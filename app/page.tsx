@@ -1,4 +1,5 @@
 'use client';
+import { supabase } from "@/lib/supabase"
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
@@ -320,6 +321,31 @@ function MetricCard({ mk, val, sector }: { mk: MetricKey; val: number; sector: s
 // ─── PAGE COMPONENTS ────────────────────────────────────────────────────────
 
 function DashboardPage({ onNav }: { onNav: (p: Page) => void }) {
+  const [nifty, setNifty] = useState<number | null>(null)
+  const [prices, setPrices] = useState({
+  NIFTY50: null,
+  SENSEX: null,
+  BANKNIFTY: null,
+})
+  useEffect(() => {
+  const fetchPrice = async () => {
+    const { data, error } = await supabase
+      .from("live_prices")
+      .select("*")
+      .eq("symbol", "NIFTY50")
+      .single()
+
+    if (!error && data) {
+      setNifty(data.price)
+    }
+  }
+
+  fetchPrice()
+
+  const interval = setInterval(fetchPrice, 5000) // every 5 sec
+
+  return () => clearInterval(interval)
+}, [])
   const sectors = [['IT', '+2.1%', 'green'], ['FMCG', '+0.8%', 'green'], ['Auto', '+1.4%', 'green'], ['Pharma', '-0.3%', 'red'], ['Banking', '-0.6%', 'red'], ['Defence', '+3.8%', 'green']];
   const movers = [['RELIANCE', '₹2,934', '+3.2%', 'g'], ['MTAR TECH', '₹2,180', '+4.1%', 'g'], ['HAL', '₹4,620', '+2.8%', 'g'], ['INDIGO', '₹3,240', '-2.6%', 'r'], ['NTPC', '₹364', '-1.4%', 'r']];
   const news = [
@@ -332,14 +358,21 @@ function DashboardPage({ onNav }: { onNav: (p: Page) => void }) {
   return (
     <div>
       <div className="idx-strip">
-        {[['Nifty 50', '24,328', '▲ +197 · +0.82%', 'green'], ['Sensex', '80,116', '▲ +566 · +0.71%', 'green'], ['Bank Nifty', '52,480', '▼ -179 · -0.34%', 'red'], ['India VIX', '13.42', '— Moderate', 'ink2']].map(([name, val, chg, c]) => (
-          <div key={name} className="idx-card">
-            <div className="idx-name">{name}</div>
-            <div className="idx-val">{val}</div>
-            <div className="idx-chg" style={{ color: `var(--${c})` }}>{chg}</div>
-          </div>
-        ))}
+  {[
+    ['Nifty 50', nifty !== null ? `₹${nifty}` : 'Loading...', '▲ +197 · +0.82%', 'green'],
+    ['Sensex', '80,116', '▲ +566 · +0.71%', 'green'],
+    ['Bank Nifty', '52,480', '▼ -179 · -0.34%', 'red'],
+    ['India VIX', '13.42', '— Moderate', 'ink2']
+  ].map(([name, val, chg, c]) => (
+    <div key={name} className="idx-card">
+      <div className="idx-name">{name}</div>
+      <div className="idx-val">{val}</div>
+      <div className="idx-chg" style={{ color: `var(--${c})` }}>
+        {chg}
       </div>
+    </div>
+  ))}
+</div>
 
       <div className="g2" style={{ marginBottom: 12 }}>
         <div className="card">
