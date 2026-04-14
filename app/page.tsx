@@ -477,6 +477,9 @@ function DashboardPage({ onNav }: { onNav: (p: Page) => void }) {
         </div>
         <button className="btn-gold" onClick={() => onNav('geo')}>View Full Analysis →</button>
       </div>
+      <p style={{fontSize:'10px', color:'#3D5070', marginTop:'20px'}}>
+  StockSense v0.1 · Day 1 · Branch: frontend_kartikey
+</p>
     </div>
   );
 }
