@@ -321,28 +321,38 @@ function MetricCard({ mk, val, sector }: { mk: MetricKey; val: number; sector: s
 // ─── PAGE COMPONENTS ────────────────────────────────────────────────────────
 
 function DashboardPage({ onNav }: { onNav: (p: Page) => void }) {
-  const [nifty, setNifty] = useState<number | null>(null)
   const [prices, setPrices] = useState({
   NIFTY50: null,
   SENSEX: null,
   BANKNIFTY: null,
 })
   useEffect(() => {
-  const fetchPrice = async () => {
+  const fetchPrices = async () => {
     const { data, error } = await supabase
       .from("live_prices")
-      .select("*")
-      .eq("symbol", "NIFTY50")
-      .single()
+      .select("symbol, price")
+      .in("symbol", ["NIFTY50", "SENSEX", "BANKNIFTY"])
 
     if (!error && data) {
-      setNifty(data.price)
+      const updated = {
+        NIFTY50: null,
+        SENSEX: null,
+        BANKNIFTY: null,
+      }
+
+      data.forEach((row) => {
+        if (row.symbol === "NIFTY50") updated.NIFTY50 = row.price
+        if (row.symbol === "SENSEX") updated.SENSEX = row.price
+        if (row.symbol === "BANKNIFTY") updated.BANKNIFTY = row.price
+      })
+
+      setPrices(updated)
     }
   }
 
-  fetchPrice()
+  fetchPrices()
 
-  const interval = setInterval(fetchPrice, 5000) // every 5 sec
+  const interval = setInterval(fetchPrices, 2000)
 
   return () => clearInterval(interval)
 }, [])
@@ -359,11 +369,32 @@ function DashboardPage({ onNav }: { onNav: (p: Page) => void }) {
     <div>
       <div className="idx-strip">
   {[
-    ['Nifty 50', nifty !== null ? `₹${nifty}` : 'Loading...', '▲ +197 · +0.82%', 'green'],
-    ['Sensex', '80,116', '▲ +566 · +0.71%', 'green'],
-    ['Bank Nifty', '52,480', '▼ -179 · -0.34%', 'red'],
-    ['India VIX', '13.42', '— Moderate', 'ink2']
-  ].map(([name, val, chg, c]) => (
+  [
+    'Nifty 50',
+    prices.NIFTY50 !== null
+      ? `₹${prices.NIFTY50}`
+      : 'Loading...',
+    'LIVE',
+    'green'
+  ],
+  [
+    'Sensex',
+    prices.SENSEX !== null
+      ? `₹${prices.SENSEX}`
+      : 'Loading...',
+    'LIVE',
+    'green'
+  ],
+  [
+    'Bank Nifty',
+    prices.BANKNIFTY !== null
+      ? `₹${prices.BANKNIFTY}`
+      : 'Loading...',
+    'LIVE',
+    'red'
+  ],
+  ['India VIX', '13.42', 'Moderate', 'ink2']
+].map(([name, val, chg, c]) => (
     <div key={name} className="idx-card">
       <div className="idx-name">{name}</div>
       <div className="idx-val">{val}</div>
