@@ -1,4 +1,4 @@
 requests
 python-dotenv
-supabase==1.0.3
+supabase
 yfinance
