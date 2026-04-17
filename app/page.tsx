@@ -18,20 +18,50 @@ import { PremiumPage } from '@/components/sections/PremiumPage';
 import { ProfilePage } from '@/components/sections/ProfilePage';
 import { PaperTradingPage } from '@/components/sections/PaperTradingPage';
 import { RHPPage } from '@/components/sections/RHPPage';
+import { useRouter } from 'next/navigation'
 
-export default function StockSensePage() {
-  const [inApp, setInApp] = useState(false);
-  const [activePage, setActivePage] = useState<Page>('dashboard');
+
+export default function StockSensePage({ 
+  initialPage 
+}: { 
+  initialPage?: Page 
+} = {}) {
+const router = useRouter()
+
+  const [inApp, setInApp] = useState(!!initialPage);
+  const [activePage, setActivePage] = useState<Page>(initialPage ?? 'dashboard');
   const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
-  const navTo = (page: Page) => setActivePage(page);
-  const enter = (page: Page) => { setInApp(true); setActivePage(page); };
+  const navTo = (page: Page) => {
+  setActivePage(page);
+
+  const routeMap: Record<Page, string> = {
+    dashboard: '/',
+    analysis: '/analysis',
+    ipo: '/ipo',
+    paper: '/paper-trading',
+    rhp: '/rhp-analyser',
+    geo: '/geopolitics-engine',
+    screener: '/screener',
+    premium: '/premium',
+    profile: '/profile',
+    mf: '/mf',
+  };
+
+  router.push(routeMap[page]);
+};
+  const enter = (page: Page) => {
+  setInApp(true);
+  navTo(page);
+};
 
   const navSections = [
     { label: 'Core', items: NAV_ITEMS.slice(0, 4) },
     { label: 'Intelligence', items: NAV_ITEMS.slice(4, 7) },
     { label: 'Learning', items: NAV_ITEMS.slice(7) },
   ];
+
+
 
   return (
     <>
@@ -163,7 +193,7 @@ export default function StockSensePage() {
         .idx-chg{font-size:10px;font-weight:600;margin-top:3px;}
 
         /* METRIC CARDS */
-        .mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+        .mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start;}
         .mc{background:var(--s1);border-radius:10px;padding:15px 17px;cursor:pointer;transition:all .2s;border:1px solid var(--border);}
         .mc:hover,.mc.open{background:var(--s2);}
         .mc.open{border-color:var(--border2);}

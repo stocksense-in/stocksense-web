@@ -1,11 +1,18 @@
 'use client';
-import React, { useState } from 'react';
-import { MetricKey } from '@/lib/types';
 import { MM, C } from '@/lib/constants';
-import { getMetricStatus, pillClass } from '@/lib/utils';
+import { getMetricStatus } from '@/lib/utils';
+import { MetricKey } from '@/lib/types';
+import { METRIC_CONTENT } from '@/lib/metricContent';
 
-export function MetricCard({ mk, val, sector }: { mk: MetricKey; val: number; sector: string }) {
-  const [open, setOpen] = useState(false);
+interface MetricCardProps {
+  mk: MetricKey;
+  val: number;
+  sector: string;
+  /** Called when the card is clicked — parent opens the overlay */
+  onOpen: () => void;
+}
+
+export function MetricCard({ mk, val, sector, onOpen }: MetricCardProps) {
   const m = MM[mk];
   const st = getMetricStatus(mk, val, sector);
   const dc = st === 'green' ? C.green : st === 'yellow' ? C.gold : C.red;
@@ -17,8 +24,20 @@ export function MetricCard({ mk, val, sector }: { mk: MetricKey; val: number; se
   const bl = st === 'green' ? 'Healthy' : st === 'yellow' ? 'Monitor' : 'Concern';
   const borderColor = st === 'green' ? 'rgba(0,230,118,.2)' : st === 'yellow' ? 'rgba(212,175,55,.2)' : 'rgba(255,58,58,.2)';
 
+  // Layer 1 content
+  const cardContent = METRIC_CONTENT[mk]?.card;
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onOpen();
+  };
+
   return (
-    <div className={`mc${open ? ' open' : ''}`} style={{ borderColor }} onClick={() => setOpen(o => !o)}>
+    <div
+      className="mc"
+      style={{ borderColor }}
+      onClick={handleClick}
+    >
       <div className="mc-top">
         <span className="mc-name">{m.name}</span>
         <div className="status-dot" style={{ background: dc, boxShadow: `0 0 6px ${dc}` }} />
@@ -32,7 +51,7 @@ export function MetricCard({ mk, val, sector }: { mk: MetricKey; val: number; se
         </div>
         <div className="ideal-track">
           <div className="ideal-zone" style={{ left: `${il}%`, width: `${iw}%`, background: dc }} />
-          <div className="ideal-mid" style={{ left: `${il + iw / 2}%` }} />
+          <div className="ideal-mid"  style={{ left: `${il + iw / 2}%` }} />
           <div className="ideal-needle" style={{ left: `${dl}%`, background: dc, boxShadow: `0 0 6px ${dc}` }} />
         </div>
         <div className="ideal-ann">
@@ -40,15 +59,37 @@ export function MetricCard({ mk, val, sector }: { mk: MetricKey; val: number; se
           <span className={`pill ${bcl}`} style={{ fontSize: 8 }}>{bl}</span>
         </div>
       </div>
+
+      {/* Layer 1: plain lang + card insight */}
       <div className="mc-plain">{m.plain(val, sector)}</div>
-      {open && (
-        <div className="mc-expand">
-          <div className="exp-body">{m.verd(val, sector)} — {m.plain(val, sector)}</div>
-          <div className="exp-rule">
-            <strong style={{ color: C.gold }}>Ideal range: {m.il}</strong> · This stock: {val}{m.unit} ·{' '}
-            {st === 'green' ? 'Within the ideal zone for this sector.' : st === 'yellow' ? 'Near the boundary — watch closely.' : 'Outside the ideal range — understand why before investing.'}
+
+      {cardContent && (
+        <div style={{
+          marginTop: 8,
+          paddingTop: 8,
+          borderTop: '1px solid rgba(255,255,255,0.04)',
+        }}>
+          {/* Insight */}
+          <div style={{
+            fontSize: 10,
+            color: 'var(--ink2)',
+            lineHeight: 1.55,
+            marginBottom: 5,
+          }}>
+            {cardContent.insight}
           </div>
-          <div className="exp-verd" style={{ color: dc }}>"{m.verd(val, sector)}"</div>
+          {/* Risk chip */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'flex-start',
+            gap: 5,
+            fontSize: 9,
+            color: 'var(--red)',
+            lineHeight: 1.5,
+          }}>
+            <span style={{ flexShrink: 0, marginTop: 1 }}>⚠</span>
+            <span style={{ color: 'rgba(255,58,58,0.75)' }}>{cardContent.risk}</span>
+          </div>
         </div>
       )}
     </div>

@@ -1,5 +1,6 @@
-import { AnalysisPage } from "@/components/sections/AnalysisPage";
+import StockSensePage from '@/app/page'
+import type { Page } from '@/lib/types'
 
-export default function Page() {
-  return <AnalysisPage />;
+export default function AnalysisRoute() {
+  return <StockSensePage initialPage={'analysis' as Page} />
 }

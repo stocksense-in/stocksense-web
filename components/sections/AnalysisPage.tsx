@@ -1,43 +1,58 @@
 'use client';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Page, StockData, Holding, IPO, MetricKey, MetricMeta, Sector } from '@/lib/types';
-import { SD, MM, IPOS, SCREENER, GEO_SECTORS, GEO_EVENTS, NICHE, PT_STOCKS, PAGE_TITLES, NAV_ITEMS, C } from '@/lib/constants';
-import { pillClass, getMetricStatus, scoreColor, formatINR } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
+import { useState, useCallback, useEffect } from 'react';
+import { SD, MM, C } from '@/lib/constants';
+import { MetricKey } from '@/lib/types';
 import { Pill } from '@/components/ui/Pill';
-import { StatRow } from '@/components/ui/StatRow';
-import { SectionDiv } from '@/components/ui/SectionDiv';
 import { CandleChart } from '@/components/cards/CandleChart';
 import { MetricCard } from '@/components/cards/MetricCard';
+import { MetricOverlay } from '@/components/cards/MetricOverlay';
 
 export function AnalysisPage() {
   const [query, setQuery] = useState('Infosys');
-  const [stock, setStock] = useState<{ key: string; data: StockData } | null>(null);
+  const [stock, setStock] = useState<{ key: string; data: typeof SD[string] } | null>(null);
+  const [activeMetric, setActiveMetric] = useState<MetricKey | null>(null);
 
   const doAnalyse = useCallback((q: string) => {
-    const key = Object.keys(SD).find(k => k.toLowerCase().includes(q.toLowerCase())) || 'Infosys';
+    const key = Object.keys(SD).find(k =>
+      k.toLowerCase().includes(q.toLowerCase())
+    ) || 'Infosys';
     setStock({ key, data: SD[key] });
+    setActiveMetric(null); // close overlay on new search
   }, []);
 
   useEffect(() => { doAnalyse('Infosys'); }, [doAnalyse]);
 
   const s = stock?.data;
   const key = stock?.key || '';
-  const vs = s ? (s.score >= 70 ? ['pill-g', 'Strong'] : s.score >= 55 ? ['pill-gold', 'Moderate'] : ['pill-r', 'Risky']) : [];
+  const vs = s
+    ? (s.score >= 70 ? ['pill-g', 'Strong'] : s.score >= 55 ? ['pill-gold', 'Moderate'] : ['pill-r', 'Risky'])
+    : [];
 
   return (
     <div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        <input className="fi" value={query} onChange={e => setQuery(e.target.value)}
+        <input
+          className="fi"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && doAnalyse(query)}
-          placeholder="Search — INFY · HDFCBANK · TATAMOTORS · ZOMATO" style={{ flex: 1 }} />
+          placeholder="Search — INFY · HDFCBANK · TATAMOTORS · ZOMATO"
+          style={{ flex: 1 }}
+        />
         <button className="btn-blue" onClick={() => doAnalyse(query)}>Analyse ↗</button>
       </div>
+
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 18 }}>
         <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: C.ink3, alignSelf: 'center' }}>QUICK:</span>
         {[['Infosys', 'INFY'], ['HDFC Bank', 'HDFCBANK'], ['Tata Motors', 'TATAMOTORS'], ['Zomato', 'ZOMATO']].map(([k, label]) => (
-          <span key={k} className="pill pill-b" style={{ cursor: 'pointer', padding: '4px 10px' }}
-            onClick={() => { setQuery(k); doAnalyse(k); }}>{label}</span>
+          <span
+            key={k}
+            className="pill pill-b"
+            style={{ cursor: 'pointer', padding: '4px 10px' }}
+            onClick={() => { setQuery(k); doAnalyse(k); }}
+          >
+            {label}
+          </span>
         ))}
       </div>
 
@@ -64,7 +79,13 @@ export function AnalysisPage() {
 
           <div className="mc-grid">
             {(Object.keys(MM) as MetricKey[]).map(mk => (
-              <MetricCard key={mk} mk={mk} val={s.data[mk]} sector={s.sector} />
+              <MetricCard
+                key={mk}
+                mk={mk}
+                val={s.data[mk]}
+                sector={s.sector}
+                onOpen={() => setActiveMetric(mk)}
+              />
             ))}
           </div>
 
@@ -72,6 +93,16 @@ export function AnalysisPage() {
             <strong style={{ color: C.red }}>Disclosure —</strong> StockSense is educational only. Not SEBI-registered investment advice. Consult a registered advisor before investing.
           </div>
         </div>
+      )}
+
+      {/* Glassmorphic overlay — rendered via portal above everything */}
+      {activeMetric && s && (
+        <MetricOverlay
+          mk={activeMetric}
+          val={s.data[activeMetric]}
+          sector={s.sector}
+          onClose={() => setActiveMetric(null)}
+        />
       )}
     </div>
   );

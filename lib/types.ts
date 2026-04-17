@@ -1,5 +1,14 @@
-export type Page = 'dashboard' | 'analysis' | 'ipo' | 'screener'
-  | 'geo' | 'premium' | 'profile' | 'paper' | 'rhp';
+export type Page =
+  | 'dashboard'
+  | 'analysis'
+  | 'ipo'
+  | 'paper'
+  | 'rhp'
+  | 'geo'
+  | 'screener'
+  | 'premium'
+  | 'profile'
+  | 'mf';
 
 export type Sector = 'it' | 'bank' | 'auto' | 'newage' | 'fmcg' | 'pharma' | 'defence' | 'nbfc' | 'electronics';
 

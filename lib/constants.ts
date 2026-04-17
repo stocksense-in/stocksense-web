@@ -116,9 +116,16 @@ export const PT_STOCKS: Record<string, { n: string; vol: number }> = {
 };
 
 export const PAGE_TITLES: Record<Page, string> = {
-  dashboard: 'Dashboard', analysis: 'Stock Analysis', ipo: 'IPO Analyser',
-  screener: 'Screener', geo: 'Geopolitics Engine', premium: 'Niche Stocks · Premium',
-  profile: 'Investment Profile', paper: 'Paper Trading Simulator', rhp: 'RHP Scanner',
+  dashboard: 'Dashboard',
+  analysis: 'Stock Analysis',
+  ipo: 'IPO Analyser',
+  screener: 'Screener',
+  geo: 'Geopolitics Engine',
+  premium: 'Niche Stocks · Premium',
+  profile: 'Investment Profile',
+  paper: 'Paper Trading Simulator',
+  rhp: 'RHP Scanner',
+  mf: 'Mutual Funds',
 };
 
 export const NAV_ITEMS: { id: Page; icon: string; label: string; pro?: boolean }[] = [
