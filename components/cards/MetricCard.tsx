@@ -65,29 +65,29 @@ export function MetricCard({ mk, val, sector, onOpen }: MetricCardProps) {
 
       {cardContent && (
         <div style={{
-          marginTop: 8,
-          paddingTop: 8,
+          marginTop: 10,
+          paddingTop: 10,
           borderTop: '1px solid rgba(255,255,255,0.04)',
         }}>
           {/* Insight */}
           <div style={{
             fontSize: 10,
             color: 'var(--ink2)',
-            lineHeight: 1.55,
-            marginBottom: 5,
+            lineHeight: 1.6,
+            marginBottom: 8,
           }}>
             {cardContent.insight}
           </div>
           {/* Risk chip */}
           <div style={{
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'flex-start',
             gap: 5,
             fontSize: 9,
-            color: 'var(--red)',
             lineHeight: 1.5,
+            width: '100%',
           }}>
-            <span style={{ flexShrink: 0, marginTop: 1 }}>⚠</span>
+            <span style={{ flexShrink: 0, color: 'var(--red)' }}>⚠</span>
             <span style={{ color: 'rgba(255,58,58,0.75)' }}>{cardContent.risk}</span>
           </div>
         </div>
