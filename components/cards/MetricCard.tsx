@@ -22,7 +22,7 @@ export function MetricCard({ mk, val, sector, onOpen }: MetricCardProps) {
   const il = Math.max(0, Math.min(90, ip));
   const bcl = st === 'green' ? 'pill-g' : st === 'yellow' ? 'pill-gold' : 'pill-r';
   const bl = st === 'green' ? 'Healthy' : st === 'yellow' ? 'Monitor' : 'Concern';
-  const borderColor = st === 'green' ? 'rgba(0,230,118,.2)' : st === 'yellow' ? 'rgba(212,175,55,.2)' : 'rgba(255,58,58,.2)';
+  const borderColor = st === 'green' ? 'rgba(0,230,118,.15)' : st === 'yellow' ? 'rgba(212,175,55,.15)' : 'rgba(255,58,58,.15)';
 
   // Layer 1 content
   const cardContent = METRIC_CONTENT[mk]?.card;
