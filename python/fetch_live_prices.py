@@ -1,48 +1,71 @@
 # -*- coding: utf-8 -*-
 """
 fetch_live_prices.py
-Fetches live/latest prices from yfinance and upserts into Supabase `live_prices` table.
+====================
+Fetches live/latest prices from yfinance for ALL NSE-listed equity stocks
+plus the major indices (NIFTY50, SENSEX) and upserts into the Supabase
+`live_prices` table.
 
-Fixes applied:
-  - NaN / Infinity values from yfinance are sanitized before sending to Supabase.
-  - ZOMATO.NS renamed to ETERNAL.NS (Zomato rebranded to Eternal Limited in 2025).
-  - TATAMOTORS.NS temporarily broken on Yahoo Finance; uses a 5-day window + last
-    valid row fallback to recover the most recent real price.
-  - Skips any symbol that still has no usable data rather than crashing.
+The full NSE symbol list is loaded dynamically from nse_symbols.py
+(which caches NSE's EQUITY_L.csv for 24 hours).
+
+Usage:
+    python fetch_live_prices.py                     # all NSE stocks
+    python fetch_live_prices.py --limit 50          # test run
+    python fetch_live_prices.py --symbols INFY TCS  # specific symbols
+    python fetch_live_prices.py --refresh-symbols   # force NSE list refresh
+    python fetch_live_prices.py --workers 8         # more concurrency
 """
 
 import math
 import os
+import sys
+import time
+import argparse
+import concurrent.futures
+from pathlib import Path
+
+# Force UTF-8 output on Windows (avoids cp1252 UnicodeEncodeError)
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 import yfinance as yf
 from dotenv import load_dotenv
 from supabase import create_client
 
-# ── env / supabase ────────────────────────────────────────────────────────────
-load_dotenv()
+from nse_symbols import get_all_symbols
+
+# ── Env / Supabase ────────────────────────────────────────────────────────────
+
+def _load_env() -> None:
+    search = Path(__file__).resolve().parent
+    for _ in range(4):
+        for name in (".env.local", ".env"):
+            candidate = search / name
+            if candidate.exists():
+                load_dotenv(candidate, override=True)
+                return
+        search = search.parent
+    load_dotenv()
+
+_load_env()
+
 sb = create_client(
-    os.getenv("SUPABASE_URL", os.getenv("NEXT_PUBLIC_SUPABASE_URL")),
-    os.getenv("SUPABASE_KEY", os.getenv("NEXT_PUBLIC_SUPABASE_SERVICE_KEY",
-              os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY"))),
+    os.getenv("SUPABASE_URL", os.getenv("NEXT_PUBLIC_SUPABASE_URL", "")),
+    os.getenv("SUPABASE_KEY",
+        os.getenv("SUPABASE_SERVICE_KEY",
+            os.getenv("NEXT_PUBLIC_SUPABASE_SERVICE_KEY",
+                os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "")))),
 )
 
-# ── symbol map ────────────────────────────────────────────────────────────────
-# (display_name, yahoo_ticker)
-# ZOMATO.NS → ETERNAL.NS  : Zomato Ltd rebranded to Eternal Limited (Mar 2025)
-# TATAMOTORS.NS            : Yahoo Finance 404s on this ticker; we try a wider
-#                            history window and take the last non-NaN close.
-SYMBOLS = [
-    ("NIFTY50",    "^NSEI"),
-    ("SENSEX",     "^BSESN"),
-    ("INFY",       "INFY.NS"),
-    ("HDFCBANK",   "HDFCBANK.NS"),
-    ("TATAMOTORS", "TATAMOTORS.NS"),
-    ("ZOMATO",     "ETERNAL.NS"),      # rebranded ticker
-    ("RELIANCE",   "RELIANCE.NS"),
+# ── Index symbols (always included — not in EQUITY_L.csv) ─────────────────────
+INDEX_SYMBOLS = [
+    ("NIFTY50", "^NSEI"),
+    ("SENSEX",  "^BSESN"),
 ]
 
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
-# ── helpers ───────────────────────────────────────────────────────────────────
 def safe_float(value) -> float | None:
     """Return a JSON-safe float, or None for NaN / Infinity / None."""
     try:
@@ -54,69 +77,145 @@ def safe_float(value) -> float | None:
         return None
 
 
-def fetch_history(yahoo_sym: str, days: int = 5):
+def fetch_price(symbol: str, yahoo_sym: str) -> tuple[str, float | None, float | None]:
     """
-    Fetch up to `days` days of daily history.
-    Returns a DataFrame (may be empty).
+    Fetch latest close + change % for a single ticker.
+    Returns (symbol, price, change_pct) — any value can be None on failure.
     """
-    ticker = yf.Ticker(yahoo_sym)
-    return ticker.history(period=f"{days}d")
-
-
-def last_valid_close(hist, col: str = "Close"):
-    """
-    Walk backwards through a history DataFrame and return the first non-NaN
-    value in `col`, or None if every row is NaN / the frame is empty.
-    """
-    series = hist[col].dropna()
-    if series.empty:
-        return None
-    return float(series.iloc[-1])
-
-
-# ── main loop ─────────────────────────────────────────────────────────────────
-for symbol, yahoo_sym in SYMBOLS:
     try:
-        # Use 5-day window so we have a fallback when the latest row is NaN
-        hist = fetch_history(yahoo_sym, days=5)
+        ticker = yf.Ticker(yahoo_sym)
+        hist = ticker.history(period="5d")
 
         if hist.empty:
-            print(f"  SKIP  {symbol}: no data returned by Yahoo Finance")
-            continue
+            return symbol, None, None
 
-        price_raw = last_valid_close(hist, "Close")
-        if price_raw is None:
-            print(f"  SKIP  {symbol}: all close values are NaN")
-            continue
-
-        price = round(price_raw, 2)
-
-        # For change_pct we need at least two rows with valid data
         valid_closes = hist["Close"].dropna()
+        if valid_closes.empty:
+            return symbol, None, None
+
+        price_raw = float(valid_closes.iloc[-1])
+        price = safe_float(round(price_raw, 2))
+
         if len(valid_closes) >= 2:
             prev = float(valid_closes.iloc[-2])
-            change_pct = round((price_raw - prev) / prev * 100, 2)
+            change_pct = safe_float(round((price_raw - prev) / prev * 100, 2)) or 0.0
         else:
             change_pct = 0.0
 
-        # Final NaN / Inf guard before hitting Supabase
-        price      = safe_float(price)
-        change_pct = safe_float(change_pct) or 0.0
-
-        if price is None:
-            print(f"  SKIP  {symbol}: price resolved to NaN/Inf after sanitization")
-            continue
-
-        sb.table("live_prices").upsert({
-            "symbol":     symbol,
-            "price":      price,
-            "change_pct": change_pct,
-        }).execute()
-
-        sign = "+" if change_pct >= 0 else ""
-        print(f"  OK    {symbol}: INR {price} ({sign}{change_pct:.2f}%)")
+        return symbol, price, change_pct
 
     except Exception as exc:
-        print(f"  ERROR {symbol}: {exc}")
+        print(f"  ERROR {symbol} ({yahoo_sym}): {exc}")
+        return symbol, None, None
 
-print("\nDone. All prices updated.")
+
+def upsert_price(symbol: str, price: float, change_pct: float) -> None:
+    sb.table("live_prices").upsert({
+        "symbol":     symbol,
+        "price":      price,
+        "change_pct": change_pct,
+    }).execute()
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+def run(
+    symbols:         list[str] | None = None,
+    limit:           int | None       = None,
+    batch_size:      int               = 50,
+    workers:         int               = 8,
+    delay_between:   float             = 0.2,
+    refresh_symbols: bool              = False,
+) -> None:
+    # Always include indices
+    all_targets: list[tuple[str, str]] = list(INDEX_SYMBOLS)
+
+    # Load all NSE equities
+    print("Loading NSE symbol list …", flush=True)
+    all_nse = get_all_symbols(force_refresh=refresh_symbols)
+
+    if symbols:
+        sym_set = {s.upper() for s in symbols}
+        nse_targets = [(s["symbol"], s["yf"]) for s in all_nse if s["symbol"] in sym_set]
+    else:
+        nse_targets = [(s["symbol"], s["yf"]) for s in all_nse]
+
+    if limit:
+        nse_targets = nse_targets[:limit]
+
+    all_targets.extend(nse_targets)
+    print(f"Fetching prices for {len(all_targets)} symbols "
+          f"(including {len(INDEX_SYMBOLS)} indices) …\n", flush=True)
+
+    ok_count = fail_count = 0
+
+    for batch_start in range(0, len(all_targets), batch_size):
+        batch = all_targets[batch_start : batch_start + batch_size]
+        batch_num = batch_start // batch_size + 1
+        total_batches = (len(all_targets) + batch_size - 1) // batch_size
+        print(f"-- Batch {batch_num}/{total_batches} --", flush=True)
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as exe:
+            futures = {exe.submit(fetch_price, sym, yahoo): (sym, yahoo) for sym, yahoo in batch}
+
+            for future in concurrent.futures.as_completed(futures):
+                sym, price, change_pct = future.result()
+
+                if price is None:
+                    print(f"  SKIP  {sym}: no usable price data")
+                    fail_count += 1
+                    continue
+
+                try:
+                    upsert_price(sym, price, change_pct or 0.0)
+                    sign = "+" if (change_pct or 0) >= 0 else ""
+                    print(f"  OK    {sym:<14s} ₹{price:>10.2f}  ({sign}{change_pct:.2f}%)")
+                    ok_count += 1
+                except Exception as exc:
+                    print(f"  ERROR {sym}: Supabase upsert failed — {exc}")
+                    fail_count += 1
+
+        if batch_start + batch_size < len(all_targets):
+            time.sleep(delay_between)
+
+    print(f"\nDone — {ok_count} updated, {fail_count} skipped/failed.", flush=True)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="StockSense live price pipeline — all NSE stocks"
+    )
+    parser.add_argument(
+        "--symbols", nargs="*", metavar="SYM",
+        help="Specific NSE symbols (default: all NSE equities)",
+    )
+    parser.add_argument(
+        "--limit", type=int, default=None, metavar="N",
+        help="Only process first N equity stocks (testing)",
+    )
+    parser.add_argument(
+        "--batch-size", type=int, default=50, metavar="N",
+        help="Symbols per batch (default: 50)",
+    )
+    parser.add_argument(
+        "--workers", type=int, default=8, metavar="N",
+        help="Concurrent yfinance threads per batch (default: 8)",
+    )
+    parser.add_argument(
+        "--delay", type=float, default=0.2, metavar="SEC",
+        help="Sleep between batches in seconds (default: 0.2)",
+    )
+    parser.add_argument(
+        "--refresh-symbols", action="store_true",
+        help="Force re-download of NSE equity list",
+    )
+    args = parser.parse_args()
+
+    run(
+        symbols=args.symbols,
+        limit=args.limit,
+        batch_size=args.batch_size,
+        workers=args.workers,
+        delay_between=args.delay,
+        refresh_symbols=args.refresh_symbols,
+    )
