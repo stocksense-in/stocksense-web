@@ -6,8 +6,10 @@ Fetches live/latest prices from yfinance for ALL NSE-listed equity stocks
 plus the major indices (NIFTY50, SENSEX) and upserts into the Supabase
 `live_prices` table.
 
-The full NSE symbol list is loaded dynamically from nse_symbols.py
-(which caches NSE's EQUITY_L.csv for 24 hours).
+Optimizations vs. original:
+  - Uses yf.download() for batch fetching (1 request per chunk, not N)
+  - Accumulates results and upserts to DB in bulk (1 DB call per batch)
+  - Removed unnecessary inter-batch sleep
 
 Usage:
     python fetch_live_prices.py                     # all NSE stocks
@@ -20,12 +22,11 @@ Usage:
 import math
 import os
 import sys
-import time
 import argparse
-import concurrent.futures
+from datetime import datetime, timezone
 from pathlib import Path
 
-# Force UTF-8 output on Windows (avoids cp1252 UnicodeEncodeError)
+# Force UTF-8 output on Windows
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -77,44 +78,11 @@ def safe_float(value) -> float | None:
         return None
 
 
-def fetch_price(symbol: str, yahoo_sym: str) -> tuple[str, float | None, float | None]:
-    """
-    Fetch latest close + change % for a single ticker.
-    Returns (symbol, price, change_pct) — any value can be None on failure.
-    """
-    try:
-        ticker = yf.Ticker(yahoo_sym)
-        hist = ticker.history(period="5d")
-
-        if hist.empty:
-            return symbol, None, None
-
-        valid_closes = hist["Close"].dropna()
-        if valid_closes.empty:
-            return symbol, None, None
-
-        price_raw = float(valid_closes.iloc[-1])
-        price = safe_float(round(price_raw, 2))
-
-        if len(valid_closes) >= 2:
-            prev = float(valid_closes.iloc[-2])
-            change_pct = safe_float(round((price_raw - prev) / prev * 100, 2)) or 0.0
-        else:
-            change_pct = 0.0
-
-        return symbol, price, change_pct
-
-    except Exception as exc:
-        print(f"  ERROR {symbol} ({yahoo_sym}): {exc}")
-        return symbol, None, None
-
-
-def upsert_price(symbol: str, price: float, change_pct: float) -> None:
-    sb.table("live_prices").upsert({
-        "symbol":     symbol,
-        "price":      price,
-        "change_pct": change_pct,
-    }).execute()
+def bulk_upsert(rows: list[dict]) -> None:
+    """Upsert a list of price rows in a single Supabase call."""
+    if not rows:
+        return
+    sb.table("live_prices").upsert(rows).execute()
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -122,9 +90,7 @@ def upsert_price(symbol: str, price: float, change_pct: float) -> None:
 def run(
     symbols:         list[str] | None = None,
     limit:           int | None       = None,
-    batch_size:      int               = 50,
-    workers:         int               = 8,
-    delay_between:   float             = 0.2,
+    batch_size:      int               = 200,   # larger batches = fewer yf.download calls
     refresh_symbols: bool              = False,
 ) -> None:
     # Always include indices
@@ -153,37 +119,84 @@ def run(
         batch = all_targets[batch_start : batch_start + batch_size]
         batch_num = batch_start // batch_size + 1
         total_batches = (len(all_targets) + batch_size - 1) // batch_size
-        print(f"-- Batch {batch_num}/{total_batches} --", flush=True)
+        print(f"-- Batch {batch_num}/{total_batches} ({len(batch)} symbols) --", flush=True)
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as exe:
-            futures = {exe.submit(fetch_price, sym, yahoo): (sym, yahoo) for sym, yahoo in batch}
+        # Map yahoo_sym -> nse_sym for lookup after download
+        yf_to_nse: dict[str, str] = {yahoo: sym for sym, yahoo in batch}
+        yahoo_tickers = list(yf_to_nse.keys())
 
-            for future in concurrent.futures.as_completed(futures):
-                sym, price, change_pct = future.result()
+        # ── Single yf.download() call for the whole batch ──────────────────
+        try:
+            raw = yf.download(
+                tickers=yahoo_tickers,
+                period="5d",
+                group_by="ticker",
+                auto_adjust=True,
+                progress=False,
+                threads=True,       # yfinance internal threading
+            )
+        except Exception as exc:
+            print(f"  ERROR downloading batch: {exc}")
+            fail_count += len(batch)
+            continue
 
-                if price is None:
-                    print(f"  SKIP  {sym}: no usable price data")
+        # ── Parse results & accumulate rows ───────────────────────────────
+        upsert_rows: list[dict] = []
+
+        for yahoo_sym, nse_sym in yf_to_nse.items():
+            try:
+                # With group_by="ticker", multi-ticker download uses MultiIndex columns
+                if len(yahoo_tickers) == 1:
+                    closes = raw["Close"].dropna() if "Close" in raw.columns else None
+                else:
+                    closes = raw[yahoo_sym]["Close"].dropna() if yahoo_sym in raw.columns.get_level_values(0) else None
+
+                if closes is None or len(closes) == 0:
+                    print(f"  SKIP  {nse_sym}: no data")
                     fail_count += 1
                     continue
 
-                try:
-                    upsert_price(sym, price, change_pct or 0.0)
-                    sign = "+" if (change_pct or 0) >= 0 else ""
-                    print(f"  OK    {sym:<14s} ₹{price:>10.2f}  ({sign}{change_pct:.2f}%)")
-                    ok_count += 1
-                except Exception as exc:
-                    print(f"  ERROR {sym}: Supabase upsert failed — {exc}")
+                price_raw = float(closes.iloc[-1])
+                price = safe_float(round(price_raw, 2))
+                if price is None:
                     fail_count += 1
+                    continue
 
-        if batch_start + batch_size < len(all_targets):
-            time.sleep(delay_between)
+                change_pct = 0.0
+                if len(closes) >= 2:
+                    prev = float(closes.iloc[-2])
+                    change_pct = safe_float(round((price_raw - prev) / prev * 100, 2)) or 0.0
+
+                sign = "+" if change_pct >= 0 else ""
+                print(f"  OK    {nse_sym:<14s} ₹{price:>10.2f}  ({sign}{change_pct:.2f}%)")
+                upsert_rows.append({
+                    "symbol":     nse_sym,
+                    "price":      price,
+                    "change_pct": change_pct,
+                    "updated_at": datetime.now(timezone.utc).isoformat(),
+                })
+                ok_count += 1
+
+            except Exception as exc:
+                print(f"  ERROR {nse_sym}: {exc}")
+                fail_count += 1
+
+        # ── Single bulk DB upsert for the entire batch ─────────────────────
+        if upsert_rows:
+            try:
+                bulk_upsert(upsert_rows)
+                print(f"  → Upserted {len(upsert_rows)} rows to Supabase", flush=True)
+            except Exception as exc:
+                print(f"  ERROR bulk upsert: {exc}")
+                fail_count += len(upsert_rows)
+                ok_count   -= len(upsert_rows)
 
     print(f"\nDone — {ok_count} updated, {fail_count} skipped/failed.", flush=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="StockSense live price pipeline — all NSE stocks"
+        description="StockSense live price pipeline — all NSE stocks (optimized)"
     )
     parser.add_argument(
         "--symbols", nargs="*", metavar="SYM",
@@ -194,16 +207,8 @@ if __name__ == "__main__":
         help="Only process first N equity stocks (testing)",
     )
     parser.add_argument(
-        "--batch-size", type=int, default=50, metavar="N",
-        help="Symbols per batch (default: 50)",
-    )
-    parser.add_argument(
-        "--workers", type=int, default=8, metavar="N",
-        help="Concurrent yfinance threads per batch (default: 8)",
-    )
-    parser.add_argument(
-        "--delay", type=float, default=0.2, metavar="SEC",
-        help="Sleep between batches in seconds (default: 0.2)",
+        "--batch-size", type=int, default=200, metavar="N",
+        help="Symbols per yf.download() batch (default: 200)",
     )
     parser.add_argument(
         "--refresh-symbols", action="store_true",
@@ -215,7 +220,5 @@ if __name__ == "__main__":
         symbols=args.symbols,
         limit=args.limit,
         batch_size=args.batch_size,
-        workers=args.workers,
-        delay_between=args.delay,
         refresh_symbols=args.refresh_symbols,
     )

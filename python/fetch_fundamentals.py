@@ -4,18 +4,22 @@ fetch_fundamentals.py
 Fetches fundamental data (PE, ROE, D/E, margin) from yfinance for ALL
 NSE-listed equity stocks and upserts into Supabase `stocks` table.
 
-The full NSE symbol list is loaded dynamically from nse_symbols.py.
+Optimizations vs. original:
+  - Concurrent fetching via ThreadPoolExecutor (default 16 workers)
+  - Bulk DB upsert per batch instead of one call per stock
+  - Removed sequential sleep
 
 Usage:
     python fetch_fundamentals.py               # all NSE stocks
     python fetch_fundamentals.py --limit 30    # test run
     python fetch_fundamentals.py --symbols INFY TCS
+    python fetch_fundamentals.py --workers 16  # tune concurrency
 """
 
 import os
-import time
 import argparse
 import math
+import concurrent.futures
 from pathlib import Path
 
 import yfinance as yf
@@ -46,7 +50,7 @@ sb = create_client(
             os.getenv("NEXT_PUBLIC_SUPABASE_SERVICE_KEY", ""))),
 )
 
-# ── Sector → scoring category map ─────────────────────────────────────────────
+# ── Sector map ────────────────────────────────────────────────────────────────
 YF_SECTOR_MAP = {
     "technology":             "it",
     "communication services": "it",
@@ -64,8 +68,6 @@ YF_SECTOR_MAP = {
 BANK_SECTORS   = {"bank", "nbfc"}
 NEWAGE_SECTORS = {"newage"}
 
-
-# ── Scoring ───────────────────────────────────────────────────────────────────
 
 def _cap(v: float) -> float:
     return max(0.0, min(100.0, v))
@@ -85,21 +87,13 @@ def score_stock(pe, roe, de, margin, promoter, cagr, sector: str) -> int:
     promoter_score = _cap(promoter / 80 * 100)  if promoter else 50.0
     cagr_score     = _cap(cagr / 55 * 100)      if cagr     else 0.0
 
-    composite = (
-        pe_score       * 0.20 +
-        roe_score      * 0.20 +
-        de_score       * 0.15 +
-        margin_score   * 0.20 +
-        promoter_score * 0.10 +
-        cagr_score     * 0.15
+    return round(
+        pe_score * 0.20 + roe_score * 0.20 + de_score * 0.15 +
+        margin_score * 0.20 + promoter_score * 0.10 + cagr_score * 0.15
     )
-    return round(composite)
 
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _safe(val, multiplier: float = 1.0, decimals: int = 1):
-    """Convert yfinance field to a clean float, or None on NaN/missing."""
     if val is None:
         return None
     try:
@@ -111,12 +105,43 @@ def _safe(val, multiplier: float = 1.0, decimals: int = 1):
         return None
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+def fetch_one(stock: dict) -> dict | None:
+    sym       = stock["symbol"]
+    yf_ticker = stock["yf"]
+    name      = stock.get("name", sym)
+    try:
+        info = yf.Ticker(yf_ticker).info
+        if not info or info.get("regularMarketPrice") is None:
+            print(f"  SKIP {sym}: no market data", flush=True)
+            return None
+
+        pe     = _safe(info.get("trailingPE"))
+        roe    = _safe(info.get("returnOnEquity"),  multiplier=100)
+        de     = _safe(info.get("debtToEquity"))
+        margin = _safe(info.get("profitMargins"),   multiplier=100)
+        sector = YF_SECTOR_MAP.get((info.get("sector") or "").lower(), "general")
+        score  = score_stock(pe, roe, de, margin, None, None, sector)
+
+        row = {
+            "symbol": sym, "name": name, "sector": sector,
+            "pe_ratio": pe, "roe": roe, "debt_equity": de,
+            "net_margin": margin, "composite_score": score,
+        }
+        row_clean = {k: v for k, v in row.items() if v is not None}
+        row_clean["symbol"] = sym
+        print(f"  OK   {sym}: PE={pe}, ROE={roe}%, Score={score}", flush=True)
+        return row_clean
+    except Exception as e:
+        print(f"  ERROR {sym}: {e}", flush=True)
+        return None
+
 
 def run(
     symbols:         list[str] | None = None,
     limit:           int | None       = None,
     refresh_symbols: bool              = False,
+    workers:         int               = 16,
+    batch_size:      int               = 100,
 ) -> None:
     print("Loading NSE symbol list …", flush=True)
     all_nse = get_all_symbols(force_refresh=refresh_symbols)
@@ -130,83 +155,47 @@ def run(
     if limit:
         target = target[:limit]
 
-    print(f"Fetching fundamentals for {len(target)} stocks …\n", flush=True)
+    print(f"Fetching fundamentals for {len(target)} stocks "
+          f"({workers} workers, batch_size={batch_size}) …\n", flush=True)
     ok = fail = 0
 
-    for stock in target:
-        sym       = stock["symbol"]
-        yf_ticker = stock["yf"]
-        name      = stock.get("name", sym)
-        print(f"Fetching {sym} ({yf_ticker}) …", flush=True)
+    for batch_start in range(0, len(target), batch_size):
+        batch = target[batch_start : batch_start + batch_size]
+        batch_num    = batch_start // batch_size + 1
+        total_batches = (len(target) + batch_size - 1) // batch_size
+        print(f"-- Batch {batch_num}/{total_batches} ({len(batch)} stocks) --", flush=True)
 
-        try:
-            ticker = yf.Ticker(yf_ticker)
-            info   = ticker.info
+        upsert_rows: list[dict] = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as exe:
+            for row in exe.map(fetch_one, batch):
+                if row:
+                    upsert_rows.append(row)
+                    ok += 1
+                else:
+                    fail += 1
 
-            if not info or info.get("regularMarketPrice") is None:
-                print(f"  SKIP {sym}: no market data", flush=True)
-                fail += 1
-                continue
-
-            pe     = _safe(info.get("trailingPE"))
-            roe    = _safe(info.get("returnOnEquity"),    multiplier=100, decimals=1)
-            de     = _safe(info.get("debtToEquity"))
-            margin = _safe(info.get("profitMargins"),     multiplier=100, decimals=1)
-
-            # Sector from yfinance
-            yf_sec = (info.get("sector") or "").lower()
-            sector = YF_SECTOR_MAP.get(yf_sec, "general")
-
-            # Promoter + CAGR not reliably available from yfinance — fetch_nse.py fills these
-            promoter = None
-            cagr     = None
-
-            score = score_stock(pe, roe, de, margin, promoter, cagr, sector)
-
-            row = {
-                "symbol":           sym,
-                "name":             name,
-                "sector":           sector,
-                "pe_ratio":         pe,
-                "roe":              roe,
-                "debt_equity":      de,
-                "net_margin":       margin,
-                "promoter_holding": promoter,
-                "revenue_cagr_3yr": cagr,
-                "composite_score":  score,
-            }
-            # Remove None values to avoid overwriting existing data
-            row_clean = {k: v for k, v in row.items() if v is not None}
-            row_clean["symbol"] = sym
-
-            sb.table("stocks").upsert(row_clean).execute()
-            print(f"  OK   {sym}: PE={pe}, ROE={roe}%, Score={score}", flush=True)
-            ok += 1
-
-        except Exception as e:
-            print(f"  ERROR {sym}: {e}", flush=True)
-            fail += 1
-
-        time.sleep(0.3)   # polite rate-limiting
+        if upsert_rows:
+            try:
+                sb.table("stocks").upsert(upsert_rows).execute()
+                print(f"  → Upserted {len(upsert_rows)} rows to Supabase", flush=True)
+            except Exception as exc:
+                print(f"  ERROR bulk upsert: {exc}", flush=True)
 
     print(f"\nDone — {ok} succeeded, {fail} failed.", flush=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="StockSense fundamentals pipeline — all NSE stocks"
+        description="StockSense fundamentals pipeline — optimized"
     )
-    parser.add_argument(
-        "--symbols", nargs="*", metavar="SYM",
-        help="Specific NSE symbols (default: all NSE equities)",
-    )
-    parser.add_argument(
-        "--limit", type=int, default=None, metavar="N",
-        help="Only process first N stocks (for testing)",
-    )
-    parser.add_argument(
-        "--refresh-symbols", action="store_true",
-        help="Force re-download of NSE equity list",
-    )
+    parser.add_argument("--symbols", nargs="*", metavar="SYM")
+    parser.add_argument("--limit",      type=int,   default=None)
+    parser.add_argument("--workers",    type=int,   default=16)
+    parser.add_argument("--batch-size", type=int,   default=100)
+    parser.add_argument("--refresh-symbols", action="store_true")
     args = parser.parse_args()
-    run(symbols=args.symbols, limit=args.limit, refresh_symbols=args.refresh_symbols)
+    run(
+        symbols=args.symbols, limit=args.limit,
+        refresh_symbols=args.refresh_symbols,
+        workers=args.workers, batch_size=args.batch_size,
+    )
