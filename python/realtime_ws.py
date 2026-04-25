@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from supabase import create_client
 import websockets
 import requests
+from nse_symbols import get_all_symbols
 
 def _load_env():
     search = Path(__file__).resolve().parent
@@ -37,31 +38,31 @@ sb = create_client(
 
 UPSTOX_TOKEN = os.getenv("NEXT_PUBLIC_UPSTOX_ACCESS_TOKEN", "")
 
-# NSE instrument keys (Upstox format)
+print("Loading all NSE symbols...")
+all_stocks = get_all_symbols()
+
 INSTRUMENTS = [
-    "NSE_EQ|INE009A01021",   # INFY
-    "NSE_EQ|INE040A01034",   # HDFCBANK
-    "NSE_EQ|INE028A01039",   # TATAMOTORS
-    "NSE_EQ|INE758T01015",   # ZOMATO
-    "NSE_EQ|INE002A01018",   # RELIANCE
     "NSE_INDEX|Nifty 50",    # NIFTY50
     "NSE_INDEX|Nifty Bank",  # BANKNIFTY
 ]
 
-# Symbol mapping — instrument key → tumhara symbol name
+# Symbol mapping — instrument key (isin/name) → tumhara symbol name
 SYMBOL_MAP = {
-    "INE009A01021": "INFY",
-    "INE040A01034": "HDFCBANK",
-    "INE028A01039": "TATAMOTORS",
-    "INE758T01015": "ZOMATO",
-    "INE002A01018": "RELIANCE",
     "Nifty 50":     "NIFTY50",
     "Nifty Bank":   "BANKNIFTY",
 }
 
-# Throttle — same symbol ko 3 sec mein ek baar hi update karo
+for s in all_stocks:
+    if s.get("isin"):
+        inst_key = f"NSE_EQ|{s['isin']}"
+        INSTRUMENTS.append(inst_key)
+        SYMBOL_MAP[s['isin']] = s['symbol']
+
+print(f"Loaded {len(INSTRUMENTS)} total instruments.")
+
+# Throttle — same symbol ko 1 sec mein ek baar hi update karo
 last_update: dict[str, float] = {}
-THROTTLE_SEC = 3
+THROTTLE_SEC = 1
 
 
 def get_ws_url() -> str:
@@ -71,12 +72,13 @@ def get_ws_url() -> str:
         "Accept": "application/json",
     }
     resp = requests.get(
-        "https://api.upstox.com/v2/feed/market-data-feed/authorize",
+        "https://api.upstox.com/v3/feed/market-data-feed/authorize",
         headers=headers, timeout=10
     )
     print("Status:", resp.status_code)
-    print("Response:", resp.json())     
-    return resp.json()["data"]["authorizedRedirectUri"]
+    data = resp.json()
+    print("Auth Response:", data)     
+    return data["data"]["authorizedRedirectUri"]
 
 
 async def connect():
@@ -84,76 +86,87 @@ async def connect():
     print(f"WebSocket connecting...")
 
     async with websockets.connect(ws_url) as ws:
-        # Subscribe karo
-        sub_msg = {
-            "guid":        "stocksense-feed",
-            "method":      "sub",
-            "data": {
-                "mode":            "full",
-                "instrumentKeys":  INSTRUMENTS,
+        # Subscribe in chunks to avoid Upstox websocket limits
+        chunk_size = 100
+        for i in range(0, len(INSTRUMENTS), chunk_size):
+            chunk = INSTRUMENTS[i : i + chunk_size]
+            sub_msg = {
+                "guid":        f"stocksense-feed-{i}",
+                "method":      "sub",
+                "data": {
+                    "mode":            "full",
+                    "instrumentKeys":  chunk,
+                }
             }
-        }
-        await ws.send(json.dumps(sub_msg))
-        print(f"Subscribed to {len(INSTRUMENTS)} instruments\n")
+            await ws.send(json.dumps(sub_msg))
+            await asyncio.sleep(0.1)  # small delay so we don't overwhelm
+
+        print(f"Successfully sent subscription for {len(INSTRUMENTS)} instruments\n")
 
         async for message in ws:
             try:
-                data = json.loads(message)
-                feeds = data.get("feeds", {})
+                if isinstance(message, bytes):
+                    # Upstox official protobuf decoder
+                    from MarketDataFeed_pb2 import FeedResponse
+                    feed_response = FeedResponse()
+                    feed_response.ParseFromString(message)
 
-                rows = []
-                now = datetime.now(timezone.utc)
+                    rows = []
+                    now  = datetime.now(timezone.utc)
 
-                for instrument_key, feed_data in feeds.items():
-                    # Last traded price nikalo
-                    ltp = (feed_data.get("ff", {})
-                                    .get("marketFF", {})
-                                    .get("ltpc", {})
-                                    .get("ltp"))
-
-                    close = (feed_data.get("ff", {})
-                                      .get("marketFF", {})
-                                      .get("ltpc", {})
-                                      .get("cp"))  # previous close
-
-                    if ltp is None:
-                        continue
-
-                    # Symbol map karo
-                    key = instrument_key.split("|")[-1]
-                    symbol = SYMBOL_MAP.get(key)
-                    if not symbol:
-                        continue
-
-                    # Throttle check
                     import time
-                    now_ts = time.time()
-                    if now_ts - last_update.get(symbol, 0) < THROTTLE_SEC:
-                        continue
-                    last_update[symbol] = now_ts
+                    for instrument_key, feed in feed_response.feeds.items():
+                        try:
+                            # LTPC — Last Traded Price + Close
+                            ltpc = feed.ff.market_ff.ltpc
+                            ltp  = ltpc.ltp
+                            cp   = ltpc.cp   # previous close
 
-                    change_pct = 0.0
-                    if close and close > 0:
-                        change_pct = round((ltp - close) / close * 100, 2)
+                            if not ltp:
+                                continue
 
-                    print(f"  {symbol:<12} ₹{ltp:>10.2f}  "
-                          f"({'+'if change_pct>=0 else ''}{change_pct:.2f}%)")
+                            # Symbol map
+                            key    = instrument_key.split("|")[-1]
+                            symbol = SYMBOL_MAP.get(key)
+                            if not symbol:
+                                continue
 
-                    rows.append({
-                        "symbol":     symbol,
-                        "price":      round(ltp, 2),
-                        "change_pct": change_pct,
-                        "updated_at": now.isoformat(),
-                    })
+                            # Throttle
+                            now_ts = time.time()
+                            if now_ts - last_update.get(symbol, 0) < THROTTLE_SEC:
+                                continue
+                            last_update[symbol] = now_ts
 
-                # Supabase update
-                if rows:
-                    sb.table("live_prices").upsert(rows).execute()
+                            change_pct = 0.0
+                            if cp and cp > 0:
+                                change_pct = round((ltp - cp) / cp * 100, 2)
 
-            except json.JSONDecodeError:
-                pass  # Binary message — ignore
+                            arrow = "▲" if change_pct >= 0 else "▼"
+                            print(f"  {symbol:<14} ₹{ltp:>10.2f}  "
+                                  f"{arrow} {change_pct:+.2f}%")
+
+                            rows.append({
+                                "symbol":     symbol,
+                                "price":      round(ltp, 2),
+                                "change_pct": change_pct,
+                                "updated_at": now.isoformat(),
+                            })
+
+                        except Exception as e:
+                            continue  # ek symbol fail ho toh baaki chalta rahe
+
+                        # Bulk Supabase upsert
+                        if rows:
+                            sb.table("live_prices").upsert(rows).execute()
+                            print(f"  → {len(rows)} prices updated")
+
+                else:
+                    # Text message — JSON
+                    data = json.loads(message)
+                    print(f"  Text msg: {data}")
+
             except Exception as e:
-                print(f"Error: {e}")
+                print(f"  Error: {e}")
 
 
 # Reconnect logic — connection toot jaaye toh dobara connect karo

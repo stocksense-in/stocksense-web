@@ -1,0 +1,28 @@
+{
+  "email": "kartikagrawal301@gmail.com",
+  "exchanges": [
+    "BSE",
+    "NSE"
+  ],
+  "products": [
+    "OCO",
+    "D",
+    "CO",
+    "I"
+  ],
+  "broker": "UPSTOX",
+  "user_id": "5HCNZH",
+  "user_name": "KARTIKEY AGRAWAL",
+  "order_types": [
+    "MARKET",
+    "LIMIT",
+    "SL",
+    "SL-M"
+  ],
+  "user_type": "individual",
+  "ddpi": false,
+  "is_active": true,
+  "access_token": "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiI1SENOWkgiLCJqdGkiOiI2OWViYTlmM2ZhYThjMTAxZWJjOWQ5NTAiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc3NzA1MjE0OCwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzc3MDY4MDAwfQ.srOrQHjpY_cEEpn5Bd4vpcNwq4nXBgNDTA9FHsD2CVI",
+  "extended_token": "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiI1SENOWkgiLCJqdGkiOiI2OWViYTlmNGZhYThjMTAxZWJjOWQ5NTEiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlzRXh0ZW5kZWQiOnRydWUsImlhdCI6MTc3NzA1MjE0OCwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxODA4NjA0MDAwfQ.EWywBRdS89nQV0aD6yTqxfnhKgoi9mgaiaHPMQo-10Y",
+  "saved_at": "2026-04-24T17:35:47.725231+00:00"
+}

@@ -35,7 +35,7 @@ _load_env()
 # ── Config ────────────────────────────────────────────────
 API_KEY      = os.getenv("NEXT_PUBLIC_UPSTOX_API_KEY", "")  
 API_SECRET   = os.getenv("NEXT_PUBLIC_UPSTOX_API_SECRET", "")
-REDIRECT_URI = "http://localhost:8000/callback"
+REDIRECT_URI = os.getenv("NEXT_PUBLIC_UPSTOX_REDIRECT_URI", "http://localhost:8000/callback")
 TOKEN_FILE   = Path(__file__).parent / "upstox_token.json"
 
 # ── Save / Load token ─────────────────────────────────────
@@ -90,13 +90,15 @@ def is_token_valid() -> bool:
 
 
 # ── OAuth Flow ────────────────────────────────────────────
+from urllib.parse import urlencode
+
 def get_auth_url() -> str:
-    return (
-        f"https://api.upstox.com/v2/login/authorization/dialog"
-        f"?response_type=code"
-        f"&client_id={API_KEY}"
-        f"&redirect_uri={REDIRECT_URI}"
-    )
+    params = {
+        "response_type": "code",
+        "client_id": API_KEY,
+        "redirect_uri": REDIRECT_URI
+    }
+    return f"https://api.upstox.com/v2/login/authorization/dialog?{urlencode(params)}"
 
 
 def exchange_code_for_token(auth_code: str) -> dict:

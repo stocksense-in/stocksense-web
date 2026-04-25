@@ -63,7 +63,7 @@ def check_token():
 # ── Schedule ──────────────────────────────────────────────
 
 # Prices — har 5 minute
-schedule.every(5).minutes.do(fetch_prices)
+# schedule.every(5).minutes.do(fetch_prices)
 
 # Token check — har subah 8:45 AM (market open se pehle)
 schedule.every().day.at("08:45").do(check_token)
