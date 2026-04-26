@@ -1,10 +1,31 @@
 # =========================
 # Next.js / Node
 # =========================
-/node_modules
-/.next/
+node_modules/
+.next/
 /out/
 /build
+
+# Monorepo specific paths
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# =========================
+# Env files (IMPORTANT)
+# =========================
+.env
+.env.local
+.env.*
+python/.env
+
+# =========================
+# Python
+# =========================
+venv/
+__pycache__/
+*.pyc
 
 # =========================
 # Logs
@@ -13,18 +34,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-
-# =========================
-# Env files (IMPORTANT)
-# =========================
-.env*
-
-# =========================
-# Python (YOUR PART)
-# =========================
-venv/
-__pycache__/
-*.pyc
 
 # =========================
 # System files
@@ -41,11 +50,4 @@ __pycache__/
 # =========================
 *.tsbuildinfo
 next-env.d.ts
-.env
-.env.local
-python/.env
-venv/
-
-
-frontend/node_modules/
-frontend/.next/
+frontend/next-env.d.ts
