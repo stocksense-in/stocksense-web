@@ -59,7 +59,7 @@ stocksense-web/
 │   └── premium/                # Premium features
 ├── components/                 # Shared React components
 ├── lib/                        # Utility functions & scoring logic
-├── python/                     # Data pipeline scripts
+├── backend/                    # Data pipeline scripts
 │   ├── nse_symbols.py          # Fetches all NSE symbols dynamically
 │   ├── fetch_yfinance.py       # Main pipeline: fundamentals + prices
 │   ├── fetch_nse.py            # Promoter holding & Revenue CAGR
@@ -97,7 +97,7 @@ NEXT_PUBLIC_SUPABASE_SERVICE_KEY=eyJ...   # service-role key (for Python scripts
 ### 3. Set Up Python Environment
 
 ```powershell
-cd python
+cd backend
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
@@ -107,7 +107,7 @@ pip install -r requirements.txt
 
 ## Python Data Pipeline
 
-All scripts live in `python/` and share the `venv`. Run them from the `python/` directory.
+All scripts live in `backend/` and share the `venv`. Run them from the `backend/` directory.
 
 ### Script Reference
 
