@@ -2,7 +2,7 @@ import { MetricKey } from './types';
 import { MM, C } from './constants';
 
 export function pillClass(sig: string) {
-  return sig === 'g' ? 'pill pill-g' : sig === 'gold' ? 'pill pill-gold' : sig === 'r' ? 'pill pill-r' : 'pill pill-b';
+  return sig === 'g' ? 'pill pill-g' : sig === 'gold' ? 'pill pill-gold' : sig === 'r' ? 'pill pill-r' : 'pill pill-gold';
 }
 
 export function getMetricStatus(mk: MetricKey, val: number, sector: string): 'green' | 'yellow' | 'red' {
@@ -15,7 +15,7 @@ export function getMetricStatus(mk: MetricKey, val: number, sector: string): 'gr
 }
 
 export function scoreColor(score: number) {
-  return score >= 65 ? C.green : score >= 50 ? C.gold : C.red;
+  return score >= 70 ? C.green : score >= 55 ? C.gold : C.red;
 }
 
 export function formatINR(n: number) {

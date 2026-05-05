@@ -141,7 +141,7 @@ export const NAV_ITEMS: { id: Page; icon: string; label: string; pro?: boolean }
 ];
 
 export const C = {
-  blue: 'var(--blue)', gold: 'var(--gold)', green: 'var(--green)', red: 'var(--red)',
-  ink: 'var(--ink)', ink2: 'var(--ink2)', ink3: 'var(--ink3)',
+  gold: 'var(--gold)', green: 'var(--green)', red: 'var(--red)',
+  ink: 'var(--cream)', ink2: 'var(--cream-dim)', ink3: 'var(--cream-mute)',
 };
 

@@ -26,7 +26,7 @@ export function AnalysisPage() {
     ? (s.score >= 70 ? ['pill-g', 'Strong Buy'] : s.score >= 55 ? ['pill-gold', 'Moderate'] : ['pill-r', 'Risky'])
     : [];
 
-  const scoreColor = s ? (s.score >= 70 ? 'var(--green)' : s.score >= 55 ? 'var(--gold)' : 'var(--red)') : 'var(--ink)';
+  const scoreColor = s ? (s.score >= 70 ? 'var(--green)' : s.score >= 55 ? 'var(--gold)' : 'var(--red)') : 'var(--cream)';
 
   const quickPicks = [
     ['Infosys', 'INFY', 'IT Services'],
@@ -47,20 +47,20 @@ export function AnalysisPage() {
           placeholder="Search — INFY · HDFCBANK · TATAMOTORS · ZOMATO"
           style={{ flex: 1 }}
         />
-        <button className="btn-blue" onClick={() => doAnalyse(query)}>Analyse ↗</button>
+        <button className="btn-gold-main" onClick={() => doAnalyse(query)}><span>Analyse ↗</span></button>
       </div>
 
       {/* Quick picks */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
-        <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--ink3)', alignSelf: 'center' }}>Quick:</span>
+        <span className="ct" style={{ alignSelf: 'center', marginBottom: 0 }}>Quick:</span>
         {quickPicks.map(([k, ticker, sector]) => (
           <button
             key={k}
             onClick={() => { setQuery(k); doAnalyse(k); }}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', background: 'var(--s2)', border: `1px solid ${query === k || (stock?.key || '') === k ? 'var(--border-a)' : 'var(--border)'}`, borderRadius: 'var(--r2)', padding: '6px 12px', cursor: 'pointer', transition: 'all .15s' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', background: 'var(--s2)', border: `1px solid ${query === k || (stock?.key || '') === k ? 'var(--border-bright)' : 'var(--border)'}`, borderRadius: 5, padding: '6px 12px', cursor: 'pointer', transition: 'all .15s', fontFamily: 'inherit' }}
           >
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, fontWeight: 700, color: 'var(--blue)' }}>{ticker}</span>
-            <span style={{ fontSize: 9, color: 'var(--ink3)', marginTop: 1 }}>{sector}</span>
+            <span style={{ fontFamily: 'var(--f-mono)', fontSize: 11, fontWeight: 500, color: 'var(--gold)' }}>{ticker}</span>
+            <span style={{ fontSize: 9, color: 'var(--cream-mute)', marginTop: 1 }}>{sector}</span>
           </button>
         ))}
       </div>
@@ -68,34 +68,34 @@ export function AnalysisPage() {
       {s && (
         <div>
           {/* Stock hero header */}
-          <div style={{ background: 'var(--s1)', border: '1px solid var(--border)', borderRadius: 'var(--r3)', padding: '20px 24px', marginBottom: 14, position: 'relative', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--s1)', border: '1px solid var(--border)', borderRadius: 8, padding: '20px 24px', marginBottom: 14, position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,transparent,${scoreColor},transparent)` }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
               {/* Left: Identity */}
               <div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ fontFamily: 'var(--mono)', fontSize: 10, fontWeight: 700, color: 'var(--blue)', background: 'var(--blue-d)', border: '1px solid rgba(0,200,245,.2)', borderRadius: 'var(--r1)', padding: '3px 9px', letterSpacing: '0.5px' }}>NSE: {s.ticker}</span>
-                  <span style={{ fontSize: 10, color: 'var(--ink3)' }}>{s.sub}</span>
+                  <span style={{ fontFamily: 'var(--f-mono)', fontSize: 10, fontWeight: 500, color: 'var(--gold)', background: 'rgba(201,168,76,0.07)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: 3, padding: '3px 9px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>NSE: {s.ticker}</span>
+                  <span style={{ fontSize: 10, color: 'var(--cream-mute)' }}>{s.sub}</span>
                 </div>
-                <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.8px', color: 'var(--ink)', marginBottom: 2 }}>{key} Ltd.</div>
+                <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.8px', color: 'var(--cream)', marginBottom: 2, fontFamily: 'var(--f-display)' }}>{key} Ltd.</div>
                 <div style={{ display: 'flex', gap: 12, marginTop: 10 }}>
                   <span className={vs[0]}>{vs[1]}</span>
-                  <span style={{ fontSize: 10, color: 'var(--ink3)', alignSelf: 'center' }}>52W Range: ₹1,240 – ₹1,924</span>
+                  <span style={{ fontSize: 10, color: 'var(--cream-mute)', alignSelf: 'center' }}>52W Range: ₹1,240 – ₹1,924</span>
                 </div>
               </div>
 
               {/* Right: Price + Score */}
               <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--ink3)', marginBottom: 4 }}>Last Price</div>
-                  <div style={{ fontSize: 32, fontWeight: 800, fontFamily: 'var(--mono)', color: 'var(--ink)', letterSpacing: '-1.5px', lineHeight: 1 }}>{s.price}</div>
-                  <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6, color: s.chg.startsWith('-') ? C.red : C.green, fontFamily: 'var(--mono)' }}>{s.chg} today</div>
+                  <div className="ct" style={{ marginBottom: 4 }}>Last Price</div>
+                  <div style={{ fontSize: 22, fontWeight: 500, fontFamily: 'var(--f-mono)', color: 'var(--cream)', letterSpacing: '-1.5px', lineHeight: 1 }}>{s.price}</div>
+                  <div style={{ fontSize: 12, fontWeight: 500, marginTop: 6, color: s.chg.startsWith('-') ? C.red : C.green, fontFamily: 'var(--f-mono)' }}>{s.chg} today</div>
                 </div>
                 <div style={{ width: 1, height: 64, background: 'var(--border)', flexShrink: 0, alignSelf: 'center' }} />
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--ink3)', marginBottom: 4 }}>StockSense Score</div>
-                  <div style={{ fontSize: 44, fontWeight: 800, fontFamily: 'var(--mono)', color: scoreColor, letterSpacing: '-2px', lineHeight: 1 }}>{s.score}</div>
-                  <div style={{ fontSize: 9, color: 'var(--ink3)', marginTop: 4, fontWeight: 600, letterSpacing: '0.5px' }}>OUT OF 100</div>
+                  <div className="ct" style={{ marginBottom: 4 }}>StockSense Score</div>
+                  <div style={{ fontSize: 20, fontWeight: 500, fontFamily: 'var(--f-mono)', color: scoreColor, letterSpacing: '-2px', lineHeight: 1 }}>{s.score}</div>
+                  <div style={{ fontSize: 9, color: 'var(--cream-mute)', marginTop: 4, fontWeight: 500, letterSpacing: '0.5px', fontFamily: 'var(--f-mono)' }}>OUT OF 100</div>
                 </div>
               </div>
             </div>
@@ -115,8 +115,11 @@ export function AnalysisPage() {
             ))}
           </div>
 
-          <div style={{ marginTop: 14, padding: '12px 16px', background: 'rgba(240,68,56,.06)', border: '1px solid rgba(240,68,56,.13)', borderRadius: 'var(--r2)', fontSize: 10, color: 'var(--ink2)', lineHeight: 1.7 }}>
-            <strong style={{ color: 'var(--red)' }}>Disclosure — </strong>StockSense is educational only. Not SEBI-registered investment advice. Consult a registered advisor before investing.
+          {/* Disclosure */}
+          <div className="geo-alert" style={{ marginTop: 14, padding: '12px 16px' }}>
+            <div style={{ fontSize: 10, color: 'var(--cream-dim)', lineHeight: 1.7 }}>
+              <strong style={{ color: 'var(--red)' }}>Disclosure — </strong>StockSense is educational only. Not SEBI-registered investment advice. Consult a registered advisor before investing.
+            </div>
           </div>
         </div>
       )}

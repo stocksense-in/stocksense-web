@@ -1,6 +1,5 @@
 'use client';
 import React from 'react';
-import { C } from '@/lib/constants';
 
 export function CandleChart() {
   const candles = Array.from({ length: 28 }, (_, i) => {
@@ -18,7 +17,7 @@ export function CandleChart() {
 
   return (
     <div className="chart-wrap">
-      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: C.ink3, marginBottom: 10 }}>
+      <div style={{ fontSize: 9, fontWeight: 500, letterSpacing: '1.8px', textTransform: 'uppercase', color: 'var(--cream-mute)', marginBottom: 10, fontFamily: 'var(--f-body)' }}>
         Price Action · 30 Days
       </div>
       <div className="chart-grid-lines">
@@ -28,7 +27,7 @@ export function CandleChart() {
         {candles.map((c, i) => (
           <div key={i} className="candle-g" style={{ height: '100%', justifyContent: 'flex-end' }}>
             <div className="wick" style={{ height: c.wickTopH }} />
-            <div className="body-c" style={{ height: c.bodyH, background: c.up ? C.green : C.red, opacity: c.dim ? 0.35 : 0.85 }} />
+            <div className="body-c" style={{ height: c.bodyH, background: c.up ? 'rgba(0,230,118,0.8)' : 'rgba(196,92,92,0.8)', opacity: c.dim ? 0.35 : 0.85 }} />
             <div className="wick" style={{ height: c.wickBotH }} />
           </div>
         ))}

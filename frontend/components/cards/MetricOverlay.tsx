@@ -72,7 +72,7 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
         }
         .mo-backdrop {
           position: fixed; inset: 0; z-index: 9000;
-          background: rgba(4,6,12,0.55);
+          background: rgba(12,11,9,0.55);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           display: flex; align-items: center; justify-content: center;
@@ -82,12 +82,12 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
           display: flex;
           width: min(920px, 88vw);
           height: min(78vh, 680px);
-          background: rgba(11,16,28,0.88);
+          background: rgba(17,16,9,0.92);
           backdrop-filter: blur(28px);
           -webkit-backdrop-filter: blur(28px);
-          border: 1px solid rgba(255,255,255,0.07);
+          border: 1px solid rgba(201,168,76,0.10);
           border-radius: 20px;
-          box-shadow: 0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(0,212,255,0.03) inset;
+          box-shadow: 0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(201,168,76,0.03) inset;
           animation: mo-in 210ms cubic-bezier(0.22,1,0.36,1) both;
           overflow: hidden;
           position: relative;
@@ -96,7 +96,7 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
         /* Top glow */
         .mo-top-glow {
           position: absolute; top: 0; left: 60px; right: 60px; height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(0,212,255,0.3), transparent);
+          background: linear-gradient(90deg, transparent, rgba(201,168,76,0.18), transparent);
           pointer-events: none;
         }
 
@@ -106,30 +106,30 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
           padding: 28px 24px;
           border-right: 1px solid rgba(255,255,255,0.05);
           display: flex; flex-direction: column; gap: 0;
-          background: rgba(8,11,20,0.4);
+          background: rgba(14,13,9,0.4);
           overflow: hidden;
         }
         .mo-eyebrow {
           font-size: 9px; font-weight: 700; letter-spacing: 2.5px;
-          text-transform: uppercase; color: var(--ink3); margin-bottom: 16px;
+          text-transform: uppercase; color: var(--cream-mute); margin-bottom: 16px;
         }
         .mo-metric-name {
-          font-size: 19px; font-weight: 800; color: var(--ink);
+          font-size: 19px; font-weight: 800; color: var(--cream);
           letter-spacing: -.3px; line-height: 1.25; margin-bottom: 6px;
         }
         .mo-val-block { display: flex; align-items: baseline; gap: 5px; margin: 16px 0 6px; }
         .mo-big-val { font-size: 58px; font-weight: 900; line-height: 1; letter-spacing: -3px; }
-        .mo-big-unit { font-size: 20px; font-weight: 400; color: var(--ink2); letter-spacing: 0; }
+        .mo-big-unit { font-size: 20px; font-weight: 400; color: var(--cream-dim); letter-spacing: 0; }
 
         .mo-bar-section { margin: 16px 0 0; }
-        .mo-bar-title { font-size: 8px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--ink3); margin-bottom: 8px; }
-        .mo-bar-labels { display: flex; justify-content: space-between; font-size: 8px; color: var(--ink3); margin-bottom: 5px; }
+        .mo-bar-title { font-size: 8px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--cream-mute); margin-bottom: 8px; }
+        .mo-bar-labels { display: flex; justify-content: space-between; font-size: 8px; color: var(--cream-mute); margin-bottom: 5px; }
         .mo-track {
           position: relative; height: 7px;
-          background: rgba(238,242,255,0.06); border-radius: 4px; overflow: visible;
+          background: rgba(201,168,76,0.06); border-radius: 4px; overflow: visible;
         }
         .mo-zone { position: absolute; top: 0; height: 100%; border-radius: 4px; opacity: .3; }
-        .mo-mid { position: absolute; top: -5px; width: 1px; height: 17px; background: rgba(238,242,255,0.12); }
+        .mo-mid { position: absolute; top: -5px; width: 1px; height: 17px; background: rgba(201,168,76,0.12); }
         .mo-needle {
           position: absolute; top: 50%; transform: translate(-50%,-50%);
           width: 15px; height: 15px; border-radius: 50%;
@@ -143,43 +143,43 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
           border: 1px solid rgba(255,255,255,0.05);
           border-radius: 10px;
         }
-        .mo-pos-label { font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink3); margin-bottom: 6px; }
+        .mo-pos-label { font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--cream-mute); margin-bottom: 6px; }
         .mo-pos-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        .mo-pos-k { font-size: 10px; color: var(--ink3); }
-        .mo-pos-v { font-size: 10px; font-weight: 700; color: var(--ink); }
+        .mo-pos-k { font-size: 10px; color: var(--cream-mute); }
+        .mo-pos-v { font-size: 10px; font-weight: 700; color: var(--cream); }
 
         .mo-plain-left {
           margin-top: 18px; padding-top: 18px;
           border-top: 1px solid rgba(255,255,255,0.05);
-          font-size: 11px; color: var(--ink2); line-height: 1.75;
+          font-size: 11px; color: var(--cream-dim); line-height: 1.75;
         }
 
         /* ── RIGHT PANEL ── */
         .mo-right {
           flex: 1; overflow-y: auto; padding: 28px 28px 32px;
           scrollbar-width: thin;
-          scrollbar-color: rgba(0,212,255,0.15) transparent;
+          scrollbar-color: rgba(201,168,76,0.12) transparent;
         }
         .mo-right::-webkit-scrollbar { width: 4px; }
         .mo-right::-webkit-scrollbar-track { background: transparent; }
-        .mo-right::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.15); border-radius: 2px; }
+        .mo-right::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.12); border-radius: 2px; }
 
         .mo-close {
           position: absolute; top: 16px; right: 18px; z-index: 10;
           width: 30px; height: 30px; border-radius: 8px;
           background: rgba(255,255,255,0.06);
           border: 1px solid rgba(255,255,255,0.09);
-          color: rgba(238,242,255,0.5);
+          color: rgba(201,168,76,0.5);
           font-size: 14px; display: flex; align-items: center; justify-content: center;
           cursor: pointer; transition: all .15s;
         }
-        .mo-close:hover { background: rgba(255,255,255,0.12); color: var(--ink); }
+        .mo-close:hover { background: rgba(255,255,255,0.12); color: var(--cream); }
 
         /* Right panel sections */
         .mo-section { margin-bottom: 24px; }
         .mo-section-title {
           font-size: 8px; font-weight: 700; letter-spacing: 2px;
-          text-transform: uppercase; color: var(--ink3);
+          text-transform: uppercase; color: var(--cream-mute);
           display: flex; align-items: center; gap: 8px;
           margin-bottom: 10px;
         }
@@ -192,22 +192,22 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
         /* Summary */
         .mo-summary {
           padding: 16px 18px;
-          background: rgba(0,212,255,0.05);
-          border: 1px solid rgba(0,212,255,0.12);
-          border-left: 3px solid rgba(0,212,255,0.6);
+          background: rgba(201,168,76,0.05);
+          border: 1px solid rgba(201,168,76,0.10);
+          border-left: 3px solid rgba(201,168,76,0.4);
           border-radius: 0 10px 10px 0;
           font-size: 13px; font-weight: 500;
-          color: var(--ink); line-height: 1.75;
+          color: var(--cream); line-height: 1.75;
         }
 
         /* Verdict quote */
         .mo-verdict {
           font-size: 13px; font-weight: 700; font-style: italic;
-          padding: 12px 0; color: var(--ink2); line-height: 1.6;
+          padding: 12px 0; color: var(--cream-dim); line-height: 1.6;
         }
 
         /* Definition */
-        .mo-def { font-size: 12px; color: var(--ink2); line-height: 1.8; }
+        .mo-def { font-size: 12px; color: var(--cream-dim); line-height: 1.8; }
 
         /* Sector comparison */
         .mo-sector-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
@@ -217,8 +217,8 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
           border: 1px solid rgba(255,255,255,0.06);
           border-radius: 8px;
         }
-        .mo-sector-cell-label { font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ink3); margin-bottom: 5px; }
-        .mo-sector-cell-val { font-size: 13px; font-weight: 700; color: var(--ink); }
+        .mo-sector-cell-label { font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--cream-mute); margin-bottom: 5px; }
+        .mo-sector-cell-val { font-size: 13px; font-weight: 700; color: var(--cream); }
 
         /* Trend */
         .mo-trend-row { display: flex; align-items: flex-start; gap: 12px; }
@@ -226,7 +226,7 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
           font-size: 11px; font-weight: 700; padding: 4px 10px;
           border-radius: 6px; flex-shrink: 0; letter-spacing: .3px;
         }
-        .mo-trend-text { font-size: 12px; color: var(--ink2); line-height: 1.75; }
+        .mo-trend-text { font-size: 12px; color: var(--cream-dim); line-height: 1.75; }
 
         /* Range logic */
         .mo-range-block {
@@ -234,7 +234,7 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
           border-left: 2px solid var(--gold);
           background: rgba(212,175,55,0.04);
           border-radius: 0 8px 8px 0;
-          font-size: 12px; color: var(--ink2); line-height: 1.75;
+          font-size: 12px; color: var(--cream-dim); line-height: 1.75;
         }
 
         /* Risks */
@@ -245,7 +245,7 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
           background: rgba(255,58,58,0.04);
           border: 1px solid rgba(255,58,58,0.1);
           border-radius: 8px;
-          font-size: 11px; color: var(--ink2); line-height: 1.65;
+          font-size: 11px; color: var(--cream-dim); line-height: 1.65;
         }
         .mo-risk-dot {
           width: 5px; height: 5px; border-radius: 50%;
@@ -265,10 +265,10 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
           text-transform: uppercase; color: var(--blue);
           margin-bottom: 5px;
         }
-        .mo-driver-desc { font-size: 11px; color: var(--ink2); line-height: 1.6; }
+        .mo-driver-desc { font-size: 11px; color: var(--cream-dim); line-height: 1.6; }
 
         /* Impact */
-        .mo-impact { font-size: 12px; color: var(--ink2); line-height: 1.8; }
+        .mo-impact { font-size: 12px; color: var(--cream-dim); line-height: 1.8; }
 
         /* Action */
         .mo-action-block {
@@ -324,8 +324,8 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
                 />
               </div>
               <div className="mo-bar-ann">
-                <span style={{ fontSize: 8, color: 'var(--ink3)' }}>Ideal: {m.il}</span>
-                <span style={{ fontSize: 8, color: 'var(--ink3)' }}>
+                <span style={{ fontSize: 8, color: 'var(--cream-mute)' }}>Ideal: {m.il}</span>
+                <span style={{ fontSize: 8, color: 'var(--cream-mute)' }}>
                   This: <strong style={{ color: dcRaw }}>{val}{m.unit}</strong>
                 </span>
               </div>
@@ -474,9 +474,9 @@ export function MetricOverlay({ mk, val, sector, onClose }: MetricOverlayProps) 
                 >
                   <div className="mo-action-label" style={{ color: actionColorRaw }}>🚀 Final Verdict Logic</div>
                   <div className="mo-action-title" style={{ color: actionColorRaw }}>{action.label}</div>
-                  <div className="mo-action-text" style={{ color: 'var(--ink2)', marginBottom: 12 }}>{action.text}</div>
+                  <div className="mo-action-text" style={{ color: 'var(--cream-dim)', marginBottom: 12 }}>{action.text}</div>
                   <div style={{
-                    fontSize: 11, color: 'var(--ink2)', lineHeight: 1.75,
+                    fontSize: 11, color: 'var(--cream-dim)', lineHeight: 1.75,
                     borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 10,
                   }}>
                     {content.full.verdict}

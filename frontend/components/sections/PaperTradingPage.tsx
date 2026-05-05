@@ -1,14 +1,9 @@
 'use client';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Page, StockData, Holding, IPO, MetricKey, MetricMeta, Sector } from '@/lib/types';
-import { SD, MM, IPOS, SCREENER, GEO_SECTORS, GEO_EVENTS, NICHE, PT_STOCKS, PAGE_TITLES, NAV_ITEMS, C } from '@/lib/constants';
-import { pillClass, getMetricStatus, scoreColor, formatINR } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
+import React, { useState } from 'react';
+import { Holding } from '@/lib/types';
+import { PT_STOCKS, C } from '@/lib/constants';
+import { formatINR } from '@/lib/utils';
 import { Pill } from '@/components/ui/Pill';
-import { StatRow } from '@/components/ui/StatRow';
-import { SectionDiv } from '@/components/ui/SectionDiv';
-import { CandleChart } from '@/components/cards/CandleChart';
-import { MetricCard } from '@/components/cards/MetricCard';
 
 export function PaperTradingPage() {
   const [cash, setCash] = useState(100000);
@@ -21,7 +16,7 @@ export function PaperTradingPage() {
   const [toast, setToast] = useState<{ msg: string; color: string } | null>(null);
   const [insight, setInsight] = useState('');
 
-  const showToast = (msg: string, color = C.blue) => {
+  const showToast = (msg: string, color = C.gold) => {
     setToast({ msg, color });
     setTimeout(() => setToast(null), 3200);
   };
@@ -98,7 +93,7 @@ export function PaperTradingPage() {
       updateInsight(next);
       return next;
     });
-    showToast(`Day ${dayCount + 1} simulated — markets moved`, C.blue);
+    showToast(`Day ${dayCount + 1} simulated — markets moved`, C.gold);
   };
 
   const quickExit = (exitSym: string) => {
@@ -110,12 +105,12 @@ export function PaperTradingPage() {
   };
 
   const missions = [
-    { id: 'first-trade', title: 'First Trade', desc: 'Execute your first buy order.', ic: 'm-ic-blue' },
-    { id: 'diversify', title: 'Diversification', desc: 'Hold 3+ different stocks simultaneously.', ic: 'm-ic-blue' },
+    { id: 'first-trade', title: 'First Trade', desc: 'Execute your first buy order.', ic: 'm-ic-gold' },
+    { id: 'diversify', title: 'Diversification', desc: 'Hold 3+ different stocks simultaneously.', ic: 'm-ic-gold' },
     { id: 'stop-loss', title: 'Stop Loss', desc: 'Watch a stop loss trigger in simulation.', ic: 'm-ic-gold' },
     { id: 'survive-red', title: 'Hold Through Red', desc: 'Keep a losing position for 3+ simulated days.', ic: 'm-ic-gold' },
     { id: 'golden-hour', title: 'Golden Hour', desc: 'Buy a stock during a market dip.', ic: 'm-ic-gold' },
-    { id: 'week-profit', title: 'Green Week', desc: 'End 7 simulated days with overall profit.', ic: 'm-ic-blue' },
+    { id: 'week-profit', title: 'Green Week', desc: 'End 7 simulated days with overall profit.', ic: 'm-ic-gold' },
   ];
 
   return (
@@ -132,25 +127,25 @@ export function PaperTradingPage() {
       </div>
 
       <div className="g4" style={{ marginBottom: 12 }}>
-        <div className="card card-blue">
-          <div className="ct" style={{ color: C.blue }}>Virtual Capital</div>
-          <div className="bn bn-blue">{formatINR(total)}</div>
-          <div style={{ fontSize: 9, color: C.ink3, marginTop: 3 }}>Total portfolio value</div>
+        <div className="card card-gold">
+          <div className="ct" style={{ color: 'var(--gold)' }}>Virtual Capital</div>
+          <div className="bn bn-gold">{formatINR(total)}</div>
+          <div style={{ fontSize: 9, color: 'var(--cream-mute)', marginTop: 3 }}>Total portfolio value</div>
         </div>
         <div className="card card-gold">
-          <div className="ct" style={{ color: C.gold }}>Savings Potential</div>
+          <div className="ct" style={{ color: 'var(--gold)' }}>Savings Potential</div>
           <div className="bn bn-gold">{formatINR(total * 0.18)}</div>
-          <div style={{ fontSize: 9, color: C.ink3, marginTop: 3 }}>Projected 1yr at 18% avg</div>
+          <div style={{ fontSize: 9, color: 'var(--cream-mute)', marginTop: 3 }}>Projected 1yr at 18% avg</div>
         </div>
         <div className="card">
           <div className="ct">Unrealised P&amp;L</div>
-          <div className="bn" style={{ color: pnl >= 0 ? C.green : C.red }}>{pnl >= 0 ? '+' : '-'}{formatINR(Math.abs(pnl))}</div>
-          <div style={{ fontSize: 9, marginTop: 3, color: pnl >= 0 ? C.green : C.red }}>{pnl >= 0 ? '+' : ''}{pnlPct}%</div>
+          <div className="bn" style={{ color: pnl >= 0 ? 'var(--green)' : 'var(--red)' }}>{pnl >= 0 ? '+' : '-'}{formatINR(Math.abs(pnl))}</div>
+          <div style={{ fontSize: 9, marginTop: 3, color: pnl >= 0 ? 'var(--green)' : 'var(--red)', fontFamily: 'var(--f-mono)' }}>{pnl >= 0 ? '+' : ''}{pnlPct}%</div>
         </div>
         <div className="card">
           <div className="ct">Available Cash</div>
           <div className="bn">{formatINR(cash)}</div>
-          <div style={{ fontSize: 9, color: C.green, marginTop: 3 }}>Free to deploy</div>
+          <div style={{ fontSize: 9, color: 'var(--green)', marginTop: 3, fontFamily: 'var(--f-mono)' }}>Free to deploy</div>
         </div>
       </div>
 
@@ -182,20 +177,20 @@ export function PaperTradingPage() {
             </div>
           </div>
           <div className="nudge">Mission 1: Set a Stop Loss to protect your capital — every trade needs one.</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: C.ink3, margin: '9px 0 10px' }}>
-            <span>Est. cost: <strong style={{ color: C.blue }}>{formatINR(estCost)}</strong></span>
-            <span>Brokerage + STT: <strong style={{ color: C.ink2 }}>₹29</strong></span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--cream-mute)', margin: '9px 0 10px' }}>
+            <span>Est. cost: <strong style={{ color: 'var(--gold)' }}>{formatINR(estCost)}</strong></span>
+            <span>Brokerage + STT: <strong style={{ color: 'var(--cream-dim)' }}>₹29</strong></span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <button className="btn-blue" onClick={() => ptTrade('BUY')}>Buy / Long ↗</button>
-            <button className="btn-ghost" style={{ color: C.red, borderColor: 'rgba(255,58,58,.2)' }} onClick={() => ptTrade('SELL')}>Exit Position</button>
+            <button className="btn-gold-main" onClick={() => ptTrade('BUY')}><span>Buy / Long ↗</span></button>
+            <button className="btn-destruct" onClick={() => ptTrade('SELL')}>Exit Position</button>
           </div>
         </div>
 
         <div className="card">
           <div className="ct">Holdings</div>
           {holdings.length === 0 ? (
-            <div style={{ fontSize: 11, color: C.ink3, padding: '16px 0', textAlign: 'center' }}>No positions yet. Execute a trade to begin.</div>
+            <div style={{ fontSize: 11, color: 'var(--cream-mute)', padding: '16px 0', textAlign: 'center' }}>No positions yet. Execute a trade to begin.</div>
           ) : (
             <>
               <table className="tbl">
@@ -204,27 +199,27 @@ export function PaperTradingPage() {
                   {holdings.map(h => {
                     const hPnl = (h.ltp - h.avgCost) * h.qty;
                     const hPnlPct = ((h.ltp - h.avgCost) / h.avgCost * 100).toFixed(1);
-                    const hc = hPnl >= 0 ? C.green : C.red;
+                    const hc = hPnl >= 0 ? 'var(--green)' : 'var(--red)';
                     const mn = Math.min(...h.hist), mx = Math.max(...h.hist), r = mx - mn || 1;
                     return (
                       <tr key={h.sym}>
                         <td>
-                          <div style={{ fontWeight: 600, fontSize: 11 }}>{h.sym}</div>
+                          <div style={{ fontWeight: 600, fontSize: 11, fontFamily: 'var(--f-mono)' }}>{h.sym}</div>
                           <div className="sparkline" style={{ marginTop: 3 }}>
                             {h.hist.map((v, i) => (
-                              <div key={i} className="spark-b" style={{ height: `${Math.max(10, (v - mn) / r * 100)}%`, background: v >= h.avgCost ? C.green : C.red }} />
+                              <div key={i} className="spark-b" style={{ height: `${Math.max(10, (v - mn) / r * 100)}%`, background: v >= h.avgCost ? 'var(--green)' : 'var(--red)' }} />
                             ))}
                           </div>
                         </td>
-                        <td style={{ fontFamily: 'monospace' }}>{h.qty}</td>
-                        <td style={{ fontFamily: 'monospace', fontSize: 11 }}>{formatINR(h.avgCost)}</td>
-                        <td style={{ fontFamily: 'monospace', fontSize: 11 }}>{formatINR(h.ltp)}</td>
+                        <td style={{ fontFamily: 'var(--f-mono)', fontSize: 11 }}>{h.qty}</td>
+                        <td style={{ fontFamily: 'var(--f-mono)', fontSize: 11 }}>{formatINR(h.avgCost)}</td>
+                        <td style={{ fontFamily: 'var(--f-mono)', fontSize: 11 }}>{formatINR(h.ltp)}</td>
                         <td>
-                          <div style={{ fontFamily: 'monospace', fontSize: 11, color: hc }}>{hPnl >= 0 ? '+' : '-'}{formatINR(Math.abs(hPnl))}</div>
-                          <div style={{ fontFamily: 'monospace', fontSize: 9, color: hc }}>{hPnl >= 0 ? '+' : ''}{hPnlPct}%</div>
+                          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: hc }}>{hPnl >= 0 ? '+' : '-'}{formatINR(Math.abs(hPnl))}</div>
+                          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 9, color: hc }}>{hPnl >= 0 ? '+' : ''}{hPnlPct}%</div>
                         </td>
                         <td>
-                          <button onClick={() => quickExit(h.sym)} style={{ background: 'transparent', border: '1px solid var(--border)', color: C.ink2, borderRadius: 5, padding: '3px 9px', fontSize: 9, cursor: 'pointer', fontFamily: 'var(--f)' }}>EXIT</button>
+                          <button className="btn-destruct" onClick={() => quickExit(h.sym)} style={{ padding: '3px 9px', fontSize: 9 }}>EXIT</button>
                         </td>
                       </tr>
                     );
@@ -237,16 +232,16 @@ export function PaperTradingPage() {
         </div>
       </div>
 
-      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: C.ink3, marginBottom: 10 }}>Learning Missions</div>
+      <div className="ct" style={{ marginBottom: 10 }}>Learning Missions</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
         {missions.map(m => {
           const done = completedMissions.has(m.id);
           return (
             <div key={m.id} className={`mission-card${done ? ' done' : ''}`}>
               <div className={`m-ic ${done ? 'm-ic-green' : m.ic}`}>{done ? '✓' : '→'}</div>
-              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 3 }}>{m.title}</div>
-              <div style={{ fontSize: 10, color: C.ink3, lineHeight: 1.5, marginBottom: 6 }}>{m.desc}</div>
-              <div style={{ fontSize: 9, fontWeight: 700, color: done ? C.green : C.ink3 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 3, color: 'var(--cream)' }}>{m.title}</div>
+              <div style={{ fontSize: 10, color: 'var(--cream-mute)', lineHeight: 1.5, marginBottom: 6 }}>{m.desc}</div>
+              <div style={{ fontSize: 9, fontWeight: 500, fontFamily: 'var(--f-mono)', color: done ? 'var(--green)' : 'var(--cream-mute)', letterSpacing: '1px', textTransform: 'uppercase' }}>
                 {done ? 'COMPLETED' : m.id === 'diversify' ? `${holdings.length}/3 sectors` : 'In progress'}
               </div>
             </div>
