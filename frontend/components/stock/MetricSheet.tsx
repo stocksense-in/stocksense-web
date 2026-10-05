@@ -52,6 +52,7 @@ export function MetricSheet({
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', onKey);
@@ -60,6 +61,7 @@ export function MetricSheet({
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = overflow;
+      opener?.focus(); // return keyboard focus to the row that opened the panel
     };
   }, [onClose]);
 
