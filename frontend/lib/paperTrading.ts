@@ -102,7 +102,7 @@ export function reducer(state: State, action: Action): State {
       const price = state.prices[instrument.symbol] ?? instrument.price;
       const value = price * qty;
       const existing = state.positions.find((p) => p.symbol === instrument.symbol);
-      const stopLoss = price * (1 - stopLossPct / 100);
+      const stopLoss = Math.round(price * (1 - stopLossPct / 100) * 100) / 100; // to the paisa
       const positions = existing
         ? state.positions.map((p) =>
             p.symbol === instrument.symbol
