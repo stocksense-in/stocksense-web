@@ -24,6 +24,7 @@ python/.env
 # Python
 # =========================
 venv/
+.venv/
 __pycache__/
 *.pyc
 
@@ -55,5 +56,6 @@ frontend/next-env.d.ts
 # Secrets / generated data
 # =========================
 backend/upstox_token.json
-backend/failed_symbols.txt
-.venv/
+!.env.example
+!backend/.env.example
+.pytest_cache/
