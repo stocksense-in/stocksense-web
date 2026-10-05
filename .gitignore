@@ -51,3 +51,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 frontend/next-env.d.ts
+# =========================
+# Secrets / generated data
+# =========================
+backend/upstox_token.json
+backend/failed_symbols.txt
+.venv/
