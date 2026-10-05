@@ -63,7 +63,7 @@ export default function GeopoliticsPage() {
         </ul>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         <section className="panel p-5" aria-labelledby="events-heading">
           <h2 id="events-heading" className="panel-title">What’s happening</h2>
           <ul className="mt-2 divide-y divide-rule-2">

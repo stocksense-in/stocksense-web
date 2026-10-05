@@ -25,7 +25,7 @@ export default async function StocksPage() {
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <section className="panel overflow-hidden" aria-labelledby="familiar-heading">
           <h2 id="familiar-heading" className="panel-title px-5 pt-4 pb-3">Familiar names</h2>
           <StockTable stocks={familiar} showScore empty="No data yet. Run the fundamentals job in backend/." />

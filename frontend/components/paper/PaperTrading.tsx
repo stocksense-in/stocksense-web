@@ -101,7 +101,7 @@ export function PaperTrading({ instruments }: { instruments: Instrument[] }) {
         ))}
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
         <section className="panel h-fit p-5" aria-labelledby="order-heading">
           <h2 id="order-heading" className="panel-title mb-4">Place an order</h2>
           <div className="space-y-4">

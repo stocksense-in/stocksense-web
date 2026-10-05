@@ -35,7 +35,7 @@ export function ProspectusScanner() {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
       <div className="space-y-6">
         <label
           onDragOver={(e) => {

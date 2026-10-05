@@ -55,7 +55,7 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <section className="panel p-5" aria-labelledby="sectors-heading">
           <h2 id="sectors-heading" className="panel-title">Sectors</h2>
           <p className="mb-4 text-sm text-ink-3">Day change weighted by market cap. Select a sector to screen it.</p>
@@ -74,7 +74,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <section className="panel overflow-hidden" aria-labelledby="top-heading">
           <div className="flex items-baseline justify-between px-5 pt-4 pb-3">
             <h2 id="top-heading" className="panel-title">Strongest fundamentals</h2>

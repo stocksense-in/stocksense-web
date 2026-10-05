@@ -85,7 +85,7 @@ export function PriceChart({
       : { day: 'numeric', month: 'short' });
 
   return (
-    <div ref={boxRef}>
+    <div ref={boxRef} className="min-w-0">
       <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
         <div className="min-h-[2.6rem]">
           {shown && (
@@ -120,7 +120,7 @@ export function PriceChart({
           viewBox={`0 0 ${W} ${H}`}
           width={W}
           height={H}
-          className={`block touch-none select-none transition-opacity ${pending ? 'opacity-50' : ''}`}
+          className={`block max-w-full touch-none select-none transition-opacity ${pending ? 'opacity-50' : ''}`}
           onPointerMove={onMove}
           onPointerLeave={() => setHover(null)}
           role="img"

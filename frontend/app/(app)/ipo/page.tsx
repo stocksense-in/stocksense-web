@@ -22,7 +22,7 @@ export default async function IpoPage(props: PageProps<'/ipo'>) {
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
         <nav aria-label="Upcoming IPOs" className="panel h-fit overflow-hidden">
           <ul className="divide-y divide-rule-2">
             {ipos.map((i) => {

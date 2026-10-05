@@ -53,8 +53,8 @@ export default async function StockPage(props: PageProps<'/stocks/[symbol]'>) {
         <RangeBar low={stock.week52Low} high={stock.week52High} price={stock.price} />
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <section className="panel p-5" aria-labelledby="price-heading">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <section className="panel min-w-0 p-5" aria-labelledby="price-heading">
           <h2 id="price-heading" className="sr-only">Price history</h2>
           <PriceChart symbol={stock.symbol} initial={history} />
         </section>
