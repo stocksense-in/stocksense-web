@@ -1,13 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { inr } from '@/lib/format';
 import { DEFAULT_PROFILE, HORIZON_LABEL, PROFILE_COOKIE, RISK_COPY, type Horizon, type Profile, type Risk } from '@/lib/profile';
 import { SECTOR_LABELS } from '@/lib/sectors';
 import type { SectorCode } from '@/lib/types';
 
 const SECTOR_CHOICES: SectorCode[] = ['it', 'bank', 'nbfc', 'pharma', 'fmcg', 'auto', 'energy', 'industrial', 'defence', 'materials', 'consumer', 'realestate'];
+
+function saveProfile(profile: Profile) {
+  document.cookie = `${PROFILE_COOKIE}=${encodeURIComponent(JSON.stringify(profile))}; path=/; max-age=31536000; samesite=lax`;
+}
 
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
@@ -26,13 +30,13 @@ export function ProfileForm({ initial }: { initial: Profile | null }) {
   const [profile, setProfile] = useState<Profile>(initial ?? DEFAULT_PROFILE);
   const [saved, setSaved] = useState(!!initial);
 
-  useEffect(() => {
-    if (!saved && profile === (initial ?? DEFAULT_PROFILE)) return;
-    document.cookie = `${PROFILE_COOKIE}=${encodeURIComponent(JSON.stringify(profile))}; path=/; max-age=31536000; samesite=lax`;
+  /** Apply a change and save it straight away (a year-long cookie the server can read). */
+  const update = (patch: Partial<Profile>) => {
+    const next = { ...profile, ...patch };
+    setProfile(next);
+    saveProfile(next);
     setSaved(true);
-  }, [profile]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const update = (patch: Partial<Profile>) => setProfile((p) => ({ ...p, ...patch }));
+  };
   const toggleSector = (s: SectorCode) =>
     update({ sectors: profile.sectors.includes(s) ? profile.sectors.filter((x) => x !== s) : [...profile.sectors, s] });
 

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Logo } from './Logo';
 import { NAV } from './nav';
@@ -59,8 +59,6 @@ export function Sidebar() {
 /** Menu button + slide-over navigation for small screens. */
 export function MobileNav() {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-  useEffect(() => setOpen(false), [pathname]);
 
   return (
     <>

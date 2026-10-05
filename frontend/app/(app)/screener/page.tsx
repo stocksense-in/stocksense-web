@@ -61,7 +61,10 @@ export default async function ScreenerPage(props: PageProps<'/screener'>) {
   const href = (changes: Record<string, string | number | undefined>) => {
     const q = new URLSearchParams();
     for (const [k, v] of Object.entries(params)) if (typeof v === 'string' && v) q.set(k, v);
-    for (const [k, v] of Object.entries(changes)) (v == null || v === '' ? q.delete(k) : q.set(k, String(v)));
+    for (const [k, v] of Object.entries(changes)) {
+      if (v == null || v === '') q.delete(k);
+      else q.set(k, String(v));
+    }
     const s = q.toString();
     return s ? `/screener?${s}` : '/screener';
   };

@@ -32,7 +32,7 @@ function Sparkline({ values, up }: { values: number[]; up: boolean }) {
 
 export function PaperTrading({ instruments }: { instruments: Instrument[] }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [loaded, setLoaded] = useState(false);
+  const loaded = useRef(false);
   const [symbol, setSymbol] = useState(instruments[0]?.symbol ?? '');
   const [qty, setQty] = useState(5);
   const [stopLossPct, setStopLossPct] = useState(7);
@@ -47,12 +47,13 @@ export function PaperTrading({ instruments }: { instruments: Instrument[] }) {
     } catch {
       /* corrupt save — start fresh */
     }
-    setLoaded(true);
+    loaded.current = true;
   }, []);
 
+  // Save after every change (skipped until the saved portfolio has been read).
   useEffect(() => {
-    if (loaded) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state, loaded]);
+    if (loaded.current) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
 
   // Announce stop-loss exits that happened during "next day".
   useEffect(() => {

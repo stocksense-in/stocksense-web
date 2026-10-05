@@ -36,10 +36,7 @@ export function SearchBox() {
   }, []);
 
   useEffect(() => {
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
+    if (!query.trim()) return;
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
@@ -66,18 +63,19 @@ export function SearchBox() {
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setActive((i) => Math.min(i + 1, results.length - 1));
+      setActive((i) => Math.min(i + 1, visible.length - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setActive((i) => Math.max(i - 1, 0));
-    } else if (e.key === 'Enter' && results[active]) {
-      go(results[active].symbol);
+    } else if (e.key === 'Enter' && visible[active]) {
+      go(visible[active].symbol);
     } else if (e.key === 'Escape') {
       inputRef.current?.blur();
     }
   };
 
   const showList = open && query.trim().length > 0;
+  const visible = query.trim() ? results : [];
 
   return (
     <div className="relative w-full max-w-md">
@@ -102,10 +100,10 @@ export function SearchBox() {
       </kbd>
       {showList && (
         <ul id={listId} role="listbox" className="absolute top-full right-0 left-0 z-40 mt-1.5 overflow-hidden rounded-[10px] border border-rule bg-surface py-1 shadow-pop">
-          {results.length === 0 ? (
+          {visible.length === 0 ? (
             <li className="px-3 py-2.5 text-sm text-ink-3">No NSE stock matches “{query}”.</li>
           ) : (
-            results.map((r, i) => (
+            visible.map((r, i) => (
               <li
                 key={r.symbol}
                 role="option"
