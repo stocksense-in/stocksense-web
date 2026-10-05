@@ -16,6 +16,10 @@ _INDUSTRY_CODES: list[tuple[str, str]] = [
     ("internet content", "newage"),
     ("internet retail", "newage"),
     ("aerospace & defense", "defence"),
+    ("solar", "energy"),
+    ("semiconductor", "electronics"),
+    ("communication equipment", "electronics"),
+    ("software", "it"),
     ("electronic components", "electronics"),
     ("auto", "auto"),
 ]
