@@ -6,6 +6,6 @@
     "build": "cd frontend && npm run build",
     "start": "cd frontend && npm run start",
     "install-frontend": "cd frontend && npm install",
-    "test-backend": "cd backend && .venv/bin/python -m pytest"
+    "test": "cd frontend && npm test && cd ../backend && .venv/bin/python -m pytest -q"
   }
 }

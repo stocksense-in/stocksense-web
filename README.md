@@ -50,7 +50,8 @@ python -m stocksense fundamentals --limit 20   # try it on 20 stocks
 First time with a new Supabase project: run [`backend/schema.sql`](backend/schema.sql) in the SQL editor.
 Full pipeline docs: [`backend/README.md`](backend/README.md).
 
-From the repo root, `npm run dev` / `npm run build` also work (they `cd frontend` first).
+From the repo root, `npm run dev` / `npm run build` also work (they `cd frontend` first),
+and `npm test` runs the frontend and backend test suites.
 
 ## Where things are
 
