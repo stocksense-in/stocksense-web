@@ -10,8 +10,11 @@ Unit conventions returned by this module (Yahoo's raw units differ, see notes):
 from __future__ import annotations
 
 import math
+import threading
+import time
 
 import yfinance as yf
+from yfinance.exceptions import YFRateLimitError
 
 from ..log import get_logger
 from ..sectors import sector_code
@@ -34,11 +37,50 @@ def _pct(fraction) -> float | None:
     return round(f * 100, 2) if f is not None else None
 
 
+class _RateLimiter:
+    """Spaces out requests across all threads. Yahoo starts returning HTTP 429 after ~900 fast requests."""
+
+    def __init__(self, per_second: float):
+        self._interval = 1 / per_second
+        self._lock = threading.Lock()
+        self._next = 0.0
+
+    def wait(self) -> None:
+        with self._lock:
+            now = time.monotonic()
+            delay = self._next - now
+            self._next = max(now, self._next) + self._interval
+        if delay > 0:
+            time.sleep(delay)
+
+
+_limiter = _RateLimiter(per_second=2.5)
+RATE_LIMIT_RETRIES = 3
+RATE_LIMIT_PAUSE_SECONDS = 60
+
+
+def _with_backoff(call, label: str):
+    """Run a Yahoo request; on HTTP 429 pause and retry instead of failing the stock."""
+    for attempt in range(RATE_LIMIT_RETRIES + 1):
+        _limiter.wait()
+        try:
+            return call()
+        except YFRateLimitError:
+            if attempt == RATE_LIMIT_RETRIES:
+                log.warning(f"{label}: still rate-limited after {attempt} retries, skipping")
+                return None
+            pause = RATE_LIMIT_PAUSE_SECONDS * (attempt + 1)
+            log.warning(f"Yahoo rate limit hit — pausing {pause}s")
+            time.sleep(pause)
+        except Exception as exc:  # yfinance raises a zoo of exception types
+            log.debug(f"{label}: {exc}")
+            return None
+    return None
+
+
 def _info(ticker: str) -> dict | None:
-    try:
-        info = yf.Ticker(ticker).info
-    except Exception as exc:  # yfinance raises a zoo of exception types
-        log.debug(f"{ticker}: info failed: {exc}")
+    info = _with_backoff(lambda: yf.Ticker(ticker).info, ticker)
+    if not info:
         return None
     price = _num(info.get("currentPrice")) or _num(info.get("regularMarketPrice"))
     return info if price else None
@@ -87,10 +129,7 @@ def _round(value: float | None, digits: int) -> float | None:
 
 def revenue_cagr(sym: Symbol) -> float | None:
     """Compound annual revenue growth across the annual statements Yahoo has (usually 3–4 years)."""
-    try:
-        fin = yf.Ticker(sym.yahoo).financials
-    except Exception:
-        return None
+    fin = _with_backoff(lambda: yf.Ticker(sym.yahoo).financials, f"{sym.symbol} financials")
     if fin is None or fin.empty:
         return None
     for label in ("Total Revenue", "Operating Revenue"):

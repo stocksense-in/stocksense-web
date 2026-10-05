@@ -26,7 +26,7 @@ def run(
     store: Store,
     symbols: list[str] | None = None,
     limit: int | None = None,
-    workers: int = 8,
+    workers: int = 4,
     batch_size: int = 100,
     refresh_symbols: bool = False,
 ) -> None:

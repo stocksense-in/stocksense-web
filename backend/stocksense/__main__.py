@@ -50,7 +50,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p = jobs.add_parser("fundamentals", help="fetch fundamentals and score stocks")
     _add_selection(p)
     _add_storage(p)
-    p.add_argument("--workers", type=int, default=8)
+    p.add_argument("--workers", type=int, default=4)
     p.add_argument("--refresh-symbols", action="store_true", help="re-download the NSE list")
 
     p = jobs.add_parser("ownership", help="fetch promoter holding and revenue CAGR")
