@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-05T23:34:07+00:00",
+ "generated_at": "2026-10-05T23:37:43+00:00",
  "stocks": [
   {
    "symbol": "ADANIENT",
@@ -1109,441 +1109,441 @@
  "prices": [
   {
    "symbol": "ADANIENT",
-   "price": 2816.8,
-   "change_pct": -2.98,
-   "updated_at": "2026-10-05T22:37:42"
+   "price": 2864.0,
+   "change_pct": 1.68,
+   "updated_at": "2026-10-05T23:36:30"
   },
   {
    "symbol": "ADANIPORTS",
-   "price": 1737.8,
-   "change_pct": -3.36,
-   "updated_at": "2026-10-05T22:37:42"
+   "price": 1774.0,
+   "change_pct": 2.08,
+   "updated_at": "2026-10-05T23:36:30"
   },
   {
    "symbol": "APOLLOHOSP",
-   "price": 8133.5,
-   "change_pct": -0.39,
-   "updated_at": "2026-10-05T22:37:42"
+   "price": 7985.0,
+   "change_pct": -1.83,
+   "updated_at": "2026-10-05T23:36:30"
   },
   {
    "symbol": "ASIANPAINT",
-   "price": 2407.0,
-   "change_pct": 0.18,
-   "updated_at": "2026-10-05T22:37:50"
+   "price": 2366.0,
+   "change_pct": -1.7,
+   "updated_at": "2026-10-05T23:36:35"
   },
   {
    "symbol": "AXISBANK",
-   "price": 1217.1,
-   "change_pct": -0.73,
-   "updated_at": "2026-10-05T22:37:50"
+   "price": 1222.2,
+   "change_pct": 0.42,
+   "updated_at": "2026-10-05T23:36:35"
   },
   {
    "symbol": "BAJAJ-AUTO",
    "price": 10045.0,
    "change_pct": -7.62,
-   "updated_at": "2026-10-05T22:37:50"
+   "updated_at": "2026-10-05T23:36:35"
   },
   {
    "symbol": "BAJAJFINSV",
-   "price": 1732.6,
-   "change_pct": 0.09,
-   "updated_at": "2026-10-05T22:37:50"
+   "price": 1751.4,
+   "change_pct": 1.09,
+   "updated_at": "2026-10-05T23:36:35"
   },
   {
    "symbol": "BAJFINANCE",
-   "price": 948.3,
-   "change_pct": -1.16,
-   "updated_at": "2026-10-05T22:37:50"
+   "price": 970.0,
+   "change_pct": 2.29,
+   "updated_at": "2026-10-05T23:36:35"
   },
   {
    "symbol": "BANKNIFTY",
-   "price": 54450.75,
-   "change_pct": -0.33,
-   "updated_at": "2026-10-05T22:37:42"
+   "price": 54714.1,
+   "change_pct": 0.48,
+   "updated_at": "2026-10-05T23:36:23"
   },
   {
    "symbol": "BEL",
-   "price": 383.1,
-   "change_pct": -1.34,
-   "updated_at": "2026-10-05T22:37:50"
+   "price": 384.85,
+   "change_pct": 0.46,
+   "updated_at": "2026-10-05T23:36:35"
   },
   {
    "symbol": "BHARTIARTL",
-   "price": 1741.1,
-   "change_pct": -0.9,
-   "updated_at": "2026-10-05T22:37:50"
+   "price": 1779.9,
+   "change_pct": 2.23,
+   "updated_at": "2026-10-05T23:36:35"
   },
   {
    "symbol": "BPCL",
-   "price": 300.6,
-   "change_pct": -0.86,
-   "updated_at": "2026-10-05T22:37:58"
+   "price": 296.95,
+   "change_pct": -1.21,
+   "updated_at": "2026-10-05T23:36:35"
   },
   {
    "symbol": "BRITANNIA",
-   "price": 4778.0,
-   "change_pct": -1.08,
-   "updated_at": "2026-10-05T22:37:58"
+   "price": 4770.0,
+   "change_pct": -0.17,
+   "updated_at": "2026-10-05T23:36:42"
   },
   {
    "symbol": "CHOLAFIN",
    "price": 1580.0,
    "change_pct": -2.47,
-   "updated_at": "2026-10-05T22:37:58"
+   "updated_at": "2026-10-05T23:36:42"
   },
   {
    "symbol": "CIPLA",
-   "price": 1344.0,
-   "change_pct": -0.15,
-   "updated_at": "2026-10-05T22:37:58"
+   "price": 1335.5,
+   "change_pct": -0.63,
+   "updated_at": "2026-10-05T23:36:42"
   },
   {
    "symbol": "COALINDIA",
-   "price": 420.4,
-   "change_pct": -1.08,
-   "updated_at": "2026-10-05T22:37:58"
+   "price": 425.1,
+   "change_pct": 1.12,
+   "updated_at": "2026-10-05T23:36:42"
   },
   {
    "symbol": "DIVISLAB",
-   "price": 9249.0,
-   "change_pct": -0.46,
-   "updated_at": "2026-10-05T22:38:06"
+   "price": 9196.0,
+   "change_pct": -0.57,
+   "updated_at": "2026-10-05T23:36:47"
   },
   {
    "symbol": "DIXON",
    "price": 12700.0,
    "change_pct": -3.05,
-   "updated_at": "2026-10-05T22:38:06"
+   "updated_at": "2026-10-05T23:36:47"
   },
   {
    "symbol": "DMART",
-   "price": 3813.0,
-   "change_pct": 0.31,
-   "updated_at": "2026-10-05T22:38:06"
+   "price": 3567.0,
+   "change_pct": -6.45,
+   "updated_at": "2026-10-05T23:36:47"
   },
   {
    "symbol": "DRREDDY",
    "price": 1206.2,
    "change_pct": -2.17,
-   "updated_at": "2026-10-05T22:38:06"
+   "updated_at": "2026-10-05T23:36:47"
   },
   {
    "symbol": "EICHERMOT",
    "price": 6920.0,
    "change_pct": -3.22,
-   "updated_at": "2026-10-05T22:38:06"
+   "updated_at": "2026-10-05T23:36:47"
   },
   {
    "symbol": "ETERNAL",
-   "price": 313.9,
-   "change_pct": -1.91,
-   "updated_at": "2026-10-05T22:38:06"
+   "price": 320.8,
+   "change_pct": 2.2,
+   "updated_at": "2026-10-05T23:36:47"
   },
   {
    "symbol": "GRASIM",
    "price": 2962.0,
    "change_pct": -3.26,
-   "updated_at": "2026-10-05T22:38:14"
+   "updated_at": "2026-10-05T23:36:53"
   },
   {
    "symbol": "HAL",
-   "price": 4601.0,
-   "change_pct": -1.44,
-   "updated_at": "2026-10-05T22:38:14"
+   "price": 4680.0,
+   "change_pct": 1.72,
+   "updated_at": "2026-10-05T23:36:53"
   },
   {
    "symbol": "HAVELLS",
-   "price": 1040.0,
-   "change_pct": 2.36,
-   "updated_at": "2026-10-05T22:38:14"
+   "price": 1046.7,
+   "change_pct": 0.64,
+   "updated_at": "2026-10-05T23:36:53"
   },
   {
    "symbol": "HCLTECH",
-   "price": 1243.1,
-   "change_pct": 1.07,
-   "updated_at": "2026-10-05T22:38:14"
+   "price": 1201.9,
+   "change_pct": -3.31,
+   "updated_at": "2026-10-05T23:36:53"
   },
   {
    "symbol": "HDFCBANK",
-   "price": 721.2,
-   "change_pct": 1.76,
-   "updated_at": "2026-10-05T22:38:14"
+   "price": 704.8,
+   "change_pct": -2.27,
+   "updated_at": "2026-10-05T23:36:53"
   },
   {
    "symbol": "HDFCLIFE",
    "price": 534.2,
    "change_pct": 2.49,
-   "updated_at": "2026-10-05T22:38:14"
+   "updated_at": "2026-10-05T23:36:53"
   },
   {
    "symbol": "HEROMOTOCO",
    "price": 5168.0,
    "change_pct": -1.39,
-   "updated_at": "2026-10-05T22:38:14"
+   "updated_at": "2026-10-05T23:36:53"
   },
   {
    "symbol": "HINDALCO",
-   "price": 941.85,
-   "change_pct": 0.01,
-   "updated_at": "2026-10-05T22:38:14"
+   "price": 938.4,
+   "change_pct": -0.37,
+   "updated_at": "2026-10-05T23:36:53"
   },
   {
    "symbol": "HINDUNILVR",
-   "price": 1836.0,
-   "change_pct": -2.29,
-   "updated_at": "2026-10-05T22:38:14"
+   "price": 1838.4,
+   "change_pct": 0.13,
+   "updated_at": "2026-10-05T23:36:53"
   },
   {
    "symbol": "ICICIBANK",
-   "price": 1310.6,
-   "change_pct": -0.84,
-   "updated_at": "2026-10-05T22:38:22"
+   "price": 1332.0,
+   "change_pct": 1.63,
+   "updated_at": "2026-10-05T23:36:59"
   },
   {
    "symbol": "INDIAVIX",
-   "price": 14.46,
-   "change_pct": 7.19,
-   "updated_at": "2026-10-05T22:37:42"
+   "price": 14.78,
+   "change_pct": 2.36,
+   "updated_at": "2026-10-05T23:36:23"
   },
   {
    "symbol": "INDUSINDBK",
-   "price": 886.85,
-   "change_pct": -1.61,
-   "updated_at": "2026-10-05T22:38:22"
+   "price": 886.6,
+   "change_pct": -0.03,
+   "updated_at": "2026-10-05T23:36:59"
   },
   {
    "symbol": "INFY",
-   "price": 1035.0,
-   "change_pct": 4.11,
-   "updated_at": "2026-10-05T22:38:22"
+   "price": 1020.5,
+   "change_pct": -1.4,
+   "updated_at": "2026-10-05T23:36:59"
   },
   {
    "symbol": "IRCTC",
-   "price": 454.1,
+   "price": 452.8,
    "change_pct": -0.29,
-   "updated_at": "2026-10-05T22:38:22"
+   "updated_at": "2026-10-05T23:36:59"
   },
   {
    "symbol": "ITC",
-   "price": 255.9,
-   "change_pct": -2.61,
-   "updated_at": "2026-10-05T22:38:22"
+   "price": 268.9,
+   "change_pct": 5.08,
+   "updated_at": "2026-10-05T23:36:59"
   },
   {
    "symbol": "JIOFIN",
-   "price": 212.5,
-   "change_pct": -2.02,
-   "updated_at": "2026-10-05T22:38:22"
+   "price": 212.0,
+   "change_pct": -0.24,
+   "updated_at": "2026-10-05T23:36:59"
   },
   {
    "symbol": "JSWSTEEL",
-   "price": 1233.0,
-   "change_pct": -1.63,
-   "updated_at": "2026-10-05T22:38:22"
+   "price": 1235.3,
+   "change_pct": 0.19,
+   "updated_at": "2026-10-05T23:36:59"
   },
   {
    "symbol": "KAYNES",
-   "price": 3399.0,
-   "change_pct": -2.91,
-   "updated_at": "2026-10-05T22:38:30"
+   "price": 3394.8,
+   "change_pct": -0.12,
+   "updated_at": "2026-10-05T23:37:05"
   },
   {
    "symbol": "KOTAKBANK",
    "price": 418.35,
    "change_pct": 0.32,
-   "updated_at": "2026-10-05T22:38:30"
+   "updated_at": "2026-10-05T23:37:05"
   },
   {
    "symbol": "LT",
-   "price": 3693.4,
-   "change_pct": -1.77,
-   "updated_at": "2026-10-05T22:38:30"
+   "price": 3750.0,
+   "change_pct": 1.53,
+   "updated_at": "2026-10-05T23:37:05"
   },
   {
    "symbol": "M&M",
-   "price": 2860.0,
-   "change_pct": -3.05,
-   "updated_at": "2026-10-05T22:38:30"
+   "price": 2857.6,
+   "change_pct": -0.08,
+   "updated_at": "2026-10-05T23:37:05"
   },
   {
    "symbol": "MARUTI",
    "price": 11386.0,
    "change_pct": -4.86,
-   "updated_at": "2026-10-05T22:38:38"
+   "updated_at": "2026-10-05T23:37:11"
   },
   {
    "symbol": "MTARTECH",
    "price": 7797.0,
    "change_pct": 0.0,
-   "updated_at": "2026-10-05T22:38:38"
+   "updated_at": "2026-10-05T23:37:11"
   },
   {
    "symbol": "NESTLEIND",
    "price": 1307.7,
    "change_pct": -0.18,
-   "updated_at": "2026-10-05T22:38:38"
+   "updated_at": "2026-10-05T23:37:11"
   },
   {
    "symbol": "NIFTY50",
-   "price": 22421.95,
-   "change_pct": -0.88,
-   "updated_at": "2026-10-05T22:37:42"
+   "price": 22555.75,
+   "change_pct": 0.6,
+   "updated_at": "2026-10-05T23:36:23"
   },
   {
    "symbol": "NTPC",
    "price": 315.1,
    "change_pct": -2.37,
-   "updated_at": "2026-10-05T22:38:46"
+   "updated_at": "2026-10-05T23:37:17"
   },
   {
    "symbol": "NYKAA",
-   "price": 324.95,
-   "change_pct": 1.55,
-   "updated_at": "2026-10-05T22:38:46"
+   "price": 339.55,
+   "change_pct": 4.49,
+   "updated_at": "2026-10-05T23:37:17"
   },
   {
    "symbol": "ONGC",
-   "price": 222.37,
-   "change_pct": -1.52,
-   "updated_at": "2026-10-05T22:38:46"
+   "price": 224.9,
+   "change_pct": 1.14,
+   "updated_at": "2026-10-05T23:37:17"
   },
   {
    "symbol": "PAYTM",
-   "price": 1656.0,
-   "change_pct": -1.31,
-   "updated_at": "2026-10-05T22:38:46"
+   "price": 1684.0,
+   "change_pct": 1.69,
+   "updated_at": "2026-10-05T23:37:17"
   },
   {
    "symbol": "PERSISTENT",
-   "price": 5367.0,
-   "change_pct": 1.67,
-   "updated_at": "2026-10-05T22:38:46"
+   "price": 5530.0,
+   "change_pct": 3.04,
+   "updated_at": "2026-10-05T23:37:17"
   },
   {
    "symbol": "PIDILITIND",
-   "price": 1464.0,
-   "change_pct": -0.08,
-   "updated_at": "2026-10-05T22:38:46"
+   "price": 1487.7,
+   "change_pct": 1.62,
+   "updated_at": "2026-10-05T23:37:17"
   },
   {
    "symbol": "POLYCAB",
-   "price": 7990.0,
-   "change_pct": -0.45,
-   "updated_at": "2026-10-05T22:38:46"
+   "price": 8080.0,
+   "change_pct": 1.13,
+   "updated_at": "2026-10-05T23:37:17"
   },
   {
    "symbol": "POWERGRID",
-   "price": 254.55,
-   "change_pct": -2.28,
-   "updated_at": "2026-10-05T22:38:46"
+   "price": 257.0,
+   "change_pct": 0.96,
+   "updated_at": "2026-10-05T23:37:17"
   },
   {
    "symbol": "RADICO",
-   "price": 4237.0,
-   "change_pct": -2.95,
-   "updated_at": "2026-10-05T22:38:55"
+   "price": 4289.1,
+   "change_pct": 1.23,
+   "updated_at": "2026-10-05T23:37:23"
   },
   {
    "symbol": "RELIANCE",
-   "price": 1167.7,
-   "change_pct": -1.63,
-   "updated_at": "2026-10-05T22:38:55"
+   "price": 1186.4,
+   "change_pct": 1.6,
+   "updated_at": "2026-10-05T23:37:23"
   },
   {
    "symbol": "SBILIFE",
    "price": 1721.6,
    "change_pct": 1.49,
-   "updated_at": "2026-10-05T22:39:03"
+   "updated_at": "2026-10-05T23:37:29"
   },
   {
    "symbol": "SBIN",
-   "price": 954.1,
-   "change_pct": -0.56,
-   "updated_at": "2026-10-05T22:39:03"
+   "price": 958.0,
+   "change_pct": 0.41,
+   "updated_at": "2026-10-05T23:37:29"
   },
   {
    "symbol": "SENSEX",
-   "price": 71909.7,
-   "change_pct": -0.79,
-   "updated_at": "2026-10-05T22:37:42"
+   "price": 72382.47,
+   "change_pct": 0.66,
+   "updated_at": "2026-10-05T23:36:23"
   },
   {
    "symbol": "SHRIRAMFIN",
-   "price": 945.0,
-   "change_pct": -3.84,
-   "updated_at": "2026-10-05T22:39:03"
+   "price": 971.4,
+   "change_pct": 2.79,
+   "updated_at": "2026-10-05T23:37:29"
   },
   {
    "symbol": "SUNPHARMA",
-   "price": 1801.0,
-   "change_pct": -0.86,
-   "updated_at": "2026-10-05T22:39:11"
+   "price": 1779.7,
+   "change_pct": -1.18,
+   "updated_at": "2026-10-05T23:37:35"
   },
   {
    "symbol": "TATACONSUM",
-   "price": 957.0,
-   "change_pct": 0.79,
-   "updated_at": "2026-10-05T22:39:11"
+   "price": 953.75,
+   "change_pct": -0.34,
+   "updated_at": "2026-10-05T23:37:35"
   },
   {
    "symbol": "TATAPOWER",
-   "price": 350.15,
-   "change_pct": -2.47,
-   "updated_at": "2026-10-05T22:39:11"
+   "price": 351.5,
+   "change_pct": 0.39,
+   "updated_at": "2026-10-05T23:37:35"
   },
   {
    "symbol": "TATASTEEL",
-   "price": 178.0,
-   "change_pct": -3.42,
-   "updated_at": "2026-10-05T22:39:11"
+   "price": 178.14,
+   "change_pct": 0.08,
+   "updated_at": "2026-10-05T23:37:35"
   },
   {
    "symbol": "TCS",
-   "price": 2075.0,
-   "change_pct": 1.19,
-   "updated_at": "2026-10-05T22:39:11"
+   "price": 2114.4,
+   "change_pct": 1.9,
+   "updated_at": "2026-10-05T23:37:35"
   },
   {
    "symbol": "TECHM",
-   "price": 1533.0,
-   "change_pct": 0.59,
-   "updated_at": "2026-10-05T22:39:11"
+   "price": 1535.9,
+   "change_pct": 0.19,
+   "updated_at": "2026-10-05T23:37:35"
   },
   {
    "symbol": "TITAN",
-   "price": 4515.7,
-   "change_pct": -1.55,
-   "updated_at": "2026-10-05T22:39:11"
+   "price": 4580.0,
+   "change_pct": 1.42,
+   "updated_at": "2026-10-05T23:37:35"
   },
   {
    "symbol": "TMPV",
-   "price": 279.4,
-   "change_pct": -1.45,
-   "updated_at": "2026-10-05T22:39:11"
+   "price": 288.65,
+   "change_pct": 3.31,
+   "updated_at": "2026-10-05T23:37:35"
   },
   {
    "symbol": "TRENT",
    "price": 2580.0,
-   "change_pct": -1.59,
-   "updated_at": "2026-10-05T22:39:11"
+   "change_pct": 0.0,
+   "updated_at": "2026-10-05T23:37:35"
   },
   {
    "symbol": "ULTRACEMCO",
    "price": 10710.0,
    "change_pct": -2.25,
-   "updated_at": "2026-10-05T22:39:19"
+   "updated_at": "2026-10-05T23:37:41"
   },
   {
    "symbol": "VBL",
-   "price": 425.3,
-   "change_pct": -1.55,
-   "updated_at": "2026-10-05T22:39:19"
+   "price": 439.6,
+   "change_pct": 3.36,
+   "updated_at": "2026-10-05T23:37:41"
   },
   {
    "symbol": "WIPRO",
-   "price": 159.35,
-   "change_pct": 0.54,
-   "updated_at": "2026-10-05T22:39:19"
+   "price": 162.14,
+   "change_pct": 1.75,
+   "updated_at": "2026-10-05T23:37:41"
   }
  ]
 }

@@ -28,7 +28,13 @@ YAHOO_INDICES = {
 
 
 def _yahoo_rows(targets, batch_size: int):
-    pairs = list(YAHOO_INDICES.items()) + [(t.symbol, t.yahoo) for t in targets]
+    indices = yahoo.index_quotes(list(YAHOO_INDICES.values()))
+    yield [
+        {"symbol": symbol, "price": indices[ticker][0], "change_pct": indices[ticker][1]}
+        for symbol, ticker in YAHOO_INDICES.items()
+        if ticker in indices
+    ]
+    pairs = [(t.symbol, t.yahoo) for t in targets]
     for batch in chunks(pairs, batch_size):
         quotes = yahoo.latest_prices([ticker for _, ticker in batch])
         yield [

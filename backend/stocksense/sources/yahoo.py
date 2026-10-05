@@ -142,6 +142,21 @@ def revenue_cagr(sym: Symbol) -> float | None:
     return None
 
 
+def index_quotes(tickers: list[str]) -> dict[str, tuple[float, float]]:
+    """
+    {yahoo_ticker: (last, change_pct)} for indices. Uses the live quote rather than
+    daily bars, which Yahoo often leaves empty for Indian indices until the next day.
+    """
+    result: dict[str, tuple[float, float]] = {}
+    for ticker in tickers:
+        info = _with_backoff(lambda: yf.Ticker(ticker).fast_info, ticker)
+        last = _num(getattr(info, "last_price", None)) if info else None
+        prev = _num(getattr(info, "previous_close", None)) if info else None
+        if last and prev:
+            result[ticker] = (round(last, 2), round((last - prev) / prev * 100, 2))
+    return result
+
+
 def latest_prices(tickers: list[str]) -> dict[str, tuple[float, float]]:
     """
     {yahoo_ticker: (last_close, change_pct)} for many tickers in one request.
@@ -165,11 +180,15 @@ def latest_prices(tickers: list[str]) -> dict[str, tuple[float, float]]:
     result: dict[str, tuple[float, float]] = {}
     for ticker in tickers:
         try:
-            closes = (frame[ticker]["Close"] if len(tickers) > 1 else frame["Close"]).dropna()
+            bars = frame[ticker] if len(tickers) > 1 else frame
+            closes, volumes = bars["Close"], bars["Volume"]
         except KeyError:
             continue
         if hasattr(closes, "columns"):  # newer yfinance keeps a ticker level on single downloads
-            closes = closes.iloc[:, 0]
+            closes, volumes = closes.iloc[:, 0], volumes.iloc[:, 0]
+        # Yahoo inserts zero-volume rows on NSE holidays that repeat the previous
+        # close; counting them as a session makes "today's change" wrong.
+        closes = closes[(volumes > 0) | volumes.isna()].dropna()
         if closes.empty:
             continue
         last = float(closes.iloc[-1])
