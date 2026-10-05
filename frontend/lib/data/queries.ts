@@ -170,3 +170,13 @@ export async function getLastUpdated(): Promise<string | null> {
   const times = [...(await quotes()).values()].map((q) => q.updatedAt).filter(Boolean) as string[];
   return times.sort().at(-1) ?? null;
 }
+
+/** The largest companies in the same sector, for side-by-side comparison. Includes the stock itself. */
+export async function getPeers(stock: Stock, count = 6): Promise<Stock[]> {
+  if (stock.sector === 'general') return [];
+  const peers = (await stocks())
+    .filter((s) => s.sector === stock.sector && s.price != null && s.marketCap != null)
+    .sort((a, b) => (b.marketCap ?? 0) - (a.marketCap ?? 0));
+  const top = peers.slice(0, count);
+  return top.some((s) => s.symbol === stock.symbol) ? top : [...top.slice(0, count - 1), stock];
+}

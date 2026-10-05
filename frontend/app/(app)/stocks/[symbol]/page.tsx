@@ -3,12 +3,13 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PriceChart } from '@/components/charts/PriceChart';
 import { RangeBar } from '@/components/stock/RangeBar';
+import { PeerTable } from '@/components/stock/PeerTable';
 import { ReportCard } from '@/components/stock/ReportCard';
 import { ScoreBreakdown } from '@/components/stock/ScoreBreakdown';
 import { Change } from '@/components/ui/Change';
 import { ScoreMeter } from '@/components/ui/ScoreMeter';
 import { getPriceHistory } from '@/lib/data/chart';
-import { getStock } from '@/lib/data/queries';
+import { getPeers, getStock } from '@/lib/data/queries';
 import { ago, capBand, crore, inr, pct } from '@/lib/format';
 import { sectorLabel } from '@/lib/sectors';
 
@@ -22,7 +23,7 @@ export default async function StockPage(props: PageProps<'/stocks/[symbol]'>) {
   const { symbol } = await props.params;
   const stock = await getStock(decodeURIComponent(symbol));
   if (!stock) notFound();
-  const history = await getPriceHistory(stock.symbol, '1y');
+  const [history, peers] = await Promise.all([getPriceHistory(stock.symbol, '1y'), getPeers(stock)]);
 
   const facts = [
     { label: 'Market cap', value: crore(stock.marketCap), note: capBand(stock.marketCap) },
@@ -79,6 +80,16 @@ export default async function StockPage(props: PageProps<'/stocks/[symbol]'>) {
         </div>
         <ReportCard stock={stock} />
       </section>
+
+      {peers.length > 1 && (
+        <section className="panel overflow-hidden" aria-labelledby="peers-heading">
+          <div className="px-5 pt-4 pb-3">
+            <h2 id="peers-heading" className="panel-title">Compared with {sectorLabel(stock.sector)} peers</h2>
+            <p className="text-sm text-ink-3">The largest companies in the same sector.</p>
+          </div>
+          <PeerTable stock={stock} peers={peers} />
+        </section>
+      )}
 
       <section aria-label="Key facts" className="grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-rule bg-rule md:grid-cols-4">
         {facts.map((f) => (
