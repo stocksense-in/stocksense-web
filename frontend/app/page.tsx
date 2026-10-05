@@ -48,7 +48,7 @@ export default async function Landing() {
       </header>
 
       <main>
-        <section className="mx-auto grid max-w-[1200px] items-center gap-12 px-5 pt-10 pb-20 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:pt-20">
+        <section className="mx-auto grid max-w-[1200px] items-center gap-12 px-5 pt-10 pb-20 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] lg:pt-20">
           <div>
             <h1 className="font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.035em] text-ink sm:text-[4rem] lg:text-[4.6rem]">
               Know what you’re buying.
