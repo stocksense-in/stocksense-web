@@ -10,6 +10,7 @@ Jobs
     realtime       stream Upstox ticks into live_prices          (runs until stopped)
     upstox-login   sign in to Upstox and save today's token
     scheduler      run everything above on a market-hours timetable
+    snapshot       copy ~70 large caps from Supabase into frontend/data/snapshot.json
 
 Common options
     --symbols INFY TCS   only these stocks          --limit N    only the first N stocks
@@ -72,6 +73,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
     p = jobs.add_parser("scheduler", help="run jobs on a timetable")
     _add_storage(p)
+
+    p = jobs.add_parser("snapshot", help="refresh the frontend's offline data file")
+    p.add_argument("--symbols", nargs="+", metavar="SYM", help="instead of the default large caps")
     return parser
 
 
@@ -90,6 +94,12 @@ def _store(args: argparse.Namespace) -> Store:
 
 def main() -> None:
     args = _build_parser().parse_args()
+
+    if args.job == "snapshot":
+        from .jobs import snapshot
+
+        snapshot.run(args.symbols)
+        return
 
     if args.job == "upstox-login":
         from .jobs import upstox_login

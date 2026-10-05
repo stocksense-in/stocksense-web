@@ -36,6 +36,7 @@ public anon key.
 | `python -m stocksense realtime` | Streams Upstox ticks into `live_prices` (1 write/sec) | Runs until stopped |
 | `python -m stocksense upstox-login` | Opens Upstox sign-in and saves the day's token | Every morning |
 | `python -m stocksense scheduler` | Runs all of the above on an IST market-hours timetable | Leave running |
+| `python -m stocksense snapshot` | Copies ~70 large caps from Supabase into `frontend/data/snapshot.json` (the site's offline data) | After a fundamentals run, before committing |
 
 Every job accepts `--symbols INFY TCS` or `--limit 20` to work on a few stocks,
 and `--snapshot` to also write results into `frontend/data/snapshot.json`.
