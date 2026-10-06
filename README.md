@@ -13,27 +13,24 @@ simulator.
 ## How it fits together
 
 ```
-               backend/  (Python, runs on a schedule)                    frontend/  (Next.js 16)
-┌──────────────────────────────────────────────────┐        ┌───────────────────────────────────────┐
-│ NSE symbol list ─┐                               │        │ lib/data/source.ts                    │
-│ Yahoo Finance  ──┼─► python -m stocksense <job> ─┼──────► │   reads Supabase (anon key, read-only)│
-│ Screener.in    ──┤      scores every stock       │ Supa-  │   or data/snapshot.json when offline  │
-│ Upstox (live)  ──┘                               │ base   │ lib/data/queries.ts → pages           │
-└──────────────────────────────────────────────────┘        └───────────────────────────────────────┘
+backend/  (Python, runs on a schedule)                         frontend/  (Next.js 16, golden dark UI)
+NSE symbols, Yahoo Finance, Screener.in, Upstox                  pages read live index prices from
+        │                                                        Supabase `live_prices`; most panels
+        ▼                                                        use sample data in lib/constants.ts
+python -m stocksense <job>  ──►  Supabase `stocks`, `live_prices`
 ```
 
-* **Python writes, Next.js reads.** The backend is the only thing with the
-  Supabase service key. The website reads with the public anon key, which row-level
-  security limits to `select`.
-* **Works without a database.** If Supabase isn't configured (or is down), the
-  site serves `frontend/data/snapshot.json`, real numbers for ~70 large caps.
+* **Python writes, the website reads.** The backend is the only thing with the
+  Supabase service key; the website uses the public anon key.
+* The frontend is the original golden design (tag `baseline-2026-10-06`). It does
+  not yet use the scored `stocks` table — wiring that in is the next step.
 
 ## Run it
 
 ```bash
 # Website — http://localhost:3000
 cd frontend
-cp .env.example .env.local        # optional: add SUPABASE_URL + SUPABASE_ANON_KEY
+# .env.local: NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY (anon key only)
 npm install
 npm run dev
 ```
@@ -51,69 +48,36 @@ First time with a new Supabase project: run [`backend/schema.sql`](backend/schem
 Full pipeline docs: [`backend/README.md`](backend/README.md).
 
 From the repo root, `npm run dev` / `npm run build` also work (they `cd frontend` first),
-and `npm test` runs the frontend and backend test suites.
+and `npm test` runs the backend tests.
 
 ## Where things are
 
 ```
 frontend/
-  app/
-    page.tsx                 landing page
-    (app)/                   everything with the sidebar — the folder name doesn't appear in URLs
-      layout.tsx             sidebar, search, index bar
-      dashboard/             market breadth, sector moves, movers, top scores
-      stocks/                stock list, and stocks/[symbol] — the report-card page
-      screener/              filters over every stock, all state in the URL
-      ipo/  geopolitics/     IPO scores, sector risk map (curated sample data for now)
-      paper-trading/         simulator — logic in lib/paperTrading.ts
-      rhp-analyser/          prospectus scanner — rules in lib/rhp.ts
-      profile/  premium/     investor profile (cookie) → Matched picks
-    api/                     search, chart history, prospectus upload
-  components/
-    shell/                   sidebar + nav list (nav.ts), search box, index bar, logo
-    stock/                   report card, metric side panel, score breakdown
-    ui/                      small shared pieces: Change, StatusBadge, MetricGauge, ScoreMeter, StockTable
-  lib/
-    data/                    the only code that fetches data (server-side)
-    metrics.ts               sector ideal ranges + plain-language readings for each metric
-    scoring.ts               score curves — mirror of backend/stocksense/scoring.py
-    metricContent.ts, metricIntel.ts   long-form explanations shown in the metric panel
-    content/                 hand-maintained IPO and geopolitics data
-  app/globals.css            design tokens (colours, fonts, radii) + a few shared classes
+  app/page.tsx               landing page + the in-app shell (sidebar, top bar); every route
+                             (app/dashboard, app/analysis, …) renders it with an initialPage
+  components/sections/       one component per page: Dashboard, Analysis, Screener, IPO,
+                             Geo, PaperTrading, RHP, Premium, Profile
+  components/cards/          MetricCard, MetricOverlay (metric deep-dive), CandleChart
+  components/landing/        Constellation background, custom cursor
+  lib/constants.ts           sample stocks, IPOs, screener rows, geopolitics data
+  lib/metricContent.ts, metricIntel.ts   long-form metric explanations
+  app/globals.css            the golden theme (gold #C9A84C, green #00E676, cream text)
 
 backend/
-  stocksense/                the pipeline package — see backend/README.md
+  stocksense/                the data pipeline package — see backend/README.md
   schema.sql                 tables, columns, access rules
   tests/                     pytest
 ```
-
-## Design system
-
-Light, number-first, and quiet. The tokens live in `frontend/app/globals.css`
-and are usable as Tailwind classes (`bg-paper`, `text-ink-2`, `border-rule`…).
-
-| Token | Use |
-|---|---|
-| `paper` `#F3F4F1`, `surface` `#FFFFFF` | page and panel backgrounds |
-| `ink` / `ink-2` / `ink-3` | primary, secondary, muted text |
-| `brand` `#2B3FD6` | actions, links, focus — nothing else |
-| `up` / `down` | real price moves and healthy / concern status only |
-| `watch` | the in-between status, always shown with a word |
-| `.ideal-band` | hatched texture marking a sector's healthy range on every gauge |
-
-Fonts: **Bricolage Grotesque** for headings, **IBM Plex Sans** for everything
-else, with tabular figures (`.num`) wherever numbers line up.
 
 ## Status
 
 | Area | State |
 |---|---|
-| Stock scores, report card, screener, dashboard | Live data from the pipeline |
-| Price charts | Live from Yahoo Finance |
-| Prospectus scanner | Works on real DRHP/RHP PDFs (pattern rules, not AI) |
-| Paper trading, profile, matched picks | Working; saved on the device |
-| IPO list, geopolitics events | Curated sample data — feeds still to build |
-| Accounts / sign-in | Not built yet (planned: Supabase Auth) |
+| Data pipeline (prices, fundamentals, scores for ~2,400 stocks) | Live in Supabase |
+| Dashboard index prices | Live from Supabase `live_prices` |
+| Other frontend panels | Sample data in `lib/constants.ts` |
+| Accounts / sign-in | Not built yet |
 
 History of the big restructure, and how to go back to the earlier version:
 [`docs/overhaul-2026-10-06.md`](docs/overhaul-2026-10-06.md).

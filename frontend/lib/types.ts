@@ -1,50 +1,41 @@
-/** Sector codes come from the backend (backend/stocksense/sectors.py). */
-export type SectorCode =
-  | 'it' | 'bank' | 'nbfc' | 'finance' | 'newage' | 'defence' | 'electronics' | 'auto'
-  | 'telecom' | 'consumer' | 'fmcg' | 'pharma' | 'materials' | 'industrial' | 'energy'
-  | 'realestate' | 'utilities' | 'general';
+export type Page =
+  | 'dashboard'
+  | 'analysis'
+  | 'ipo'
+  | 'paper'
+  | 'rhp'
+  | 'geo'
+  | 'screener'
+  | 'premium'
+  | 'profile'
+  | 'mf';
 
-/** The six fundamentals that make up the StockSense score. */
+export type Sector = 'it' | 'bank' | 'auto' | 'newage' | 'fmcg' | 'pharma' | 'defence' | 'nbfc' | 'electronics';
+
+export interface StockData {
+  ticker: string; sub: string; price: string; chg: string;
+  score: number; sector: Sector;
+  data: { pe: number; roe: number; de: number; margin: number; promoter: number; cagr: number };
+  ctx: { idealPE: string; avgROE: number; idealDE: string; avgMargin: number; sectorCAGR: number; promoterNote: string; cagr: number; pe: number; margin: number };
+}
+
+export interface Holding {
+  sym: string; qty: number; avgCost: number; ltp: number;
+  sl: number; daysHeld: number; hist: number[];
+}
+
+export interface IPO {
+  name: string; sector: string; open: string; size: string;
+  score: number; gmp: number; qib: number; retail: number;
+  fund: number; geo: number; verdict: string; band: string;
+}
+
 export type MetricKey = 'pe' | 'roe' | 'de' | 'margin' | 'promoter' | 'cagr';
 
-/**
- * One NSE stock. Percent fields are percentages (31.2 = 31.2%), `de` is a ratio
- * (0.4 = 0.4×), `marketCap` is in ₹ crore. Any field can be null when the data
- * source doesn't publish it.
- */
-export interface Stock {
-  symbol: string;
-  name: string;
-  sector: SectorCode;
-  industry: string | null;
-  marketCap: number | null;
-  price: number | null;
-  changePct: number | null;
-  week52High: number | null;
-  week52Low: number | null;
-  pe: number | null;
-  pb: number | null;
-  roe: number | null;
-  de: number | null;
-  margin: number | null;
-  dividendYield: number | null;
-  promoter: number | null;
-  cagr: number | null;
-  score: number | null;
-  updatedAt: string | null;
+export interface MetricMeta {
+  name: string; unit: string; il: string; lo: string; hi: string;
+  norm: (v: number, s?: string) => number;
+  iz: (s?: string) => [number, number];
+  plain: (v: number, s?: string) => string;
+  verd: (v: number, s?: string) => string;
 }
-
-export interface Quote {
-  symbol: string;
-  price: number;
-  changePct: number | null;
-  updatedAt: string | null;
-}
-
-export interface PricePoint {
-  /** Unix seconds */
-  t: number;
-  close: number;
-}
-
-export type Status = 'healthy' | 'watch' | 'concern' | 'neutral';

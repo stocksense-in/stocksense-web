@@ -1,158 +1,302 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { HeroReportCard } from '@/components/landing/HeroReportCard';
-import { Logo } from '@/components/shell/Logo';
-import { getStocks } from '@/lib/data/queries';
-import { METRICS, METRIC_ORDER } from '@/lib/metrics';
-import { WEIGHTS } from '@/lib/scoring';
+'use client';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Page } from '@/lib/types';
+import { PAGE_TITLES, NAV_ITEMS } from '@/lib/constants';
+import { DashboardPage } from '@/components/sections/DashboardPage';
+import { AnalysisPage } from '@/components/sections/AnalysisPage';
+import { IPOPage } from '@/components/sections/IPOPage';
+import { ScreenerPage } from '@/components/sections/ScreenerPage';
+import { GeoPage } from '@/components/sections/GeoPage';
+import { PremiumPage } from '@/components/sections/PremiumPage';
+import { ProfilePage } from '@/components/sections/ProfilePage';
+import { PaperTradingPage } from '@/components/sections/PaperTradingPage';
+import { RHPPage } from '@/components/sections/RHPPage';
+import { useRouter } from 'next/navigation';
+import { Constellation } from '@/components/landing/Constellation';
+import { CustomCursor } from '@/components/landing/CustomCursor';
 
-export const metadata: Metadata = { title: { absolute: 'StockSense — Know what you’re buying' } };
-
-const EXAMPLES = ['TCS', 'HDFCBANK', 'ETERNAL', 'TMPV', 'ITC'];
-
-/** Categorical colours for the six score weights, in fixed order. */
-const WEIGHT_COLORS = ['#F2B544', '#5B8CFF', '#9B7BFF', '#2FD3E8', '#22D39A', '#FFB648'];
-
-const WHY: Record<string, string> = {
-  pe: 'What you pay for each rupee of profit.',
-  roe: 'How well the company uses shareholders’ money.',
-  margin: 'How much of each sale it keeps as profit.',
-  de: 'How much it relies on borrowed money.',
-  cagr: 'How fast sales have grown over three years.',
-  promoter: 'How much the founders still own.',
-};
-
-const TOOLS = [
-  { href: '/screener', title: 'Screener', body: 'Filter all 2,600 NSE stocks by score, valuation, returns and debt.' },
-  { href: '/ipo', title: 'IPO scores', body: 'Fundamentals, institutional demand and grey-market premium, weighed into one verdict.' },
-  { href: '/geopolitics', title: 'Geopolitics', body: 'Which Indian sectors today’s global events push up or drag down.' },
-  { href: '/paper-trading', title: 'Paper trading', body: '₹1,00,000 of pretend money at real prices, with stop-losses and missions.' },
-  { href: '/rhp-analyser', title: 'Prospectus scanner', body: 'The risk factors buried in a 400-page IPO prospectus, pulled out and ranked.' },
+/* ══ TIMELINE DATA ══ */
+const STEPS = [
+  {
+    num: '01', icon: '◈', tag: 'DISCOVERY',
+    title: 'Search any stock or IPO',
+    body: 'Type a ticker like INFY, HDFCBANK, or an upcoming IPO name. StockSense instantly pulls real-time price data, sector classification, and 52-week range — giving you a complete identity card for every listed company on NSE and BSE.',
+    features: ['2,800+ NSE/BSE stocks indexed', 'Live price feeds with <3s latency', 'Auto-complete with sector tags'],
+  },
+  {
+    num: '02', icon: '▦', tag: 'ANALYSIS',
+    title: 'See the full metric breakdown',
+    body: 'Every fundamental metric — PE Ratio, Return on Equity, Debt/Equity, Net Profit Margin, Promoter Holding, and Revenue CAGR — is plotted on an ideal-range gauge calibrated specifically for that stock\'s sector. A banking stock\'s D/E of 9× is normal; the same ratio in IT is a red flag. StockSense knows the difference.',
+    features: ['6 institutional-grade metrics per stock', 'Sector-calibrated ideal zones', 'Click any metric for deep-dive intelligence'],
+  },
+  {
+    num: '03', icon: '◉', tag: 'GEOPOLITICS',
+    title: 'Get live geopolitical context',
+    body: 'Most retail investors ignore geopolitics until it\'s too late. StockSense\'s Geopolitics Engine maps real-time global events — Iran tensions, Hormuz closure risk, OPEC output cuts, India-US trade pacts — directly to affected Indian sectors. Defence rallies on conflict. Aviation bleeds on crude spikes. You see it before the market prices it in.',
+    features: ['8 sectors tracked against 14 geo-risk sources', 'Historical precedent matching (2020 COVID, 2022 Russia)', 'Sector risk matrix updated every 2 hours'],
+  },
+  {
+    num: '04', icon: '★', tag: 'VERDICT',
+    title: 'Read the AI verdict',
+    body: 'StockSense synthesizes all 6 metrics, sector context, and geopolitical overlay into a single institutional-grade verdict: Strong Buy, Moderate, or Risky. But we don\'t just give you a label — we show the plain-language reasoning behind it. "PE is 24× against a sector ideal of 18–28× — fairly valued. ROE at 31% is top-decile. Zero debt concern. Verdict: Strong Buy."',
+    features: ['Weighted scoring: Fundamentals 60% + Geo 20% + Sentiment 20%', 'Plain-language reasoning for every verdict', 'Click-through to 3-layer metric intelligence'],
+  },
+  {
+    num: '05', icon: '◎', tag: 'SIMULATION',
+    title: 'Paper trade before risking capital',
+    body: 'Start with virtual ₹1,00,000 and trade in simulated market conditions. Set stop-losses, track P&L, and learn position sizing — all without risking a single real rupee. Our coach system guides you through learning missions: execute your first trade, survive a red day, diversify across 3 sectors, and watch a stop-loss trigger. By the time you deploy real capital, you\'ve already built conviction.',
+    features: ['Virtual ₹1,00,000 with realistic brokerage', '6 learning missions with progress tracking', 'AI coach insights on concentration and profit-booking'],
+  },
 ];
 
-export default async function Landing() {
-  const examples = (await getStocks(EXAMPLES)).filter((s) => s.score != null);
-  const order = [...METRIC_ORDER].sort((a, b) => WEIGHTS[b] - WEIGHTS[a]);
+/* ══ TYPEWRITER DATA ══ */
+const FEATURES = [
+  { cat: 'STOCK REPORT CARD', txt: 'See exactly where every metric sits — ideal vs actual, in plain language. PE, ROE, D/E explained for your sector.' },
+  { cat: 'GEOPOLITICS RISK ENGINE', txt: 'Iran tensions? Oil spike? We map live global events to Indian sector risk before the market prices it in.' },
+  { cat: 'IPO ANALYSER', txt: 'GMP, QIB, HNI, fundamentals — scored into one verdict. Subscribe, Risky, or Avoid. No more FOMO.' },
+  { cat: 'PAPER TRADING', txt: 'Trade with virtual ₹1,00,000 in real market conditions. Learn stop-losses and sizing before it costs you.' },
+  { cat: 'RHP SCANNER', txt: 'Drop any DRHP. Our AI reads 300+ pages and flags related-party risks, litigation, and revenue concentration.' },
+];
+
+export default function StockSensePage({
+  initialPage
+}: {
+  initialPage?: Page
+} = {}) {
+  const router = useRouter();
+  const [inApp, setInApp] = useState(!!initialPage);
+  const [activePage, setActivePage] = useState<Page>(initialPage ?? 'dashboard');
+  const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  const navTo = (page: Page) => {
+    setActivePage(page);
+    const routeMap: Record<Page, string> = {
+      dashboard: '/dashboard', analysis: '/analysis', ipo: '/ipo',
+      paper: '/paper-trading', rhp: '/rhp-analyser', geo: '/geopolitics-engine',
+      screener: '/screener', premium: '/premium', profile: '/profile', mf: '/mf',
+    };
+    router.push(routeMap[page]);
+  };
+
+  const enter = (page: Page) => {
+    setInApp(true);
+    navTo(page);
+  };
+
+  const navSections = [
+    { label: 'Core', items: NAV_ITEMS.slice(0, 4) },
+    { label: 'Intelligence', items: NAV_ITEMS.slice(4, 7) },
+    { label: 'Learning', items: NAV_ITEMS.slice(7) },
+  ];
+
+  /* ── Typewriter ── */
+  const [twCat, setTwCat] = useState(FEATURES[0].cat);
+  const [twDisp, setTwDisp] = useState('');
+  const twRef = useRef({ fi: 0, ci: 0, phase: 'type' as 'type' | 'pause' | 'erase', pauseAt: 0 });
+
+  useEffect(() => {
+    if (inApp) return;
+    let raf: number;
+    let last = 0;
+    const loop = (now: number) => {
+      raf = requestAnimationFrame(loop);
+      const s = twRef.current;
+      const spd = s.phase === 'erase' ? 15 : 33;
+      if (now - last < spd) return;
+      last = now;
+      const full = FEATURES[s.fi].txt;
+      if (s.phase === 'type') {
+        if (s.ci < full.length) { s.ci++; }
+        else { s.phase = 'pause'; s.pauseAt = now; }
+      } else if (s.phase === 'pause') {
+        if (now - s.pauseAt > 2300) s.phase = 'erase';
+      } else {
+        if (s.ci > 0) s.ci--;
+        else { s.fi = (s.fi + 1) % FEATURES.length; s.phase = 'type'; setTwCat(FEATURES[s.fi].cat); }
+      }
+      setTwDisp(full.slice(0, s.ci));
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [inApp]);
+
+  /* ── Timeline IntersectionObserver ── */
+  const timelineRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (inApp || !timelineRef.current) return;
+    // Small delay to ensure DOM is fully rendered after hydration
+    const timer = setTimeout(() => {
+      if (!timelineRef.current) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) e.target.classList.add('visible');
+        });
+      }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+      const steps = timelineRef.current.querySelectorAll('.timeline-step');
+      steps.forEach(s => observer.observe(s));
+      return () => observer.disconnect();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [inApp]);
+
+  /* ── Scroll indicator fade ── */
+  useEffect(() => {
+    if (inApp) return;
+    const handler = () => {
+      const el = document.querySelector('.scroll-indicator') as HTMLElement | null;
+      if (el) { const p = window.scrollY / window.innerHeight; el.style.opacity = String(1 - Math.min(p * 2, 1)); }
+    };
+    window.addEventListener('scroll', handler);
+    return () => window.removeEventListener('scroll', handler);
+  }, [inApp]);
 
   return (
-    <div className="min-h-dvh">
-      <header className="mx-auto flex h-16 max-w-[1200px] items-center gap-8 px-5 sm:px-8">
-        <Link href="/" aria-label="StockSense home"><Logo /></Link>
-        <nav className="hidden gap-6 text-[0.9333rem] text-ink-2 md:flex" aria-label="Product">
-          <Link href="/stocks" className="hover:text-ink">Stocks</Link>
-          <Link href="/screener" className="hover:text-ink">Screener</Link>
-          <Link href="/ipo" className="hover:text-ink">IPOs</Link>
-          <Link href="/paper-trading" className="hover:text-ink">Paper trading</Link>
-        </nav>
-        <div className="ml-auto flex items-center gap-2">
-          <Link href="/login" className="btn btn-quiet btn-sm">Sign in</Link>
-          <Link href="/dashboard" className="btn btn-primary btn-sm">Open StockSense</Link>
-        </div>
-      </header>
-
-      <main>
-        <section className="mx-auto grid max-w-[1200px] items-center gap-12 px-5 pt-10 pb-20 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] lg:pt-20">
-          <div>
-            <h1 className="font-display text-[2.75rem] leading-[1.02] font-semibold tracking-[-0.035em] text-ink sm:text-[4rem] lg:text-[4.6rem]">
-              Know what you’re buying.
-            </h1>
-            <p className="mt-6 max-w-[34rem] text-[1.1333rem] leading-relaxed text-ink-2">
-              StockSense checks every NSE-listed company against six fundamentals, judged by what’s healthy for its own sector, and explains each one in plain words.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/stocks" className="btn btn-primary h-11 px-5">Look up a stock</Link>
-              <Link href="/paper-trading" className="btn btn-secondary h-11 px-5">Practise with ₹1,00,000</Link>
+    <>
+      {/* ── LANDING ── */}
+      {!inApp && (
+        <div style={{ background: 'var(--bg)', minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
+          {/* Constellation canvas background — fixed, full viewport */}
+          <Constellation />
+          {/* Custom gold dot + ring cursor */}
+          <CustomCursor />
+          <nav className="land-nav">
+            <div className="logo">Stock<span className="logo-gold">Sense</span></div>
+            <div className="nav-links">
+              <a onClick={() => enter('analysis')}>Analysis</a>
+              <a onClick={() => enter('ipo')}>IPO Scorer</a>
+              <a onClick={() => enter('geo')}>Geopolitics</a>
+              <a onClick={() => enter('paper')}>Paper Trading</a>
             </div>
-            <p className="mt-5 text-sm text-ink-3">Free, no account needed. For learning, not advice.</p>
-          </div>
-          {examples.length > 0 && <HeroReportCard stocks={examples} />}
-        </section>
-
-        <section className="border-y border-rule bg-surface">
-          <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8">
-            <h2 className="max-w-xl font-display text-[2rem] leading-tight font-semibold tracking-[-0.02em] text-ink">
-              A score you can take apart.
-            </h2>
-            <p className="mt-3 max-w-2xl text-ink-2">
-              Every stock gets up to 100 points. Here is where they come from. Missing data never counts against a company; the other weights scale up instead.
-            </p>
-
-            <div className="mt-10 flex h-11 gap-0.5 overflow-hidden rounded-lg" role="img" aria-label="Score weights: P/E 20, ROE 20, net margin 20, debt to equity 15, revenue growth 15, promoter holding 10">
-              {order.map((key, i) => (
-                <div
-                  key={key}
-                  className="flex items-center px-3 text-sm font-semibold text-paper"
-                  style={{ flexGrow: WEIGHTS[key], backgroundColor: WEIGHT_COLORS[i] }}
-                >
-                  <span className="truncate">{METRICS[key].short} <span className="num opacity-70">{WEIGHTS[key] * 100}</span></span>
-                </div>
-              ))}
+            <div className="nav-right">
+              <button className="btn-ghost-nav">Sign in</button>
+              <button className="btn-nav-cta" onClick={() => enter('premium')}><span>Get Premium →</span></button>
             </div>
+          </nav>
 
-            <dl className="mt-8 grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
-              {order.map((key) => (
-                <div key={key}>
-                  <dt className="flex items-baseline gap-2">
-                    <span className="font-medium text-ink">{METRICS[key].label}</span>
-                    <span className="num text-sm text-ink-3">{WEIGHTS[key] * 100} pts</span>
-                  </dt>
-                  <dd className="mt-1 text-[0.9333rem] text-ink-2">{WHY[key]}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </section>
-
-        <section className="mx-auto grid max-w-[1200px] gap-12 px-5 py-20 sm:px-8 lg:grid-cols-2">
-          <div>
-            <h2 className="font-display text-[2rem] leading-tight font-semibold tracking-[-0.02em] text-ink">Judged by its own sector.</h2>
-            <p className="mt-3 max-w-lg text-ink-2">
-              Debt of twice its equity is a warning sign for a software company and an ordinary day for a bank, which borrows in order to lend. StockSense knows the difference, so a healthy bank isn’t marked down for being a bank.
-            </p>
-          </div>
-          <div className="panel grid gap-6 p-6">
-            {[
-              { who: 'IT company', verdict: 'Concern', tone: 'bg-down', ideal: [0, 27], note: 'Healthy range: below 0.8×' },
-              { who: 'Bank', verdict: 'Expected', tone: 'bg-ink-3', ideal: null, note: 'Judged on asset quality and margins instead' },
-            ].map((row) => (
-              <div key={row.who}>
-                <div className="mb-2 flex items-baseline justify-between text-sm">
-                  <span className="font-medium text-ink">{row.who} with debt/equity of 2.0×</span>
-                  <span className="text-ink-2">{row.verdict}</span>
-                </div>
-                <div className="relative h-2 rounded-full bg-raised">
-                  {row.ideal && <span className="ideal-band absolute inset-y-0 rounded-full" style={{ left: `${row.ideal[0]}%`, width: `${row.ideal[1]}%` }} />}
-                  <span className={`absolute top-1/2 left-[66%] size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface ${row.tone}`} />
-                </div>
-                <p className="mt-1.5 text-[0.8rem] text-ink-3">{row.note}</p>
+          <section className="hero">
+            <div className="hero-inner">
+              <div className="eyebrow"><div className="eye-dot" />India&apos;s Geopolitical Intelligence Platform</div>
+              <div className="headline-block"><span className="hl-main">The Market Moves on</span></div>
+              <div className="tagline-line">
+                <span className="hl-intelligence">Intelligence</span>
+                <span className="sep-comma">,</span>
+                <span className="hl-not">not</span>
+                <span className="hl-luck">Luck.</span>
               </div>
-            ))}
-          </div>
-        </section>
+              <div className="div-rule" />
+              <p className="sub">Real fundamentals, live geopolitics, institutional tools —<br />built for Indian retail investors.</p>
+              <div className="tw-wrap">
+                <div className="tw-category">{twCat}</div>
+                <div className="tw-text">{twDisp}<span className="tw-cursor" /></div>
+              </div>
+              <div className="btns">
+                <button className="btn-primary" onClick={() => enter('paper')}><span>Start Paper Trading ↗</span></button>
+                <button className="btn-outline" onClick={() => enter('analysis')}><span>Analyse a Stock →</span></button>
+              </div>
+            </div>
+            <div className="scroll-indicator"><div className="scroll-line" /><span>Scroll</span></div>
+          </section>
 
-        <section className="mx-auto max-w-[1200px] px-5 pb-24 sm:px-8">
-          <h2 className="font-display text-[2rem] leading-tight font-semibold tracking-[-0.02em] text-ink">The rest of the toolkit</h2>
-          <ul className="mt-6 divide-y divide-rule border-y border-rule">
-            {TOOLS.map((t) => (
-              <li key={t.href}>
-                <Link href={t.href} className="group grid gap-1 py-5 sm:grid-cols-[14rem_minmax(0,1fr)] sm:items-baseline">
-                  <span className="font-display text-[1.2rem] font-semibold text-ink group-hover:text-brand">{t.title}</span>
-                  <span className="text-ink-2">{t.body}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </main>
+          {/* ── TIMELINE ── */}
+          <section className="timeline-section" style={{ position: 'relative', zIndex: 10 }}>
+            <div className="timeline-inner" ref={timelineRef}>
+              <div className="timeline-line" />
+              <div className="timeline-eyebrow">HOW IT WORKS</div>
+              <div className="timeline-title">Five steps to investing<br />with intelligence.</div>
 
-      <footer className="border-t border-rule">
-        <div className="mx-auto flex max-w-[1200px] flex-wrap items-start justify-between gap-6 px-5 py-8 text-sm text-ink-3 sm:px-8">
-          <Logo />
-          <p className="max-w-xl">
-            Market data from NSE and Yahoo Finance, refreshed daily. StockSense is an educational tool and is not registered with SEBI as an investment adviser. Nothing here is a recommendation to buy or sell.
-          </p>
+              {STEPS.map((s, i) => (
+                <div key={s.num} className="timeline-step" style={{ transitionDelay: `${i * 0.12}s` }}>
+                  <div className="step-dot">
+                    <span className="step-dot-icon">{s.icon}</span>
+                    <span className="step-dot-num">{s.num}</span>
+                  </div>
+                  <div className="step-content">
+                    <div className="step-tag">{s.tag}</div>
+                    <div className="step-title">{s.title}</div>
+                    <div className="step-body">{s.body}</div>
+                    {s.features && (
+                      <div className="step-features">
+                        {s.features.map((f, fi) => (
+                          <div key={fi} className="step-feature">
+                            <span className="step-feature-dot" />
+                            <span>{f}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              <div className="timeline-cta">
+                <button className="btn-primary" onClick={() => enter('analysis')}><span>Start for free →</span></button>
+                <div className="timeline-cta-note">No account needed to analyse your first stock.</div>
+              </div>
+            </div>
+          </section>
         </div>
-      </footer>
-    </div>
+      )}
+
+      {/* ── APP SHELL ── */}
+      {inApp && (
+        <div className="app-shell">
+          <div className="sidebar">
+            <div className="sb-brand">
+              <div className="sb-logo">Stock<span>Sense</span></div>
+              <div className="sb-tier">India Equities Platform</div>
+            </div>
+            <div className="sb-nav">
+              {navSections.map(({ label, items }) => (
+                <div key={label}>
+                  <div className="nav-sec">{label}</div>
+                  {items.map(item => (
+                    <div key={item.id} className={`ni${activePage === item.id ? ' active' : ''}`} onClick={() => navTo(item.id)}>
+                      <span className="ni-ic">{item.icon}</span>
+                      {item.label}
+                      {item.pro && <span className="pro-tag">PRO</span>}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div className="sb-bottom">
+              <div className="sb-promo">
+                <div className="sb-promo-t">Upgrade to Sovereign</div>
+                <div className="sb-promo-d">Niche picks, geo-adjusted alerts &amp; IPO intelligence tailored to your profile.</div>
+                <button className="sb-promo-btn" onClick={() => navTo('premium')}>Go Premium ↗</button>
+              </div>
+              <div className="sb-user">
+                <div className="sb-av">VS</div>
+                <div><div className="sb-un">Vikram S.</div><div className="sb-us">Free Member</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div className="main-area">
+            <div className="topbar">
+              <div className="tb-left">
+                <div className="tb-title">{PAGE_TITLES[activePage]}</div>
+              </div>
+              <div className="tb-r">
+                <div className="live-badge"><div className="live-dot" />NSE Live</div>
+                <div className="tb-date">{today}</div>
+                <button className="btn-ghost" style={{ padding: '5px 12px', fontSize: 10 }} onClick={() => setInApp(false)}>← Home</button>
+              </div>
+            </div>
+            <div className="content">
+              {activePage === 'dashboard'  && <DashboardPage onNav={navTo} />}
+              {activePage === 'analysis'   && <AnalysisPage />}
+              {activePage === 'ipo'        && <IPOPage />}
+              {activePage === 'screener'   && <ScreenerPage />}
+              {activePage === 'geo'        && <GeoPage />}
+              {activePage === 'premium'    && <PremiumPage onNav={navTo} />}
+              {activePage === 'profile'    && <ProfilePage onNav={navTo} />}
+              {activePage === 'paper'      && <PaperTradingPage />}
+              {activePage === 'rhp'        && <RHPPage />}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
