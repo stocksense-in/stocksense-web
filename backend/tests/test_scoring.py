@@ -32,6 +32,17 @@ def test_missing_metrics_renormalise_weights():
     assert result.composite == round(expected)
 
 
+def test_no_score_without_balance_sheet_data():
+    # Profitable-looking numbers but no ROE or D/E (typical of negative equity).
+    distressed = {"pe": 3.7, "roe": None, "de": None, "margin": 82, "promoter": 75, "cagr": 2}
+    assert score_stock(distressed, "telecom").composite is None
+
+
+def test_implausibly_low_pe_scores_neutral():
+    assert metric_score("pe", 3.0, "it") == 50
+    assert metric_score("pe", 6.0, "it") == 100
+
+
 def test_too_few_metrics_gives_no_score():
     assert score_stock({"pe": 20, "roe": 15, "de": None}, "it").composite is None
 
@@ -47,7 +58,7 @@ def test_loss_making_pe_scores_zero_and_newage_is_flat():
 
 
 def test_scores_are_clamped():
-    assert metric_score("pe", 2, "it") == 100
+    assert metric_score("pe", 5, "it") == 100
     assert metric_score("roe", 90, "it") == 100
     assert metric_score("margin", -5, "it") == 0
 

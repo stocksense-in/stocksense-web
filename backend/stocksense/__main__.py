@@ -10,6 +10,7 @@ Jobs
     realtime       stream Upstox ticks into live_prices          (runs until stopped)
     upstox-login   sign in to Upstox and save today's token
     scheduler      run everything above on a market-hours timetable
+    rescore        recompute every stored score after a scoring.py change (seconds, no Yahoo)
     snapshot       copy ~70 large caps from Supabase into frontend/data/snapshot.json
 
 Common options
@@ -74,6 +75,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p = jobs.add_parser("scheduler", help="run jobs on a timetable")
     _add_storage(p)
 
+    p = jobs.add_parser("rescore", help="recompute stored scores without refetching")
+    _add_storage(p)
+
     p = jobs.add_parser("snapshot", help="refresh the frontend's offline data file")
     p.add_argument("--symbols", nargs="+", metavar="SYM", help="instead of the default large caps")
     return parser
@@ -125,6 +129,10 @@ def main() -> None:
         from .jobs import realtime
 
         realtime.run(store, args.symbols, args.limit)
+    elif args.job == "rescore":
+        from .jobs import rescore
+
+        rescore.run(store)
     elif args.job == "scheduler":
         from .jobs import scheduler
 

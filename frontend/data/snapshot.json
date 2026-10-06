@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-05T23:37:43+00:00",
+ "generated_at": "2026-10-06T04:45:32+00:00",
  "stocks": [
   {
    "symbol": "ADANIENT",
@@ -619,7 +619,7 @@
    "net_margin": 28.47,
    "promoter_holding": 28.41,
    "revenue_cagr_3yr": 13.5,
-   "composite_score": 52,
+   "composite_score": null,
    "last_updated": "2026-10-05T23:25:17",
    "market_cap": 413832,
    "price": 416.0,

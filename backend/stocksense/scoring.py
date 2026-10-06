@@ -14,7 +14,13 @@ curves in frontend/lib/scoring.ts — change both together.
 
 Missing metrics are skipped and the remaining weights are re-normalised, so a
 stock is not punished for data Yahoo doesn't publish. A composite is only
-produced when at least MIN_METRICS metrics are known.
+produced when at least MIN_METRICS metrics are known AND at least one
+balance-sheet metric (ROE or D/E) is among them — Yahoo omits both when a
+company's equity is negative, and scoring on profit metrics alone would then
+rate a distressed company highly.
+
+A P/E below 4 almost always comes from a one-off gain (asset sale, write-back),
+so it scores a neutral 50 instead of the maximum.
 """
 
 from __future__ import annotations
@@ -31,6 +37,8 @@ WEIGHTS: dict[str, float] = {
 }
 
 MIN_METRICS = 4
+BALANCE_SHEET = {"roe", "de"}
+SUSPICIOUS_PE = 4
 
 BANK_SECTORS = {"bank", "nbfc"}
 NEWAGE_SECTORS = {"newage"}
@@ -47,6 +55,8 @@ def metric_score(metric: str, value: float, sector: str) -> float:
             return 40.0
         if value <= 0:  # loss-making: P/E is meaningless, treat as poor
             return 0.0
+        if value < SUSPICIOUS_PE:  # usually inflated by one-off profits
+            return 50.0
         band = 30 if sector in BANK_SECTORS else 42
         return _clamp(100 - (value - 8) / band * 100)
     if metric == "roe":
@@ -81,7 +91,7 @@ def score_stock(metrics: dict[str, float | None], sector: str) -> ScoreResult:
         for key, value in metrics.items()
         if key in WEIGHTS and value is not None
     }
-    if len(parts) < MIN_METRICS:
+    if len(parts) < MIN_METRICS or not BALANCE_SHEET & parts.keys():
         return ScoreResult(composite=None, parts=parts, coverage=len(parts))
 
     total_weight = sum(WEIGHTS[key] for key in parts)

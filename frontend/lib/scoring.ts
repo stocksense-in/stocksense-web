@@ -23,6 +23,7 @@ export function metricScore(metric: MetricKey, value: number, sector: string): n
     case 'pe':
       if (sector === 'newage') return 40;
       if (value <= 0) return 0;
+      if (value < 4) return 50; // implausibly cheap: usually one-off profits
       return clamp(100 - ((value - 8) / (BANK.has(sector) ? 30 : 42)) * 100);
     case 'roe':
       return clamp((value / 50) * 100);
