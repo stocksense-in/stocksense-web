@@ -1,0 +1,266 @@
+# Theme
+
+## Part 1 — Token summary (CURRENT, light — user finds it too bland)
+Colors: paper #f3f4f1 (page bg), surface #ffffff, sunken #f8f9f6, ink #14171f, ink-2 #4a5060, ink-3 #6f7584, rule #dadfd6, rule-2 #e9ebe6, brand #2b3fd6 (brand-ink #1e2c9e, brand-wash #eef0fd), up #0f7b4a (wash #e7f3ec), down #c2362b (wash #fbebe9), watch #c98a0e (ink #845700, wash #fbf3e0).
+Fonts: sans = IBM Plex Sans (400/500/600) via --font-plex; display = Bricolage Grotesque (500/600/700) via --font-bricolage. Base 15px. Tabular nums via .num.
+Radius: panel 10px, control 7px. Shadows: pop, sheet. Breakpoints: Tailwind defaults (sm 640, md 768, lg 1024, xl 1280).
+
+## Previous theme (baseline-2026-10-06, user liked its "fintech vibe")
+Dark: bg #0C0B09, surfaces #111009/#16140E/#1C1A12; gold #C9A84C (bright #E8C96A); green #00E676; red #C45C5C; text cream #F0EBE0 / #B8AFA0 / #6B6358; borders rgba(201,168,76,.10/.26). Fonts Playfair Display (display serif), DM Sans (body), JetBrains Mono (numbers). Gold grid texture on body, glowing status dots, gradient top-borders on cards.
+
+## Part 2 — Raw globals.css (Tailwind v4, no tailwind.config file)
+
+```css
+@import "tailwindcss";
+
+/*
+  StockSense design tokens.
+  Light, precise, number-first. One brand colour (indigo) for actions and focus;
+  green/red only for real up/down or healthy/concern values; amber for "watch".
+  Every colour below is available as a Tailwind utility: bg-paper, text-ink-2, border-rule, …
+*/
+@theme {
+  --color-paper: #f3f4f1;      /* page background */
+  --color-surface: #ffffff;    /* panels */
+  --color-sunken: #f8f9f6;     /* table headers, inputs, hover rows */
+  --color-ink: #14171f;        /* primary text */
+  --color-ink-2: #4a5060;      /* secondary text */
+  --color-ink-3: #6f7584;      /* muted text — labels, captions */
+  --color-rule: #dadfd6;       /* borders */
+  --color-rule-2: #e9ebe6;     /* hairlines inside panels */
+
+  --color-brand: #2b3fd6;
+  --color-brand-ink: #1e2c9e;
+  --color-brand-wash: #eef0fd;
+
+  --color-up: #0f7b4a;
+  --color-up-wash: #e7f3ec;
+  --color-down: #c2362b;
+  --color-down-wash: #fbebe9;
+  --color-watch: #c98a0e;
+  --color-watch-ink: #845700;
+  --color-watch-wash: #fbf3e0;
+
+  --font-sans: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-plex), ui-sans-serif, sans-serif;
+
+  --radius-panel: 10px;
+  --radius-control: 7px;
+
+  --shadow-pop: 0 1px 2px rgb(20 23 31 / 0.06), 0 8px 24px -6px rgb(20 23 31 / 0.14);
+  --shadow-sheet: -24px 0 48px -12px rgb(20 23 31 / 0.18);
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    min-height: 100dvh;
+    line-height: 1.5;
+  }
+  ::selection {
+    background: var(--color-brand-wash);
+    color: var(--color-brand-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  button {
+    cursor: pointer;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Numbers line up in columns everywhere. */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "zero" 1;
+  }
+
+  .panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-panel);
+  }
+
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 1.0667rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    height: 2.4rem;
+    padding: 0 1rem;
+    border-radius: var(--radius-control);
+    font-size: 0.9333rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 120ms, border-color 120ms, color 120ms;
+  }
+  .btn-primary {
+    background: var(--color-brand);
+    color: white;
+  }
+  .btn-primary:hover {
+    background: var(--color-brand-ink);
+  }
+  .btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    border: 1px solid var(--color-rule);
+  }
+  .btn-secondary:hover {
+    border-color: var(--color-ink-3);
+  }
+  .btn-quiet {
+    color: var(--color-ink-2);
+  }
+  .btn-quiet:hover {
+    color: var(--color-ink);
+    background: var(--color-sunken);
+  }
+  .btn-sm {
+    height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.8667rem;
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Form controls */
+  .field {
+    width: 100%;
+    height: 2.4rem;
+    padding: 0 0.75rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-control);
+    font-size: 0.9333rem;
+    color: var(--color-ink);
+  }
+  .field:hover {
+    border-color: var(--color-ink-3);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px var(--color-brand-wash);
+  }
+  .label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.8667rem;
+    font-weight: 500;
+    color: var(--color-ink-2);
+  }
+
+  /* Data tables */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9333rem;
+  }
+  .data-table th {
+    padding: 0.6rem 0.9rem;
+    background: var(--color-sunken);
+    border-bottom: 1px solid var(--color-rule);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-ink-3);
+    text-align: left;
+    white-space: nowrap;
+  }
+  .data-table td {
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--color-rule-2);
+    vertical-align: middle;
+  }
+  .data-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .data-table tbody tr:hover td {
+    background: var(--color-sunken);
+  }
+  .data-table .r {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* Segmented control (risk appetite, time range…) */
+  .segmented {
+    display: inline-flex;
+    padding: 3px;
+    gap: 2px;
+    background: var(--color-sunken);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-control);
+  }
+  .segmented > button {
+    height: 1.9rem;
+    padding: 0 0.8rem;
+    border-radius: 5px;
+    font-size: 0.8667rem;
+    font-weight: 500;
+    color: var(--color-ink-2);
+  }
+  .segmented > button[aria-pressed="true"] {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow: 0 1px 2px rgb(20 23 31 / 0.1);
+  }
+
+  /* Hatched "ideal range" band on metric gauges (texture, so it's never colour-only). */
+  .ideal-band {
+    background-image: repeating-linear-gradient(
+      135deg,
+      rgb(20 23 31 / 0.16) 0 1.5px,
+      transparent 1.5px 5px
+    );
+    background-color: rgb(20 23 31 / 0.04);
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes tick-flash {
+  from {
+    background: var(--color-brand-wash);
+  }
+}
+
+```

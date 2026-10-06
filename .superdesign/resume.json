@@ -1,0 +1,41 @@
+{
+  "projectId": "615f60bd-5f31-40cd-9185-bdb3923a6264",
+  "brandAssets": {
+    "logo": {
+      "assetKey": "frontend-app-icon.svg",
+      "url": "https://vgbujcuwptvheqijyjbe.supabase.co/storage/v1/object/public/hmac-uploads/projects/615f60bd-5f31-40cd-9185-bdb3923a6264/brand-assets/frontend-app-icon.svg/icon.svg"
+    }
+  },
+  "targets": {
+    "/dashboard": {
+      "baselineDraftId": "2ac9c1cc-2700-4644-aa68-2df5b4507d4d",
+      "activeDraftId": "06e26ab9-93da-47d2-9b20-6c7041b4d5f2",
+      "branches": [
+        {
+          "draftId": "a8a60ad1-fe3f-40b9-a0df-a9a9b919fc80",
+          "description": "Direction A \u2014 Trading desk (index cards w/ sparklines, sector heatmap tiles, score rings)"
+        },
+        {
+          "draftId": "06e26ab9-93da-47d2-9b20-6c7041b4d5f2",
+          "description": "Direction B \u2014 Aurora hero (big NIFTY hero, ranked sectors, gainers/fallers cards)"
+        }
+      ],
+      "model": "gemini-3.1-pro",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "frontend/app/(app)/layout.tsx",
+        "frontend/components/shell/Sidebar.tsx",
+        "frontend/components/shell/nav.ts",
+        "frontend/components/shell/IndexBar.tsx",
+        "frontend/app/(app)/dashboard/page.tsx",
+        "frontend/components/charts/SectorBars.tsx",
+        "frontend/components/ui/StockTable.tsx",
+        "frontend/components/ui/ScoreMeter.tsx",
+        ".superdesign/tmp/direction-a.html"
+      ],
+      "components": [],
+      "activeVersion": 3,
+      "selected": "Direction B refined: B hero (huge NIFTY + chart) + A ambient top glow + A sector bento + A gainers/fallers table cards; breadth strip; authored directly (out of credits)"
+    }
+  }
+}
