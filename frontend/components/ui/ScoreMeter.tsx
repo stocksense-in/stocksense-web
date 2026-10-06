@@ -6,13 +6,18 @@ import { verdict } from '@/lib/scoring';
  */
 export function ScoreMeter({ score, compact = false }: { score: number | null; compact?: boolean }) {
   const v = verdict(score);
-  const fill = v?.tone === 'healthy' ? 'bg-up' : v?.tone === 'watch' ? 'bg-watch' : 'bg-down';
+  const fill =
+    v?.tone === 'healthy'
+      ? 'bg-up shadow-[0_0_8px_rgb(34_211_154/0.5)]'
+      : v?.tone === 'watch'
+        ? 'bg-watch shadow-[0_0_8px_rgb(255_182_72/0.45)]'
+        : 'bg-down shadow-[0_0_8px_rgb(255_93_115/0.5)]';
 
   if (compact) {
     return (
       <span className="inline-flex items-center gap-2">
         <span className="num w-6 text-right font-medium text-ink">{score ?? '—'}</span>
-        <span className="relative h-1.5 w-14 rounded-full bg-rule-2" aria-hidden>
+        <span className="relative h-1.5 w-14 rounded-full bg-raised" aria-hidden>
           {score != null && <span className={`absolute inset-y-0 left-0 rounded-full ${fill}`} style={{ width: `${score}%` }} />}
         </span>
       </span>
@@ -28,7 +33,7 @@ export function ScoreMeter({ score, compact = false }: { score: number | null; c
         <span className="text-sm text-ink-3">/ 100</span>
         {v && <span className="ml-auto text-sm font-medium text-ink-2">{v.label}</span>}
       </div>
-      <div className="relative mt-3 h-2 rounded-full bg-rule-2">
+      <div className="relative mt-3 h-2 rounded-full bg-raised">
         {score != null && <div className={`absolute inset-y-0 left-0 rounded-full ${fill}`} style={{ width: `${score}%` }} />}
         {[45, 65].map((edge) => (
           <span key={edge} className="absolute -top-1 -bottom-1 w-0.5 bg-surface" style={{ left: `${edge}%` }} aria-hidden />

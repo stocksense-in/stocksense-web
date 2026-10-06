@@ -7,9 +7,9 @@ export function RangeBar({ low, high, price }: { low: number | null; high: numbe
   return (
     <div className="w-full max-w-xs">
       <div className="mb-1.5 text-[0.8rem] text-ink-3">52-week range</div>
-      <div className="relative h-1.5 rounded-full bg-rule-2">
+      <div className="relative h-1.5 rounded-full bg-gradient-to-r from-down/50 via-raised to-up/50">
         <span
-          className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-ink shadow-[0_0_0_1px_rgb(20_23_31/0.2)]"
+          className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-brand shadow-[0_0_10px_rgb(242_181_68/0.6)]"
           style={{ left: `${pos}%` }}
           aria-hidden
         />

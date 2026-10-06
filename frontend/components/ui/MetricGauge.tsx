@@ -1,6 +1,6 @@
 import { METRICS, metricStatus } from '@/lib/metrics';
 import type { MetricKey } from '@/lib/types';
-import { STATUS_FILL } from './StatusBadge';
+import { STATUS_FILL, STATUS_GLOW } from './StatusBadge';
 
 /**
  * A ruler for one metric: the hatched band is the sector's ideal range, the
@@ -26,7 +26,7 @@ export function MetricGauge({
 
   return (
     <div className="w-full">
-      <div className={`relative ${track} rounded-full bg-rule-2`}>
+      <div className={`relative ${track} rounded-full bg-raised`}>
         {ideal && (
           <div
             className="ideal-band absolute inset-y-0 rounded-full"
@@ -35,7 +35,7 @@ export function MetricGauge({
         )}
         {value != null && (
           <div
-            className={`absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface ${STATUS_FILL[status]} shadow-[0_0_0_1px_rgb(20_23_31/0.15)]`}
+            className={`absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface ${STATUS_FILL[status]} ${STATUS_GLOW[status]}`}
             style={{ left: `${pos(value)}%` }}
             aria-hidden
           />

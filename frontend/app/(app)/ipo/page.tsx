@@ -91,8 +91,8 @@ export default async function IpoPage(props: PageProps<'/ipo'>) {
                       {((value / 100) * max).toFixed(1)} <span className="text-ink-3">/ {max}</span>
                     </div>
                   </div>
-                  <div className="relative mt-2 h-2 rounded-full bg-rule-2" role="img" aria-label={`${w.label}: ${value} out of 100`}>
-                    <span className="absolute inset-y-0 left-0 rounded-full bg-ink" style={{ width: `${value}%` }} />
+                  <div className="relative mt-2 h-2 rounded-full bg-raised" role="img" aria-label={`${w.label}: ${value} out of 100`}>
+                    <span className="absolute inset-y-0 left-0 rounded-full bar-brand" style={{ width: `${value}%` }} />
                   </div>
                 </li>
               );

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Bricolage_Grotesque, IBM_Plex_Sans } from 'next/font/google';
+import { Bricolage_Grotesque, IBM_Plex_Sans, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 
 const plex = IBM_Plex_Sans({
@@ -16,6 +16,13 @@ const bricolage = Bricolage_Grotesque({
   display: 'swap',
 });
 
+const jetbrains = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-jetbrains',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: { default: 'StockSense — Know what you’re buying', template: '%s · StockSense' },
   description:
@@ -24,7 +31,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" className={`${plex.variable} ${bricolage.variable}`}>
+    <html lang="en-IN" className={`${plex.variable} ${bricolage.variable} ${jetbrains.variable}`}>
       <body>{children}</body>
     </html>
   );

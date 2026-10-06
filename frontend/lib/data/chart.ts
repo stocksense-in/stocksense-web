@@ -4,9 +4,10 @@
  */
 import type { PricePoint } from '@/lib/types';
 
-export type Range = '1mo' | '6mo' | '1y' | '5y';
+export type Range = '1d' | '1mo' | '6mo' | '1y' | '5y';
 
 export const RANGES: { value: Range; label: string }[] = [
+  { value: '1d', label: '1D' },
   { value: '1mo', label: '1M' },
   { value: '6mo', label: '6M' },
   { value: '1y', label: '1Y' },
@@ -21,12 +22,12 @@ const INDEX_TICKERS: Record<string, string> = {
 
 export async function getPriceHistory(symbol: string, range: Range = '1y'): Promise<PricePoint[]> {
   const ticker = INDEX_TICKERS[symbol] ?? `${symbol}.NS`;
-  const interval = range === '5y' ? '1wk' : '1d';
+  const interval = range === '1d' ? '5m' : range === '5y' ? '1wk' : '1d';
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}`;
   try {
     const res = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (StockSense)' },
-      next: { revalidate: 3600 },
+      next: { revalidate: range === '1d' ? 120 : 3600 },
     });
     if (!res.ok) return [];
     const json = await res.json();

@@ -24,3 +24,11 @@ export const STATUS_FILL: Record<Status, string> = {
   concern: 'bg-down',
   neutral: 'bg-ink-3',
 };
+
+/** Soft glow behind gauge markers, in the status colour. */
+export const STATUS_GLOW: Record<Status, string> = {
+  healthy: 'shadow-[0_0_12px_rgb(34_211_154/0.65)]',
+  watch: 'shadow-[0_0_12px_rgb(255_182_72/0.6)]',
+  concern: 'shadow-[0_0_12px_rgb(255_93_115/0.65)]',
+  neutral: '',
+};

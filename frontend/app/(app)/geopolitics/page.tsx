@@ -48,8 +48,8 @@ export default function GeopoliticsPage() {
                   <p className="text-[0.8rem] text-ink-3 md:hidden">{s.note}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="relative h-2 flex-1 rounded-full bg-rule-2" role="img" aria-label={`Sensitivity ${s.sensitivity} out of 100`}>
-                    <span className="absolute inset-y-0 left-0 rounded-full bg-ink" style={{ width: `${s.sensitivity}%` }} />
+                  <span className="relative h-2 flex-1 rounded-full bg-raised" role="img" aria-label={`Sensitivity ${s.sensitivity} out of 100`}>
+                    <span className="absolute inset-y-0 left-0 rounded-full bar-info" style={{ width: `${s.sensitivity}%` }} />
                   </span>
                   <span className="num w-8 text-right text-sm text-ink">{s.sensitivity}</span>
                   <span className="hidden flex-[1.4] text-sm text-ink-2 md:block">{s.note}</span>

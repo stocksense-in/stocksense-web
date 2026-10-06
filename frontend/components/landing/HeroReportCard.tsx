@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Change } from '@/components/ui/Change';
-import { STATUS_FILL } from '@/components/ui/StatusBadge';
+import { STATUS_FILL, STATUS_GLOW } from '@/components/ui/StatusBadge';
 import { inr } from '@/lib/format';
 import { METRICS, METRIC_ORDER, STATUS_LABEL, formatMetric, metricStatus } from '@/lib/metrics';
 import { verdict } from '@/lib/scoring';
@@ -36,7 +36,7 @@ export function HeroReportCard({ stocks }: { stocks: Stock[] }) {
             role="tab"
             aria-selected={i === index}
             onClick={() => setIndex(i)}
-            className={`h-8 shrink-0 rounded-md px-3 text-sm font-medium transition-colors ${i === index ? 'bg-surface text-ink shadow-[0_0_0_1px_var(--color-rule)]' : 'text-ink-3 hover:text-ink'}`}
+            className={`h-8 shrink-0 rounded-md px-3 text-sm font-medium transition-colors ${i === index ? 'bg-brand-wash text-brand-ink' : 'text-ink-3 hover:text-ink'}`}
           >
             {s.symbol}
           </button>
@@ -70,7 +70,7 @@ export function HeroReportCard({ stocks }: { stocks: Stock[] }) {
             return (
               <li key={key} className="grid grid-cols-[7.5rem_minmax(0,1fr)_4.25rem] items-center gap-3 text-sm sm:grid-cols-[9rem_minmax(0,1fr)_4.5rem]">
                 <span className="truncate text-ink-2">{spec.short}</span>
-                <span className="relative h-2 rounded-full bg-rule-2">
+                <span className="relative h-2 rounded-full bg-raised">
                   {ideal && (
                     <span
                       className="ideal-band absolute inset-y-0 rounded-full transition-all duration-500"
@@ -79,7 +79,7 @@ export function HeroReportCard({ stocks }: { stocks: Stock[] }) {
                   )}
                   {value != null && (
                     <span
-                      className={`absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface shadow-[0_0_0_1px_rgb(20_23_31/0.15)] transition-[left] duration-700 ease-[cubic-bezier(.2,.8,.2,1)] ${STATUS_FILL[status]}`}
+                      className={`absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface transition-[left] duration-700 ease-[cubic-bezier(.2,.8,.2,1)] ${STATUS_FILL[status]} ${STATUS_GLOW[status]}`}
                       style={{ left: settled ? `${pos(value)}%` : '0%' }}
                       title={STATUS_LABEL[status]}
                     />

@@ -19,8 +19,8 @@ export function ScoreBreakdown({ stock }: { stock: Stock }) {
           return (
             <li key={metric} className="grid grid-cols-[minmax(0,1fr)_5.5rem_4.5rem] items-center gap-3 text-sm">
               <span className="truncate text-ink-2">{METRICS[metric].short}</span>
-              <span className="relative h-1.5 rounded-full bg-rule-2" aria-hidden>
-                <span className="absolute inset-y-0 left-0 rounded-full bg-ink" style={{ width: `${score}%` }} />
+              <span className="relative h-1.5 rounded-full bg-raised" aria-hidden>
+                <span className="absolute inset-y-0 left-0 rounded-full bar-brand" style={{ width: `${score}%` }} />
               </span>
               <span className="num text-right text-ink">
                 {earned.toFixed(1)} <span className="text-ink-3">/ {max.toFixed(0)}</span>

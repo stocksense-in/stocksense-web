@@ -28,7 +28,7 @@ export function StockTable({ stocks, showScore = false, empty }: { stocks: Stock
             </td>
             <td className="r num whitespace-nowrap text-ink">{inr(s.price)}</td>
             <td className="r whitespace-nowrap">
-              <Change value={s.changePct} />
+              <Change value={s.changePct} pill />
             </td>
             {showScore && (
               <td className="r">

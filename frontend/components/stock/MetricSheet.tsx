@@ -67,7 +67,7 @@ export function MetricSheet({
 
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-labelledby="metric-sheet-title">
-      <div className="absolute inset-0 bg-ink/25 [animation:fade-in_150ms]" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] [animation:fade-in_150ms]" onClick={onClose} />
       <div className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col bg-surface shadow-sheet [animation:sheet-in_200ms_ease-out]">
         <header className="flex items-start gap-4 border-b border-rule px-6 py-5">
           <div className="min-w-0 flex-1">

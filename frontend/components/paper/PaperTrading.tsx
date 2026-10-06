@@ -237,7 +237,7 @@ export function PaperTrading({ instruments }: { instruments: Instrument[] }) {
             return (
               <li key={m.id} className="flex items-start gap-3 border-t border-rule-2 py-3">
                 <span
-                  className={`mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border ${done ? 'border-up bg-up text-white' : 'border-rule text-transparent'}`}
+                  className={`mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border ${done ? 'border-up bg-up text-paper' : 'border-rule text-transparent'}`}
                   aria-hidden
                 >
                   <Check className="size-3" strokeWidth={3} />

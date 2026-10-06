@@ -147,7 +147,7 @@ export default async function ScreenerPage(props: PageProps<'/screener'>) {
                   </td>
                   <td className="text-ink-2">{sectorLabel(s.sector)}</td>
                   <td className="r num text-ink">{inr(s.price)}</td>
-                  <td className="r"><Change value={s.changePct} /></td>
+                  <td className="r"><Change value={s.changePct} pill /></td>
                   <td className="r num text-ink-2">{crore(s.marketCap)}</td>
                   <td className="r num">{s.pe != null && s.pe > 0 ? `${s.pe.toFixed(1)}×` : '—'}</td>
                   <td className="r num">{s.roe != null ? `${s.roe.toFixed(1)}%` : '—'}</td>

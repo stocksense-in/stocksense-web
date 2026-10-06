@@ -10,6 +10,9 @@ export const metadata: Metadata = { title: { absolute: 'StockSense — Know what
 
 const EXAMPLES = ['TCS', 'HDFCBANK', 'ETERNAL', 'TMPV', 'ITC'];
 
+/** Categorical colours for the six score weights, in fixed order. */
+const WEIGHT_COLORS = ['#F2B544', '#5B8CFF', '#9B7BFF', '#2FD3E8', '#22D39A', '#FFB648'];
+
 const WHY: Record<string, string> = {
   pe: 'What you pay for each rupee of profit.',
   roe: 'How well the company uses shareholders’ money.',
@@ -78,8 +81,8 @@ export default async function Landing() {
               {order.map((key, i) => (
                 <div
                   key={key}
-                  className="flex items-center px-3 text-sm font-medium text-white"
-                  style={{ flexGrow: WEIGHTS[key], backgroundColor: `color-mix(in oklab, var(--color-ink) ${100 - i * 11}%, var(--color-brand))` }}
+                  className="flex items-center px-3 text-sm font-semibold text-paper"
+                  style={{ flexGrow: WEIGHTS[key], backgroundColor: WEIGHT_COLORS[i] }}
                 >
                   <span className="truncate">{METRICS[key].short} <span className="num opacity-70">{WEIGHTS[key] * 100}</span></span>
                 </div>
@@ -117,7 +120,7 @@ export default async function Landing() {
                   <span className="font-medium text-ink">{row.who} with debt/equity of 2.0×</span>
                   <span className="text-ink-2">{row.verdict}</span>
                 </div>
-                <div className="relative h-2 rounded-full bg-rule-2">
+                <div className="relative h-2 rounded-full bg-raised">
                   {row.ideal && <span className="ideal-band absolute inset-y-0 rounded-full" style={{ left: `${row.ideal[0]}%`, width: `${row.ideal[1]}%` }} />}
                   <span className={`absolute top-1/2 left-[66%] size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface ${row.tone}`} />
                 </div>

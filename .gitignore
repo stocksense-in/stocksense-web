@@ -59,3 +59,6 @@ backend/upstox_token.json
 !.env.example
 !backend/.env.example
 .pytest_cache/
+
+# Superdesign scratch files
+.superdesign/tmp/

@@ -1,41 +1,53 @@
 @import "tailwindcss";
 
 /*
-  StockSense design tokens.
-  Light, precise, number-first. One brand colour (indigo) for actions and focus;
-  green/red only for real up/down or healthy/concern values; amber for "watch".
-  Every colour below is available as a Tailwind utility: bg-paper, text-ink-2, border-rule, …
+  StockSense design tokens — "Night Market".
+  A dark fintech terminal: deep navy-black canvas, layered panels, Indian gold as
+  the brand colour, mint/coral for real up/down moves, blue/violet/cyan for data.
+  Spec: .superdesign/design-system.md. Approved draft: Superdesign project
+  "StockSense — Night Market redesign" (dashboard, draft B v3).
+
+  Token names are semantic, so components never hard-code colours:
+    paper = page background · surface/sunken/raised = panel layers
+    ink / ink-2 / ink-3 = text · rule / rule-2 = borders
+  Every token is a Tailwind utility: bg-paper, text-ink-2, border-rule, bg-up-wash, …
 */
 @theme {
-  --color-paper: #f3f4f1;      /* page background */
-  --color-surface: #ffffff;    /* panels */
-  --color-sunken: #f8f9f6;     /* table headers, inputs, hover rows */
-  --color-ink: #14171f;        /* primary text */
-  --color-ink-2: #4a5060;      /* secondary text */
-  --color-ink-3: #6f7584;      /* muted text — labels, captions */
-  --color-rule: #dadfd6;       /* borders */
-  --color-rule-2: #e9ebe6;     /* hairlines inside panels */
+  --color-paper: #070b14;
+  --color-surface: #0e1526;
+  --color-sunken: #141d33;
+  --color-raised: #1b2640;
+  --color-ink: #eef2fa;
+  --color-ink-2: #a3aec7;
+  --color-ink-3: #7c88a6;
+  --color-rule: rgb(148 163 209 / 0.16);
+  --color-rule-2: rgb(148 163 209 / 0.1);
 
-  --color-brand: #2b3fd6;
-  --color-brand-ink: #1e2c9e;
-  --color-brand-wash: #eef0fd;
+  --color-brand: #f2b544;
+  --color-brand-ink: #ffd27a;
+  --color-brand-wash: rgb(242 181 68 / 0.12);
 
-  --color-up: #0f7b4a;
-  --color-up-wash: #e7f3ec;
-  --color-down: #c2362b;
-  --color-down-wash: #fbebe9;
-  --color-watch: #c98a0e;
-  --color-watch-ink: #845700;
-  --color-watch-wash: #fbf3e0;
+  --color-up: #22d39a;
+  --color-up-wash: rgb(34 211 154 / 0.12);
+  --color-down: #ff5d73;
+  --color-down-wash: rgb(255 93 115 / 0.12);
+  --color-watch: #ffb648;
+  --color-watch-ink: #ffc970;
+  --color-watch-wash: rgb(255 182 72 / 0.12);
+
+  --color-info: #5b8cff;
+  --color-violet: #9b7bff;
+  --color-cyan: #2fd3e8;
 
   --font-sans: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-bricolage), var(--font-plex), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 
-  --radius-panel: 10px;
-  --radius-control: 7px;
+  --radius-panel: 14px;
+  --radius-control: 10px;
 
-  --shadow-pop: 0 1px 2px rgb(20 23 31 / 0.06), 0 8px 24px -6px rgb(20 23 31 / 0.14);
-  --shadow-sheet: -24px 0 48px -12px rgb(20 23 31 / 0.18);
+  --shadow-pop: 0 1px 2px rgb(0 0 0 / 0.4), 0 16px 40px -12px rgb(0 0 0 / 0.6);
+  --shadow-sheet: -24px 0 64px -12px rgb(0 0 0 / 0.7);
 }
 
 @layer base {
@@ -44,12 +56,25 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 15px;
+    color-scheme: dark;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
   body {
     min-height: 100dvh;
     line-height: 1.5;
+  }
+  /* The ambient shade that glows down from the top of every page. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: 640px;
+    background:
+      radial-gradient(60% 55% at 70% 0%, rgb(91 140 255 / 0.22), transparent),
+      radial-gradient(45% 45% at 25% 0%, rgb(242 181 68 / 0.11), transparent);
+    pointer-events: none;
+    z-index: -1; /* behind all content, above the page background */
   }
   ::selection {
     background: var(--color-brand-wash);
@@ -74,23 +99,43 @@
 }
 
 @layer components {
-  /* Numbers line up in columns everywhere. */
+  /* Every number: monospaced, lined up in columns — the trading-terminal feel. */
   .num {
+    font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1, "zero" 1;
   }
 
   .panel {
+    position: relative;
     background: var(--color-surface);
     border: 1px solid var(--color-rule);
     border-radius: var(--radius-panel);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  }
+
+  /* Hero panel: aurora wash over a slightly see-through surface, so the page glow reads through. */
+  .panel-aurora {
+    background:
+      radial-gradient(60% 50% at 70% 0%, rgb(91 140 255 / 0.16), transparent),
+      radial-gradient(40% 40% at 30% 100%, rgb(242 181 68 / 0.08), transparent),
+      rgb(14 21 38 / 0.82);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Coloured glow along a panel's top edge (gainers / fallers). */
+  .edge-up {
+    box-shadow: inset 0 1px 0 rgb(34 211 154 / 0.35), inset 0 12px 24px -16px rgb(34 211 154 / 0.35);
+  }
+  .edge-down {
+    box-shadow: inset 0 1px 0 rgb(255 93 115 / 0.35), inset 0 12px 24px -16px rgb(255 93 115 / 0.35);
   }
 
   .panel-title {
     font-family: var(--font-display);
     font-size: 1.0667rem;
     font-weight: 600;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     color: var(--color-ink);
   }
 
@@ -100,28 +145,31 @@
     align-items: center;
     justify-content: center;
     gap: 0.45rem;
-    height: 2.4rem;
+    height: 2.5rem;
     padding: 0 1rem;
     border-radius: var(--radius-control);
     font-size: 0.9333rem;
     font-weight: 500;
     white-space: nowrap;
-    transition: background-color 120ms, border-color 120ms, color 120ms;
+    transition: background-color 120ms, border-color 120ms, color 120ms, filter 120ms;
   }
   .btn-primary {
-    background: var(--color-brand);
-    color: white;
+    background: linear-gradient(135deg, #f7c25c, #e99a2c);
+    color: #1a1305;
+    font-weight: 600;
+    box-shadow: 0 6px 20px -8px rgb(242 181 68 / 0.6);
   }
   .btn-primary:hover {
-    background: var(--color-brand-ink);
+    filter: brightness(1.08);
   }
   .btn-secondary {
-    background: var(--color-surface);
+    background: var(--color-sunken);
     color: var(--color-ink);
     border: 1px solid var(--color-rule);
   }
   .btn-secondary:hover {
-    border-color: var(--color-ink-3);
+    background: var(--color-raised);
+    border-color: rgb(148 163 209 / 0.28);
   }
   .btn-quiet {
     color: var(--color-ink-2);
@@ -136,28 +184,35 @@
     font-size: 0.8667rem;
   }
   .btn:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
+    box-shadow: none;
   }
 
   /* Form controls */
   .field {
     width: 100%;
-    height: 2.4rem;
+    height: 2.5rem;
     padding: 0 0.75rem;
-    background: var(--color-surface);
+    background: var(--color-sunken);
     border: 1px solid var(--color-rule);
     border-radius: var(--radius-control);
     font-size: 0.9333rem;
     color: var(--color-ink);
   }
+  .field::placeholder {
+    color: var(--color-ink-3);
+  }
   .field:hover {
-    border-color: var(--color-ink-3);
+    border-color: rgb(148 163 209 / 0.3);
   }
   .field:focus {
     outline: none;
     border-color: var(--color-brand);
     box-shadow: 0 0 0 3px var(--color-brand-wash);
+  }
+  select.field option {
+    background: var(--color-surface);
   }
   .label {
     display: block;
@@ -192,14 +247,22 @@
     border-bottom: 0;
   }
   .data-table tbody tr:hover td {
-    background: var(--color-sunken);
+    background: var(--color-raised);
   }
   .data-table .r {
     text-align: right;
     white-space: nowrap;
   }
 
-  /* Segmented control (risk appetite, time range…) */
+  /* Coloured % pill used in tables: mint when up, coral when down. */
+  .chg-pill {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+  }
+
+  /* Segmented control (risk appetite, chart range…) */
   .segmented {
     display: inline-flex;
     padding: 3px;
@@ -211,25 +274,52 @@
   .segmented > button {
     height: 1.9rem;
     padding: 0 0.8rem;
-    border-radius: 5px;
+    border-radius: 7px;
     font-size: 0.8667rem;
     font-weight: 500;
-    color: var(--color-ink-2);
+    color: var(--color-ink-3);
+  }
+  .segmented > button:hover {
+    color: var(--color-ink);
   }
   .segmented > button[aria-pressed="true"] {
-    background: var(--color-surface);
+    background: var(--color-raised);
     color: var(--color-ink);
-    box-shadow: 0 1px 2px rgb(20 23 31 / 0.1);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
   }
 
-  /* Hatched "ideal range" band on metric gauges (texture, so it's never colour-only). */
+  /* Hatched "ideal range" band on metric gauges — gold texture, never colour-only. */
   .ideal-band {
     background-image: repeating-linear-gradient(
       135deg,
-      rgb(20 23 31 / 0.16) 0 1.5px,
+      rgb(242 181 68 / 0.55) 0 1.5px,
       transparent 1.5px 5px
     );
-    background-color: rgb(20 23 31 / 0.04);
+    background-color: rgb(242 181 68 / 0.1);
+  }
+
+  /* Filled bars that measure a quantity (signal strength, score parts). */
+  .bar-brand {
+    background: linear-gradient(90deg, #e99a2c, #f7c25c);
+  }
+  .bar-info {
+    background: linear-gradient(90deg, var(--color-info), var(--color-violet));
+  }
+
+  /* Sector heatmap tile (dashboard bento). Colour comes from inline style by size of move. */
+  .tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 5.75rem;
+    padding: 0.85rem 0.95rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    transition: filter 120ms, transform 120ms;
+  }
+  .tile:hover {
+    filter: brightness(1.25);
+    transform: translateY(-1px);
   }
 }
 
@@ -242,10 +332,5 @@
 @keyframes fade-in {
   from {
     opacity: 0;
-  }
-}
-@keyframes tick-flash {
-  from {
-    background: var(--color-brand-wash);
   }
 }
