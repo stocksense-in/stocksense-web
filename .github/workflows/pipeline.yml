@@ -2,6 +2,7 @@ name: Data pipeline
 
 # Refreshes Supabase on weekdays. Needs repository secrets SUPABASE_URL and
 # SUPABASE_SERVICE_KEY (Settings → Secrets and variables → Actions).
+# Until they're added, scheduled runs skip with a warning instead of failing.
 # Scheduled workflows only run from the default branch.
 on:
   schedule:
@@ -25,26 +26,34 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      CONFIGURED: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_KEY != '' }}
     steps:
+      - name: Secrets not set
+        if: env.CONFIGURED != 'true'
+        working-directory: .
+        run: |
+          msg="Add SUPABASE_URL and SUPABASE_SERVICE_KEY as repository secrets to enable the data pipeline."
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "::error::$msg"; exit 1   # a manual run was meant to work
+          fi
+          echo "::warning::$msg Skipping this scheduled run."
       - uses: actions/checkout@v4
+        if: env.CONFIGURED == 'true'
       - uses: actions/setup-python@v5
+        if: env.CONFIGURED == 'true'
         with:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: backend/requirements.txt
-      - run: pip install -r requirements.txt
-      - name: Check secrets
-        run: |
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_KEY" ]; then
-            echo "::error::Add SUPABASE_URL and SUPABASE_SERVICE_KEY as repository secrets."
-            exit 1
-          fi
+      - name: Install
+        if: env.CONFIGURED == 'true'
+        run: pip install -r requirements.txt
       - name: Prices
-        if: github.event.schedule == '30 11 * * 1-5' || inputs.job == 'prices'
+        if: env.CONFIGURED == 'true' && (github.event.schedule == '30 11 * * 1-5' || inputs.job == 'prices')
         run: python -m stocksense prices
       - name: Fundamentals
-        if: github.event.schedule == '30 11 * * 1-5' || inputs.job == 'fundamentals'
+        if: env.CONFIGURED == 'true' && (github.event.schedule == '30 11 * * 1-5' || inputs.job == 'fundamentals')
         run: python -m stocksense fundamentals
       - name: Ownership
-        if: github.event.schedule == '30 4 * * 0' || inputs.job == 'ownership'
+        if: env.CONFIGURED == 'true' && (github.event.schedule == '30 4 * * 0' || inputs.job == 'ownership')
         run: python -m stocksense ownership
