@@ -40,11 +40,12 @@
 | REST API (`backend/stocksense/api`) | Overview, screener, stock detail + score breakdown + peers, history, news/geopolitics (rules), IPOs, prospectus scanner. Not deployed. |
 | Frontend (`frontend/`) | Golden UI. Dashboard index prices are live; other panels use sample data in `lib/constants.ts`. |
 | Geopolitics engine | Keyword rules over live RSS (`backend/stocksense/geo.py`). The baseline the models must beat. |
-| Infra | Supabase free tier. No deployment, no scheduled jobs yet. |
+| Infra | Supabase free tier. CI on every PR (`.github/workflows/ci.yml`). Scheduled pipeline ready (`pipeline.yml`), waiting for repo secrets. No deployment yet. |
 
 Open user actions: run `backend/schema.sql`; decide on `stocksense cleanup --apply`
-(41 delisted stocks); rotate the old Upstox token and Superdesign key; move
-`docs/github-workflows/*.yml` to `.github/workflows/`.
+(41 delisted stocks); rotate the old Upstox token and Superdesign key; add the
+`SUPABASE_URL` and `SUPABASE_SERVICE_KEY` repository secrets to switch on the scheduled
+pipeline.
 
 ---
 
