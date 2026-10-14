@@ -113,3 +113,13 @@ def test_ipo_endpoint(market):
 def test_ipo_endpoint_reports_nse_outage(market):
     resp = TestClient(create_app(market=market, nse=FakeNse(fail=True))).get("/ipos")
     assert resp.status_code == 503 and "unavailable" in resp.json()["detail"]
+
+
+def test_today_is_indian_date():
+    from datetime import datetime, timezone
+    from unittest import mock
+
+    # 20:00 UTC on 14 Oct is already 01:30 on 15 Oct in India.
+    with mock.patch("stocksense.ipo.datetime") as fake:
+        fake.now.side_effect = lambda tz=None: datetime(2026, 10, 14, 20, 0, tzinfo=timezone.utc).astimezone(tz)
+        assert ipo.today_ist() == date(2026, 10, 15)

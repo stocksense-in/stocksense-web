@@ -12,6 +12,15 @@ from __future__ import annotations
 import re
 from dataclasses import asdict, dataclass
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
+
+IST = ZoneInfo("Asia/Kolkata")
+
+
+def today_ist() -> date:
+    """IPO dates are Indian dates; a server on UTC would otherwise flip status 5½ hours late."""
+    return datetime.now(IST).date()
+
 
 # NSE category rows (srNo) → our field names.
 CATEGORY_ROWS = {"1": "qib", "2": "nii", "3": "retail", "4": "employees"}
@@ -112,7 +121,7 @@ class Issue:
 
 
 def build_issue(raw: dict, subscription: Subscription | None = None, today: date | None = None) -> Issue:
-    today = today or date.today()
+    today = today or today_ist()
     opens, closes = parse_date(raw.get("issueStartDate")), parse_date(raw.get("issueEndDate"))
     status = (
         "upcoming" if opens and today < opens
@@ -143,7 +152,7 @@ def recent_listings(past: list[dict], prices: dict[str, float], days: int = 90, 
     Equity IPOs that listed in the last `days` days, with the return from the issue
     price to the latest price. `prices` maps NSE symbol → latest price.
     """
-    today = today or date.today()
+    today = today or today_ist()
     rows = []
     for p in past:
         if (p.get("securityType") or "").upper() not in {"EQ", "BE", "SME"}:
