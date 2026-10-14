@@ -31,6 +31,12 @@ Everything is per-user; no system packages, services or drivers were installed.
 | ML env | `backend\.venv-ml` | `requirements-ml.txt` = `requirements.txt` + PyTorch 2.14.1+cu132 (~3 GB) |
 | Node 24.21 / npm 11.19 | `C:\Program Files\nodejs` | already installed system-wide; meets "Node 22+", so no second copy |
 | Data lake | `E:\stocksense\lake` | the only disk with real headroom; `STOCKSENSE_LAKE_DIR` in `backend\.env` |
+| GitHub CLI 2.102.0 | `~\.local\bin\gh.exe` | official release zip, SHA-256 checked against the release's checksums file; for pushing and PRs. Run `gh auth logout` when you leave: this Windows account is shared. |
+
+**curl on this network:** Windows' TLS layer (schannel) sometimes can't reach certificate
+revocation servers from here (`CRYPT_E_REVOCATION_OFFLINE`, seen on GitHub's release
+downloads). `curl --ssl-revoke-best-effort` still validates the certificate; verify
+checksums for anything you download. Python (`httpx`, `requests`, `pip`) isn't affected.
 
 **Why a separate ML env:** `backend\.venv` stays identical to what the API Docker image
 installs, so tests there reflect production. ML libraries (transformers, sentence-transformers,
