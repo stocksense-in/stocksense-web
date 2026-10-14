@@ -14,6 +14,8 @@ Jobs
     cleanup        list (or --apply delete) stocks no longer listed on NSE
     rescore        recompute every stored score after a scoring.py change (seconds, no Yahoo)
     snapshot       copy ~70 large caps from Supabase into backend/data/snapshot.json (API offline data)
+    lake-prices    copy today's live_prices into the local data lake (STOCKSENSE_LAKE_DIR)  (daily)
+    lake-query     run SQL against the data lake, e.g. "select date, count(*) from prices group by date"
 
 Common options
     --symbols INFY TCS   only these stocks          --limit N    only the first N stocks
@@ -90,6 +92,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
     p = jobs.add_parser("snapshot", help="refresh the frontend's offline data file")
     p.add_argument("--symbols", nargs="+", metavar="SYM", help="instead of the default large caps")
+
+    jobs.add_parser("lake-prices", help="copy today's live_prices into the data lake")
+
+    p = jobs.add_parser("lake-query", help="run SQL against the data lake")
+    p.add_argument("sql", help="each clean dataset is a view, e.g. prices")
     return parser
 
 
@@ -131,6 +138,18 @@ def main() -> None:
         from .jobs import upstox_login
 
         upstox_login.run(show_status=args.status)
+        return
+
+    if args.job == "lake-prices":
+        from .jobs import lake_prices
+
+        lake_prices.run()
+        return
+
+    if args.job == "lake-query":
+        from .jobs import lake_prices
+
+        lake_prices.query(args.sql)
         return
 
     store = _store(args)
