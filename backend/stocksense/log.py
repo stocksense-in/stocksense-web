@@ -1,9 +1,11 @@
 import logging
 import sys
 
-# Windows terminals default to cp1252 and fail on "₹" — force UTF-8.
-if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+# Windows terminals default to cp1252 and fail on "₹" — force UTF-8. Log lines go to
+# stderr, so it needs the same treatment.
+for stream in (sys.stdout, sys.stderr):
+    if hasattr(stream, "reconfigure"):
+        stream.reconfigure(encoding="utf-8", errors="replace")
 
 logging.basicConfig(
     level=logging.INFO,
