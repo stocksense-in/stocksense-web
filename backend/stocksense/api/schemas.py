@@ -26,6 +26,7 @@ class StockOut(BaseModel):
     cagr: float | None = Field(description="3-year revenue CAGR, %")
     score: int | None = Field(description="StockSense score 0–100; null when too little data")
     updated_at: str | None
+    stale: bool = Field(description="Data is over a week older than the latest refresh — usually delisted or renamed")
 
 
 class IndexQuote(BaseModel):
@@ -158,5 +159,6 @@ class Health(BaseModel):
     status: str
     data_source: str = Field(description="supabase | snapshot | fixture")
     stocks: int
+    stale: int
     scored: int
     prices_updated_at: str | None

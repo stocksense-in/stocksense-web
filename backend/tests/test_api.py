@@ -18,6 +18,7 @@ def test_health_reports_source_and_counts(client):
     body = client.get("/health").json()
     assert body["data_source"] == "fixture"
     assert body["stocks"] == len(ROWS)
+    assert body["stale"] == 1
 
 
 def test_overview(client):
@@ -29,10 +30,17 @@ def test_overview(client):
 
 def test_screener_paginates_and_validates(client):
     page = client.get("/stocks", params={"page_size": 2, "page": 2}).json()
-    assert page["total"] == 7 and len(page["results"]) == 2
+    assert page["total"] == 7 and len(page["results"]) == 2  # GONE (stale) and NOPRICE excluded
     assert client.get("/stocks", params={"cap": "giant"}).status_code == 422
     asc = client.get("/stocks", params={"sort": "score", "order": "asc", "sector": "it"}).json()["results"]
     assert asc[0]["symbol"] == "TINYCO"
+
+
+def test_stale_stocks_are_hidden_from_rankings_but_still_open(client):
+    overview = client.get("/market/overview").json()
+    assert "GONE" not in [s["symbol"] for s in overview["movers"]["losers"]]
+    detail = client.get("/stocks/GONE").json()
+    assert detail["stock"]["stale"] is True
 
 
 def test_stock_detail_and_404(client):

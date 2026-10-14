@@ -80,7 +80,8 @@ def create_app(
             status="ok",
             data_source=m.source,
             stocks=len(stocks),
-            scored=sum(1 for s in stocks if s.score is not None),
+            stale=sum(1 for s in stocks if s.stale),
+            scored=sum(1 for s in stocks if s.score is not None and not s.stale),
             prices_updated_at=updated,
         )
 
@@ -93,7 +94,7 @@ def create_app(
     @app.get("/market/overview", response_model=schemas.Overview, tags=["market"])
     def overview(request: Request, movers: int = Query(5, ge=1, le=20), top: int = Query(8, ge=1, le=30)):
         m = market_of(request)
-        stocks = m.stocks()
+        stocks = m.fresh_stocks()
         moves = analytics.movers(stocks, movers)
         return schemas.Overview(
             indices=m.indices(),
@@ -110,7 +111,7 @@ def create_app(
     def sectors(request: Request):
         """Sector codes with labels and how many stocks each has — for filter dropdowns."""
         counts: dict[str, int] = {}
-        for s in market_of(request).stocks():
+        for s in market_of(request).fresh_stocks():
             counts[s.sector] = counts.get(s.sector, 0) + 1
         return [
             {"code": code, "label": label, "stocks": counts.get(code, 0)}
@@ -139,7 +140,7 @@ def create_app(
             sector=sector, cap=cap, min_score=min_score, max_pe=max_pe, min_roe=min_roe, max_de=max_de,
             sort=sort, descending=None if order is None else order == "desc",
         )
-        rows = analytics.screen(market_of(request).stocks(), filters)
+        rows = analytics.screen(market_of(request).fresh_stocks(), filters)
         start = (page - 1) * page_size
         return schemas.ScreenPage(
             total=len(rows), page=page, page_size=page_size,
@@ -165,7 +166,7 @@ def create_app(
                 value=stock.score, verdict=_verdict(stock.score), coverage=coverage,
                 breakdown=analytics.score_breakdown(stock),
             ),
-            peers=[_stock_out(s) for s in analytics.peers(m.stocks(), stock, peers)] if peers else [],
+            peers=[_stock_out(s) for s in analytics.peers(m.fresh_stocks(), stock, peers)] if peers else [],
         )
 
     @app.get("/stocks/{symbol}/history", response_model=schemas.History, tags=["stocks"])

@@ -11,6 +11,7 @@ Jobs
     upstox-login   sign in to Upstox and save today's token
     scheduler      run everything above on a market-hours timetable
     api            serve the REST API (docs at http://localhost:8000/docs)
+    cleanup        list (or --apply delete) stocks no longer listed on NSE
     rescore        recompute every stored score after a scoring.py change (seconds, no Yahoo)
     snapshot       copy ~70 large caps from Supabase into backend/data/snapshot.json (API offline data)
 
@@ -81,6 +82,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--port", type=int, default=8000)
     p.add_argument("--reload", action="store_true", help="restart on code changes (development)")
 
+    p = jobs.add_parser("cleanup", help="find delisted/renamed stocks")
+    p.add_argument("--apply", action="store_true", help="actually delete them")
+
     p = jobs.add_parser("rescore", help="recompute stored scores without refetching")
     _add_storage(p)
 
@@ -109,6 +113,12 @@ def main() -> None:
         import uvicorn
 
         uvicorn.run("stocksense.api:app", host=args.host, port=args.port, reload=args.reload)
+        return
+
+    if args.job == "cleanup":
+        from .jobs import cleanup
+
+        cleanup.run(apply=args.apply)
         return
 
     if args.job == "snapshot":

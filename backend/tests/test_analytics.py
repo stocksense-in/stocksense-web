@@ -24,18 +24,18 @@ def test_screen_ascending_pe_by_default(market):
 
 
 def test_movers_ignore_micro_caps(market):
-    moves = analytics.movers(market.stocks(), 3)
+    moves = analytics.movers(market.fresh_stocks(), 3)
     assert "TINYCO" not in [s.symbol for s in moves["gainers"]]
     assert moves["gainers"][0].symbol == "TCS"
     assert [s.symbol for s in moves["losers"]] == ["HDFCBANK", "INFY"]
 
 
 def test_breadth_counts(market):
-    assert analytics.breadth(market.stocks()) == {"advancers": 5, "decliners": 2, "unchanged": 1}
+    assert analytics.breadth(market.fresh_stocks()) == {"advancers": 5, "decliners": 2, "unchanged": 1}
 
 
 def test_sector_moves_are_cap_weighted(market):
-    banks = next(s for s in analytics.sector_moves(market.stocks()) if s["sector"] == "bank")
+    banks = next(s for s in analytics.sector_moves(market.fresh_stocks()) if s["sector"] == "bank")
     expected = (-2.3 * 1_080_000 + 0.8 * 900_000 + 0.5 * 950_000) / (1_080_000 + 900_000 + 950_000)
     assert banks["change_pct"] == round(expected, 2)
     assert banks["label"] == "Banking"

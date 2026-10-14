@@ -27,6 +27,8 @@ ROWS = [
     row("ICICIBANK", "bank", cap=950_000, price=1310, chg=0.5, score=62, de=None),
     row("TINYCO", "it", cap=500, price=12, chg=19.0, score=40),  # micro-cap: never a "mover"
     row("NOPRICE", "fmcg", price=None, score=None),
+    # Delisted months ago: its last reading was a crash, which must not show up as a "faller".
+    {**row("GONE", "energy", cap=26_000, price=383, chg=-22.1, score=50), "last_updated": "2026-04-27T10:00:00"},
 ]
 PRICES = [
     {"symbol": "NIFTY50", "price": 22721.95, "change_pct": 1.6, "updated_at": "2026-10-14T01:00:00"},

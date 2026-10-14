@@ -27,6 +27,10 @@ log = get_logger(__name__)
 STOCKS_TTL_SECONDS = 300  # fundamentals change daily
 PRICES_TTL_SECONDS = 30  # prices change by the minute
 PAGE_SIZE = 1000  # PostgREST's default maximum rows per request
+# A stock whose data is this much older than the latest pipeline run is treated as
+# stale — usually delisted or renamed (e.g. merged companies). Relative to the
+# newest row, so a paused pipeline doesn't make every stock stale at once.
+STALE_AFTER_DAYS = 7
 INDEX_SYMBOLS = {
     "NIFTY50": "NIFTY 50",
     "SENSEX": "SENSEX",
@@ -69,6 +73,7 @@ class Stock:
     cagr: float | None
     score: int | None
     updated_at: str | None
+    stale: bool = False
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -83,7 +88,7 @@ def _num(value) -> float | None:
         return None
 
 
-def stock_from_row(row: dict) -> Stock:
+def stock_from_row(row: dict, stale: bool = False) -> Stock:
     """Database row (column names from schema.sql) → Stock."""
     score = _num(row.get("composite_score"))
     return Stock(
@@ -106,6 +111,7 @@ def stock_from_row(row: dict) -> Stock:
         cagr=_num(row.get("revenue_cagr_3yr")),
         score=int(score) if score is not None else None,
         updated_at=row.get("last_updated"),
+        stale=stale,
     )
 
 
@@ -187,9 +193,18 @@ class MarketData:
         return {r["symbol"]: quote_from_row(r) for r in rows if r.get("price") is not None}
 
     def stocks(self) -> list[Stock]:
+        """Every stock, including stale ones (flagged). Use fresh_stocks() for lists and rankings."""
         rows = self._cache.get("stocks", STOCKS_TTL_SECONDS, lambda: self._load("stocks", "*", "stocks"))
         quotes = self.quotes()
-        return [with_quote(stock_from_row(r), quotes.get(r["symbol"])) for r in rows]
+        latest = max((_timestamp(r.get("last_updated")) for r in rows), default=0.0)
+        cutoff = latest - STALE_AFTER_DAYS * 86_400
+        return [
+            with_quote(stock_from_row(r, stale=_timestamp(r.get("last_updated")) < cutoff), quotes.get(r["symbol"]))
+            for r in rows
+        ]
+
+    def fresh_stocks(self) -> list[Stock]:
+        return [s for s in self.stocks() if not s.stale]
 
     def stock(self, symbol: str) -> Stock | None:
         wanted = symbol.upper()
