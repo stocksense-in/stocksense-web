@@ -13,17 +13,19 @@ simulator.
 ## How it fits together
 
 ```
-backend/  (Python, runs on a schedule)                         frontend/  (Next.js 16, golden dark UI)
-NSE symbols, Yahoo Finance, Screener.in, Upstox                  pages read live index prices from
-        │                                                        Supabase `live_prices`; most panels
-        ▼                                                        use sample data in lib/constants.ts
-python -m stocksense <job>  ──►  Supabase `stocks`, `live_prices`
+backend/  (Python)                                                frontend/  (Next.js, golden dark UI)
+                                                                 
+pipeline jobs ── NSE, Yahoo, Screener.in, Upstox ──► Supabase     reads live index prices from
+                                                       │          Supabase; other panels still use
+REST API (FastAPI) ◄── Supabase, news RSS, NSE IPOs ◄──┘          sample data in lib/constants.ts
+   └── /market, /stocks, /news, /geopolitics, /ipos, /prospectus ──► ready for the frontend to call
 ```
 
-* **Python writes, the website reads.** The backend is the only thing with the
-  Supabase service key; the website uses the public anon key.
-* The frontend is the original golden design (tag `baseline-2026-10-06`). It does
-  not yet use the scored `stocks` table — wiring that in is the next step.
+* **Pipeline writes, everything else reads.** Only the pipeline holds the Supabase
+  service key; the API and the website use the read-only anon key.
+* The frontend is the original golden design (tag `baseline-2026-10-06`). The API
+  serves everything its panels need with real data; wiring it in is the next step
+  (see `backend/README.md` → "The API").
 
 ## Run it
 
@@ -42,6 +44,12 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env              # SUPABASE_URL + SUPABASE_SERVICE_KEY
 python -m stocksense fundamentals --limit 20   # try it on 20 stocks
+```
+
+```bash
+# REST API — http://localhost:8000/docs
+cd backend && source .venv/bin/activate
+python -m stocksense api --reload
 ```
 
 First time with a new Supabase project: run [`backend/schema.sql`](backend/schema.sql) in the SQL editor.
@@ -75,8 +83,9 @@ backend/
 | Area | State |
 |---|---|
 | Data pipeline (prices, fundamentals, scores for ~2,400 stocks) | Live in Supabase |
+| REST API: overview, screener, stock detail, history, news/geopolitics, IPOs, prospectus scanner | Built and tested; not yet deployed |
 | Dashboard index prices | Live from Supabase `live_prices` |
-| Other frontend panels | Sample data in `lib/constants.ts` |
+| Other frontend panels | Sample data in `lib/constants.ts` until wired to the API |
 | Accounts / sign-in | Not built yet |
 
 History of the big restructure, and how to go back to the earlier version:

@@ -8,6 +8,7 @@ State lives on app.state so tests can inject fixtures:
 
 from __future__ import annotations
 
+import threading
 from datetime import datetime, timezone
 from typing import Callable, Literal
 
@@ -27,6 +28,7 @@ IPO_TTL_SECONDS = 5 * 60  # subscription numbers update through the bidding day
 LISTINGS_TTL_SECONDS = 6 * 3600
 CHART_TTL_SECONDS = {"1d": 120, "5d": 600}  # intraday refreshes often; daily ranges hourly
 MAX_UPLOAD_BYTES = 60 * 1024 * 1024  # DRHPs run 10–40 MB
+MAX_CONCURRENT_SCANS = 2  # PDF text extraction is CPU-heavy; don't let a burst starve other requests
 
 Range = Literal["1d", "5d", "1mo", "6mo", "1y", "5y"]
 SortField = Literal["score", "market_cap", "change_pct", "pe", "roe", "de", "name"]
@@ -68,6 +70,7 @@ def create_app(
     app.state.history = history or chart.history
     app.state.cache = TTLCache()
     app.state.nse = nse
+    app.state.scan_slots = threading.BoundedSemaphore(MAX_CONCURRENT_SCANS)
 
     def market_of(request: Request) -> MarketData:
         return request.app.state.market
@@ -266,15 +269,20 @@ def create_app(
         return [{"id": r.id, "title": r.title, "why": r.why} for r in rhp.RULES]
 
     @app.post("/prospectus/scan", response_model=schemas.ScanResult, tags=["prospectus"])
-    def prospectus_scan(file: UploadFile = File(..., description="DRHP or RHP as a text PDF")):
+    def prospectus_scan(request: Request, file: UploadFile = File(..., description="DRHP or RHP as a text PDF")):
         """Upload a prospectus PDF; get its red flags with page-numbered quotes. The file is not stored."""
         data = file.file.read(MAX_UPLOAD_BYTES + 1)
         if len(data) > MAX_UPLOAD_BYTES:
             raise HTTPException(413, "That file is over 60 MB. Upload the DRHP or RHP PDF only.")
+        slots = request.app.state.scan_slots
+        if not slots.acquire(timeout=30):
+            raise HTTPException(503, "The scanner is busy with other prospectuses. Try again in a minute.")
         try:
             return rhp.scan_pdf(data).to_dict()
         except rhp.ScanError as exc:
             raise HTTPException(422, str(exc)) from exc
+        finally:
+            slots.release()
 
     return app
 
