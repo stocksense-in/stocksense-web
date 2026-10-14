@@ -20,8 +20,8 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 REPO_DIR = BACKEND_DIR.parent
 DATA_DIR = BACKEND_DIR / "data"
 
-# Default snapshot location: the frontend reads this file when Supabase is not configured.
-FRONTEND_SNAPSHOT = REPO_DIR / "frontend" / "data" / "snapshot.json"
+# Offline copy of ~70 large caps. The API serves it when Supabase isn't configured or is down.
+SNAPSHOT_PATH = DATA_DIR / "snapshot.json"
 
 
 def _load_dotenv_files() -> None:
@@ -43,6 +43,10 @@ def _first_env(*names: str) -> str:
 class Settings:
     supabase_url: str
     supabase_service_key: str
+    # Read-only public key. The API uses it when set, so a leak can't write data.
+    supabase_anon_key: str
+    # Origins allowed to call the API from a browser (comma-separated in API_CORS_ORIGINS).
+    api_cors_origins: tuple[str, ...]
     upstox_api_key: str
     upstox_api_secret: str
     upstox_redirect_uri: str
@@ -61,6 +65,12 @@ def get_settings() -> Settings:
         # Service-role key: bypasses row-level security, so it must never reach the browser.
         supabase_service_key=_first_env(
             "SUPABASE_SERVICE_KEY", "SUPABASE_KEY", "NEXT_PUBLIC_SUPABASE_SERVICE_KEY"
+        ),
+        supabase_anon_key=_first_env("SUPABASE_ANON_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+        api_cors_origins=tuple(
+            o.strip()
+            for o in (_first_env("API_CORS_ORIGINS") or "http://localhost:3000").split(",")
+            if o.strip()
         ),
         upstox_api_key=_first_env("UPSTOX_API_KEY", "NEXT_PUBLIC_UPSTOX_API_KEY"),
         upstox_api_secret=_first_env("UPSTOX_API_SECRET", "NEXT_PUBLIC_UPSTOX_API_SECRET"),

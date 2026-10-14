@@ -13,6 +13,7 @@ logging.basicConfig(
 # yfinance logs an error line for every delisted ticker; keep our output readable.
 logging.getLogger("yfinance").setLevel(logging.CRITICAL)
 logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("pypdf").setLevel(logging.ERROR)  # malformed-PDF chatter; we report errors ourselves
 
 
 def get_logger(name: str) -> logging.Logger:

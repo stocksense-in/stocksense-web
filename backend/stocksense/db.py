@@ -3,7 +3,7 @@ Where pipeline results go.
 
 Two destinations, usable together:
   • Supabase — the `stocks` and `live_prices` tables (see backend/schema.sql).
-  • A JSON snapshot — frontend/data/snapshot.json by default. The website reads
+  • A JSON snapshot — backend/data/snapshot.json by default. The API reads
     it when Supabase isn't configured, so it can show real numbers offline.
 
 Jobs call store.upsert_stocks(rows) / store.upsert_prices(rows) and don't care
