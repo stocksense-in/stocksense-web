@@ -67,7 +67,9 @@ Frontend: `cd frontend && npm ci && npm run build` (or `npm run dev`).
 
 `backend\.env` and `frontend\.env.local` are created on this machine and gitignored (checked
 with `git check-ignore`). Values are pasted by hand over AnyDesk, never through chat or git.
-The frontend file holds the **anon** key only.
+The frontend file holds the **anon** key only. Checked 14 Oct by presence and key role only
+(no values printed): backend has the URL, service_role and anon keys and the Upstox keys and token;
+the frontend has the URL and an anon-role key, matching the backend. Both build and run.
 
 ## Results
 
@@ -180,14 +182,12 @@ replaced, not appended). The lake is 320 KB so far.
 
 ## Needs you
 
-1. `frontend\.env.local` is still empty: paste the Supabase URL and the **anon** key
-   (only needed to run the site locally with live index prices; the build works without it).
-2. Rotate the old Upstox token and Superdesign key if not done yet (PLAN.md §2). Upstox
+1. Rotate the old Upstox token and Superdesign key if not done yet (PLAN.md §2). Upstox
    access tokens also expire daily (~3:30 AM IST): `python -m stocksense upstox-login`.
-3. Before M0.4/M0.5: check the college IT policy on long-running personal jobs, a
+2. Before M0.4/M0.5: check the college IT policy on long-running personal jobs, a
    scheduled task on this machine, and remote access (Tailscale / Cloudflare Tunnel).
    Both milestones install background services, so they need your approval.
-4. AnyDesk and TeamViewer both run on this PC and it now holds a database write key:
+3. AnyDesk and TeamViewer both run on this PC and it now holds a database write key:
    protect both with a strong password and 2FA.
-5. The lake has no backup yet (that's M0.4). A lab machine can be reimaged without
+4. The lake has no backup yet (that's M0.4). A lab machine can be reimaged without
    notice; until then, treat `E:\stocksense\lake` as rebuildable, not precious.

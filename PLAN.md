@@ -203,8 +203,7 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 - [ ] Install: git, Python 3.12, CUDA drivers + PyTorch (CUDA build), Node 22, DuckDB, Tailscale (or cloudflared), Docker (optional).
   *14 Oct: all but Tailscale/cloudflared (M0.5) and Docker; DuckDB is the Python package.*
 - [x] `git clone https://github.com/stocksense-in/stocksense-web.git && cd stocksense-web`
-- [ ] Copy `backend/.env` and `frontend/.env.local` by hand (USB/password manager/remote desktop), never via git or chat. A repo-root `.env.local` isn't needed.
-  *14 Oct: `backend/.env` done; `frontend/.env.local` still empty.*
+- [x] Copy `backend/.env` and `frontend/.env.local` by hand (USB/password manager/remote desktop), never via git or chat. A repo-root `.env.local` isn't needed.
 - [x] Python envs + tests: see `docs/college-pc-setup.md` (Windows, uv).
 - [x] `python ml/gpu_check.py` → A5000, CUDA available
 - [x] Reachability: NSE archives, Yahoo chart URL, GDELT, RSS feeds (table in `docs/college-pc-setup.md`).
