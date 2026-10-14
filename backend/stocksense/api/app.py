@@ -9,6 +9,7 @@ State lives on app.state so tests can inject fixtures:
 from __future__ import annotations
 
 import threading
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Callable, Literal
 
@@ -45,13 +46,27 @@ def _verdict(score: int | None) -> str | None:
     return "Strong" if score >= 65 else "Fair" if score >= 45 else "Weak"
 
 
+def _warm(app: FastAPI) -> None:
+    try:
+        app.state.market.stocks()
+    except Exception:  # noqa: BLE001 — warming is best-effort; requests will retry the load
+        pass
+
+
 def create_app(
     market: MarketData | None = None,
     headlines: Callable[[], list[news.Headline]] | None = None,
     history: Callable[[str, str], list[tuple[int, float]]] | None = None,
     nse=nse_ipo,
 ) -> FastAPI:
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # Load the ~2,600 stocks in the background so the first visitor doesn't wait ~3 s.
+        threading.Thread(target=_warm, args=(app,), daemon=True).start()
+        yield
+
     app = FastAPI(
+        lifespan=lifespan,
         title="StockSense API",
         version="1.0.0",
         description=(
