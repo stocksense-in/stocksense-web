@@ -41,11 +41,12 @@
 | Frontend (`frontend/`) | Golden UI. Dashboard index prices are live; other panels use sample data in `lib/constants.ts`. |
 | Geopolitics engine | Keyword rules over live RSS (`backend/stocksense/geo.py`). The baseline the models must beat. |
 | Infra | Supabase free tier. CI on every PR (`.github/workflows/ci.yml`). Scheduled pipeline ready (`pipeline.yml`), waiting for repo secrets. No deployment yet. |
+| College PC (engine) | Set up 14 Oct (M0.1–M0.3): repo at `C:\Users\PRO-LAB-2\stocksense-web`, Python 3.12 envs `backend/.venv` (API) and `backend/.venv-ml` (PyTorch CUDA 13.2), A5000 verified, every data source reachable without a proxy, data lake at `E:\stocksense\lake` with daily `live_prices` snapshots (`lake-prices`). No scheduler, backups or remote access yet (M0.4, M0.5). Details: `docs/college-pc-setup.md`. |
 
 Open user actions: run `backend/schema.sql`; decide on `stocksense cleanup --apply`
 (41 delisted stocks); rotate the old Upstox token and Superdesign key; add the
 `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` repository secrets to switch on the scheduled
-pipeline.
+pipeline; check college IT policy on long-running jobs and remote access before M0.4/M0.5.
 
 ---
 
@@ -132,11 +133,14 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 
 ### Phase 0 — Foundation
 
-- [ ] **M0.1 Merge & move.** PRs for `overhaul-2026-10-06` and `backend-api-2026-10-14`
+- [x] **M0.1 Merge & move.** PRs for `overhaul-2026-10-06` and `backend-api-2026-10-14`
   merged into `main`; repo cloned on the college PC; `.env` files copied by hand; keys
   rotated. *Accept:* `cd backend && pytest` passes on the college PC; `python -m stocksense api` serves `/health` with `data_source: supabase`.
-- [ ] **M0.2 GPU & network check.** *Accept:* PyTorch sees the A5000 (`torch.cuda.is_available()`); NSE archives, Yahoo, GDELT, RSS all reachable from the campus network (or a documented workaround).
-- [ ] **M0.3 Data lake skeleton.** `stocksense/lake.py` with raw/clean/feature folders, DuckDB catalogue. *Accept:* one job writes Parquet and DuckDB can query it; layout documented in `backend/README.md`.
+  *Done 14 Oct: 71 tests pass; `/health` → supabase, 2,646 stocks. Key rotation not confirmed yet (§2).*
+- [x] **M0.2 GPU & network check.** *Accept:* PyTorch sees the A5000 (`torch.cuda.is_available()`); NSE archives, Yahoo, GDELT, RSS all reachable from the campus network (or a documented workaround).
+  *Done 14 Oct: all reachable, no proxy; only BSE's API refuses (its bot protection, not the campus).*
+- [x] **M0.3 Data lake skeleton.** `stocksense/lake.py` with raw/clean/feature folders, DuckDB catalogue. *Accept:* one job writes Parquet and DuckDB can query it; layout documented in `backend/README.md`.
+  *Done 14 Oct: `lake-prices` writes 2,648 rows to `clean/prices/`, `lake-query` reads them back.*
 - [ ] **M0.4 Scheduler & backups.** Jobs run on a timetable (cron/systemd or the existing `scheduler`); nightly lake backup to cloud storage. *Accept:* a week of unattended runs with logs; restore tested once.
 - [ ] **M0.5 Private access.** Tailscale or Cloudflare Tunnel to the internal API/UI. *Accept:* reachable from a laptop off-campus; not reachable from the open internet.
 
@@ -197,14 +201,16 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 
 - [ ] Confirm college IT policy allows long-running personal jobs, outbound internet to data sources, and storing personal API keys. Get it in writing if unsure.
 - [ ] Install: git, Python 3.12, CUDA drivers + PyTorch (CUDA build), Node 22, DuckDB, Tailscale (or cloudflared), Docker (optional).
-- [ ] `git clone https://github.com/stocksense-in/stocksense-web.git && cd stocksense-web`
-- [ ] Copy `.env.local` (repo root), `backend/.env`, `frontend/.env.local` by hand (USB/password manager), never via git or chat.
-- [ ] `cd backend && python3.12 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && pytest`
-- [ ] `python -c "import torch; print(torch.cuda.get_device_name(0))"` → A5000
-- [ ] Reachability: `curl -I https://archives.nseindia.com`, Yahoo chart URL, GDELT, RSS feeds.
-- [ ] Disk: plan ~200–500 GB for the lake + models; separate data disk if available.
+  *14 Oct: all but Tailscale/cloudflared (M0.5) and Docker; DuckDB is the Python package.*
+- [x] `git clone https://github.com/stocksense-in/stocksense-web.git && cd stocksense-web`
+- [ ] Copy `backend/.env` and `frontend/.env.local` by hand (USB/password manager/remote desktop), never via git or chat. A repo-root `.env.local` isn't needed.
+  *14 Oct: `backend/.env` done; `frontend/.env.local` still empty.*
+- [x] Python envs + tests: see `docs/college-pc-setup.md` (Windows, uv).
+- [x] `python ml/gpu_check.py` → A5000, CUDA available
+- [x] Reachability: NSE archives, Yahoo chart URL, GDELT, RSS feeds (table in `docs/college-pc-setup.md`).
+- [x] Disk: lake on `E:` (408 GB free at setup).
 - [ ] Power/reboots: jobs must resume safely (idempotent, checkpointed); note the machine's maintenance windows.
-- [ ] Claude Code logged in **locally** on this PC for GPU/data work (cloud sessions have no GPU).
+- [x] Claude Code logged in **locally** on this PC for GPU/data work (cloud sessions have no GPU).
 
 ---
 
@@ -228,4 +234,5 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 | 2026-10-06 | Two UI redesigns tried and rejected; original golden UI kept. |
 | 2026-10-14 | REST API added; geopolitics v0 = keyword rules over live news (the baseline). |
 | 2026-10-14 | Direction: internal Indian-markets terminal + public StockSense on the publishable subset. Training/inference on the college A5000; public site never depends on it. |
+| 2026-10-14 | College PC is the engine: Windows 11, Xeon W-2295 (18 cores), 128 GB RAM, RTX A5000 24 GB (driver 596.51, CUDA 13.2). Data lake root `E:\stocksense\lake` (Parquet + DuckDB, `STOCKSENSE_LAKE_DIR`). ML in a separate `backend/.venv-ml` (`requirements-ml.txt`, PyTorch 2.14.1+cu132) so the API env stays identical to its container. |
 | _open_ | Public prices: delayed/EOD vs licensed real-time. |
