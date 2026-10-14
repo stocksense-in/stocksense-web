@@ -11,11 +11,11 @@ Jobs
     upstox-login   sign in to Upstox and save today's token
     scheduler      run everything above on a market-hours timetable
     rescore        recompute every stored score after a scoring.py change (seconds, no Yahoo)
-    snapshot       copy ~70 large caps from Supabase into frontend/data/snapshot.json
+    snapshot       copy ~70 large caps from Supabase into backend/data/snapshot.json (API offline data)
 
 Common options
     --symbols INFY TCS   only these stocks          --limit N    only the first N stocks
-    --snapshot [PATH]    also write results to a JSON file (default: frontend/data/snapshot.json)
+    --snapshot [PATH]    also write results to a JSON file (default: backend/data/snapshot.json)
     --no-db              skip Supabase (use with --snapshot to work offline)
 """
 
@@ -24,7 +24,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from .config import FRONTEND_SNAPSHOT, get_settings
+from .config import SNAPSHOT_PATH, get_settings
 from .db import Store
 
 
@@ -37,7 +37,7 @@ def _add_storage(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--snapshot",
         nargs="?",
-        const=str(FRONTEND_SNAPSHOT),
+        const=str(SNAPSHOT_PATH),
         metavar="PATH",
         help="also merge results into a JSON snapshot file",
     )

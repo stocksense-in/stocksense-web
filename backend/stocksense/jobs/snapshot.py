@@ -1,6 +1,6 @@
 """
 Snapshot job — copies a curated set of stocks from Supabase into
-frontend/data/snapshot.json, the file the website uses when it has no database.
+backend/data/snapshot.json, which the API serves when it has no database.
 
     python -m stocksense snapshot                 # the default ~70 large caps
     python -m stocksense snapshot --symbols INFY TCS
@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 
-from ..config import FRONTEND_SNAPSHOT
+from ..config import SNAPSHOT_PATH
 from ..db import fetch_stock_rows, now_iso, supabase_client
 from ..log import get_logger
 
@@ -30,7 +30,7 @@ SHRIRAMFIN CHOLAFIN
 INDICES = ["NIFTY50", "SENSEX", "BANKNIFTY", "INDIAVIX"]
 
 
-def run(symbols: list[str] | None = None, path=FRONTEND_SNAPSHOT) -> None:
+def run(symbols: list[str] | None = None, path=SNAPSHOT_PATH) -> None:
     wanted = [s.upper() for s in symbols] if symbols else DEFAULT_SYMBOLS
     stocks = fetch_stock_rows(wanted)
     prices = (
