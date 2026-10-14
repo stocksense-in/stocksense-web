@@ -1,8 +1,8 @@
-requests
-python-dotenv
-supabase
-yfinance
-nsepython
-websockets
-protobuf
-flask
+requests>=2.31
+python-dotenv>=1.0
+supabase>=2.4
+yfinance>=0.2.50
+websockets>=12
+flask>=3.0
+schedule>=1.2
+pytest>=8

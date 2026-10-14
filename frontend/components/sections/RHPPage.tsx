@@ -30,36 +30,37 @@ export function RHPPage() {
   ];
 
   const borderColor = { r: 'var(--red)', gold: 'var(--gold)', g: 'var(--green)' } as any;
+  const dotColor = { r: '#C45C5C', gold: '#C9A84C', g: '#00E676' } as any;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 14 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 12 }}>
 
       {/* Left: Upload + scan checklist */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div
           className="rhp-upload"
           onClick={rhpDemo}
           style={{ opacity: scanning ? 0.5 : 1, cursor: scanning ? 'wait' : 'pointer' }}
         >
           <div style={{ fontSize: 40, marginBottom: 14 }}>📄</div>
-          <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 8, color: 'var(--ink)', letterSpacing: '-0.3px' }}>Upload RHP / DRHP</div>
-          <div style={{ fontSize: 11, color: 'var(--ink2)', marginBottom: 18, lineHeight: 1.7, maxWidth: 260, margin: '0 auto 18px' }}>
+          <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 8, color: 'var(--cream)', letterSpacing: '-0.3px', fontFamily: 'var(--f-display)' }}>Upload RHP / DRHP</div>
+          <div style={{ fontSize: 11, color: 'var(--cream-dim)', marginBottom: 18, lineHeight: 1.7, maxWidth: 260, margin: '0 auto 18px' }}>
             AI extracts key risk factors in seconds.<br />Drop a PDF or click to browse.
           </div>
           <button
-            className="btn-blue"
+            className="btn-gold-main"
             onClick={e => { e.stopPropagation(); rhpDemo(); }}
             style={{ width: '100%' }}
           >
-            {scanning ? 'Scanning…' : 'Try Demo: Ather Energy DRHP ↗'}
+            <span>{scanning ? 'Scanning…' : 'Try Demo: Ather Energy DRHP ↗'}</span>
           </button>
         </div>
 
         <div className="card">
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'var(--ink3)', marginBottom: 14 }}>What We Scan For</div>
+          <div className="ct">What We Scan For</div>
           {scanChecks.map(([label, c, badge]) => (
-            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,.04)' }}>
-              <span style={{ fontSize: 11, color: 'var(--ink2)' }}>{label}</span>
+            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(201,168,76,0.04)' }}>
+              <span style={{ fontSize: 11, color: 'var(--cream-dim)' }}>{label}</span>
               <Pill type={c as 'r' | 'g' | 'gold'}>{badge}</Pill>
             </div>
           ))}
@@ -69,38 +70,38 @@ export function RHPPage() {
       {/* Right: Results panel */}
       <div>
         {results === null ? (
-          <div style={{ height: '100%', minHeight: 320, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--s1)', border: '1px solid var(--border)', borderRadius: 'var(--r3)', padding: '40px 24px', gap: 12 }}>
-            <div style={{ fontSize: 44, opacity: 0.12 }}>◈</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink3)' }}>Upload a DRHP or try the demo</div>
-            <div style={{ fontSize: 11, color: 'var(--ink4)', textAlign: 'center', maxWidth: 260, lineHeight: 1.65 }}>
+          <div style={{ height: '100%', minHeight: 320, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--s1)', border: '1px solid var(--border)', borderRadius: 8, padding: '40px 24px', gap: 12 }}>
+            <div style={{ fontSize: 44, opacity: 0.12, color: 'var(--gold)' }}>◈</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--cream-mute)' }}>Upload a DRHP or try the demo</div>
+            <div style={{ fontSize: 11, color: 'var(--cream-mute)', textAlign: 'center', maxWidth: 260, lineHeight: 1.65, opacity: 0.6 }}>
               AI reads 300+ pages and surfaces only what matters — in under 2 seconds.
             </div>
-            <button className="btn-blue" onClick={rhpDemo} style={{ marginTop: 8 }}>Try Demo</button>
+            <button className="btn-gold-main" onClick={rhpDemo} style={{ marginTop: 8 }}><span>Try Demo</span></button>
           </div>
         ) : (
           <div>
             {/* Report header */}
-            <div style={{ position: 'relative', overflow: 'hidden', background: 'var(--s1)', border: '1px solid rgba(201,153,30,.2)', borderRadius: 'var(--r3)', padding: '18px 22px', marginBottom: 14 }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg,transparent,rgba(201,153,30,.6),transparent)' }} />
+            <div style={{ position: 'relative', overflow: 'hidden', background: 'var(--s1)', border: '1px solid var(--border-bright)', borderRadius: 8, padding: '18px 22px', marginBottom: 14 }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(201,168,76,0.28),transparent)' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
                 <div>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--ink3)', marginBottom: 5 }}>RHP Analysis · Ather Energy DRHP</div>
-                  <div style={{ fontSize: 11, color: 'var(--ink2)', lineHeight: 1.6 }}>
-                    AI extracted <strong style={{ color: 'var(--ink)' }}>{risks.length} key risk factors</strong> from 342 pages.<br />
+                  <div className="ct" style={{ marginBottom: 5 }}>RHP Analysis · Ather Energy DRHP</div>
+                  <div style={{ fontSize: 11, color: 'var(--cream-dim)', lineHeight: 1.6 }}>
+                    AI extracted <strong style={{ color: 'var(--cream)' }}>{risks.length} key risk factors</strong> from 342 pages.<br />
                     <span style={{ color: 'var(--red)' }}>2 high-severity items</span> require attention before subscribing.
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--ink3)', marginBottom: 4 }}>Risk Score</div>
-                  <div style={{ fontSize: 36, fontWeight: 800, fontFamily: 'var(--mono)', color: 'var(--gold)', letterSpacing: '-1.5px', lineHeight: 1 }}>58</div>
-                  <div style={{ fontSize: 9, color: 'var(--ink3)', marginTop: 2, fontWeight: 700 }}>MODERATE</div>
+                  <div className="ct" style={{ marginBottom: 4 }}>Risk Score</div>
+                  <div style={{ fontSize: 22, fontWeight: 500, fontFamily: 'var(--f-mono)', color: 'var(--gold)', letterSpacing: '-1.5px', lineHeight: 1 }}>58</div>
+                  <div style={{ fontSize: 9, color: 'var(--cream-mute)', marginTop: 2, fontWeight: 500, fontFamily: 'var(--f-mono)', letterSpacing: '1px' }}>MODERATE</div>
                 </div>
               </div>
             </div>
 
             {/* Risk items */}
             <div className="card">
-              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'var(--ink3)', marginBottom: 14 }}>Extracted Risk Factors</div>
+              <div className="ct">Extracted Risk Factors</div>
               {risks.map((r, i) => (
                 <div
                   key={r.title}
@@ -108,7 +109,7 @@ export function RHPPage() {
                     display: 'flex',
                     gap: 14,
                     padding: '13px 0',
-                    borderBottom: i < risks.length - 1 ? '1px solid rgba(255,255,255,.05)' : 'none',
+                    borderBottom: i < risks.length - 1 ? '1px solid rgba(201,168,76,0.04)' : 'none',
                     paddingLeft: 12,
                     borderLeft: `2px solid ${borderColor[r.c]}`,
                     marginBottom: 2,
@@ -116,10 +117,10 @@ export function RHPPage() {
                 >
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 5 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink)', letterSpacing: '-0.2px' }}>{r.title}</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--cream)', letterSpacing: '-0.2px' }}>{r.title}</span>
                       <Pill type={r.c as 'r' | 'g' | 'gold'}>{r.level}</Pill>
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--ink2)', lineHeight: 1.65 }}>{r.body}</div>
+                    <div style={{ fontSize: 11, color: 'var(--cream-dim)', lineHeight: 1.65 }}>{r.body}</div>
                   </div>
                 </div>
               ))}

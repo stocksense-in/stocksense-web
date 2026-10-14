@@ -24,6 +24,7 @@ python/.env
 # Python
 # =========================
 venv/
+.venv/
 __pycache__/
 *.pyc
 
@@ -51,3 +52,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 frontend/next-env.d.ts
+# =========================
+# Secrets / generated data
+# =========================
+backend/upstox_token.json
+!.env.example
+!backend/.env.example
+.pytest_cache/
+
+# Superdesign scratch files
+.superdesign/tmp/
