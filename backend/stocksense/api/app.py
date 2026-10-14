@@ -14,15 +14,17 @@ from typing import Callable, Literal
 from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
-from .. import analytics, geo, rhp
+from .. import analytics, geo, ipo, rhp
 from ..config import get_settings
 from ..market import MarketData, Stock, TTLCache
 from ..scoring import score_stock
 from ..sectors import SECTOR_LABELS
-from ..sources import chart, news
+from ..sources import chart, news, nse_ipo
 from . import schemas
 
 NEWS_TTL_SECONDS = 15 * 60
+IPO_TTL_SECONDS = 5 * 60  # subscription numbers update through the bidding day
+LISTINGS_TTL_SECONDS = 6 * 3600
 CHART_TTL_SECONDS = {"1d": 120, "5d": 600}  # intraday refreshes often; daily ranges hourly
 MAX_UPLOAD_BYTES = 60 * 1024 * 1024  # DRHPs run 10–40 MB
 
@@ -45,6 +47,7 @@ def create_app(
     market: MarketData | None = None,
     headlines: Callable[[], list[news.Headline]] | None = None,
     history: Callable[[str, str], list[tuple[int, float]]] | None = None,
+    nse=nse_ipo,
 ) -> FastAPI:
     app = FastAPI(
         title="StockSense API",
@@ -64,6 +67,7 @@ def create_app(
     app.state.headlines = headlines or news.fetch_headlines
     app.state.history = history or chart.history
     app.state.cache = TTLCache()
+    app.state.nse = nse
 
     def market_of(request: Request) -> MarketData:
         return request.app.state.market
@@ -209,6 +213,50 @@ def create_app(
             exposure=geo.exposure(all_events),
             events=[e.to_dict() for e in all_events[:events]],
         )
+
+    # ── IPOs ────────────────────────────────────────────────────────────────
+
+    def _nse(request: Request, key: str, ttl: int, load: Callable):
+        try:
+            return request.app.state.cache.get(key, ttl, load)
+        except nse_ipo.NseUnavailable as exc:
+            raise HTTPException(503, "NSE's IPO data is unavailable right now. Try again in a few minutes.") from exc
+
+    @app.get("/ipos", response_model=schemas.IpoBoard, tags=["ipos"])
+    def ipos(request: Request):
+        """Open and upcoming IPOs on NSE, with live category-wise subscription for open mainboard issues."""
+        nse = request.app.state.nse
+
+        def load():
+            current = {r["symbol"]: r for r in nse.current_issues()}
+            listed = {r["symbol"]: r for r in nse.upcoming_issues()}
+            issues = []
+            for symbol in {**listed, **current}:
+                raw = {**listed.get(symbol, {}), **current.get(symbol, {})}
+                issue = ipo.build_issue(raw)
+                if issue.status == "open" and issue.board == "mainboard":
+                    try:
+                        issue = ipo.build_issue(raw, ipo.parse_subscription(nse.category_subscription(symbol)))
+                    except nse_ipo.NseUnavailable:
+                        pass  # keep the overall figure from current_issues
+                issues.append(issue)
+            return issues
+
+        issues = _nse(request, "ipos", IPO_TTL_SECONDS, load)
+        by_date = lambda i: (i.closes or i.opens or "", i.name)  # noqa: E731
+        return schemas.IpoBoard(
+            updated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            open=[i.to_dict() for i in sorted((i for i in issues if i.status == "open"), key=by_date)],
+            upcoming=[i.to_dict() for i in sorted((i for i in issues if i.status == "upcoming"), key=by_date)],
+        )
+
+    @app.get("/ipos/listings", response_model=list[schemas.Listing], tags=["ipos"])
+    def ipo_listings(request: Request, days: int = Query(90, ge=1, le=365), board: Literal["mainboard", "sme"] | None = None):
+        """How recent IPOs have done: return from issue price to the latest price."""
+        past = _nse(request, "ipo-past", LISTINGS_TTL_SECONDS, request.app.state.nse.past_issues)
+        prices = {s.symbol: s.price for s in market_of(request).stocks() if s.price is not None}
+        rows = ipo.recent_listings(past, prices, days)
+        return [r for r in rows if board is None or r["board"] == board]
 
     # ── prospectus scanner ──────────────────────────────────────────────────
 

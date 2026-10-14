@@ -162,3 +162,50 @@ class Health(BaseModel):
     stale: int
     scored: int
     prices_updated_at: str | None
+
+
+class Subscription(BaseModel):
+    """Times subscribed per category: 2.5 means bids for 2.5× the shares on offer."""
+
+    qib: float | None = Field(description="Qualified institutional buyers")
+    nii: float | None = Field(description="Non-institutional (HNI) investors")
+    retail: float | None
+    employees: float | None
+    total: float | None
+    updated_at: str | None
+
+
+class Demand(BaseModel):
+    level: str = Field(description="strong | moderate | weak | early — demand so far, not a recommendation")
+    summary: str
+
+
+class Ipo(BaseModel):
+    symbol: str
+    name: str
+    board: str = Field(description="mainboard | sme")
+    status: str = Field(description="open | upcoming | closed")
+    opens: str | None
+    closes: str | None
+    price_low: float | None
+    price_high: float | None
+    shares_offered: float | None
+    size_crore: float | None = Field(description="Issue size at the top of the price band, ₹ crore")
+    subscription: Subscription
+    demand: Demand
+
+
+class IpoBoard(BaseModel):
+    updated_at: str
+    open: list[Ipo]
+    upcoming: list[Ipo]
+
+
+class Listing(BaseModel):
+    symbol: str
+    name: str
+    board: str
+    listed: str
+    issue_price: float | None
+    price: float | None = Field(description="Latest price, when StockSense tracks the stock")
+    return_pct: float | None = Field(description="Return from issue price to latest price, %")
