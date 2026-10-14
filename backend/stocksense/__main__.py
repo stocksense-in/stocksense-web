@@ -10,6 +10,7 @@ Jobs
     realtime       stream Upstox ticks into live_prices          (runs until stopped)
     upstox-login   sign in to Upstox and save today's token
     scheduler      run everything above on a market-hours timetable
+    api            serve the REST API (docs at http://localhost:8000/docs)
     rescore        recompute every stored score after a scoring.py change (seconds, no Yahoo)
     snapshot       copy ~70 large caps from Supabase into backend/data/snapshot.json (API offline data)
 
@@ -75,6 +76,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p = jobs.add_parser("scheduler", help="run jobs on a timetable")
     _add_storage(p)
 
+    p = jobs.add_parser("api", help="serve the REST API")
+    p.add_argument("--host", default="127.0.0.1", help="0.0.0.0 to accept outside connections")
+    p.add_argument("--port", type=int, default=8000)
+    p.add_argument("--reload", action="store_true", help="restart on code changes (development)")
+
     p = jobs.add_parser("rescore", help="recompute stored scores without refetching")
     _add_storage(p)
 
@@ -98,6 +104,12 @@ def _store(args: argparse.Namespace) -> Store:
 
 def main() -> None:
     args = _build_parser().parse_args()
+
+    if args.job == "api":
+        import uvicorn
+
+        uvicorn.run("stocksense.api:app", host=args.host, port=args.port, reload=args.reload)
+        return
 
     if args.job == "snapshot":
         from .jobs import snapshot
