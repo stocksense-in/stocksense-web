@@ -114,6 +114,9 @@ Without Docker: `pip install -r requirements.txt` then
 | `python -m stocksense api` | Serves the REST API | Always on, in production |
 | `python -m stocksense lake-prices` | Copies `live_prices` into the local data lake (`clean/prices/date=<IST day>/`) | Daily, after the close |
 | `python -m stocksense lake-query "SQL"` | Runs SQL against the data lake and prints the result | Ad hoc |
+| `python -m stocksense ingest-bhavcopy` | NSE end-of-day prices for every security, 2010 → today, into the lake (resumable; `--start`, `--end`, `--download-only`, `--build-only`, `--rebuild`) | Daily, after ~18:00 IST |
+| `python -m stocksense ingest-corporate-actions` | NSE corporate actions + symbol changes → split/bonus adjustment and the `eod_adjusted` view | Weekly, after `ingest-bhavcopy` |
+| `python -m stocksense check-eod` | Data checks on the price history: gaps, thin days, duplicates, impossible prices, unexplained jumps | After each ingest |
 
 Jobs accept `--symbols INFY TCS` or `--limit 20` to work on a few stocks,
 `--snapshot` to also write results to the JSON file, and `--no-db` to skip Supabase.
@@ -166,6 +169,36 @@ python -m stocksense lake-query "select date, count(*) as n, avg(change_pct) fro
 The ML/GPU environment (`requirements-ml.txt`, PyTorch with CUDA) is separate from
 this one so the API container stays small. See `docs/college-pc-setup.md`.
 
+Reference tables that aren't split by day are stored whole as
+`clean/<dataset>/data.parquet` (`lake.write_table(df, name)`). Jobs running side by
+side wait for DuckDB's file lock instead of failing.
+
+### Price history (M1.1)
+
+| Dataset | What | Built by |
+|---|---|---|
+| `raw/nse_bhavcopy/<day>/` | NSE's daily bhavcopy zip, untouched (old `cm…bhav.csv` format until 5 Jul 2024, UDiFF after) | `ingest-bhavcopy` |
+| `eod_prices` | Every security on the bhavcopy, **as traded**: open, high, low, close, last, prev_close, volume, turnover (₹), trades | `ingest-bhavcopy` |
+| `corporate_actions` | Every NSE corporate action since 2010: kind (split, bonus, dividend, rights…), share multiplier, dividend per share | `ingest-corporate-actions` |
+| `symbol_changes`, `symbol_map` | NSE's renames, resolved to today's symbol (chains followed; a reused symbol only maps its own period) | `ingest-corporate-actions` |
+| `price_adjustments` | One row per split/bonus/consolidation: the multiplier used and how it was checked | `ingest-corporate-actions` |
+| `eod_adjusted` (view) | Prices adjusted for splits and bonuses, under today's symbol | `ingest-corporate-actions` |
+
+**Adjustment.** A price before an ex-date is divided by the number of shares one old
+share became (Bonus 1:1 → 2, split ₹10 → ₹1 → 10), compounded over every later action;
+volume is multiplied by the same factor. The multiplier is read from NSE's wording of
+the action and **checked against the exchange itself**: on the ex-date NSE quotes a
+previous close already adjusted for the action, so (last close before) ÷ (ex-date
+prev_close) is the exchange's own ratio. `price_adjustments.status` says what was used:
+`confirmed` (the two agree within 3%), `exchange` (they disagree or nothing parsed —
+the exchange's ratio wins), `parsed` (no prices around the ex-date) or `skipped`.
+Dividends, rights issues and demergers are recorded but **not** adjusted for yet.
+
+```python
+from stocksense import eod
+eod.adjusted_history(lake, ["TCS", "INFY"], start=date(2015, 1, 1))  # EQ series, adjusted OHLCV
+```
+
 ## Code map
 
 ```
@@ -177,6 +210,8 @@ stocksense/
   symbols.py         NSE equity list (EQUITY_L.csv), cached 24h in _nse_symbols_cache.json
   db.py              write side: Store saves rows to Supabase and/or a JSON snapshot
   lake.py            local data lake: Parquet layout, partitioned writes, DuckDB queries
+  downloads.py       polite, resumable archive downloads into the lake's raw/ folder
+  eod.py             price history: split/bonus adjustment, symbol continuity, data checks
   market.py          read side: typed Stock/Quote objects, caching, snapshot fallback, staleness
   analytics.py       screener, movers, breadth, sector moves, search, peers, score breakdown
   geo.py             news → topics → affected sectors → sector exposure
@@ -187,6 +222,8 @@ stocksense/
     chart.py         price history from Yahoo's chart endpoint
     news.py          RSS headlines (Economic Times, Livemint, Business Standard, Google News)
     nse_ipo.py       NSE IPO endpoints
+    bhavcopy.py      NSE end-of-day bhavcopy (both archive formats)
+    nse_corporate.py NSE corporate actions and symbol changes; split/bonus ratio parsing
     screener.py      Screener.in scraping — fallback for promoter holding / sales growth
     fallbacks.py     hardcoded large-cap ownership values (last resort, goes stale)
     upstox.py        OAuth token storage, REST quotes, WebSocket URL
