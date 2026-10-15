@@ -82,13 +82,16 @@ def test_symbol_map_follows_chains_and_respects_reuse():
 
 
 def prices(symbol, rows):
-    return pd.DataFrame([{"date": pd.Timestamp(d), "symbol": symbol, "close": c, "prev_close": p} for d, c, p in rows])
+    """rows: (date, open, close)."""
+    return pd.DataFrame([{"date": pd.Timestamp(d), "symbol": symbol, "open": o, "close": c} for d, o, c in rows])
 
 
-def test_observed_ratio_uses_exchange_adjusted_prev_close():
+def test_observed_ratio_is_the_overnight_jump():
+    # Real bhavcopy rows: prev_close on the ex-date is NOT adjusted (27,116.40), so the
+    # check uses last close before / open on the ex-date.
     acts = pd.DataFrame({"symbol": ["NESTLEIND"], "ex_date": [date(2024, 1, 5)]})
-    px = prices("NESTLEIND", [("2024-01-04", 25600.0, 25500.0), ("2024-01-05", 2580.0, 2560.0)])
-    assert eod.observed_ratios(acts, px).iloc[0] == pytest.approx(10.0)
+    px = prices("NESTLEIND", [("2024-01-04", 26851.05, 27116.40), ("2024-01-05", 2754.00, 2666.40)])
+    assert eod.observed_ratios(acts, px).iloc[0] == pytest.approx(27116.40 / 2754.00)
     # No price around the ex-date → unknown.
     far = prices("NESTLEIND", [("2023-01-02", 1, 1)])
     assert pd.isna(eod.observed_ratios(acts, far).iloc[0])
@@ -96,14 +99,27 @@ def test_observed_ratio_uses_exchange_adjusted_prev_close():
 
 def test_choose_multipliers():
     acts = pd.DataFrame({
-        "symbol": list("ABCDE"),
-        "parsed": [2.0, 230.0, None, 5.0, None],
-        "observed": [2.01, 23.0, 1.5, None, 1.001],
+        "symbol": list("ABCDEFGHI"),
+        "parsed": [2.0, 230.0, None, 5.0, None, 11.0, 1.5, None, None],
+        "observed": [2.01, 23.0, 1.5, None, 1.001, 9.39, 0.99, 1.10, 1.10],
+        "price_only": [False] * 7 + [True, True],
+        "subject": ["Bonus 1:1"] * 7 + ["Demerger", "Scheme Of Arrangement"],
     })
     out = eod.choose_multipliers(acts)
-    assert out["status"].tolist() == ["confirmed", "exchange", "exchange", "parsed", "skipped"]
-    assert out["multiplier"].tolist()[:4] == [2.0, 23.0, 1.5, 5.0]
-    assert pd.isna(out["multiplier"].iloc[4])
+    assert out["status"].tolist() == [
+        "confirmed",  # matches the jump
+        "exchange",   # misread ratio, the jump is clear
+        "exchange",   # nothing parsed, clear jump
+        "parsed",     # no prices to check against
+        "skipped",    # nothing parsed, no jump
+        "likely",     # VSTIND-style: right direction, the stock also rallied 17%
+        "no_jump",    # parsed but the price didn't move: not applied
+        "demerger",   # named demerger, 10% overnight drop
+        "skipped",    # vague scheme, small move: probably a merger
+    ]
+    m = out["multiplier"].tolist()
+    assert m[:4] == [2.0, 23.0, 1.5, 5.0] and m[5] == 11.0 and m[7] == pytest.approx(1.10)
+    assert pd.isna(m[4]) and pd.isna(m[6]) and pd.isna(m[8])
 
 
 def test_factor_ranges_compound_later_actions():
@@ -112,8 +128,29 @@ def test_factor_ranges_compound_later_actions():
                         "multiplier": [2.0, 2.0, 2.0]})
     f = eod.factor_ranges(adj)
     assert f["factor"].tolist() == [8.0, 4.0, 2.0]
+    assert f["volume_factor"].tolist() == [8.0, 4.0, 2.0]
     assert f["valid_to"].tolist() == [date(2014, 12, 2), date(2015, 6, 15), date(2018, 9, 4)]
     assert f["valid_from"].iloc[0] == eod.BEGINNING and f["valid_from"].iloc[1] == date(2014, 12, 2)
+
+
+def test_demergers_adjust_price_but_not_volume():
+    adj = pd.DataFrame({"symbol": ["RELIANCE", "RELIANCE"], "ex_date": [date(2023, 7, 20), date(2024, 10, 28)],
+                        "multiplier": [1.1, 2.0], "price_only": [True, False]})
+    f = eod.factor_ranges(adj)
+    assert f["factor"].tolist() == [pytest.approx(2.2), 2.0]
+    assert f["volume_factor"].tolist() == [2.0, 2.0]
+
+
+def test_infer_splits_only_round_ratios_without_a_recorded_action():
+    jumps = pd.DataFrame({
+        "symbol": ["JSWSTEEL", "CRASHCO", "TCS"],
+        "ex_date": [date(2017, 1, 4), date(2018, 9, 21), date(2018, 5, 31)],
+        "observed": [9.86, 1.74, 1.99],
+    })
+    known = pd.DataFrame({"symbol": ["TCS"], "ex_date": [date(2018, 5, 31)]})
+    out = eod.infer_splits(jumps, known)
+    assert out["symbol"].tolist() == ["JSWSTEEL"] and out["multiplier"].tolist() == [10]
+    assert out["status"].tolist() == ["inferred"]
 
 
 def test_adjusted_view_end_to_end(tmp_path):
@@ -127,12 +164,15 @@ def test_adjusted_view_end_to_end(tmp_path):
                            "prev_close": [prev], "volume": [100], "turnover": [close * 100], "trades": [10]})
         df["volume"] = df["volume"].astype("Int64")
         lake.write_parquet(df, "eod_prices", day=d)
-    actions = nc.actions_frame([{"symbol": "TCS", "series": "EQ", "exDate": "31-May-2018",
-                                 "subject": "Bonus 1:1 /Dividend- Rs 29 Per Share"}])
+    actions = nc.actions_frame([
+        {"symbol": "TCS", "series": "EQ", "exDate": "31-May-2018", "subject": "Bonus 1:1 /Dividend- Rs 29 Per Share"},
+        {"symbol": "TCS", "series": "EQ", "exDate": "15-Jun-2018", "subject": "Bonus 1:1"},  # not yet in the data
+    ])
     eod.build_adjustments(lake, actions, changes(("OLDTCS", "TCS", date(2018, 1, 1))))
 
-    adj = lake.query("select price_adjustments.status, observed from price_adjustments")
-    assert adj["status"].tolist() == ["confirmed"] and adj["observed"].iloc[0] == pytest.approx(2.0, rel=0.01)
+    adj = lake.query("select status, observed from price_adjustments order by ex_date")
+    assert adj["status"].tolist() == ["confirmed", "upcoming"]
+    assert adj["observed"].iloc[0] == pytest.approx(3500 / 1760)
     out = eod.adjusted_history(lake, ["TCS"])
     assert out["traded_symbol"].tolist() == ["OLDTCS", "TCS", "TCS"]
     assert out["close"].tolist() == [1300.0, 1750.0, 1760.0]
@@ -140,5 +180,5 @@ def test_adjusted_view_end_to_end(tmp_path):
 
     report = eod.check(lake)
     assert report["trading_days"] == 3 and report["duplicates"] == 0
-    assert report["adjustments"] == {"confirmed": 1}
+    assert report["adjustments"] == {"confirmed": 1, "upcoming": 1}
     assert report["unexplained_moves_over_40pct"] == 0
