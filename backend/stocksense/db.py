@@ -55,6 +55,18 @@ def fetch_stock_rows(symbols: list[str]) -> dict[str, dict]:
     return rows
 
 
+def fetch_all(table: str, columns: str = "*", order: str = "symbol", page_size: int = 1000) -> list[dict]:
+    """Every row of a table, paging past PostgREST's 1,000-row limit (ordered, so pages don't overlap)."""
+    client = supabase_client()
+    rows: list[dict] = []
+    for offset in range(0, 1_000_000, page_size):
+        page = client.table(table).select(columns).order(order).range(offset, offset + page_size - 1).execute().data
+        rows.extend(page)
+        if len(page) < page_size:
+            break
+    return rows
+
+
 def _missing_column(exc: Exception) -> str | None:
     """Column name from PostgREST's "Could not find the 'x' column of 't'" error, if that's the error."""
     match = re.search(r"Could not find the '([^']+)' column", str(exc))

@@ -112,9 +112,59 @@ Without Docker: `pip install -r requirements.txt` then
 | `python -m stocksense cleanup` | Lists stocks no longer on NSE's list; `--apply` deletes them | Occasionally |
 | `python -m stocksense snapshot` | Copies ~70 large caps into `data/snapshot.json`, the API's offline data | After a fundamentals run |
 | `python -m stocksense api` | Serves the REST API | Always on, in production |
+| `python -m stocksense lake-prices` | Copies `live_prices` into the local data lake (`clean/prices/date=<IST day>/`) | Daily, after the close |
+| `python -m stocksense lake-query "SQL"` | Runs SQL against the data lake and prints the result | Ad hoc |
 
 Jobs accept `--symbols INFY TCS` or `--limit 20` to work on a few stocks,
 `--snapshot` to also write results to the JSON file, and `--no-db` to skip Supabase.
+
+## Data lake (engine machine only)
+
+Long histories (price history, GDELT, filings, features, model weights) are too big
+for Supabase's free tier, so the engine machine keeps them in a local lake: Parquet
+files plus a DuckDB catalogue. Only finished, publishable results go to Supabase.
+The API and its container don't use the lake.
+
+Set `STOCKSENSE_LAKE_DIR` in `backend/.env` to a folder **outside the repo** with a few
+hundred GB free (college PC: `E:\stocksense\lake`). The layout:
+
+```
+<STOCKSENSE_LAKE_DIR>/
+  raw/<source>/<YYYY-MM-DD>/…                       files exactly as downloaded (csv, zip, json, pdf)
+  clean/<dataset>/date=<YYYY-MM-DD>/part-0.parquet  typed tables, one folder per day
+  features/<name>/…                                 model inputs built from clean/
+  models/<name>/<version>/…                         weights, metrics, eval reports
+  catalog.duckdb                                    one DuckDB view per clean dataset
+```
+
+- **Rerunnable.** Writing a day again replaces that day's partition (atomically), so a
+  job that crashed halfway can simply run again.
+- **Typed date.** The `date=` folder becomes a `DATE` column in queries.
+- **Schemas can grow.** Days written with extra columns read fine next to older days
+  (missing values are `NULL`).
+- **Names** of sources and datasets are lowercase `snake_case`; they become folder and
+  view names.
+
+From code (`stocksense/lake.py`):
+
+```python
+from stocksense.lake import Lake
+
+lake = Lake.from_settings()                         # reads STOCKSENSE_LAKE_DIR
+lake.write_parquet(df, "prices", day="2026-10-14")  # one day, e.g. a snapshot
+lake.write_parquet(bars, "bars", date_col="ts")     # split by a timestamp column (UTC date)
+lake.raw_dir("gdelt", "2026-10-14")                 # where to save raw downloads
+lake.query("select * from prices where date = ?", [date(2026, 10, 14)])  # → DataFrame
+```
+
+From the shell, or the DuckDB CLI pointed at `catalog.duckdb`:
+
+```bash
+python -m stocksense lake-query "select date, count(*) as n, avg(change_pct) from prices group by date order by date"
+```
+
+The ML/GPU environment (`requirements-ml.txt`, PyTorch with CUDA) is separate from
+this one so the API container stays small. See `docs/college-pc-setup.md`.
 
 ## Code map
 
@@ -126,6 +176,7 @@ stocksense/
   sectors.py         Yahoo sector/industry → StockSense sector code
   symbols.py         NSE equity list (EQUITY_L.csv), cached 24h in _nse_symbols_cache.json
   db.py              write side: Store saves rows to Supabase and/or a JSON snapshot
+  lake.py            local data lake: Parquet layout, partitioned writes, DuckDB queries
   market.py          read side: typed Stock/Quote objects, caching, snapshot fallback, staleness
   analytics.py       screener, movers, breadth, sector moves, search, peers, score breakdown
   geo.py             news → topics → affected sectors → sector exposure

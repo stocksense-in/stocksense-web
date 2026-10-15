@@ -51,6 +51,8 @@ class Settings:
     upstox_api_secret: str
     upstox_redirect_uri: str
     upstox_access_token: str
+    # Root of the local data lake (Parquet + DuckDB) on the engine machine. See lake.py.
+    lake_dir: str = ""
 
     @property
     def has_supabase(self) -> bool:
@@ -77,4 +79,5 @@ def get_settings() -> Settings:
         upstox_redirect_uri=_first_env("UPSTOX_REDIRECT_URI", "NEXT_PUBLIC_UPSTOX_REDIRECT_URI")
         or "http://localhost:8000/callback",
         upstox_access_token=_first_env("UPSTOX_ACCESS_TOKEN", "NEXT_PUBLIC_UPSTOX_ACCESS_TOKEN"),
+        lake_dir=_first_env("STOCKSENSE_LAKE_DIR"),
     )
