@@ -8,7 +8,8 @@ The root comes from STOCKSENSE_LAKE_DIR (backend/.env) and must be outside the r
     <root>/
       raw/<source>/<YYYY-MM-DD>/...                     files exactly as downloaded (csv, zip, json, pdf)
       clean/<dataset>/date=<YYYY-MM-DD>/part-0.parquet  typed tables, one folder per day
-      features/<name>/...                               model inputs built from clean/
+      clean/<dataset>/data.parquet                      small tables not split by day (reference data)
+      features/<name>/...                             model inputs built from clean/
       models/<name>/<version>/...                       weights, metrics, eval reports
       catalog.duckdb                                    one view per clean dataset
 
@@ -22,6 +23,7 @@ Writing a day again replaces that day's partition, so jobs can be rerun safely.
 from __future__ import annotations
 
 import re
+import time
 import uuid
 from datetime import date, datetime
 from pathlib import Path
@@ -35,6 +37,7 @@ from .log import get_logger
 log = get_logger(__name__)
 
 PARTITION = "date"  # hive-style partition key: clean/<dataset>/date=YYYY-MM-DD/
+TABLE_FILE = "data.parquet"  # an unpartitioned table: clean/<dataset>/data.parquet
 CATALOG_FILE = "catalog.duckdb"
 # Dataset and source names become folder names and DuckDB view names.
 _NAME = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -61,6 +64,14 @@ def _as_date(value: date | datetime | str) -> date:
 def _sql_string(path: Path) -> str:
     """A path as a DuckDB string literal (forward slashes work on Windows too)."""
     return "'" + path.as_posix().replace("'", "''") + "'"
+
+
+def _atomic_parquet(df: pd.DataFrame, target: Path) -> None:
+    """Write via a temp file and rename: readers see the old file or the new one, never half."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = target.parent / f".tmp-{uuid.uuid4().hex}"
+    df.to_parquet(tmp, index=False)
+    tmp.replace(target)
 
 
 class Lake:
@@ -131,7 +142,7 @@ class Lake:
         return sorted(
             d.name
             for d in self.clean.iterdir()
-            if d.is_dir() and _NAME.match(d.name) and any(d.glob("*/*.parquet"))
+            if d.is_dir() and _NAME.match(d.name) and (any(d.glob("*/*.parquet")) or (d / TABLE_FILE).exists())
         )
 
     # ── writing ─────────────────────────────────────────────────────────────
@@ -143,11 +154,13 @@ class Lake:
         *,
         day: date | datetime | str | None = None,
         date_col: str | None = None,
+        refresh: bool = True,
     ) -> list[Path]:
         """
         Save `df` under clean/<dataset>/date=YYYY-MM-DD/, replacing whatever that
         day held before. Give either `day` (every row belongs to one day, e.g. a
         daily snapshot) or `date_col` (split rows by that column's UTC date).
+        Bulk loads pass refresh=False and call refresh_catalog() once at the end.
         Returns the files written.
         """
         _check_name("dataset", dataset)
@@ -167,37 +180,81 @@ class Lake:
         for d, part in groups:
             # The folder name carries the date; a column of the same name would clash with it.
             part = part.drop(columns=[PARTITION], errors="ignore")
-            folder = self.clean / dataset / f"{PARTITION}={d.isoformat()}"
-            folder.mkdir(parents=True, exist_ok=True)
-            target = folder / "part-0.parquet"
-            tmp = folder / f".tmp-{uuid.uuid4().hex}"
-            part.to_parquet(tmp, index=False)
-            tmp.replace(target)  # atomic: readers see the old day or the new one, never half
-            for old in folder.glob("*.parquet"):
+            target = self.partition_path(dataset, d)
+            _atomic_parquet(part, target)
+            for old in target.parent.glob("*.parquet"):
                 if old != target:
                     old.unlink()
             written.append(target)
 
-        self.refresh_catalog()
-        log.info(f"Lake: wrote {len(df)} rows to clean/{dataset} ({len(written)} day partition(s))")
+        if refresh:
+            self.refresh_catalog()
+            log.info(f"Lake: wrote {len(df)} rows to clean/{dataset} ({len(written)} day partition(s))")
         return written
+
+    def write_table(self, df: pd.DataFrame, dataset: str, *, refresh: bool = True) -> Path:
+        """
+        Save a whole small table (not split by day) as clean/<dataset>/data.parquet,
+        replacing the previous version. For reference data such as corporate actions.
+        """
+        _check_name("dataset", dataset)
+        folder = self.clean / dataset
+        if any(folder.glob("*/*.parquet")):
+            raise ValueError(f"clean/{dataset} already holds day partitions")
+        target = folder / TABLE_FILE
+        _atomic_parquet(df, target)
+        if refresh:
+            self.refresh_catalog()
+        log.info(f"Lake: wrote {len(df)} rows to clean/{dataset}/{TABLE_FILE}")
+        return target
+
+    def partition_path(self, dataset: str, day: date | datetime | str) -> Path:
+        """The file write_parquet uses for one day of a dataset (it may not exist yet)."""
+        return self.clean / _check_name("dataset", dataset) / f"{PARTITION}={_as_date(day).isoformat()}" / "part-0.parquet"
+
+    def connect(self, read_only: bool = True, wait_seconds: float = 120) -> duckdb.DuckDBPyConnection:
+        """
+        Open catalog.duckdb. DuckDB lets one process write the file at a time; jobs
+        running side by side (and queries meanwhile) wait for the lock instead of failing.
+        """
+        deadline = time.monotonic() + wait_seconds
+        while True:
+            try:
+                return duckdb.connect(str(self.catalog_path), read_only=read_only)
+            except duckdb.IOException as exc:
+                if "lock" not in str(exc).lower() or time.monotonic() > deadline:
+                    raise
+                time.sleep(0.5)
 
     def refresh_catalog(self) -> None:
         """(Re)create one view per clean dataset in catalog.duckdb."""
         self.ensure()
-        with duckdb.connect(str(self.catalog_path)) as con:
+        with self.connect(read_only=False) as con:
             for name in self.datasets():
-                files = self.clean / name / "*" / "*.parquet"
-                con.execute(
-                    f"create or replace view {name} as select * from read_parquet("
-                    f"{_sql_string(files)}, hive_partitioning = true, union_by_name = true)"
-                )
+                table = self.clean / name / TABLE_FILE
+                if table.exists():
+                    source = f"read_parquet({_sql_string(table)})"
+                else:
+                    files = self.clean / name / "*" / "*.parquet"
+                    source = f"read_parquet({_sql_string(files)}, hive_partitioning = true, union_by_name = true)"
+                con.execute(f"create or replace view {name} as select * from {source}")
 
     # ── reading ─────────────────────────────────────────────────────────────
 
-    def query(self, sql: str, params: list | None = None) -> pd.DataFrame:
-        """Run SQL against the catalogue (each clean dataset is a view) and return a DataFrame."""
+    def query(self, sql: str, params: list | None = None, frames: dict[str, pd.DataFrame] | None = None) -> pd.DataFrame:
+        """
+        Run SQL against the catalogue (each clean dataset is a view) and return a
+        DataFrame. `frames` makes in-memory DataFrames joinable by name for this query.
+        """
         if not self.catalog_path.exists():
             self.refresh_catalog()
-        with duckdb.connect(str(self.catalog_path), read_only=True) as con:
+        with self.connect() as con:
+            for name, frame in (frames or {}).items():
+                con.register(name, frame)
             return con.execute(sql, params or []).df()
+
+    def execute(self, sql: str) -> None:
+        """Run a statement that changes the catalogue (e.g. create a derived view)."""
+        self.ensure()
+        with self.connect(read_only=False) as con:
+            con.execute(sql)
