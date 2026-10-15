@@ -135,6 +135,57 @@ class Geopolitics(BaseModel):
     events: list[NewsEvent]
 
 
+class AnalogueCell(BaseModel):
+    """How a sector did after past events of one type, versus NIFTY 50."""
+    sector: str
+    horizon_days: int
+    n: int = Field(description="Past occurrences with data for this sector")
+    mean_excess_pct: float = Field(description="Average return minus NIFTY 50's, in percent")
+    median_excess_pct: float
+    hit_rate: float = Field(description="Share of occurrences where the sector beat NIFTY 50")
+    ci_low_pct: float = Field(description="95% confidence interval of the mean, low end")
+    ci_high_pct: float
+    baseline_pct: float = Field(description="The sector's average excess return over all days")
+    notable: bool = Field(description="The confidence interval excludes the baseline")
+
+
+class AnalogueEvidence(BaseModel):
+    actors: str
+    place: str | None
+    articles: int
+    url: str
+
+
+class AnalogueOccurrence(BaseModel):
+    date: str
+    evidence: list[AnalogueEvidence]
+
+
+class AnalogueSummary(BaseModel):
+    code: str
+    label: str
+    rule: str
+    occurrences: int
+    first: str | None
+    last: str | None
+
+
+class AnalogueDetail(AnalogueSummary):
+    recent: list[AnalogueOccurrence]
+    sectors: list[AnalogueCell]
+
+
+class Analogues(BaseModel):
+    generated_at: str
+    data_from: str
+    data_through: str
+    benchmark: str
+    horizons_days: list[int]
+    method: str
+    sector_sources: dict[str, str]
+    events: list[AnalogueSummary]
+
+
 class Evidence(BaseModel):
     page: int
     quote: str

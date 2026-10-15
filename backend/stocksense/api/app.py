@@ -8,16 +8,18 @@ State lives on app.state so tests can inject fixtures:
 
 from __future__ import annotations
 
+import json
 import threading
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Callable, Literal
 
 from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from .. import analytics, geo, ipo, rhp
-from ..config import get_settings
+from ..config import DATA_DIR, get_settings
 from ..market import MarketData, Stock, TTLCache
 from ..scoring import score_stock
 from ..sectors import SECTOR_LABELS
@@ -30,6 +32,7 @@ LISTINGS_TTL_SECONDS = 6 * 3600
 CHART_TTL_SECONDS = {"1d": 120, "5d": 600}  # intraday refreshes often; daily ranges hourly
 MAX_UPLOAD_BYTES = 60 * 1024 * 1024  # DRHPs run 10–40 MB
 MAX_CONCURRENT_SCANS = 2  # PDF text extraction is CPU-heavy; don't let a burst starve other requests
+ANALOGUES_PATH = DATA_DIR / "geo_analogues.json"  # written by `python -m stocksense event-study`
 
 Range = Literal["1d", "5d", "1mo", "6mo", "1y", "5y"]
 SortField = Literal["score", "market_cap", "change_pct", "pe", "roe", "de", "name"]
@@ -46,6 +49,20 @@ def _verdict(score: int | None) -> str | None:
     return "Strong" if score >= 65 else "Fair" if score >= 45 else "Weak"
 
 
+_analogue_cache: dict = {}
+
+
+def load_analogues(path: Path = ANALOGUES_PATH) -> dict | None:
+    """The published event study (backend/data/geo_analogues.json), re-read only when the file changes."""
+    try:
+        mtime = path.stat().st_mtime
+    except FileNotFoundError:
+        return None
+    if _analogue_cache.get("mtime") != mtime:
+        _analogue_cache.update(mtime=mtime, doc=json.loads(path.read_text(encoding="utf-8")))
+    return _analogue_cache["doc"]
+
+
 def _warm(app: FastAPI) -> None:
     try:
         app.state.market.stocks()
@@ -58,6 +75,7 @@ def create_app(
     headlines: Callable[[], list[news.Headline]] | None = None,
     history: Callable[[str, str], list[tuple[int, float]]] | None = None,
     nse=nse_ipo,
+    analogues: Callable[[], dict | None] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -85,6 +103,7 @@ def create_app(
     app.state.history = history or chart.history
     app.state.cache = TTLCache()
     app.state.nse = nse
+    app.state.analogues = analogues or load_analogues
     app.state.scan_slots = threading.BoundedSemaphore(MAX_CONCURRENT_SCANS)
 
     def market_of(request: Request) -> MarketData:
@@ -231,6 +250,41 @@ def create_app(
             exposure=geo.exposure(all_events),
             events=[e.to_dict() for e in all_events[:events]],
         )
+
+    def _analogues(request: Request) -> dict:
+        doc = request.app.state.analogues()
+        if not doc:
+            raise HTTPException(503, "The historical event study hasn't been published yet.")
+        return doc
+
+    @app.get("/geopolitics/analogues", response_model=schemas.Analogues, tags=["geopolitics"])
+    def analogues(request: Request):
+        """
+        Event types the historical event study covers (crude spikes, rupee moves,
+        conflict flare-ups, …), how often each happened and over which period.
+        """
+        doc = _analogues(request)
+        return {**doc, "events": [{k: e[k] for k in schemas.AnalogueSummary.model_fields} for e in doc["events"]]}
+
+    @app.get("/geopolitics/analogues/{code}", response_model=schemas.AnalogueDetail, tags=["geopolitics"])
+    def analogue(
+        request: Request,
+        code: str,
+        horizon: int | None = Query(None, description="Only this horizon (1, 3 or 10 trading days)"),
+        notable: bool = Query(False, description="Only cells whose confidence interval excludes the baseline"),
+    ):
+        """
+        What each sector did versus NIFTY 50 after past events of this type: average
+        and median excess return, hit rate, 95% confidence interval and sample size,
+        plus the latest occurrences with news evidence. Historical tendency, not a forecast.
+        """
+        event = next((e for e in _analogues(request)["events"] if e["code"] == code), None)
+        if event is None:
+            raise HTTPException(404, f"Unknown event type: {code}")
+        cells = [c for c in event["sectors"]
+                 if (horizon is None or c["horizon_days"] == horizon) and (not notable or c["notable"])]
+        cells.sort(key=lambda c: (c["horizon_days"], c["mean_excess_pct"]))
+        return {**event, "sectors": cells}
 
     # ── IPOs ────────────────────────────────────────────────────────────────
 
