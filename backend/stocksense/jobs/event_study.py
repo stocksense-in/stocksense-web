@@ -59,9 +59,12 @@ GOLD_SECTOR = "Gold & Silver"  # gold in rupees: GOLD (USD) × USDINR
 MIDDLE_EAST = ("IS", "IR", "IZ", "SY", "LE", "YM", "SA", "JO", "KU", "QA", "AE", "BA", "MU", "GZ", "WE")
 _HOSTILE = "(" + ", ".join(f"'{r}'" for r in sorted(CONFLICT_ROOTS)) + ")"
 _ME = "(" + ", ".join(f"'{c}'" for c in MIDDLE_EAST) + ")"
+# Hostile events between India and Pakistan or China (CAMEO actor country codes).
+_INDIA_BORDER = (f"root in {_HOSTILE} and ((actor1_country = 'IND' and actor2_country in ('PAK', 'CHN')) "
+                 "or (actor2_country = 'IND' and actor1_country in ('PAK', 'CHN')))")
 EVIDENCE_FILTERS = {
     "conflict": "quad = 4",
-    "india": f"india and root in {_HOSTILE}",
+    "india": _INDIA_BORDER,
     "mideast": f"quad = 4 and country in {_ME}",
     "sanctions": "root = '16'",
 }
@@ -129,6 +132,18 @@ def load_inputs(lake: Lake) -> dict[str, pd.Series]:
         total = g["total"].where(g["total"] > 0)
         for col in ("conflict", "india_hostile", "mideast", "sanctions"):
             inputs[f"{col}_share"] = (g[col].fillna(0) / total).dropna()
+    if {"gdelt_daily", "gdelt_events"} <= set(lake.datasets()):
+        # Articles about India–Pakistan/China hostility, as a share of all articles that day.
+        b = lake.query(f"""
+            select d.date, coalesce(e.arts, 0) as arts, d.total from
+              (select date, sum(articles) as total from gdelt_daily group by date) d
+            left join (select date, sum(articles) as arts from gdelt_events where {_INDIA_BORDER} group by date) e
+              on e.date = d.date
+            order by d.date
+        """)
+        b["date"] = pd.to_datetime(b["date"])
+        b = b.set_index("date")
+        inputs["india_border_share"] = (b["arts"] / b["total"].where(b["total"] > 0)).dropna()
     return inputs
 
 

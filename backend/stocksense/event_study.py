@@ -159,9 +159,12 @@ EVENT_TYPES: list[EventType] = [
     EventType("global_conflict", "Global conflict flare-up",
               "Share of world news coverage about armed conflict 3σ above its 90-day norm",
               lambda x: spike_dates(_series(x, "conflict_share")), evidence="conflict"),
-    EventType("india_tension", "India security tension",
-              "Share of coverage about hostile acts involving India 3σ above its 90-day norm",
-              lambda x: spike_dates(_series(x, "india_hostile_share")), evidence="india"),
+    # Hostile acts between India and Pakistan or China, not "anything hostile involving an
+    # Indian actor" (domestic police/protest news drowned out cross-border crises). Catches
+    # 7 of 9 known episodes 2016–2025 (misses Uri — attackers coded as militants — and Doklam).
+    EventType("india_tension", "India–Pakistan/China tension",
+              "Share of coverage about hostile acts between India and Pakistan or China 3σ above its 90-day norm",
+              lambda x: spike_dates(_series(x, "india_border_share")), evidence="india"),
     EventType("middle_east_conflict", "Middle East conflict flare-up",
               "Share of coverage about armed conflict in the Middle East 3σ above its 90-day norm",
               lambda x: spike_dates(_series(x, "mideast_share")), evidence="mideast"),
