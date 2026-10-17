@@ -182,6 +182,10 @@ class Analogues(BaseModel):
     benchmark: str
     horizons_days: list[int]
     method: str
+    notable_share: dict[str, float] = Field(
+        default_factory=dict,
+        description="Per horizon (days), share of sector cells flagged notable; ~0.05 is what chance alone gives",
+    )
     sector_sources: dict[str, str]
     events: list[AnalogueSummary]
 

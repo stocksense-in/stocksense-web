@@ -15,7 +15,7 @@ def cell(sector, horizon, mean, notable=False):
 
 DOC = {
     "generated_at": "2026-10-16T22:00:00+00:00", "data_from": "2012-01-02", "data_through": "2026-10-15",
-    "benchmark": "NIFTY 50", "horizons_days": [1, 3, 10], "method": "…",
+    "benchmark": "NIFTY 50", "horizons_days": [1, 3, 10], "method": "…", "notable_share": {"1": 0.12},
     "sector_sources": {"Aviation": "equal-weight basket: INDIGO, SPICEJET"},
     "events": [{
         "code": "crude_spike", "label": "Crude oil spike", "rule": "Brent up 5% or more in a day",
@@ -33,7 +33,7 @@ def client(market):
 
 def test_list_event_types(client):
     body = client.get("/geopolitics/analogues").json()
-    assert body["data_through"] == "2026-10-15"
+    assert body["data_through"] == "2026-10-15" and body["notable_share"] == {"1": 0.12}
     assert body["events"] == [{"code": "crude_spike", "label": "Crude oil spike", "rule": "Brent up 5% or more in a day",
                                "occurrences": 14, "first": "2012-06-29", "last": "2026-06-13"}]
 
