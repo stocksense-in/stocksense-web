@@ -32,14 +32,14 @@
 
 ---
 
-## 2. Where things stand (14 Oct 2026)
+## 2. Where things stand (18 Oct 2026)
 
 | Area | State |
 |---|---|
-| Data pipeline (`backend/stocksense`) | Prices, fundamentals, ownership, scores for ~2,600 NSE stocks → Supabase. Upstox realtime feed. |
+| Data pipeline (`backend/stocksense`) | Prices, fundamentals, ownership, scores for ~2,600 NSE stocks → Supabase. Upstox realtime feed. Engine lake (college PC): NSE prices 2010→ (adjusted), every NSE index 2012→, global macro, GDELT 2013→ (~45 GB). |
 | REST API (`backend/stocksense/api`) | Overview, screener, stock detail + score breakdown + peers, history, news/geopolitics (rules), IPOs, prospectus scanner. Not deployed. |
 | Frontend (`frontend/`) | Golden UI. Dashboard index prices are live; other panels use sample data in `lib/constants.ts`. |
-| Geopolitics engine | Keyword rules over live RSS (`backend/stocksense/geo.py`). The baseline the models must beat. |
+| Geopolitics engine | Live: keyword rules over RSS (`geo.py`). Historical: event study (M3.1) — what each sector did after crude, rupee, US-market and conflict events since 2012 (`/geopolitics/analogues`). Market events show real effects; news-coverage events are near chance level. |
 | Infra | Supabase free tier. CI on every PR (`.github/workflows/ci.yml`). Scheduled pipeline ready (`pipeline.yml`), waiting for repo secrets. No deployment yet. |
 | College PC (engine) | Set up 14 Oct (M0.1–M0.3): repo at `C:\Users\PRO-LAB-2\stocksense-web`, Python 3.12 envs `backend/.venv` (API) and `backend/.venv-ml` (PyTorch CUDA 13.2), A5000 verified, every data source reachable without a proxy, data lake at `E:\stocksense\lake` with daily `live_prices` snapshots (`lake-prices`). No scheduler, backups or remote access yet (M0.4, M0.5). Details: `docs/college-pc-setup.md`. |
 
@@ -164,7 +164,8 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 
 ### Phase 3 — Intelligence (GPU)
 
-- [ ] **M3.1 Event study engine (no ML).** For each event type (crude spike, conflict, rate change, rupee move, tariff…), sector excess returns vs NIFTY over 1/3/10 days across history. *Accept:* "historical analogues" table per event type with sample sizes and confidence intervals; served by the API.
+- [x] **M3.1 Event study engine (no ML).** For each event type (crude spike, conflict, rate change, rupee move, tariff…), sector excess returns vs NIFTY over 1/3/10 days across history. *Accept:* "historical analogues" table per event type with sample sizes and confidence intervals; served by the API.
+  *Done 18 Oct: 12 event types (crude, rupee, US markets, gold, GDELT conflict/India–Pakistan/China/Middle East/sanctions), 481 episodes since 2012, n + 95% CI per sector and horizon; `/geopolitics/analogues`. Rate changes and tariffs wait for M1.6's RBI data and a headline archive (M3.2). Results: `docs/event-study-2026-10.md`.*
 - [ ] **M3.2 Labelled dataset.** Local LLM (e.g. Qwen 2.5 14B / Llama 3.1 8B) labels headlines + GDELT events with topic, region, affected sectors, direction. *Accept:* ≥50k labelled items; 500-item human-checked sample with measured agreement.
 - [ ] **M3.3 Geopolitics models.** Fine-tuned FinBERT/DeBERTa-v3 classifier (topic/sector/direction) + embedding-based analogue retrieval + gradient-boosted model predicting next-day sector excess returns from daily features. *Accept:* see §6; beats the keyword-rule baseline (`geo.py`) on held-out later periods.
 - [ ] **M3.4 Nightly signals.** Score new news, write `geo_signals` (sector, effect, strength, analogues, evidence links) to Supabase; `/geopolitics` serves models instead of rules. *Accept:* runs unattended for a week; model version recorded with every signal.
@@ -237,4 +238,5 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 | 2026-10-14 | Direction: internal Indian-markets terminal + public StockSense on the publishable subset. Training/inference on the college A5000; public site never depends on it. |
 | 2026-10-14 | College PC is the engine: Windows 11, Xeon W-2295 (18 cores), 128 GB RAM, RTX A5000 24 GB (driver 596.51, CUDA 13.2). Data lake root `E:\stocksense\lake` (Parquet + DuckDB, `STOCKSENSE_LAKE_DIR`). ML in a separate `backend/.venv-ml` (`requirements-ml.txt`, PyTorch 2.14.1+cu132) so the API env stays identical to its container. |
 | 2026-10-18 | Price history from NSE bhavcopy (not Yahoo). Adjustments read from NSE's corporate-action wording and checked against the overnight price jump (the bhavcopy's prev_close is *not* adjusted on ex-dates); demergers and rights issues adjusted on price only; splits missing from the feed inferred from round overnight ratios. Dividends not adjusted. |
+| 2026-10-18 | Event study before models (M3.1): 12 event types, declustered, bootstrap CIs, published as a JSON the API serves (public API never needs the engine). News signals are coverage spikes in GDELT dated by file day; the India signal counts hostile acts between India and Pakistan/China (6 of 7 known crises caught). |
 | _open_ | Public prices: delayed/EOD vs licensed real-time. |
