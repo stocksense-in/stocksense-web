@@ -247,8 +247,10 @@ sector do versus NIFTY 50?" — no machine learning, every number with its sampl
 - **Event types** (`EVENT_TYPES`): crude spike / crash (Brent ±5% in a day), sharp rupee
   fall / rally (USD/INR ±1%), global risk-off (S&P 500 −3%), US volatility jump (VIX +30%),
   US yield jump (+0.15 pt), gold spike (+3%), and four news signals from GDELT — global
-  conflict, India security tension, Middle East conflict, sanctions — each a day when that
-  topic's share of world coverage is 3σ above its previous 90 days.
+  conflict, India–Pakistan/China tension, Middle East conflict, sanctions — each a day when
+  that topic's share of world coverage is 3σ above its previous 90 days. (The India signal
+  counts hostile acts *between* India and Pakistan or China; checked against known crises
+  in `docs/event-study-2026-10.md`.)
 - **Sectors**: NSE sector indices; equal-weight baskets of today's constituents where NSE
   has no long-running index (Oil & Gas, Aviation, Defence, Paints — survivorship bias
   noted); gold in rupees.
@@ -256,6 +258,8 @@ sector do versus NIFTY 50?" — no machine learning, every number with its sampl
   from the last Indian close on or before the signal. Repeats within 10 trading days count
   once. 95% bootstrap CI of the mean; `notable` when the CI excludes the sector's average
   excess return over all days (its baseline). Cells with fewer than 5 events are left out.
+  About 5% of cells would be notable by chance; `notable_share` in the output says how many
+  are (12.5% at 1 day in the first run, mostly from crude, rupee and US-market events).
 - **Publishing**: `event-study` writes `clean/geo_analogues`, `clean/geo_event_dates` and
   `backend/data/geo_analogues.json`. The API serves the JSON, so the public API never needs
   the engine machine; rerun the job and commit the JSON to update it.
