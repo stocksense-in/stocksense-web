@@ -91,3 +91,11 @@ def test_run_skips_thin_cells_and_missing_inputs():
     assert crude["occurrences"] == 3 and crude["sectors"] == []  # fewer than MIN_EVENTS
     conflict = next(r for r in results if r["code"] == "global_conflict")
     assert conflict["occurrences"] == 0 and conflict["first"] is None  # no GDELT input given
+
+
+def test_notable_share_per_horizon():
+    from stocksense.jobs.event_study import notable_share
+
+    rows = [{"horizon_days": 1, "notable": True}, {"horizon_days": 1, "notable": False},
+            {"horizon_days": 3, "notable": False}]
+    assert notable_share(rows) == {"1": 0.5, "3": 0.0}

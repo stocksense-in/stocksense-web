@@ -168,6 +168,16 @@ def evidence(lake: Lake, kind: str, day: str, limit: int = 3) -> list[dict]:
     return out
 
 
+def notable_share(rows: list[dict]) -> dict[str, float]:
+    """Per horizon, the share of cells flagged notable (compare with ~0.05 expected by chance)."""
+    out = {}
+    for h in event_study.HORIZONS:
+        cells = [r for r in rows if r["horizon_days"] == h]
+        if cells:
+            out[str(h)] = round(sum(r["notable"] for r in cells) / len(cells), 3)
+    return out
+
+
 def run(lake: Lake | None = None, output: Path = OUTPUT, recent: int = 5) -> dict:
     lake = lake or Lake.from_settings()
     closes, bench, sources = load_closes(lake)
@@ -202,8 +212,11 @@ def run(lake: Lake | None = None, output: Path = OUTPUT, recent: int = 5) -> dic
             "For each past occurrence, the sector's return minus NIFTY 50's over the next 1, 3 and 10 "
             "trading days, measured from the last Indian close on or before the signal. Repeats within "
             f"{event_study.DECLUSTER_DAYS} trading days count once. 95% bootstrap confidence intervals; "
-            "baseline = the sector's average excess return over all days. Historical tendency, not a forecast."
+            "baseline = the sector's average excess return over all days. Historical tendency, not a forecast. "
+            "With hundreds of cells, about 5% look notable by chance alone; see notable_share."
         ),
+        # Share of sector cells whose CI excludes the baseline, per horizon. ~0.05 = no more than chance.
+        "notable_share": notable_share(rows),
         "sector_sources": sources,
         "events": results,
     }
