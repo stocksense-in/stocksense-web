@@ -64,6 +64,10 @@ def parse(content: bytes) -> pd.DataFrame:
         df = raw.rename(columns=_UDIFF)
     else:
         df = raw.rename(columns=_OLD)
+    # Files before mid-2011 have no ISIN or trade-count columns.
+    for col in ("isin", "trades"):
+        if col not in df.columns:
+            df[col] = ""
     df = df[COLUMNS].copy()
     for col in ("symbol", "series", "isin"):
         df[col] = df[col].str.strip().str.upper().astype("string")

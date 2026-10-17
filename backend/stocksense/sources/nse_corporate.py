@@ -83,6 +83,21 @@ def share_multiplier(subject: str) -> float | None:
     return round(m, 6) if found else None
 
 
+_RIGHTS = re.compile(rf"rights\D{{0,12}}?{_NUM}\s*:\s*{_NUM}(?:.*?prem\w*\D{{0,12}}?{_RUPEES}{_NUM})?", re.I)
+
+
+def rights_terms(subject: str) -> tuple[float, float, float] | None:
+    """'Rights 19:67 @ Premium Rs 215 Per Share' → (19 new, for 67 held, premium 215). None if not a rights issue."""
+    if re.search(r"ncd|warrant|debenture|entitlement", subject, re.I):
+        return None
+    r = _RIGHTS.search(subject)
+    if not r:
+        return None
+    new, held = float(r.group(1)), float(r.group(2))
+    premium = float(r.group(3)) if r.group(3) else 0.0
+    return (new, held, premium) if new > 0 and held > 0 else None
+
+
 def dividend_per_share(subject: str) -> float | None:
     d = _DIVIDEND.search(subject)
     return float(d.group(1)) if d else None

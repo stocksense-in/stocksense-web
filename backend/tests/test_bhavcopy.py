@@ -3,6 +3,7 @@ import zipfile
 from datetime import date
 
 import httpx
+import pandas as pd
 import pytest
 
 from stocksense.downloads import RawFile, download_all, raw_path
@@ -45,6 +46,16 @@ def test_parse_old_format():
     tcs = df[df.symbol == "TCS"].iloc[0]
     assert (tcs.open, tcs.close, tcs.prev_close, tcs.volume, tcs.trades) == (2500, 2540.5, 2490, 1000, 50)
     assert tcs["isin"] == "INE467B01029"  # not tcs.isin: that's pandas' Series.isin method
+
+
+def test_parse_early_format_without_isin_or_trades():
+    early = ("SYMBOL,SERIES,OPEN,HIGH,LOW,CLOSE,LAST,PREVCLOSE,TOTTRDQTY,TOTTRDVAL,TIMESTAMP,\n"
+             "TCS,EQ,750,760,745,755.5,756,748,1000,755500,04-JAN-2010,\n")
+    df = bhavcopy.parse(zipped("cm04JAN2010bhav.csv", early))
+    assert list(df.columns) == bhavcopy.COLUMNS
+    row = df.iloc[0]
+    assert (row.symbol, row.close, row.volume) == ("TCS", 755.5, 1000)
+    assert pd.isna(row.trades) and row["isin"] == ""
 
 
 def test_parse_udiff_format_gives_same_columns():
