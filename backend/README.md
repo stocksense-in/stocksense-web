@@ -124,7 +124,8 @@ Without Docker: `pip install -r requirements.txt` then
 | `python -m stocksense ingest-gdelt` | GDELT world news events since Apr 2013 → daily aggregates + widely covered events, into the lake (`--workers N` for the build) | Daily |
 | `python -m stocksense event-study` | Historical sector reactions to each event type → lake tables + `data/geo_analogues.json` (what the API serves) | Weekly, after the ingests |
 | `python -m stocksense engine-daily` | Every lake source for the last 10 days (`--days N`), then the data checks; `--weekly` adds corporate actions and the event study. Logs to `<lake>/runs.jsonl`; non-zero exit on failures | Daily, after ~19:00 IST |
-| `python -m stocksense check-lake` | Data checks on the index, macro and GDELT datasets (gaps, duplicates, impossible values, staleness) | After each ingest |
+| `python -m stocksense check-lake` | Data checks on the index, macro, GDELT and F&O datasets (gaps, duplicates, impossible values, staleness) | After each ingest |
+| `python -m stocksense ingest-fno` | NSE futures & options end-of-day file, 2010 → today: every contract plus a per-underlying summary (OI, put/call ratios, max-OI strikes) | Daily, after ~19:00 IST |
 
 Jobs accept `--symbols INFY TCS` or `--limit 20` to work on a few stocks,
 `--snapshot` to also write results to the JSON file, and `--no-db` to skip Supabase.
@@ -226,6 +227,23 @@ eod.adjusted_history(lake, ["TCS", "INFY"], start=date(2015, 1, 1))  # EQ series
 python -m stocksense lake-query "select index, count(*) as days, min(date) as since from index_prices group by index order by since limit 20"
 ```
 
+### Futures & options (M1.5)
+
+| Dataset | What |
+|---|---|
+| `fno_prices` | Every F&O contract each day: instrument (`FUTIDX`, `FUTSTK`, `OPTIDX`, `OPTSTK`), symbol, expiry, strike, option type, OHLC, settlement, contracts, turnover, open interest and its change; underlying price and lot size from 8 Jul 2024 |
+| `fno_summary` | One row per underlying per day: near-month future (expiry, close), total futures OI, call/put OI and volume, put/call ratio by OI and by volume (all expiries and the nearest), the nearest expiry's max-call-OI and max-put-OI strikes |
+
+- **Units are the same across NSE's July 2024 format switch** (checked on the NIFTY
+  July 2024 future): `contracts` = number of contracts, `open_interest` = shares/units,
+  `turnover` = ₹ (the old file's ₹ lakh converted). Turnover is the notional value NSE
+  reports, which for options is far larger than the premium paid.
+- An option chain for any day is a query on `fno_prices`:
+
+```bash
+python -m stocksense lake-query "select strike, option_type, close, open_interest from fno_prices where date = '2026-10-16' and symbol = 'NIFTY' and expiry = (select min(expiry) from fno_prices where date = '2026-10-16' and symbol = 'NIFTY' and option_type = 'CE') order by strike, option_type"
+```
+
 ### The daily run (prep for M0.4)
 
 `engine-daily` is the one command a scheduler should call each evening. Steps run in
@@ -297,7 +315,7 @@ stocksense/
   downloads.py       polite, resumable archive downloads into the lake's raw/ folder
   eod.py             price history: split/bonus adjustment, symbol continuity, data checks
   event_study.py     event detection + sector excess returns after each event type, with CIs
-  lake_checks.py     data checks for the index, macro and GDELT datasets
+  lake_checks.py     data checks for the index, macro, GDELT and F&O datasets
   market.py          read side: typed Stock/Quote objects, caching, snapshot fallback, staleness
   analytics.py       screener, movers, breadth, sector moves, search, peers, score breakdown
   geo.py             news → topics → affected sectors → sector exposure
@@ -313,6 +331,7 @@ stocksense/
     nse_indices.py   NSE daily closing values of every index; stable codes across renames
     yahoo_history.py full daily history of global macro series (crude, gold, rupee, US markets)
     gdelt.py         GDELT 1.0 daily event files → daily aggregates and salient events
+    fno_bhavcopy.py  NSE F&O bhavcopy (both formats) and the per-underlying summary
     screener.py      Screener.in scraping — fallback for promoter holding / sales growth
     fallbacks.py     hardcoded large-cap ownership values (last resort, goes stale)
     upstox.py        OAuth token storage, REST quotes, WebSocket URL
