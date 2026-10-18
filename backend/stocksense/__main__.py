@@ -21,6 +21,8 @@ Jobs
     check-eod      data checks on the price history: gaps, duplicates, bad prices, unexplained jumps
     ingest-indices NSE index closes (every sector index), 2012 → today, into the lake  (daily)
     ingest-macro   crude, gold, rupee, US rates and equities — full daily history  (daily)
+    ingest-gdelt   world news events (GDELT) since 2013 → daily aggregates + salient events  (daily)
+    event-study    what sectors did after past crude spikes, rupee moves, conflict flare-ups…  (weekly)
 
 Common options
     --symbols INFY TCS   only these stocks          --limit N    only the first N stocks
@@ -117,6 +119,15 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_range(p)
     p.add_argument("--rebuild", action="store_true", help="rebuild days already in clean/")
     jobs.add_parser("ingest-macro", help="global macro series into the lake")
+
+    p = jobs.add_parser("ingest-gdelt", help="GDELT world news events into the lake")
+    _add_range(p)
+    p.add_argument("--download-only", action="store_true", help="only fill raw/, don't build clean/")
+    p.add_argument("--build-only", action="store_true", help="only build clean/ from files already downloaded")
+    p.add_argument("--rebuild", action="store_true", help="rebuild days already in clean/")
+    p.add_argument("--workers", type=int, default=8, help="parallel processes for the build")
+
+    jobs.add_parser("event-study", help="historical sector reactions to event types")
     return parser
 
 
@@ -200,6 +211,19 @@ def main() -> None:
             ingest_market.run_indices(args.start, args.end, rebuild=args.rebuild)
         else:
             ingest_market.run_macro()
+        return
+
+    if args.job == "ingest-gdelt":
+        from .jobs import ingest_gdelt
+
+        ingest_gdelt.run(args.start, args.end, download_only=args.download_only, build_only=args.build_only,
+                         rebuild=args.rebuild, workers=args.workers)
+        return
+
+    if args.job == "event-study":
+        from .jobs import event_study
+
+        event_study.run()
         return
 
     store = _store(args)

@@ -59,6 +59,8 @@ python -m stocksense api --reload        # http://localhost:8000/docs — intera
 | `GET /stocks/{symbol}/history?range=` | Closing prices: `1d` (5-min), `5d`, `1mo`, `6mo`, `1y`, `5y`. Works for indices too (`NIFTY50`) |
 | `GET /news` | Market-moving headlines tagged with topics and affected sectors (`topic=`, `sector=` filters) |
 | `GET /geopolitics` | Sector exposure computed from the last few days of news, plus the headlines behind it |
+| `GET /geopolitics/analogues` | Event types in the historical event study (crude spikes, rupee moves, conflict flare-ups…) with how often each happened |
+| `GET /geopolitics/analogues/{code}` | What each sector did vs NIFTY 50 after past events of that type: mean/median excess return, hit rate, 95% CI, n, latest occurrences with news evidence (`horizon=`, `notable=` filters) |
 | `GET /ipos` | Open and upcoming NSE IPOs with live category-wise subscription and a demand reading |
 | `GET /ipos/listings?days=` | Recent IPOs: return from issue price to today |
 | `GET /prospectus/rules` | What the prospectus scanner checks |
@@ -119,6 +121,8 @@ Without Docker: `pip install -r requirements.txt` then
 | `python -m stocksense check-eod` | Data checks on the price history: gaps, thin days, duplicates, impossible prices, unexplained jumps | After each ingest |
 | `python -m stocksense ingest-indices` | NSE closing values of every index (sector indices, VIX…), 2012 → today, into the lake | Daily, after ~18:00 IST |
 | `python -m stocksense ingest-macro` | Full daily history of crude, gold, copper, gas, USD/INR, dollar index, US 10-year, S&P 500, VIX | Daily |
+| `python -m stocksense ingest-gdelt` | GDELT world news events since Apr 2013 → daily aggregates + widely covered events, into the lake (`--workers N` for the build) | Daily |
+| `python -m stocksense event-study` | Historical sector reactions to each event type → lake tables + `data/geo_analogues.json` (what the API serves) | Weekly, after the ingests |
 
 Jobs accept `--symbols INFY TCS` or `--limit 20` to work on a few stocks,
 `--snapshot` to also write results to the JSON file, and `--no-db` to skip Supabase.
@@ -220,6 +224,48 @@ eod.adjusted_history(lake, ["TCS", "INFY"], start=date(2015, 1, 1))  # EQ series
 python -m stocksense lake-query "select index, count(*) as days, min(date) as since from index_prices group by index order by since limit 20"
 ```
 
+### News events (GDELT)
+
+GDELT codes every news-reported event worldwide: who did what to whom (CAMEO codes),
+where, how intense (Goldstein scale), how widely covered and in what tone. One file a
+day since 1 Apr 2013 (~37 GB in `raw/gdelt/`).
+
+| Dataset | What |
+|---|---|
+| `gdelt_daily` | Per day × country × CAMEO root × quad class × India involved: events, mentions, articles, mention-weighted Goldstein and tone |
+| `gdelt_events` | Widely covered (≥10 articles) root events that are hostile (threats, protest, force posture, sanctions, coercion, violence) or involve India — with source URLs, for evidence links |
+
+Everything is dated by the **file day** (when it was known), not the event's own date:
+a day's file also reports older events. Note GDELT's daily file for day *t* is
+published around 15:30 IST on *t*+1.
+
+### Event study (M3.1)
+
+`stocksense/event_study.py` answers "historically, after events like this, what did each
+sector do versus NIFTY 50?" — no machine learning, every number with its sample size.
+
+- **Event types** (`EVENT_TYPES`): crude spike / crash (Brent ±5% in a day), sharp rupee
+  fall / rally (USD/INR ±1%), global risk-off (S&P 500 −3%), US volatility jump (VIX +30%),
+  US yield jump (+0.15 pt), gold spike (+3%), and four news signals from GDELT — global
+  conflict, India–Pakistan/China tension, Middle East conflict, sanctions — each a day when
+  that topic's share of world coverage is 3σ above its previous 90 days. (The India signal
+  counts hostile acts *between* India and Pakistan or China; checked against known crises
+  in `docs/event-study-2026-10.md`.)
+- **Sectors**: NSE sector indices; equal-weight baskets of today's constituents where NSE
+  has no long-running index (Oil & Gas, Aviation, Defence, Paints — survivorship bias
+  noted); gold in rupees.
+- **Measurement**: sector return minus NIFTY 50's over the next 1, 3 and 10 trading days,
+  from the last Indian close on or before the signal. Repeats within 10 trading days count
+  once. 95% bootstrap CI of the mean; `notable` when the CI excludes the sector's average
+  excess return over all days (its baseline). Cells with fewer than 5 events are left out.
+  About 5% of cells would be notable by chance; `notable_share` in the output says how many
+  are (12.5% at 1 day in the first run, mostly from crude, rupee and US-market events).
+- **Publishing**: `event-study` writes `clean/geo_analogues`, `clean/geo_event_dates` and
+  `backend/data/geo_analogues.json`. The API serves the JSON, so the public API never needs
+  the engine machine; rerun the job and commit the JSON to update it.
+
+Read results as historical tendencies, not forecasts or advice (PLAN §1.6).
+
 ## Code map
 
 ```
@@ -233,6 +279,7 @@ stocksense/
   lake.py            local data lake: Parquet layout, partitioned writes, DuckDB queries
   downloads.py       polite, resumable archive downloads into the lake's raw/ folder
   eod.py             price history: split/bonus adjustment, symbol continuity, data checks
+  event_study.py     event detection + sector excess returns after each event type, with CIs
   market.py          read side: typed Stock/Quote objects, caching, snapshot fallback, staleness
   analytics.py       screener, movers, breadth, sector moves, search, peers, score breakdown
   geo.py             news → topics → affected sectors → sector exposure
@@ -247,6 +294,7 @@ stocksense/
     nse_corporate.py NSE corporate actions and symbol changes; split/bonus ratio parsing
     nse_indices.py   NSE daily closing values of every index; stable codes across renames
     yahoo_history.py full daily history of global macro series (crude, gold, rupee, US markets)
+    gdelt.py         GDELT 1.0 daily event files → daily aggregates and salient events
     screener.py      Screener.in scraping — fallback for promoter holding / sales growth
     fallbacks.py     hardcoded large-cap ownership values (last resort, goes stale)
     upstox.py        OAuth token storage, REST quotes, WebSocket URL
