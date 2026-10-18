@@ -112,7 +112,36 @@ def check_gdelt(lake: Lake, today: date | None = None) -> dict:
     }
 
 
-CHECKS = {"index_prices": check_indices, "macro_prices": check_macro, "gdelt_daily": check_gdelt}
+def check_fno(lake: Lake, today: date | None = None) -> dict:
+    today = today or date.today()
+    q = lake.query
+    per_day = q("select date, count(*) as underlyings, "
+                "count(*) filter (where symbol in ('NIFTY', 'BANKNIFTY')) as main_indices "
+                "from fno_summary group by date order by date")
+    per_day["date"] = pd.to_datetime(per_day["date"])
+    dupes = int(q("select count(*) from (select date, symbol from fno_summary group by 1, 2 having count(*) > 1)").iloc[0, 0])
+    odd_pcr = int(q("select count(*) from fno_summary where symbol in ('NIFTY', 'BANKNIFTY') "
+                    "and (pcr_oi <= 0.1 or pcr_oi >= 5)").iloc[0, 0])
+    missing_main = per_day.loc[per_day["main_indices"] < 2, "date"].dt.date.astype(str).tolist()
+    last = per_day["date"].max().date()
+    problems = []
+    if (today - last).days > STALE_AFTER_DAYS:
+        problems.append(f"latest F&O day {last} is stale")
+    if dupes:
+        problems.append(f"{dupes} duplicate (date, symbol) summary rows")
+    if missing_main:
+        problems.append(f"NIFTY or BANKNIFTY missing on {len(missing_main)} days")
+    if odd_pcr:
+        problems.append(f"{odd_pcr} NIFTY/BANKNIFTY days with put/call OI ratio outside 0.1–5")
+    return {
+        "days": int(len(per_day)), "first": str(per_day["date"].min().date()), "last": str(last),
+        "underlyings_per_day": {k: int(v) for k, v in per_day["underlyings"].describe()[["min", "50%", "max"]].items()},
+        "days_missing_nifty_or_banknifty": missing_main[:10], "duplicates": dupes, "problems": problems,
+    }
+
+
+CHECKS = {"index_prices": check_indices, "macro_prices": check_macro, "gdelt_daily": check_gdelt,
+          "fno_summary": check_fno}
 
 
 def check_all(lake: Lake, today: date | None = None) -> dict[str, dict]:
