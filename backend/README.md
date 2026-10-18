@@ -123,6 +123,8 @@ Without Docker: `pip install -r requirements.txt` then
 | `python -m stocksense ingest-macro` | Full daily history of crude, gold, copper, gas, USD/INR, dollar index, US 10-year, S&P 500, VIX | Daily |
 | `python -m stocksense ingest-gdelt` | GDELT world news events since Apr 2013 → daily aggregates + widely covered events, into the lake (`--workers N` for the build) | Daily |
 | `python -m stocksense event-study` | Historical sector reactions to each event type → lake tables + `data/geo_analogues.json` (what the API serves) | Weekly, after the ingests |
+| `python -m stocksense engine-daily` | Every lake source for the last 10 days (`--days N`), then the data checks; `--weekly` adds corporate actions and the event study. Logs to `<lake>/runs.jsonl`; non-zero exit on failures | Daily, after ~19:00 IST |
+| `python -m stocksense check-lake` | Data checks on the index, macro and GDELT datasets (gaps, duplicates, impossible values, staleness) | After each ingest |
 
 Jobs accept `--symbols INFY TCS` or `--limit 20` to work on a few stocks,
 `--snapshot` to also write results to the JSON file, and `--no-db` to skip Supabase.
@@ -224,6 +226,21 @@ eod.adjusted_history(lake, ["TCS", "INFY"], start=date(2015, 1, 1))  # EQ series
 python -m stocksense lake-query "select index, count(*) as days, min(date) as since from index_prices group by index order by since limit 20"
 ```
 
+### The daily run (prep for M0.4)
+
+`engine-daily` is the one command a scheduler should call each evening. Steps run in
+order and independently (a failing source doesn't stop the others); every step is
+resumable, so `--days 30` catches up after the machine was off. Each run appends one
+line to `<lake>/runs.jsonl`:
+
+```json
+{"started_at": "...", "seconds": 43.1, "weekly": false, "ok": true,
+ "steps": [{"step": "bhavcopy", "ok": true, "seconds": 4.7}, ...], "problems": {"index_prices": [], ...}}
+```
+
+The exit code is non-zero when a step failed or a check found a problem, so a scheduler
+can alert. No scheduler is installed yet (M0.4 needs approval).
+
 ### News events (GDELT)
 
 GDELT codes every news-reported event worldwide: who did what to whom (CAMEO codes),
@@ -280,6 +297,7 @@ stocksense/
   downloads.py       polite, resumable archive downloads into the lake's raw/ folder
   eod.py             price history: split/bonus adjustment, symbol continuity, data checks
   event_study.py     event detection + sector excess returns after each event type, with CIs
+  lake_checks.py     data checks for the index, macro and GDELT datasets
   market.py          read side: typed Stock/Quote objects, caching, snapshot fallback, staleness
   analytics.py       screener, movers, breadth, sector moves, search, peers, score breakdown
   geo.py             news → topics → affected sectors → sector exposure
