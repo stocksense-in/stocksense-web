@@ -97,32 +97,44 @@ def summarise(df: pd.DataFrame, day: date) -> pd.DataFrame:
     OI, call/put open interest and volume with put/call ratios (all expiries, and the
     nearest expiry), and the near-expiry strikes with the most call and put OI.
     """
-    rows = []
-    live = df[(df["expiry"].notna()) & (df["expiry"] >= day)]
-    for symbol, g in live.groupby("symbol", sort=True):
-        fut = g[g["instrument"].str.startswith("FUT")].sort_values("expiry")
-        opt = g[g["instrument"].str.startswith("OPT")]
-        calls, puts = opt[opt["option_type"] == "CE"], opt[opt["option_type"] == "PE"]
-        near = opt["expiry"].min() if not opt.empty else None
-        nc, np_ = calls[calls["expiry"] == near], puts[puts["expiry"] == near]
-        call_oi, put_oi = calls["open_interest"].sum(), puts["open_interest"].sum()
-        near_call_oi, near_put_oi = nc["open_interest"].sum(), np_["open_interest"].sum()
-        rows.append({
-            "symbol": symbol,
-            "kind": "index" if g["instrument"].str.endswith("IDX").any() else "stock",
-            "underlying": g["underlying"].dropna().iloc[0] if g["underlying"].notna().any() else np.nan,
-            "fut_near_expiry": fut["expiry"].iloc[0] if not fut.empty else None,
-            "fut_near_close": fut["close"].iloc[0] if not fut.empty else np.nan,
-            "fut_oi": int(fut["open_interest"].sum()) if not fut.empty else 0,
-            "fut_contracts": int(fut["contracts"].sum()) if not fut.empty else 0,
-            "call_oi": int(call_oi), "put_oi": int(put_oi),
-            "call_contracts": int(calls["contracts"].sum()), "put_contracts": int(puts["contracts"].sum()),
-            "pcr_oi": put_oi / call_oi if call_oi else np.nan,
-            "pcr_volume": puts["contracts"].sum() / calls["contracts"].sum() if calls["contracts"].sum() else np.nan,
-            "opt_near_expiry": near,
-            "near_pcr_oi": near_put_oi / near_call_oi if near_call_oi else np.nan,
-            "max_call_oi_strike": nc.loc[nc["open_interest"].idxmax(), "strike"] if near_call_oi else np.nan,
-            "max_put_oi_strike": np_.loc[np_["open_interest"].idxmax(), "strike"] if near_put_oi else np.nan,
-            "turnover": float(g["turnover"].sum()),
-        })
-    return pd.DataFrame(rows)
+    live = df[(df["expiry"].notna()) & (df["expiry"] >= day)].copy()
+    live["open_interest"] = live["open_interest"].fillna(0).astype("int64")
+    live["contracts"] = live["contracts"].fillna(0).astype("int64")
+    by = live.groupby("symbol", sort=True)
+    out = pd.DataFrame(index=pd.Index(sorted(live["symbol"].unique()), name="symbol"))
+    out["kind"] = np.where(by["instrument"].agg(lambda s: s.str.endswith("IDX").any()), "index", "stock")
+    out["underlying"] = by["underlying"].first()  # first non-missing (UDiFF only)
+
+    fut = live[live["instrument"].str.startswith("FUT")]
+    near_fut = fut.sort_values(["symbol", "expiry"], kind="mergesort").groupby("symbol").first()
+    out["fut_near_expiry"] = near_fut["expiry"]
+    out["fut_near_close"] = near_fut["close"]
+    out["fut_oi"] = fut.groupby("symbol")["open_interest"].sum()
+    out["fut_contracts"] = fut.groupby("symbol")["contracts"].sum()
+
+    opt = live[live["instrument"].str.startswith("OPT")]
+    by_type = opt.groupby(["symbol", "option_type"])[["open_interest", "contracts"]].sum().unstack("option_type")
+    for col, (field, kind) in {"call_oi": ("open_interest", "CE"), "put_oi": ("open_interest", "PE"),
+                               "call_contracts": ("contracts", "CE"), "put_contracts": ("contracts", "PE")}.items():
+        out[col] = by_type[(field, kind)] if (field, kind) in by_type.columns else 0
+    for col in ("fut_oi", "fut_contracts", "call_oi", "put_oi", "call_contracts", "put_contracts"):
+        out[col] = out[col].fillna(0).astype("int64")
+    out["pcr_oi"] = out["put_oi"] / out["call_oi"].where(out["call_oi"] > 0)
+    out["pcr_volume"] = out["put_contracts"] / out["call_contracts"].where(out["call_contracts"] > 0)
+
+    # Nearest option expiry: its put/call ratio and the strikes with the most OI.
+    out["opt_near_expiry"] = opt.groupby("symbol")["expiry"].min()
+    near = opt[opt["expiry"] == opt["symbol"].map(out["opt_near_expiry"])]
+    near_oi = near.groupby(["symbol", "option_type"])["open_interest"].sum().unstack("option_type")
+    near_call = near_oi["CE"] if "CE" in near_oi else pd.Series(dtype="float64")
+    near_put = near_oi["PE"] if "PE" in near_oi else pd.Series(dtype="float64")
+    out["near_pcr_oi"] = near_put.reindex(out.index).fillna(0) / near_call.reindex(out.index).where(lambda s: s > 0)
+    top = (near[near["open_interest"] > 0].sort_values("open_interest", ascending=False, kind="mergesort")
+           .groupby(["symbol", "option_type"])["strike"].first().unstack("option_type"))
+    out["max_call_oi_strike"] = top["CE"] if "CE" in top else np.nan
+    out["max_put_oi_strike"] = top["PE"] if "PE" in top else np.nan
+    out["turnover"] = by["turnover"].sum().astype("float64")
+    out = out.reset_index()
+    for col in ("fut_near_expiry", "opt_near_expiry"):
+        out[col] = out[col].astype(object).where(out[col].notna(), None)
+    return out
