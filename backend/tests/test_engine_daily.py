@@ -52,5 +52,5 @@ def test_exit_code_follows_the_report(tmp_path, monkeypatch):
 
 def test_default_steps_cover_every_source(tmp_path):
     names = [(s.name, s.weekly) for s in engine_daily.default_steps(Lake(tmp_path), 10, TODAY)]
-    assert names == [("bhavcopy", False), ("indices", False), ("macro", False), ("gdelt", False), ("fno", False),
+    assert names == [("bhavcopy", False), ("indices", False), ("macro", False), ("gdelt", False), ("fno", False), ("filings", False),
                      ("corporate_actions", True), ("event_study", True)]

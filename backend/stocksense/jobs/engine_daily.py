@@ -54,7 +54,8 @@ class RunReport:
 
 
 def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
-    from . import event_study, ingest_bhavcopy, ingest_corporate_actions, ingest_fno, ingest_gdelt, ingest_market
+    from . import (event_study, ingest_bhavcopy, ingest_corporate_actions, ingest_filings, ingest_fno,
+                   ingest_gdelt, ingest_market)
 
     start = today - timedelta(days=days)
     return [
@@ -63,6 +64,7 @@ def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
         Step("macro", lambda: ingest_market.run_macro(lake=lake, today=today)),
         Step("gdelt", lambda: ingest_gdelt.run(start, today, lake=lake)),
         Step("fno", lambda: ingest_fno.run(start, today, lake=lake)),
+        Step("filings", lambda: ingest_filings.run(start, today, lake=lake)),
         Step("corporate_actions", lambda: ingest_corporate_actions.run(lake=lake, today=today), weekly=True),
         Step("event_study", lambda: event_study.run(lake=lake), weekly=True),
     ]
