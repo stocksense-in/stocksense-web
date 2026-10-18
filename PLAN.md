@@ -153,6 +153,7 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 - [ ] **M1.4 Announcements, insider trades, bulk/block deals, FII/DII flows.** *Accept:* daily ingestion, deduplicated, searchable by symbol and date.
 - [ ] **M1.5 F&O EOD** (option chain snapshots, OI, PCR). *Accept:* history for NIFTY/BANKNIFTY and F&O stocks.
 - [ ] **M1.6 Macro** (RBI rates, CPI, IIP, forex reserves, crude, USD/INR). *Accept:* tidy time series with release dates (no look-ahead).
+  *Part done 18 Oct: every NSE index since Feb 2012 (`index_prices`) and full daily history of crude, gold, copper, gas, USD/INR, dollar index, US 10y, S&P 500, VIX (`macro_prices`). Still to do: RBI rates, CPI, IIP, forex reserves with release dates.*
 
 ### Phase 2 — Terminal (inside the golden UI)
 
