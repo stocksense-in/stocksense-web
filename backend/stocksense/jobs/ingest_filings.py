@@ -97,3 +97,23 @@ def run(start: date | None = None, end: date | None = None, lake: Lake | None = 
     log.info(f"insider trades: {run_insider(lake, start, end)} rows written")
     df = run_fii_dii(lake)
     log.info(f"FII/DII: {len(df)} rows for {', '.join(sorted({str(d.date()) for d in df['date']}))}")
+
+
+def show(symbol: str, since: date | None = None, limit: int = 20, lake: Lake | None = None) -> None:
+    """Print a company's latest announcements and insider trades from the lake."""
+    lake = lake or Lake.from_settings()
+    symbol = symbol.upper()
+    since = since or date.today() - timedelta(days=365)
+    present = set(lake.datasets())
+    with pd.option_context("display.width", 200, "display.max_colwidth", 90, "display.max_columns", 12):
+        if "announcements" in present:
+            ann = lake.query("select broadcast_at, category, summary from announcements "
+                             "where symbol = ? and date >= ? order by broadcast_at desc limit ?", [symbol, since, limit])
+            print(f"\n{symbol} — announcements since {since} ({len(ann)} shown)")
+            print(ann.to_string(index=False) if len(ann) else "  none")
+        if "insider_trades" in present:
+            ins = lake.query("select disclosed_at, person, person_category, transaction, mode, quantity, value "
+                             "from insider_trades where symbol = ? and date >= ? order by disclosed_at desc limit ?",
+                             [symbol, since, limit])
+            print(f"\n{symbol} — insider trades since {since} ({len(ins)} shown)")
+            print(ins.to_string(index=False) if len(ins) else "  none")
