@@ -250,12 +250,14 @@ python -m stocksense lake-query "select strike, option_type, close, open_interes
 
 | Dataset | What | Partitioned by |
 |---|---|---|
-| `announcements` | Every NSE filing since 2015: category ("Outcome of Board Meeting", "Bagging/Receiving of orders/contracts", "Press Release", …), one-line summary, PDF link, XBRL flag | broadcast date (IST) |
+| `announcements` | Every NSE filing since 2015 (1.37 M by Oct 2026): category ("Outcome of Board Meeting", "Bagging/Receiving of orders/contracts", "Press Release", …), one-line summary, PDF link, XBRL flag | broadcast date (IST) |
 | `insider_trades` | SEBI PIT disclosures: person, role, buy/sell, mode (market, ESOP, …), quantity, value, holdings before/after | disclosure date — when the market could know |
 | `fii_dii` | Provisional FII and DII cash-market buy / sell / net, ₹ crore | trading date |
 
-- **Known gaps.** NSE's insider-trade endpoint returns nothing after ~March 2026 (a change
-  on NSE's side; `check-lake` reports the last date). FII/DII history starts the day this
+- **Known gaps.** Insider trades run from Nov 2015 (SEBI's PIT regulations) to 2 May 2026;
+  NSE's endpoint returns nothing after that (a change on NSE's side; `check-lake` reports
+  the last date). Yearly insider counts fall from ~58k (2018) to ~14k (2025) as disclosure
+  rules changed, so don't compare volumes across years naively. FII/DII history starts the day this
   job first ran, because NSE serves only the latest day. **Bulk and block deals** aren't
   ingested: NSE's historical deals API answers 503 outside a browser session (bot
   protection, PLAN §1.5).

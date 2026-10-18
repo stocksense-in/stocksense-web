@@ -8,7 +8,7 @@ foreign and domestic institutions bought and sold.
     (~3k filings a month in 2015, ~17k now).
   • Insider trades under SEBI's PIT regulations (…/api/corporates-pit): who, their
     role, buy/sell, quantity, value, holdings before/after. NSE's endpoint returns
-    data up to ~Mar 2026; later months come back empty (format change on NSE's side).
+    data from Nov 2015 to May 2026; later months come back empty (a change on NSE's side).
   • FII/DII cash-market flows (…/api/fiidiiTradeReact): today's provisional buy/sell/net
     in ₹ crore. NSE serves only the latest day, so history builds up day by day.
 
