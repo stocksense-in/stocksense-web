@@ -126,6 +126,8 @@ Without Docker: `pip install -r requirements.txt` then
 | `python -m stocksense engine-daily` | Every lake source for the last 10 days (`--days N`), then the data checks; `--weekly` adds corporate actions and the event study. Logs to `<lake>/runs.jsonl`; non-zero exit on failures | Daily, after ~19:00 IST |
 | `python -m stocksense check-lake` | Data checks on the index, macro, GDELT and F&O datasets (gaps, duplicates, impossible values, staleness) | After each ingest |
 | `python -m stocksense ingest-fno` | NSE futures & options end-of-day file, 2010 → today: every contract plus a per-underlying summary (OI, put/call ratios, max-OI strikes) | Daily, after ~19:00 IST |
+| `python -m stocksense ingest-filings` | NSE corporate announcements and insider trades since 2015 (monthly windows; the latest two months refetched), plus today's FII/DII cash flows | Daily |
+| `python -m stocksense filings TCS` | A company's latest announcements and insider trades from the lake (`--since`, `--limit`) | Ad hoc |
 
 Jobs accept `--symbols INFY TCS` or `--limit 20` to work on a few stocks,
 `--snapshot` to also write results to the JSON file, and `--no-db` to skip Supabase.
@@ -244,6 +246,22 @@ python -m stocksense lake-query "select index, count(*) as days, min(date) as si
 python -m stocksense lake-query "select strike, option_type, close, open_interest from fno_prices where date = '2026-10-16' and symbol = 'NIFTY' and expiry = (select min(expiry) from fno_prices where date = '2026-10-16' and symbol = 'NIFTY' and option_type = 'CE') order by strike, option_type"
 ```
 
+### Announcements, insider trades, FII/DII flows (M1.4)
+
+| Dataset | What | Partitioned by |
+|---|---|---|
+| `announcements` | Every NSE filing since 2015: category ("Outcome of Board Meeting", "Bagging/Receiving of orders/contracts", "Press Release", …), one-line summary, PDF link, XBRL flag | broadcast date (IST) |
+| `insider_trades` | SEBI PIT disclosures: person, role, buy/sell, mode (market, ESOP, …), quantity, value, holdings before/after | disclosure date — when the market could know |
+| `fii_dii` | Provisional FII and DII cash-market buy / sell / net, ₹ crore | trading date |
+
+- **Known gaps.** NSE's insider-trade endpoint returns nothing after ~March 2026 (a change
+  on NSE's side; `check-lake` reports the last date). FII/DII history starts the day this
+  job first ran, because NSE serves only the latest day. **Bulk and block deals** aren't
+  ingested: NSE's historical deals API answers 503 outside a browser session (bot
+  protection, PLAN §1.5).
+- Searchable by symbol and date: `python -m stocksense filings ACMESOLAR --since 2026-09-01`,
+  or SQL on the datasets above.
+
 ### The daily run (prep for M0.4)
 
 `engine-daily` is the one command a scheduler should call each evening. Steps run in
@@ -315,7 +333,7 @@ stocksense/
   downloads.py       polite, resumable archive downloads into the lake's raw/ folder
   eod.py             price history: split/bonus adjustment, symbol continuity, data checks
   event_study.py     event detection + sector excess returns after each event type, with CIs
-  lake_checks.py     data checks for the index, macro, GDELT and F&O datasets
+  lake_checks.py     data checks for the index, macro, GDELT, F&O and filings datasets
   market.py          read side: typed Stock/Quote objects, caching, snapshot fallback, staleness
   analytics.py       screener, movers, breadth, sector moves, search, peers, score breakdown
   geo.py             news → topics → affected sectors → sector exposure
@@ -332,6 +350,7 @@ stocksense/
     yahoo_history.py full daily history of global macro series (crude, gold, rupee, US markets)
     gdelt.py         GDELT 1.0 daily event files → daily aggregates and salient events
     fno_bhavcopy.py  NSE F&O bhavcopy (both formats) and the per-underlying summary
+    nse_filings.py   NSE announcements, insider trades (PIT) and FII/DII flows
     screener.py      Screener.in scraping — fallback for promoter holding / sales growth
     fallbacks.py     hardcoded large-cap ownership values (last resort, goes stale)
     upstox.py        OAuth token storage, REST quotes, WebSocket URL
