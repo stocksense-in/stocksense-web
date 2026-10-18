@@ -92,7 +92,7 @@ def test_build_writes_prices_and_summary(tmp_path):
         path = raw_path(lake, "nse_fno_bhavcopy", RawFile(day, "", fno.file_name(day)))
         path.parent.mkdir(parents=True)
         path.write_bytes(zipped(text))
-    assert ingest_fno.build(lake, date(2024, 7, 5), date(2024, 7, 8)) == 2
+    assert ingest_fno.build(lake, date(2024, 7, 5), date(2024, 7, 8), workers=2) == 2  # parallel path
     assert ingest_fno.build(lake, date(2024, 7, 5), date(2024, 7, 8)) == 0
     counts = lake.query("select strftime(date, '%Y-%m-%d') as d, count(*) as n from fno_prices group by d order by d")
     assert counts.values.tolist() == [["2024-07-05", 7], ["2024-07-08", 3]]

@@ -142,6 +142,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--download-only", action="store_true", help="only fill raw/, don't build clean/")
     p.add_argument("--build-only", action="store_true", help="only build clean/ from files already downloaded")
     p.add_argument("--rebuild", action="store_true", help="rebuild days already in clean/")
+    p.add_argument("--workers", type=int, default=8, help="parallel processes for the build")
     return parser
 
 
@@ -244,7 +245,7 @@ def main() -> None:
         from .jobs import ingest_fno
 
         ingest_fno.run(args.start, args.end, download_only=args.download_only, build_only=args.build_only,
-                       rebuild=args.rebuild)
+                       rebuild=args.rebuild, workers=args.workers)
         return
 
     if args.job == "engine-daily":
