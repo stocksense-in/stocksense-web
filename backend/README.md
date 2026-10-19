@@ -240,7 +240,8 @@ python -m stocksense lake-query "select index, count(*) as days, min(date) as si
   July 2024 future): `contracts` = number of contracts, `open_interest` = shares/units,
   `turnover` = ₹ (the old file's ₹ lakh converted). Turnover is the notional value NSE
   reports, which for options is far larger than the premium paid.
-- **Not rename-mapped yet:** F&O tables use the symbol as traded (INFY was INFOSYSTCH until mid-2011).
+- **Renames:** `fno_prices`/`fno_summary` keep the symbol as traded; the view `fno_summary_current`
+  shows history under today's symbol (INFOSYSTCH → INFY, TATAMOTORS → TMPV) via M1.1's `symbol_map`.
 - An option chain for any day is a query on `fno_prices`:
 
 ```bash
