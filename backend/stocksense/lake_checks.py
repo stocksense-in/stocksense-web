@@ -143,8 +143,36 @@ def check_fno(lake: Lake, today: date | None = None) -> dict:
     }
 
 
+def check_filings(lake: Lake, today: date | None = None) -> dict:
+    """Announcements must be fresh; insider trades are reported, not failed (NSE's feed stops in ~Mar 2026)."""
+    today = today or date.today()
+    q = lake.query
+    present = set(lake.datasets())
+    ann = q("select date, count(*) as n from announcements group by date order by date")
+    ann["date"] = pd.to_datetime(ann["date"])
+    dupes = int(q("select count(*) from (select seq_id, symbol from announcements group by 1, 2 having count(*) > 1)").iloc[0, 0])
+    last = ann["date"].max().date()
+    problems = []
+    if (today - last).days > STALE_AFTER_DAYS:
+        problems.append(f"latest announcement {last} is stale")
+    if dupes:
+        problems.append(f"{dupes} duplicate announcements")
+    out = {
+        "announcement_days": int(len(ann)), "first": str(ann["date"].min().date()), "last": str(last),
+        "announcements": int(ann["n"].sum()), "per_day_median": int(ann["n"].median()), "duplicates": dupes,
+    }
+    if "insider_trades" in present:
+        ins = q("select count(*) as n, min(date) as first, max(date) as last from insider_trades").iloc[0]
+        out["insider_trades"] = {"rows": int(ins["n"]), "first": str(pd.Timestamp(ins["first"]).date()),
+                                 "last": str(pd.Timestamp(ins["last"]).date())}
+    if "fii_dii" in present:
+        out["fii_dii_days"] = int(q("select count(distinct date) from fii_dii").iloc[0, 0])
+    out["problems"] = problems
+    return out
+
+
 CHECKS = {"index_prices": check_indices, "macro_prices": check_macro, "gdelt_daily": check_gdelt,
-          "fno_summary": check_fno}
+          "fno_summary": check_fno, "announcements": check_filings}
 
 
 def check_all(lake: Lake, today: date | None = None) -> dict[str, dict]:

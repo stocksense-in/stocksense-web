@@ -70,3 +70,13 @@ def test_fno_checks(tmp_path):
     lake.write_parquet(pd.DataFrame({"symbol": ["NIFTY", "BANKNIFTY"], "pcr_oi": [8.5, 8.5], "call_oi": [30_000, 30_000]}),
                        "fno_summary", day="2026-10-15")
     assert not any("outside" in p for p in lake_checks.check_fno(lake, TODAY)["problems"])
+
+
+def test_filings_checks(tmp_path):
+    lake = Lake(tmp_path)
+    lake.write_parquet(pd.DataFrame({"seq_id": ["1", "2"], "symbol": ["TCS", "INFY"]}), "announcements", day="2026-10-15")
+    lake.write_parquet(pd.DataFrame({"symbol": ["TCS"], "person": ["X"]}), "insider_trades", day="2026-03-20")
+    r = lake_checks.check_filings(lake, TODAY)
+    assert r["announcements"] == 2 and r["problems"] == []
+    assert r["insider_trades"]["last"] == "2026-03-20"  # reported, not a problem
+    assert lake_checks.check_filings(lake, date(2026, 12, 1))["problems"] == ["latest announcement 2026-10-15 is stale"]
