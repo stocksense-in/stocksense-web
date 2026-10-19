@@ -151,7 +151,8 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 - [ ] **M1.2 Fundamentals from XBRL** filings (quarterly + annual). *Accept:* revenue/profit for 20 large caps match published results; scoring switched from Yahoo to these numbers behind a flag, scores compared.
 - [ ] **M1.3 Shareholding & pledges.** *Accept:* promoter %, FII %, DII %, pledge % history for any stock; matches filings for 10 samples.
 - [ ] **M1.4 Announcements, insider trades, bulk/block deals, FII/DII flows.** *Accept:* daily ingestion, deduplicated, searchable by symbol and date.
-- [ ] **M1.5 F&O EOD** (option chain snapshots, OI, PCR). *Accept:* history for NIFTY/BANKNIFTY and F&O stocks.
+- [x] **M1.5 F&O EOD** (option chain snapshots, OI, PCR). *Accept:* history for NIFTY/BANKNIFTY and F&O stocks.
+  *Done 19 Oct: 4,163 days 2010→2026 of every contract (`fno_prices`) and a per-underlying summary (`fno_summary`: OI, put/call ratios, max-OI strikes). NIFTY/BANKNIFTY on every day; near-month futures sit 0.19%/0.22% (median) above spot, 99% of days within 0.9%. F&O symbols aren't rename-mapped yet (INFY starts mid-2011).*
 - [ ] **M1.6 Macro** (RBI rates, CPI, IIP, forex reserves, crude, USD/INR). *Accept:* tidy time series with release dates (no look-ahead).
   *Part done 18 Oct: every NSE index since Feb 2012 (`index_prices`) and full daily history of crude, gold, copper, gas, USD/INR, dollar index, US 10y, S&P 500, VIX (`macro_prices`). Still to do: RBI rates, CPI, IIP, forex reserves with release dates.*
 
@@ -239,4 +240,5 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 | 2026-10-14 | College PC is the engine: Windows 11, Xeon W-2295 (18 cores), 128 GB RAM, RTX A5000 24 GB (driver 596.51, CUDA 13.2). Data lake root `E:\stocksense\lake` (Parquet + DuckDB, `STOCKSENSE_LAKE_DIR`). ML in a separate `backend/.venv-ml` (`requirements-ml.txt`, PyTorch 2.14.1+cu132) so the API env stays identical to its container. |
 | 2026-10-18 | Price history from NSE bhavcopy (not Yahoo). Adjustments read from NSE's corporate-action wording and checked against the overnight price jump (the bhavcopy's prev_close is *not* adjusted on ex-dates); demergers and rights issues adjusted on price only; splits missing from the feed inferred from round overnight ratios. Dividends not adjusted. |
 | 2026-10-18 | Event study before models (M3.1): 12 event types, declustered, bootstrap CIs, published as a JSON the API serves (public API never needs the engine). News signals are coverage spikes in GDELT dated by file day; the India signal counts hostile acts between India and Pakistan/China (6 of 7 known crises caught). |
+| 2026-10-19 | F&O history from NSE's F&O bhavcopy with units checked across the 2024 format switch; summary per underlying computed with vectorised group-bys and built in parallel (whole history in ~4 min). |
 | _open_ | Public prices: delayed/EOD vs licensed real-time. |
