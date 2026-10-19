@@ -152,7 +152,7 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 - [ ] **M1.3 Shareholding & pledges.** *Accept:* promoter %, FII %, DII %, pledge % history for any stock; matches filings for 10 samples.
 - [ ] **M1.4 Announcements, insider trades, bulk/block deals, FII/DII flows.** *Accept:* daily ingestion, deduplicated, searchable by symbol and date.
 - [x] **M1.5 F&O EOD** (option chain snapshots, OI, PCR). *Accept:* history for NIFTY/BANKNIFTY and F&O stocks.
-  *Done 19 Oct: 4,163 days 2010→2026 of every contract (`fno_prices`) and a per-underlying summary (`fno_summary`: OI, put/call ratios, max-OI strikes). NIFTY/BANKNIFTY on every day; near-month futures sit 0.19%/0.22% (median) above spot, 99% of days within 0.9%. F&O symbols aren't rename-mapped yet (INFY starts mid-2011).*
+  *Done 19 Oct: 4,163 days 2010→2026 of every contract (`fno_prices`) and a per-underlying summary (`fno_summary`: OI, put/call ratios, max-OI strikes). NIFTY/BANKNIFTY on every day; near-month futures sit 0.19%/0.22% (median) above spot, 99% of days within 0.9%. `fno_summary_current` maps renames (INFY history from 2010).*
 - [ ] **M1.6 Macro** (RBI rates, CPI, IIP, forex reserves, crude, USD/INR). *Accept:* tidy time series with release dates (no look-ahead).
   *Part done 18 Oct: every NSE index since Feb 2012 (`index_prices`) and full daily history of crude, gold, copper, gas, USD/INR, dollar index, US 10y, S&P 500, VIX (`macro_prices`). Still to do: RBI rates, CPI, IIP, forex reserves with release dates.*
 
