@@ -50,6 +50,12 @@ def _num(s: pd.Series) -> pd.Series:
     return pd.to_numeric(s, errors="coerce")
 
 
+def _expiry(values: pd.Series) -> pd.Series:
+    """'31-May-2012', or '31-May-12' (some 2012 files use two-digit years)."""
+    out = pd.to_datetime(values, format="%d-%b-%Y", errors="coerce")
+    return out.fillna(pd.to_datetime(values, format="%d-%b-%y", errors="coerce"))
+
+
 def parse(content: bytes) -> pd.DataFrame:
     """One day's zip (either format) → DataFrame with COLUMNS."""
     with zipfile.ZipFile(io.BytesIO(content)) as z:
@@ -70,7 +76,7 @@ def parse(content: bytes) -> pd.DataFrame:
     else:
         df = pd.DataFrame({
             "instrument": raw["INSTRUMENT"], "symbol": raw["SYMBOL"],
-            "expiry": pd.to_datetime(raw["EXPIRY_DT"], format="%d-%b-%Y", errors="coerce"),
+            "expiry": _expiry(raw["EXPIRY_DT"]),
             "strike": _num(raw["STRIKE_PR"]), "option_type": raw["OPTION_TYP"],
             "open": _num(raw["OPEN"]), "high": _num(raw["HIGH"]), "low": _num(raw["LOW"]),
             "close": _num(raw["CLOSE"]), "settle": _num(raw["SETTLE_PR"]),

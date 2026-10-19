@@ -60,11 +60,16 @@ def test_check_all_skips_absent_datasets(tmp_path):
 def test_fno_checks(tmp_path):
     lake = Lake(tmp_path)
     for d, syms, pcr in (("2026-10-14", ["NIFTY", "BANKNIFTY", "TCS"], 1.1), ("2026-10-15", ["NIFTY", "TCS"], 9.0)):
-        lake.write_parquet(pd.DataFrame({"symbol": syms, "pcr_oi": [pcr] * len(syms)}), "fno_summary", day=d)
+        lake.write_parquet(pd.DataFrame({"symbol": syms, "pcr_oi": [pcr] * len(syms), "call_oi": [5_000_000] * len(syms)}),
+                           "fno_summary", day=d)
     r = lake_checks.check_fno(lake, TODAY)
     assert r["days"] == 2 and r["days_missing_nifty_or_banknifty"] == ["2026-10-15"]
     text = " | ".join(r["problems"])
     assert "missing on 1 days" in text and "outside 0.1–5" in text
+    # A thin options market (low call OI) isn't judged on its put/call ratio.
+    lake.write_parquet(pd.DataFrame({"symbol": ["NIFTY", "BANKNIFTY"], "pcr_oi": [8.5, 8.5], "call_oi": [30_000, 30_000]}),
+                       "fno_summary", day="2026-10-15")
+    assert not any("outside" in p for p in lake_checks.check_fno(lake, TODAY)["problems"])
 
 
 def test_filings_checks(tmp_path):

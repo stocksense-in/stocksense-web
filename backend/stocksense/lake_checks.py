@@ -21,6 +21,7 @@ MAIN_INDICES = ("NIFTY_50", "NIFTY_BANK", "NIFTY_IT", "NIFTY_AUTO", "NIFTY_PHARM
 STALE_AFTER_DAYS = 5  # a daily series whose latest value is older than this is flagged
 THIN_DAY_SHARE = 0.3  # a GDELT day with < 30% of its 30-day median events is flagged
 CAN_BE_NEGATIVE = ("US10Y", "WTI")
+LIQUID_CALL_OI = 1_000_000  # put/call ratios are judged only above this call OI
 
 
 def _gaps(days: pd.Series, max_days: int) -> list[str]:
@@ -120,8 +121,10 @@ def check_fno(lake: Lake, today: date | None = None) -> dict:
                 "from fno_summary group by date order by date")
     per_day["date"] = pd.to_datetime(per_day["date"])
     dupes = int(q("select count(*) from (select date, symbol from fno_summary group by 1, 2 having count(*) > 1)").iloc[0, 0])
+    # Only judge the ratio where the options market was liquid: Bank Nifty options in 2010 had
+    # 30–80k call OI, and ratios of 5–8 were real.
     odd_pcr = int(q("select count(*) from fno_summary where symbol in ('NIFTY', 'BANKNIFTY') "
-                    "and (pcr_oi <= 0.1 or pcr_oi >= 5)").iloc[0, 0])
+                    f"and call_oi >= {LIQUID_CALL_OI} and (pcr_oi <= 0.1 or pcr_oi >= 5)").iloc[0, 0])
     missing_main = per_day.loc[per_day["main_indices"] < 2, "date"].dt.date.astype(str).tolist()
     last = per_day["date"].max().date()
     problems = []
