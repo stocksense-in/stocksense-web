@@ -10,6 +10,7 @@ F&O ingest job — NSE's end-of-day futures & options file into the data lake.
    • clean/fno_prices  — every contract: prices, settlement, contracts, turnover, OI
    • clean/fno_summary — one row per underlying: near-month future, futures OI,
      put/call ratios (OI and volume, all expiries and nearest), max-OI strikes
+   • view fno_summary_current — the same under today's symbols (needs M1.1's symbol_map)
 """
 
 from __future__ import annotations
@@ -31,6 +32,22 @@ DEFAULT_START = date(2010, 1, 1)
 
 def planned_files(start: date, end: date) -> list[RawFile]:
     return [RawFile(d, fno_bhavcopy.url_for(d), fno_bhavcopy.file_name(d)) for d in days_between(start, end)]
+
+
+CURRENT_VIEW = """
+create or replace view fno_summary_current as
+select coalesce(m.current_symbol, f.symbol) as symbol, f.symbol as traded_symbol, f.* exclude (symbol)
+from fno_summary f
+left join symbol_map m on m.traded_symbol = f.symbol and f.date >= m.valid_from and f.date < m.until
+"""
+
+
+def create_view(lake: Lake) -> bool:
+    """fno_summary under today's symbols (INFOSYSTCH history shows as INFY), once the symbol map exists."""
+    if not {SUMMARY, "symbol_map"} <= set(lake.datasets()):
+        return False
+    lake.execute(CURRENT_VIEW)
+    return True
 
 
 def _build_day(root: str, f: RawFile) -> tuple[date, str | None]:
@@ -61,6 +78,7 @@ def build(lake: Lake, start: date, end: date, rebuild: bool = False, workers: in
         else:
             written += 1
     lake.refresh_catalog()
+    create_view(lake)
     log.info(f"{SOURCE}: built {written} new day(s)")
     return written
 

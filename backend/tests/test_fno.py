@@ -104,3 +104,16 @@ def test_build_writes_prices_and_summary(tmp_path):
     assert counts.values.tolist() == [["2024-07-05", 7], ["2024-07-08", 3]]
     s = lake.query("select strftime(date, '%Y-%m-%d') as d, underlying from fno_summary where symbol = 'NIFTY' order by d")
     assert pd.isna(s["underlying"].iloc[0]) and s["underlying"].iloc[1] == pytest.approx(24320.55)
+
+
+def test_current_symbol_view_maps_renames(tmp_path):
+    lake = Lake(tmp_path)
+    lake.write_parquet(pd.DataFrame({"symbol": ["INFOSYSTCH", "NIFTY"], "pcr_oi": [0.5, 1.0]}), "fno_summary", day="2011-06-01")
+    lake.write_parquet(pd.DataFrame({"symbol": ["INFY", "NIFTY"], "pcr_oi": [0.6, 1.1]}), "fno_summary", day="2011-07-01")
+    assert not ingest_fno.create_view(lake)  # no symbol map yet
+    lake.write_table(pd.DataFrame({"traded_symbol": ["INFOSYSTCH"], "valid_from": [date(1900, 1, 1)],
+                                   "until": [date(2011, 6, 28)], "current_symbol": ["INFY"]}), "symbol_map")
+    assert ingest_fno.create_view(lake)
+    df = lake.query("select strftime(date, '%Y-%m') as m, symbol, traded_symbol from fno_summary_current "
+                    "where symbol = 'INFY' order by m")
+    assert df.values.tolist() == [["2011-06", "INFY", "INFOSYSTCH"], ["2011-07", "INFY", "INFY"]]
