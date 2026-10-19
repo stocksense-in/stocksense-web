@@ -2,7 +2,8 @@
 Daily engine run — one command that brings the lake up to date and checks it, for a
 scheduler to call once a day (M0.4). Nothing here installs a scheduler.
 
-    python -m stocksense engine-daily              # last 10 days of every daily source
+    python -m stocksense engine-daily              # last 10 days of every daily source (prices, indices,
+                                                   # macro, GDELT, F&O)
     python -m stocksense engine-daily --weekly     # also corporate actions + the event study
     python -m stocksense engine-daily --days 30    # catch up after the machine was off
 
@@ -53,7 +54,7 @@ class RunReport:
 
 
 def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
-    from . import event_study, ingest_bhavcopy, ingest_corporate_actions, ingest_gdelt, ingest_market
+    from . import event_study, ingest_bhavcopy, ingest_corporate_actions, ingest_fno, ingest_gdelt, ingest_market
 
     start = today - timedelta(days=days)
     return [
@@ -61,6 +62,7 @@ def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
         Step("indices", lambda: ingest_market.run_indices(start, today, lake=lake)),
         Step("macro", lambda: ingest_market.run_macro(lake=lake, today=today)),
         Step("gdelt", lambda: ingest_gdelt.run(start, today, lake=lake)),
+        Step("fno", lambda: ingest_fno.run(start, today, lake=lake)),
         Step("corporate_actions", lambda: ingest_corporate_actions.run(lake=lake, today=today), weekly=True),
         Step("event_study", lambda: event_study.run(lake=lake), weekly=True),
     ]
