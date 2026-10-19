@@ -57,6 +57,12 @@ def test_parse_old_format_units():
     assert pd.isna(fut.underlying) and pd.isna(fut.lot_size)
 
 
+def test_parse_two_digit_expiry_years():
+    # NSE's 14 May 2012 file writes "31-May-12".
+    df = fno.parse(zipped(OLD.replace("25-Jul-2024", "25-Jul-24")))
+    assert df["expiry"].notna().all() and date(2024, 7, 25) in set(df["expiry"])
+
+
 def test_parse_udiff_maps_instruments_and_keeps_extras():
     df = fno.parse(zipped(UDIFF))
     assert df["instrument"].tolist() == ["FUTIDX", "OPTIDX", "OPTIDX"]
