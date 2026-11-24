@@ -151,6 +151,7 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 - [ ] **M1.2 Fundamentals from XBRL** filings (quarterly + annual). *Accept:* revenue/profit for 20 large caps match published results; scoring switched from Yahoo to these numbers behind a flag, scores compared.
 - [ ] **M1.3 Shareholding & pledges.** *Accept:* promoter %, FII %, DII %, pledge % history for any stock; matches filings for 10 samples.
 - [ ] **M1.4 Announcements, insider trades, bulk/block deals, FII/DII flows.** *Accept:* daily ingestion, deduplicated, searchable by symbol and date.
+  *Part done 19 Oct: 1.37 M announcements since 2015 and 337k insider trades (Nov 2015 → May 2026, NSE's feed stops there), daily, deduplicated, searchable (`filings SYMBOL`). FII/DII cash flows collected daily from 16 Oct 2026 (NSE serves only the latest day). Not possible yet: bulk/block deals — NSE's API is behind bot protection.*
 - [x] **M1.5 F&O EOD** (option chain snapshots, OI, PCR). *Accept:* history for NIFTY/BANKNIFTY and F&O stocks.
   *Done 19 Oct: 4,163 days 2010→2026 of every contract (`fno_prices`) and a per-underlying summary (`fno_summary`: OI, put/call ratios, max-OI strikes). NIFTY/BANKNIFTY on every day; near-month futures sit 0.19%/0.22% (median) above spot, 99% of days within 0.9%. `fno_summary_current` maps renames (INFY history from 2010).*
 - [ ] **M1.6 Macro** (RBI rates, CPI, IIP, forex reserves, crude, USD/INR). *Accept:* tidy time series with release dates (no look-ahead).
@@ -242,4 +243,5 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 | 2026-10-18 | Event study before models (M3.1): 12 event types, declustered, bootstrap CIs, published as a JSON the API serves (public API never needs the engine). News signals are coverage spikes in GDELT dated by file day; the India signal counts hostile acts between India and Pakistan/China (6 of 7 known crises caught). |
 | 2026-10-18 | Baseline for M3.3: a LightGBM ranking of next-day sector moves reaches IC ≈ 0.045 from market state alone (`ml/reports/sector-gbm-2026-10-18.md`); daily GDELT coverage adds nothing. Geopolitics models must beat that market-only IC, not zero; next step is LLM-labelled events (M3.2), not more coverage counts. |
 | 2026-10-19 | F&O history from NSE's F&O bhavcopy with units checked across the 2024 format switch; summary per underlying computed with vectorised group-bys and built in parallel (whole history in ~4 min). |
+| 2026-10-19 | Filings and flows from NSE's own APIs, one request per month, dated by when the market could know (broadcast / disclosure time). Bulk/block deals skipped rather than scraped past bot protection. |
 | _open_ | Public prices: delayed/EOD vs licensed real-time. |

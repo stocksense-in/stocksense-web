@@ -26,6 +26,8 @@ Jobs
     engine-daily   update every lake source for the last N days, check the data, log the run  (daily)
     check-lake     data checks on the index, macro and GDELT datasets
     ingest-fno     NSE futures & options end-of-day file, 2010 → today: OI, put/call ratios  (daily)
+    ingest-filings NSE announcements + insider trades since 2015, today's FII/DII flows  (daily)
+    filings        a company's latest announcements and insider trades, e.g. `filings TCS`
 
 Common options
     --symbols INFY TCS   only these stocks          --limit N    only the first N stocks
@@ -143,6 +145,14 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--build-only", action="store_true", help="only build clean/ from files already downloaded")
     p.add_argument("--rebuild", action="store_true", help="rebuild days already in clean/")
     p.add_argument("--workers", type=int, default=8, help="parallel processes for the build")
+
+    p = jobs.add_parser("ingest-filings", help="NSE announcements, insider trades and FII/DII flows")
+    _add_range(p)
+
+    p = jobs.add_parser("filings", help="a company's latest announcements and insider trades")
+    p.add_argument("symbol")
+    p.add_argument("--since", type=date.fromisoformat, metavar="YYYY-MM-DD", help="default: a year ago")
+    p.add_argument("--limit", type=int, default=20)
     return parser
 
 
@@ -239,6 +249,15 @@ def main() -> None:
         from .jobs import event_study
 
         event_study.run()
+        return
+
+    if args.job in ("ingest-filings", "filings"):
+        from .jobs import ingest_filings
+
+        if args.job == "filings":
+            ingest_filings.show(args.symbol, args.since, args.limit)
+        else:
+            ingest_filings.run(args.start, args.end)
         return
 
     if args.job == "ingest-fno":
