@@ -25,6 +25,7 @@ Jobs
     event-study    what sectors did after past crude spikes, rupee moves, conflict flare-ups…  (weekly)
     engine-daily   update every lake source for the last N days, check the data, log the run  (daily)
     check-lake     data checks on the index, macro and GDELT datasets
+    ingest-fno     NSE futures & options end-of-day file, 2010 → today: OI, put/call ratios  (daily)
 
 Common options
     --symbols INFY TCS   only these stocks          --limit N    only the first N stocks
@@ -135,6 +136,13 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--days", type=int, default=10, help="how many recent days to fetch (catch-up after downtime)")
     p.add_argument("--weekly", action="store_true", help="also corporate actions and the event study")
     jobs.add_parser("check-lake", help="data checks on the index, macro and GDELT datasets")
+
+    p = jobs.add_parser("ingest-fno", help="NSE F&O end-of-day prices and OI into the lake")
+    _add_range(p)
+    p.add_argument("--download-only", action="store_true", help="only fill raw/, don't build clean/")
+    p.add_argument("--build-only", action="store_true", help="only build clean/ from files already downloaded")
+    p.add_argument("--rebuild", action="store_true", help="rebuild days already in clean/")
+    p.add_argument("--workers", type=int, default=8, help="parallel processes for the build")
     return parser
 
 
@@ -231,6 +239,13 @@ def main() -> None:
         from .jobs import event_study
 
         event_study.run()
+        return
+
+    if args.job == "ingest-fno":
+        from .jobs import ingest_fno
+
+        ingest_fno.run(args.start, args.end, download_only=args.download_only, build_only=args.build_only,
+                       rebuild=args.rebuild, workers=args.workers)
         return
 
     if args.job == "engine-daily":
