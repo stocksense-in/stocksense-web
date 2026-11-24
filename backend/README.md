@@ -414,8 +414,8 @@ on all its peers, `rescore` recomputes the whole table (the fundamentals and own
 jobs end with it). `GET /stocks/{symbol}` returns each metric's peer, absolute and
 blended scores.
 
-The frontend's `lib/scoring.ts` still mirrors the old fixed curves only; it should read
-scores from the API or the `stocks` table instead of recomputing them.
+The golden UI doesn't compute scores itself; when its panels are wired to the API (M2.1)
+they should show the API's scores rather than recompute them.
 
 ## Data units
 
