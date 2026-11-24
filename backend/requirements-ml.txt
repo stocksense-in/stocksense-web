@@ -1,0 +1,10 @@
+# GPU / ML dependencies for the college-PC engine. Not used by the API container.
+# Installs into backend/.venv-ml, a superset of the API env:
+#   uv venv .venv-ml --python 3.12 --seed
+#   .venv-ml\Scripts\python -m pip install -r requirements-ml.txt
+-r requirements.txt
+
+# PyTorch CUDA 13.2 build (NVIDIA driver 596.51 reports CUDA 13.2). The +cu132 pin
+# makes pip take it from the PyTorch index, never the CPU-only wheel on PyPI.
+--extra-index-url https://download.pytorch.org/whl/cu132
+torch==2.14.1+cu132

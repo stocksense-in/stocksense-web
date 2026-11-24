@@ -25,6 +25,7 @@ python/.env
 # =========================
 venv/
 .venv/
+.venv-ml/
 __pycache__/
 *.pyc
 
