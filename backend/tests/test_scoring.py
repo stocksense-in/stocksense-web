@@ -1,3 +1,5 @@
+import pytest
+
 from stocksense.scoring import WEIGHTS, metric_score, score_stock
 from stocksense.sectors import sector_code
 
@@ -69,3 +71,31 @@ def test_sector_codes_use_industry_first():
     assert sector_code("Financial Services", "Insurance - Life") == "finance"
     assert sector_code("Technology", "Information Technology Services") == "it"
     assert sector_code(None, None) == "general"
+
+
+# ── teaching layer ────────────────────────────────────────────────────────────
+from stocksense import scoring as _scoring  # noqa: E402 — kept next to the tests that use it
+
+
+def test_score_ranges_are_the_curves_read_backwards():
+    for sector in ("it", "bank", "general"):
+        for metric in _scoring.WEIGHTS:
+            bands = _scoring.healthy_range(metric, sector)
+            if bands is None:
+                continue
+            assert _scoring.metric_score(metric, bands["strong_from"], sector) == pytest.approx(70, abs=0.5)
+            assert _scoring.metric_score(metric, bands["fair_from"], sector) == pytest.approx(40, abs=0.5)
+
+
+def test_range_text_reads_naturally():
+    assert _scoring.healthy_range("roe", "it")["text"] == "Strong: 35% or more · Fair: 20–35% · Weak: below 20%"
+    assert _scoring.healthy_range("pe", "it")["text"] == "Strong: 21 or less · Fair: 21–33 · Weak: above 33"
+    assert _scoring.healthy_range("pe", "newage") is None
+
+
+def test_explain_special_cases():
+    assert _scoring.explain("roe", 31, "it")["verdict"] == "fair"
+    assert _scoring.explain("pe", -5, "it")["verdict"] == "weak"
+    assert _scoring.explain("pe", 2.5, "it")["verdict"] == "unclear"
+    assert _scoring.explain("pe", 80, "newage")["verdict"] == "not judged"
+    assert "lend borrowed money" in _scoring.explain("de", 8, "bank")["note"]

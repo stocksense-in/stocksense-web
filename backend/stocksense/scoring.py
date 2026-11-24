@@ -99,6 +99,103 @@ def score_stock(metrics: dict[str, float | None], sector: str) -> ScoreResult:
     return ScoreResult(composite=round(composite), parts=parts, coverage=len(parts))
 
 
+# ── teaching layer: what each metric means and what range is healthy ─────────
+#
+# The ranges are not a separate opinion: they're the scoring curves above read
+# backwards. "Strong" is where a metric scores STRONG_SCORE or more, "fair" from
+# FAIR_SCORE up, "weak" below — so an explanation can never disagree with the score.
+
+STRONG_SCORE = 70
+FAIR_SCORE = 40
+
+GUIDE: dict[str, dict] = {
+    "pe": {"label": "P/E ratio", "unit": "x", "higher_is_better": False,
+           "measures": "how many rupees investors pay for each rupee of yearly profit — lower means cheaper"},
+    "roe": {"label": "Return on equity", "unit": "%", "higher_is_better": True,
+            "measures": "profit earned each year on every ₹100 of shareholders' money"},
+    "de": {"label": "Debt to equity", "unit": "x", "higher_is_better": False,
+           "measures": "how much the company has borrowed for every rupee shareholders own"},
+    "margin": {"label": "Net profit margin", "unit": "%", "higher_is_better": True,
+               "measures": "profit kept from every ₹100 of sales after all costs and tax"},
+    "promoter": {"label": "Promoter holding", "unit": "%", "higher_is_better": True,
+                 "measures": "share of the company owned by its founders/promoters — their own money at stake"},
+    "cagr": {"label": "Revenue growth (3-yr CAGR)", "unit": "%", "higher_is_better": True,
+             "measures": "how fast sales have grown each year over the last three years"},
+}
+
+
+def _value_at(metric: str, sector: str, score: float) -> float | None:
+    """The metric value that scores `score` on its curve (None if the metric isn't judged for this sector)."""
+    s = score / 100
+    if metric == "pe":
+        if sector in NEWAGE_SECTORS:
+            return None
+        return 8 + (1 - s) * (30 if sector in BANK_SECTORS else 42)
+    if metric == "de":
+        return 3 + (1 - s) * 12 if sector in BANK_SECTORS else (1 - s) * 3.5
+    full = {"roe": 50, "margin": 38, "promoter": 80, "cagr": 55}[metric]
+    return s * full
+
+
+def _fmt(metric: str, value: float) -> str:
+    if metric == "de":
+        return f"{value:.1f}"
+    return f"{value:.0f}%" if GUIDE[metric]["unit"] == "%" else f"{value:.0f}"
+
+
+def verdict_for(score: float) -> str:
+    return "strong" if score >= STRONG_SCORE else "fair" if score >= FAIR_SCORE else "weak"
+
+
+def healthy_range(metric: str, sector: str) -> dict | None:
+    """
+    Strong / fair / weak bands for a metric in a sector, as numbers and as one line
+    of text. None when the metric isn't judged for that sector (P/E for new-age).
+    """
+    strong, fair = _value_at(metric, sector, STRONG_SCORE), _value_at(metric, sector, FAIR_SCORE)
+    if strong is None or fair is None:
+        return None
+    bare = lambda v: _fmt(metric, v).rstrip("%")  # noqa: E731 — "20–35%", not "20%–35%"
+    if GUIDE[metric]["higher_is_better"]:
+        text = (f"Strong: {_fmt(metric, strong)} or more · Fair: {bare(fair)}–{_fmt(metric, strong)}"
+                f" · Weak: below {_fmt(metric, fair)}")
+    else:
+        text = (f"Strong: {_fmt(metric, strong)} or less · Fair: {bare(strong)}–{_fmt(metric, fair)}"
+                f" · Weak: above {_fmt(metric, fair)}")
+    return {"strong_from": round(strong, 2), "fair_from": round(fair, 2),
+            "higher_is_better": GUIDE[metric]["higher_is_better"], "text": text}
+
+
+def explain(metric: str, value: float, sector: str) -> dict:
+    """
+    Plain-language reading of one metric for a beginner: what it measures, how this
+    company's value compares with the healthy range for its sector, and any caveat.
+    """
+    guide = GUIDE[metric]
+    score = metric_score(metric, value, sector)
+    bands = healthy_range(metric, sector)
+    note = None
+    if metric == "pe" and sector in NEWAGE_SECTORS:
+        verdict, note = "not judged", "Young platform companies often have little or no profit yet, so P/E isn't used for them."
+    elif metric == "pe" and value <= 0:
+        verdict, note = "weak", "The company made a loss, so P/E has no meaning here."
+    elif metric == "pe" and value < SUSPICIOUS_PE:
+        verdict, note = "unclear", "A P/E this low usually comes from a one-off gain (like selling an asset), not lasting profit."
+    else:
+        verdict = verdict_for(score)
+    if metric == "de" and sector in BANK_SECTORS:
+        note = "Banks and NBFCs lend borrowed money as their business, so higher debt is normal for them."
+    if metric == "pe" and sector in BANK_SECTORS and note is None:
+        note = "Lenders are valued on a tighter P/E band than other companies."
+    return {
+        "label": guide["label"],
+        "measures": guide["measures"],
+        "verdict": verdict,
+        "healthy_range": bands["text"] if bands else None,
+        "note": note,
+    }
+
+
 # Column names in the `stocks` table ↔ short metric keys used above.
 COLUMN_FOR_METRIC = {
     "pe": "pe_ratio",

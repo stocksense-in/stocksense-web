@@ -23,6 +23,7 @@ Jobs
     ingest-macro   crude, gold, rupee, US rates and equities — full daily history  (daily)
     ingest-gdelt   world news events (GDELT) since 2013 → daily aggregates + salient events  (daily)
     event-study    what sectors did after past crude spikes, rupee moves, conflict flare-ups…  (weekly)
+    valuation-context  each sector's P/E today vs its own history → data/valuation_context.json  (weekly)
     engine-daily   update every lake source for the last N days, check the data, log the run  (daily)
     check-lake     data checks on the index, macro and GDELT datasets
     ingest-fno     NSE futures & options end-of-day file, 2010 → today: OI, put/call ratios  (daily)
@@ -133,6 +134,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--workers", type=int, default=8, help="parallel processes for the build")
 
     jobs.add_parser("event-study", help="historical sector reactions to event types")
+    jobs.add_parser("valuation-context", help="sector valuations vs their history, for the API")
 
     p = jobs.add_parser("engine-daily", help="update the whole lake and check it")
     p.add_argument("--days", type=int, default=10, help="how many recent days to fetch (catch-up after downtime)")
@@ -243,6 +245,14 @@ def main() -> None:
 
         ingest_gdelt.run(args.start, args.end, download_only=args.download_only, build_only=args.build_only,
                          rebuild=args.rebuild, workers=args.workers)
+        return
+
+    if args.job == "valuation-context":
+        from . import valuation
+        from .lake import Lake
+
+        doc = valuation.write(Lake.from_settings())
+        print(f"Wrote {len(doc['indices'])} index valuations to {valuation.OUTPUT}")
         return
 
     if args.job == "event-study":

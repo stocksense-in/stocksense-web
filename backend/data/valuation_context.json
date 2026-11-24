@@ -1,0 +1,177 @@
+{
+ "generated_at": "2026-11-24T18:16:28+00:00",
+ "source": "NSE daily index closing file (P/E), via the engine's data lake",
+ "market_index": "NIFTY_50",
+ "sector_index": {
+  "it": "NIFTY_IT",
+  "bank": "NIFTY_BANK",
+  "nbfc": "NIFTY_FINANCIAL_SERVICES",
+  "finance": "NIFTY_FINANCIAL_SERVICES",
+  "auto": "NIFTY_AUTO",
+  "pharma": "NIFTY_PHARMA",
+  "fmcg": "NIFTY_FMCG",
+  "materials": "NIFTY_METAL",
+  "energy": "NIFTY_ENERGY",
+  "realestate": "NIFTY_REALTY",
+  "consumer": "NIFTY_INDIA_CONSUMPTION",
+  "industrial": "NIFTY_INFRASTRUCTURE",
+  "telecom": "NIFTY_MEDIA",
+  "defence": "NIFTY_INDIA_DEFENCE"
+ },
+ "indices": {
+  "NIFTY_50": {
+   "as_of": "2026-11-23",
+   "since": "2021-04-01",
+   "years": 5.6,
+   "pe": 20.6,
+   "median_pe": 22.1,
+   "p25_pe": 21.0,
+   "p75_pe": 22.9,
+   "higher_than_pct_of_days": 17,
+   "reading": "cheap by its own history"
+  },
+  "NIFTY_AUTO": {
+   "as_of": "2026-11-23",
+   "since": "2021-04-01",
+   "years": 5.6,
+   "pe": 31.1,
+   "median_pe": 30.2,
+   "p25_pe": 25.3,
+   "p75_pe": 48.2,
+   "higher_than_pct_of_days": 56,
+   "reading": "around its usual level"
+  },
+  "NIFTY_BANK": {
+   "as_of": "2026-11-23",
+   "since": "2021-04-01",
+   "years": 5.6,
+   "pe": 13.8,
+   "median_pe": 16.1,
+   "p25_pe": 14.7,
+   "p75_pe": 17.9,
+   "higher_than_pct_of_days": 14,
+   "reading": "cheap by its own history"
+  },
+  "NIFTY_ENERGY": {
+   "as_of": "2026-11-23",
+   "since": "2021-04-01",
+   "years": 5.6,
+   "pe": 13.1,
+   "median_pe": 13.7,
+   "p25_pe": 12.1,
+   "p75_pe": 15.1,
+   "higher_than_pct_of_days": 38,
+   "reading": "below its usual level"
+  },
+  "NIFTY_FINANCIAL_SERVICES": {
+   "as_of": "2026-11-23",
+   "since": "2021-04-01",
+   "years": 5.6,
+   "pe": 16.6,
+   "median_pe": 17.8,
+   "p25_pe": 16.9,
+   "p75_pe": 19.1,
+   "higher_than_pct_of_days": 17,
+   "reading": "cheap by its own history"
+  },
+  "NIFTY_FMCG": {
+   "as_of": "2026-11-23",
+   "since": "2021-04-01",
+   "years": 5.6,
+   "pe": 33.9,
+   "median_pe": 41.9,
+   "p25_pe": 39.5,
+   "p75_pe": 43.8,
+   "higher_than_pct_of_days": 8,
+   "reading": "cheap by its own history"
+  },
+  "NIFTY_INDIA_CONSUMPTION": {
+   "as_of": "2026-11-23",
+   "since": "2021-04-01",
+   "years": 5.6,
+   "pe": 39.6,
+   "median_pe": 41.1,
+   "p25_pe": 38.8,
+   "p75_pe": 47.1,
+   "higher_than_pct_of_days": 34,
+   "reading": "below its usual level"
+  },
+  "NIFTY_INDIA_DEFENCE": {
+   "as_of": "2026-11-23",
+   "since": "2022-01-19",
+   "years": 4.8,
+   "pe": 54.0,
+   "median_pe": 47.7,
+   "p25_pe": 27.4,
+   "p75_pe": 55.4,
+   "higher_than_pct_of_days": 69,
+   "reading": "above its usual level"
+  },
+  "NIFTY_INFRASTRUCTURE": {
+   "as_of": "2026-11-23",
+   "since": "2021-04-01",
+   "years": 5.6,
+   "pe": 22.0,
+   "median_pe": 21.4,
+   "p25_pe": 19.5,
+   "p75_pe": 22.8,
+   "higher_than_pct_of_days": 65,
+   "reading": "above its usual level"
+  },
+  "NIFTY_IT": {
+   "as_of": "2026-11-23",
+   "since": "2021-04-01",
+   "years": 5.6,
+   "pe": 19.4,
+   "median_pe": 27.4,
+   "p25_pe": 25.4,
+   "p75_pe": 31.7,
+   "higher_than_pct_of_days": 5,
+   "reading": "cheap by its own history"
+  },
+  "NIFTY_MEDIA": {
+   "as_of": "2026-11-23",
+   "since": "2021-11-15",
+   "years": 5.0,
+   "pe": 40.6,
+   "median_pe": 60.5,
+   "p25_pe": 38.9,
+   "p75_pe": 574.5,
+   "higher_than_pct_of_days": 28,
+   "reading": "below its usual level"
+  },
+  "NIFTY_METAL": {
+   "as_of": "2026-11-23",
+   "since": "2021-04-01",
+   "years": 5.6,
+   "pe": 14.0,
+   "median_pe": 18.6,
+   "p25_pe": 10.4,
+   "p75_pe": 22.5,
+   "higher_than_pct_of_days": 32,
+   "reading": "below its usual level"
+  },
+  "NIFTY_PHARMA": {
+   "as_of": "2026-11-23",
+   "since": "2021-04-01",
+   "years": 5.6,
+   "pe": 45.5,
+   "median_pe": 33.6,
+   "p25_pe": 31.9,
+   "p75_pe": 36.7,
+   "higher_than_pct_of_days": 99,
+   "reading": "expensive by its own history"
+  },
+  "NIFTY_REALTY": {
+   "as_of": "2026-11-23",
+   "since": "2021-04-27",
+   "years": 5.6,
+   "pe": 39.6,
+   "median_pe": 47.9,
+   "p25_pe": 40.3,
+   "p75_pe": 57.1,
+   "higher_than_pct_of_days": 22,
+   "reading": "below its usual level"
+  }
+ }
+}
