@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .market import Stock
-from .scoring import COLUMN_FOR_METRIC, WEIGHTS, metric_score
+from .scoring import COLUMN_FOR_METRIC, WEIGHTS, explain, metric_score
 from .sectors import SECTOR_LABELS
 
 # Market-cap bands in ₹ crore, roughly matching SEBI's large/mid/small split.
@@ -171,7 +171,9 @@ def peers(stocks: list[Stock], stock: Stock, count: int = 6) -> list[Stock]:
 def score_breakdown(stock: Stock) -> list[dict]:
     """
     How each metric contributed: its 0–100 sub-score, its effective weight after
-    re-normalising for missing metrics, and the points it earned. Points sum to the score.
+    re-normalising for missing metrics, and the points it earned (points sum to the
+    score) — plus what the metric means, the healthy range for the stock's sector and
+    a strong / fair / weak verdict, so a beginner can read it (scoring.explain).
     """
     values = {
         "pe": stock.pe,
@@ -195,6 +197,7 @@ def score_breakdown(stock: Stock) -> list[dict]:
                 "score": round(sub, 1),
                 "weight": round(weight, 4),
                 "points": round(sub * weight, 1),
+                **explain(key, value, stock.sector),
             }
         )
     return parts
