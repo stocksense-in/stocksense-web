@@ -16,6 +16,9 @@ Jobs
     snapshot       copy ~70 large caps from Supabase into backend/data/snapshot.json (API offline data)
     lake-prices    copy today's live_prices into the local data lake (STOCKSENSE_LAKE_DIR)  (daily)
     lake-query     run SQL against the data lake, e.g. "select date, count(*) from prices group by date"
+    ingest-bhavcopy  NSE end-of-day prices for every security, 2010 → today, into the lake  (daily)
+    ingest-corporate-actions  splits/bonuses/renames → adjusted price history (eod_adjusted)  (weekly)
+    check-eod      data checks on the price history: gaps, duplicates, bad prices, unexplained jumps
 
 Common options
     --symbols INFY TCS   only these stocks          --limit N    only the first N stocks
@@ -26,6 +29,7 @@ Common options
 from __future__ import annotations
 
 import argparse
+from datetime import date
 from pathlib import Path
 
 from .config import SNAPSHOT_PATH, get_settings
@@ -97,7 +101,21 @@ def _build_parser() -> argparse.ArgumentParser:
 
     p = jobs.add_parser("lake-query", help="run SQL against the data lake")
     p.add_argument("sql", help="each clean dataset is a view, e.g. prices")
+
+    p = jobs.add_parser("ingest-bhavcopy", help="NSE end-of-day prices into the lake")
+    _add_range(p)
+    p.add_argument("--download-only", action="store_true", help="only fill raw/, don't build clean/")
+    p.add_argument("--build-only", action="store_true", help="only build clean/ from files already downloaded")
+    p.add_argument("--rebuild", action="store_true", help="rebuild days already in clean/")
+
+    jobs.add_parser("ingest-corporate-actions", help="corporate actions → adjusted price history")
+    jobs.add_parser("check-eod", help="data checks on the price history")
     return parser
+
+
+def _add_range(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--start", type=date.fromisoformat, metavar="YYYY-MM-DD", help="first day")
+    parser.add_argument("--end", type=date.fromisoformat, metavar="YYYY-MM-DD", help="last day (default today)")
 
 
 def _store(args: argparse.Namespace) -> Store:
@@ -150,6 +168,22 @@ def main() -> None:
         from .jobs import lake_prices
 
         lake_prices.query(args.sql)
+        return
+
+    if args.job == "ingest-bhavcopy":
+        from .jobs import ingest_bhavcopy
+
+        ingest_bhavcopy.run(args.start, args.end, download_only=args.download_only,
+                            build_only=args.build_only, rebuild=args.rebuild)
+        return
+
+    if args.job in ("ingest-corporate-actions", "check-eod"):
+        from .jobs import ingest_corporate_actions
+
+        if args.job == "check-eod":
+            ingest_corporate_actions.check()
+        else:
+            ingest_corporate_actions.run()
         return
 
     store = _store(args)

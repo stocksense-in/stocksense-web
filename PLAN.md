@@ -146,7 +146,8 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 
 ### Phase 1 — Core datasets (validation checks on every one: row counts, ranges, gaps, duplicates)
 
-- [ ] **M1.1 EOD prices** from bhavcopy, 10+ yrs, adjusted for splits/bonuses (corporate actions). *Accept:* spot checks against exchange data for 10 stocks; adjustment verified on 3 known splits.
+- [x] **M1.1 EOD prices** from bhavcopy, 10+ yrs, adjusted for splits/bonuses (corporate actions). *Accept:* spot checks against exchange data for 10 stocks; adjustment verified on 3 known splits.
+  *Done 18 Oct: 4,167 trading days 2010→2026 in the lake (`eod_prices`, `eod_adjusted`); 8 of 10 large caps match Yahoo to the paisa, RELIANCE/ITC differ <2% only before their demergers (method noted); NESTLEIND, HDFCBANK, RELIANCE splits exact. `ml/checks/eod_spot_check.py`.*
 - [ ] **M1.2 Fundamentals from XBRL** filings (quarterly + annual). *Accept:* revenue/profit for 20 large caps match published results; scoring switched from Yahoo to these numbers behind a flag, scores compared.
 - [ ] **M1.3 Shareholding & pledges.** *Accept:* promoter %, FII %, DII %, pledge % history for any stock; matches filings for 10 samples.
 - [ ] **M1.4 Announcements, insider trades, bulk/block deals, FII/DII flows.** *Accept:* daily ingestion, deduplicated, searchable by symbol and date.
@@ -234,4 +235,5 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 | 2026-10-14 | REST API added; geopolitics v0 = keyword rules over live news (the baseline). |
 | 2026-10-14 | Direction: internal Indian-markets terminal + public StockSense on the publishable subset. Training/inference on the college A5000; public site never depends on it. |
 | 2026-10-14 | College PC is the engine: Windows 11, Xeon W-2295 (18 cores), 128 GB RAM, RTX A5000 24 GB (driver 596.51, CUDA 13.2). Data lake root `E:\stocksense\lake` (Parquet + DuckDB, `STOCKSENSE_LAKE_DIR`). ML in a separate `backend/.venv-ml` (`requirements-ml.txt`, PyTorch 2.14.1+cu132) so the API env stays identical to its container. |
+| 2026-10-18 | Price history from NSE bhavcopy (not Yahoo). Adjustments read from NSE's corporate-action wording and checked against the overnight price jump (the bhavcopy's prev_close is *not* adjusted on ex-dates); demergers and rights issues adjusted on price only; splits missing from the feed inferred from round overnight ratios. Dividends not adjusted. |
 | _open_ | Public prices: delayed/EOD vs licensed real-time. |
