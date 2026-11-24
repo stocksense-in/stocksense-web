@@ -254,4 +254,5 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 | 2026-10-19 | Filings and flows from NSE's own APIs, one request per month, dated by when the market could know (broadcast / disclosure time). Bulk/block deals skipped rather than scraped past bot protection. |
 | 2026-11-24 | Core purpose stated: teach beginner investors which metrics matter and what healthy ranges look like; the research engine serves that. |
 | 2026-11-24 | No fixed "golden ranges": every metric is read against sector peers, the company's stage and the sector's valuation vs its own history (since Apr 2021, NSE's switch to consolidated P/E). Score stays on fixed curves until a sector-relative version is compared before/after. |
+| 2026-11-25 | Score = 70% versus sector peers + 30% fixed curves (`blend.py`), after the before/after comparison (rank agreement 0.92; NBFCs were ~12 points too high). Frontend should read scores, not recompute them. |
 | _open_ | Public prices: delayed/EOD vs licensed real-time. |

@@ -330,7 +330,8 @@ Read results as historical tendencies, not forecasts or advice (PLAN §1.6).
 stocksense/
   __main__.py        CLI — every job and its options
   config.py          reads .env (the only file that touches environment variables)
-  scoring.py         the StockSense score — single source of truth, documented curves + weights
+  scoring.py         the score's fixed curves + weights, and the plain-language metric guide
+  blend.py           the published score: 70% versus sector peers + 30% fixed curves
   sectors.py         Yahoo sector/industry → StockSense sector code
   symbols.py         NSE equity list (EQUITY_L.csv), cached 24h in _nse_symbols_cache.json
   db.py              write side: Store saves rows to Supabase and/or a JSON snapshot
@@ -394,13 +395,27 @@ Refresh the valuation layer weekly: `python -m stocksense valuation-context`.
 
 ## The score
 
-Six metrics, each mapped to 0–100, weighted: P/E 20%, ROE 20%, net margin 20%,
-D/E 15%, revenue CAGR 15%, promoter holding 10%. Banks and NBFCs are allowed more
-leverage; new-age platforms aren't judged on P/E. Missing metrics are skipped and
-the other weights re-normalised; a stock needs at least 4 metrics, including ROE or
-D/E, to be scored. A P/E below 4 (usually one-off profits) scores neutral.
-Details and exact curves: [`stocksense/scoring.py`](stocksense/scoring.py).
-`GET /stocks/{symbol}` returns the per-metric breakdown.
+Six metrics, weighted: P/E 20%, ROE 20%, net margin 20%, D/E 15%, revenue CAGR 15%,
+promoter holding 10%. **Each metric's 0–100 sub-score is 70% "versus sector peers" + 30%
+a fixed curve** ([`stocksense/blend.py`](stocksense/blend.py), since 25 Nov 2026):
+
+- *peer part* — the share of the company's sector peers it beats on that metric
+  (direction-aware; the whole market when the sector has fewer than 10 values);
+- *absolute part* — a fixed curve ([`stocksense/scoring.py`](stocksense/scoring.py)):
+  banks and NBFCs are allowed more leverage, new-age platforms aren't judged on P/E,
+  a P/E below 4 (usually one-off profits) scores neutral, a loss-making P/E scores 0.
+
+Why the blend: fixed curves alone misjudged whole sectors (NBFCs ~12 points too high,
+industrials too low — `ml/reports/score-comparison-2026-11-24.md`); a purely relative
+score would make every sector average ~50 and hide that some industries are better
+businesses. Missing metrics are skipped and the other weights re-normalised; a stock
+needs at least 4 metrics, including ROE or D/E, to be scored. Because each score depends
+on all its peers, `rescore` recomputes the whole table (the fundamentals and ownership
+jobs end with it). `GET /stocks/{symbol}` returns each metric's peer, absolute and
+blended scores.
+
+The frontend's `lib/scoring.ts` still mirrors the old fixed curves only; it should read
+scores from the API or the `stocks` table instead of recomputing them.
 
 ## Data units
 
