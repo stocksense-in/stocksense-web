@@ -1,7 +1,14 @@
 # StockSense — Plan
 
-> An internal research terminal for Indian markets ("our own Bloomberg"), with a
-> public StockSense site built on the parts we're allowed to publish.
+> **StockSense teaches beginner investors how to judge a company.** For every stock it
+> shows which metrics matter (P/E, ROE, debt/equity, margins, growth, promoter holding),
+> the range each should sit in for that sector, and where the company sits today — the
+> score and its metric-by-metric breakdown explain; they never tip.
+>
+> Behind it sits an internal research engine for Indian markets ("our own Bloomberg"):
+> 16 years of prices, F&O, filings, macro and world news on the college PC, which keeps
+> the numbers trustworthy and adds context such as how sectors react to events. The
+> public site is built on the parts we're allowed to publish.
 >
 > This file is the roadmap for everyone working on the repo, people and AI agents.
 > Work one milestone at a time, on a branch, and open a PR. Tick boxes in the PR
@@ -22,7 +29,8 @@
 5. **Data must be legal for its use.** Check §4 before adding a source. No bypassing
    logins, paywalls, CAPTCHAs or bot protection; no extracting keys from other apps;
    no republishing paid data.
-6. **Not investment advice.** Internal research is fine. Anything public describes
+6. **Teach, don't tip.** Every number a user sees should come with what it means and
+   what range is healthy for that kind of company. **Not investment advice.** Internal research is fine. Anything public describes
    ("historically, X tended to…"), never recommends ("buy X"). Public buy/sell calls
    would need SEBI research-analyst registration.
 7. **Tests with every feature.** Backend: `cd backend && pytest` (offline, fast).
@@ -244,4 +252,5 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 | 2026-10-18 | Baseline for M3.3: a LightGBM ranking of next-day sector moves reaches IC ≈ 0.045 from market state alone (`ml/reports/sector-gbm-2026-10-18.md`); daily GDELT coverage adds nothing. Geopolitics models must beat that market-only IC, not zero; next step is LLM-labelled events (M3.2), not more coverage counts. |
 | 2026-10-19 | F&O history from NSE's F&O bhavcopy with units checked across the 2024 format switch; summary per underlying computed with vectorised group-bys and built in parallel (whole history in ~4 min). |
 | 2026-10-19 | Filings and flows from NSE's own APIs, one request per month, dated by when the market could know (broadcast / disclosure time). Bulk/block deals skipped rather than scraped past bot protection. |
+| 2026-11-24 | Core purpose stated: teach beginner investors which metrics matter and what healthy ranges look like; the research engine serves that. |
 | _open_ | Public prices: delayed/EOD vs licensed real-time. |
