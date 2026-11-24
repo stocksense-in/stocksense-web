@@ -49,7 +49,7 @@ def run(
             # Start from the stored row so a value Yahoo omits today (or revenue CAGR,
             # which only the ownership job fetches) is kept instead of nulled.
             row = {**known.get(sym.symbol, {}), **{k: v for k, v in row.items() if v is not None}}
-            score = score_row(row)
+            score = score_row(row)  # provisional (fixed curves); _rescore_all sets the published blend
             row["composite_score"] = score.composite
             row["score_coverage"] = score.coverage
             row["last_updated"] = now_iso()
@@ -61,3 +61,12 @@ def run(
     log.info(f"Done — {ok} saved, {len(failed)} without Yahoo data.")
     if failed:
         log.info(f"No data: {' '.join(failed[:20])}{' …' if len(failed) > 20 else ''}")
+    _rescore_all(store)
+
+
+def _rescore_all(store: Store) -> None:
+    """Scores compare each stock with its sector peers, so refresh everyone's once the batch is in."""
+    if store.use_db:
+        from . import rescore
+
+        rescore.run(store)
