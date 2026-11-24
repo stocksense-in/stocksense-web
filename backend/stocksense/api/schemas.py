@@ -71,6 +71,19 @@ class ScreenPage(BaseModel):
     results: list[StockOut]
 
 
+class PeerContext(BaseModel):
+    """Where the company's value sits among its sector peers (layer 1)."""
+    group: str = Field(description="e.g. 'IT Services companies', or 'all NSE companies' for small sectors")
+    peers: int
+    p25: float
+    median: float
+    p75: float
+    typical_range: str = Field(description="The middle half of peers, e.g. '14–28%'")
+    better_than_pct: float | None = Field(description="Share of peers this company beats (direction-aware); None when not ranked, e.g. a loss-making P/E")
+    standing: str | None = Field(description="top quarter | above median | below median | bottom quarter")
+    text: str
+
+
 class ScorePart(BaseModel):
     metric: str
     column: str
@@ -78,13 +91,42 @@ class ScorePart(BaseModel):
     score: float = Field(description="0–100 for this metric")
     weight: float = Field(description="Share of the final score after re-normalising for missing metrics")
     points: float = Field(description="score × weight; parts sum to the composite")
+    label: str = Field(description="Plain name, e.g. 'Return on equity'")
+    measures: str = Field(description="What the metric tells a beginner")
+    verdict: str = Field(description="How it scores: strong | fair | weak | unclear | not judged")
+    healthy_range: str | None = Field(description="The StockSense score's own strong / fair / weak bands for this sector")
+    note: str | None = Field(None, description="Caveat for this kind of company (lenders, one-off profits, …)")
+    peers: PeerContext | None = Field(None, description="Layer 1: standing among sector peers")
+    stage_note: str | None = Field(None, description="Layer 2: what the company's stage means for this metric")
+    market_note: str | None = Field(None, description="Layer 3 (P/E only): the sector's valuation today vs its own history")
+    guardrail: str | None = Field(None, description="An absolute warning that holds whatever peers do")
 
 
 class ScoreDetail(BaseModel):
     value: int | None
     verdict: str | None = Field(description="Strong (65+), Fair (45–64) or Weak")
     coverage: int = Field(description="How many of the six metrics were available")
+    stage: str | None = Field(None, description="loss-making | high growth | steady | unknown — how to read the metrics")
+    stage_text: str | None = None
     breakdown: list[ScorePart]
+
+
+class MetricGuide(BaseModel):
+    metric: str
+    label: str
+    measures: str
+    higher_is_better: bool
+    weight: float = Field(description="Weight in the StockSense score")
+    healthy_range: str | None = Field(description="The score's strong / fair / weak bands for this sector")
+    peers: PeerContext | None = Field(description="What's typical among this sector's companies (no company value, so not ranked)")
+
+
+class LearnMetrics(BaseModel):
+    sector: str
+    sector_label: str
+    market_note: str | None = Field(description="How the sector (or market) is valued today vs its own history")
+    stages: dict[str, str] = Field(description="How a company's stage changes the reading")
+    metrics: list[MetricGuide]
 
 
 class StockDetail(BaseModel):

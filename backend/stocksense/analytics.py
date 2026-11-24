@@ -10,8 +10,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from . import benchmarks as bm
 from .market import Stock
 from .scoring import COLUMN_FOR_METRIC, WEIGHTS, explain, metric_score
+from .valuation import sector_note
 from .sectors import SECTOR_LABELS
 
 # Market-cap bands in ₹ crore, roughly matching SEBI's large/mid/small split.
@@ -168,12 +170,15 @@ def peers(stocks: list[Stock], stock: Stock, count: int = 6) -> list[Stock]:
     return same
 
 
-def score_breakdown(stock: Stock) -> list[dict]:
+def score_breakdown(stock: Stock, benchmarks: bm.Benchmarks | None = None, valuation: dict | None = None) -> list[dict]:
     """
     How each metric contributed: its 0–100 sub-score, its effective weight after
     re-normalising for missing metrics, and the points it earned (points sum to the
     score) — plus what the metric means, the healthy range for the stock's sector and
     a strong / fair / weak verdict, so a beginner can read it (scoring.explain).
+    With `benchmarks` (benchmarks.build over all stocks) each metric is also placed among
+    sector peers; with `valuation` (valuation_context.json) P/E gets the sector's
+    valuation today versus its own history.
     """
     values = {
         "pe": stock.pe,
@@ -198,6 +203,10 @@ def score_breakdown(stock: Stock) -> list[dict]:
                 "weight": round(weight, 4),
                 "points": round(sub * weight, 1),
                 **explain(key, value, stock.sector),
+                "peers": bm.peer_context(key, value, stock.sector, benchmarks) if benchmarks else None,
+                "stage_note": bm.stage_note(key, stock),
+                "market_note": sector_note(stock.sector, valuation) if key == "pe" else None,
+                "guardrail": bm.guardrails(key, stock),
             }
         )
     return parts
