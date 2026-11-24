@@ -55,7 +55,8 @@ python -m stocksense api --reload        # http://localhost:8000/docs — intera
 | `GET /sectors` | Sector codes and labels with stock counts (for filter menus) |
 | `GET /stocks` | Screener: `sector`, `cap` (large/mid/small), `min_score`, `max_pe`, `min_roe`, `max_de`, `sort`, `order`, `page`, `page_size` |
 | `GET /stocks/search?q=` | Symbol / company-name search |
-| `GET /stocks/{symbol}` | One stock, its score broken down metric by metric, and sector peers |
+| `GET /stocks/{symbol}` | One stock, its score broken down metric by metric — each metric explained in three layers (see "Reading a metric") — and sector peers |
+| `GET /learn/metrics?sector=` | How to read a company in a sector: each metric's meaning, weight, healthy range and what's typical among its companies; how stage changes the reading; whether the sector is cheap or expensive today |
 | `GET /stocks/{symbol}/history?range=` | Closing prices: `1d` (5-min), `5d`, `1mo`, `6mo`, `1y`, `5y`. Works for indices too (`NIFTY50`) |
 | `GET /news` | Market-moving headlines tagged with topics and affected sectors (`topic=`, `sector=` filters) |
 | `GET /geopolitics` | Sector exposure computed from the last few days of news, plus the headlines behind it |
@@ -340,6 +341,8 @@ stocksense/
   lake_checks.py     data checks for the index, macro, GDELT, F&O and filings datasets
   market.py          read side: typed Stock/Quote objects, caching, snapshot fallback, staleness
   analytics.py       screener, movers, breadth, sector moves, search, peers, score breakdown
+  benchmarks.py      metric context: sector-peer quartiles, company stage, guardrails
+  valuation.py       sector P/E today vs its own history (layer 3)
   geo.py             news → topics → affected sectors → sector exposure
   ipo.py             IPO parsing, demand reading, recent-listing returns
   rhp.py             prospectus (DRHP/RHP) red-flag scanner
@@ -365,6 +368,29 @@ tests/               pytest — `pytest` runs everything offline in under a seco
 schema.sql           database tables, columns, and access rules
 Dockerfile           API container
 ```
+
+## Reading a metric (teach, don't tip)
+
+StockSense exists to teach beginners how to judge a company, and there's no single
+"healthy range" for a metric: median P/E runs from ~8 for energy companies to 50+ for
+FMCG, and lenders carry far more debt than IT firms. So every metric in
+`/stocks/{symbol}` is read in layers:
+
+| Layer | Field | Source |
+|---|---|---|
+| What it means | `label`, `measures` | `scoring.GUIDE` |
+| How it scores | `verdict`, `healthy_range` | the score's own curves read backwards (`scoring.healthy_range`): strong = scores 70+, fair = 40+ |
+| 1. Sector peers | `peers` (quartiles, `better_than_pct`, `standing`) | `benchmarks.py`, from every stock in the sector (whole market below 10 peers) |
+| 2. Company stage | `score.stage`, `stage_note` (P/E ÷ growth for growing firms) | `benchmarks.stage` / `growth_adjusted_pe` |
+| 3. Market and time | `market_note` (P/E) | `valuation.py` → `data/valuation_context.json`: the sector index's P/E today vs its median since Apr 2021 |
+| Guardrails | `guardrail`, `note` | losses, heavy debt for non-lenders, lenders' leverage, one-off profits |
+
+Example (Hindustan Unilever): net margin 22.6% is only "fair" on the score's curve, but
+better than 95% of FMCG companies; P/E 42 is weak, and expensive for 2% sales growth,
+while the FMCG sector as a whole is cheap against its own history. The score itself
+still uses fixed curves; making it sector-relative is the next step (PLAN.md).
+
+Refresh the valuation layer weekly: `python -m stocksense valuation-context`.
 
 ## The score
 
