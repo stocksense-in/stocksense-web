@@ -11,8 +11,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from . import benchmarks as bm
+from . import blend
 from .market import Stock
-from .scoring import COLUMN_FOR_METRIC, WEIGHTS, explain, metric_score
+from .scoring import COLUMN_FOR_METRIC, WEIGHTS, explain, metric_score, verdict_for
 from .valuation import sector_note
 from .sectors import SECTOR_LABELS
 
@@ -172,7 +173,8 @@ def peers(stocks: list[Stock], stock: Stock, count: int = 6) -> list[Stock]:
 
 def score_breakdown(stock: Stock, benchmarks: bm.Benchmarks | None = None, valuation: dict | None = None) -> list[dict]:
     """
-    How each metric contributed: its 0–100 sub-score, its effective weight after
+    How each metric contributed: its 0–100 sub-score (70% versus sector peers + 30%
+    the fixed curve, as in blend.py — both parts shown), its effective weight after
     re-normalising for missing metrics, and the points it earned (points sum to the
     score) — plus what the metric means, the healthy range for the stock's sector and
     a strong / fair / weak verdict, so a beginner can read it (scoring.explain).
@@ -190,19 +192,29 @@ def score_breakdown(stock: Stock, benchmarks: bm.Benchmarks | None = None, valua
     }
     known = {k: v for k, v in values.items() if v is not None}
     total_weight = sum(WEIGHTS[k] for k in known) or 1
+    blended = blend.metric_parts(stock, benchmarks) if benchmarks else {}
     parts = []
     for key, value in known.items():
-        sub = round(metric_score(key, value, stock.sector), 1)  # same rounding as scoring.score_stock
+        absolute = round(metric_score(key, value, stock.sector), 1)  # same rounding as scoring.score_stock
+        # The published score blends peers and the fixed curve (blend.py); without benchmarks
+        # (offline / tests) the fixed curve alone is shown.
+        mix = blended.get(key, {"peer": None, "absolute": absolute, "score": absolute})
+        sub = mix["score"]
         weight = WEIGHTS[key] / total_weight
+        reading = explain(key, value, stock.sector)
+        if reading["verdict"] in ("strong", "fair", "weak"):
+            reading["verdict"] = verdict_for(sub)
         parts.append(
             {
                 "metric": key,
                 "column": COLUMN_FOR_METRIC[key],
                 "value": value,
                 "score": round(sub, 1),
+                "peer_score": mix["peer"],
+                "absolute_score": absolute,
                 "weight": round(weight, 4),
                 "points": round(sub * weight, 1),
-                **explain(key, value, stock.sector),
+                **reading,
                 "peers": bm.peer_context(key, value, stock.sector, benchmarks) if benchmarks else None,
                 "stage_note": bm.stage_note(key, stock),
                 "market_note": sector_note(stock.sector, valuation) if key == "pe" else None,

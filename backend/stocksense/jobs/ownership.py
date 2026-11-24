@@ -62,7 +62,7 @@ def run(
         for sym, found in zip(batch, results):
             base = stored.get(sym.symbol, {"symbol": sym.symbol, "name": sym.name})
             row = {**base, **{k: v for k, v in found.items() if v is not None}}
-            score = score_row(row)
+            score = score_row(row)  # provisional (fixed curves); _rescore_all sets the published blend
             row["composite_score"] = score.composite
             row["score_coverage"] = score.coverage
             row["last_updated"] = now_iso()
@@ -75,3 +75,12 @@ def run(
         time.sleep(1)  # be polite to Screener.in between batches
 
     log.info("Done.")
+    _rescore_all(store)
+
+
+def _rescore_all(store: Store) -> None:
+    """Scores compare each stock with its sector peers, so refresh everyone's once the batch is in."""
+    if store.use_db:
+        from . import rescore
+
+        rescore.run(store)

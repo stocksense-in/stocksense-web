@@ -2,7 +2,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from stocksense.api import create_app
-from stocksense.scoring import score_stock
+from stocksense import benchmarks as bm
+from stocksense import blend
 
 VALUATION = {
     "market_index": "NIFTY_50",
@@ -34,11 +35,14 @@ def test_stock_breakdown_explains_every_metric_in_three_layers(client):
     assert parts["roe"]["market_note"] is None  # valuation context is about P/E
 
 
-def test_points_still_sum_to_the_computed_score(client):
-    # The fixture's stored score is hand-set, so compare with the score computed from its metrics.
+def test_points_sum_to_the_blended_score(client, market):
+    # The fixture's stored score is hand-set, so compare with the blend computed over the same universe.
     parts = client.get("/stocks/TCS").json()["score"]["breakdown"]
-    composite = score_stock({p["metric"]: p["value"] for p in parts}, "it").composite
+    composite = blend.blended_score(market.stock("TCS"), bm.build(market.fresh_stocks())).composite
     assert sum(p["points"] for p in parts) == pytest.approx(composite, abs=1)
+    for p in parts:  # each sub-score is 70% peers + 30% fixed curve (or the curve alone if not ranked)
+        expected = p["absolute_score"] if p["peer_score"] is None else 0.7 * p["peer_score"] + 0.3 * p["absolute_score"]
+        assert p["score"] == pytest.approx(expected, abs=0.2)
 
 
 def test_learn_metrics_for_a_sector(client):

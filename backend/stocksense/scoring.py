@@ -1,8 +1,8 @@
 """
 The StockSense score: six fundamentals, each mapped to 0–100, then weighted.
 
-This is the single source of truth for scoring. The frontend mirrors the same
-curves in frontend/lib/scoring.ts — change both together.
+These are the fixed curves: the published score blends them 30/70 with each
+company's standing among its sector peers (stocksense/blend.py).
 
     metric             weight   curve (0 = worst, 100 = best)
     P/E                 20%     lower is better; banks use a tighter band; new-age gets a flat 40
