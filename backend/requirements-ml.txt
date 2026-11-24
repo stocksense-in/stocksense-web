@@ -8,3 +8,7 @@
 # makes pip take it from the PyTorch index, never the CPU-only wheel on PyPI.
 --extra-index-url https://download.pytorch.org/whl/cu132
 torch==2.14.1+cu132
+
+# Gradient-boosted trees for tabular models (ml/sector_gbm.py)
+lightgbm>=4.5
+scikit-learn>=1.5  # lightgbm.LGBMRegressor needs it
