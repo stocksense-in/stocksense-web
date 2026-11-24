@@ -88,13 +88,15 @@ class ScorePart(BaseModel):
     metric: str
     column: str
     value: float
-    score: float = Field(description="0–100 for this metric")
+    score: float = Field(description="0–100 for this metric: 70% peer_score + 30% absolute_score")
+    peer_score: float | None = Field(None, description="Share of sector peers this company beats on the metric (0–100)")
+    absolute_score: float = Field(description="The fixed scoring curve's 0–100 for this value")
     weight: float = Field(description="Share of the final score after re-normalising for missing metrics")
     points: float = Field(description="score × weight; parts sum to the composite")
     label: str = Field(description="Plain name, e.g. 'Return on equity'")
     measures: str = Field(description="What the metric tells a beginner")
-    verdict: str = Field(description="How it scores: strong | fair | weak | unclear | not judged")
-    healthy_range: str | None = Field(description="The StockSense score's own strong / fair / weak bands for this sector")
+    verdict: str = Field(description="How the blended sub-score reads: strong (70+) | fair (40+) | weak | unclear | not judged")
+    healthy_range: str | None = Field(description="The fixed curve's strong / fair / weak bands for this sector (the 30% absolute part)")
     note: str | None = Field(None, description="Caveat for this kind of company (lenders, one-off profits, …)")
     peers: PeerContext | None = Field(None, description="Layer 1: standing among sector peers")
     stage_note: str | None = Field(None, description="Layer 2: what the company's stage means for this metric")
