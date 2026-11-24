@@ -127,7 +127,7 @@ def peer_context(metric: str, value: float | None, sector: str, benchmarks: Benc
         return None
     p25, median, p75 = bench.quantile(0.25), bench.quantile(0.5), bench.quantile(0.75)
     out = {"group": _group_label(bench.group), "peers": bench.n, "p25": round(p25, 2), "median": round(median, 2),
-           "p75": round(p75, 2), "typical_range": f"{_fmt(metric, p25)}–{_fmt(metric, p75)}"}
+           "p75": round(p75, 2), "typical_range": f"{_fmt(metric, p25).rstrip('%')}–{_fmt(metric, p75)}"}
     if not _usable(metric, value):  # e.g. loss-making P/E: shown with the range, not ranked
         return {**out, "better_than_pct": None, "standing": None,
                 "text": f"Typical for {out['group']}: {out['typical_range']} (median {_fmt(metric, median)})."}

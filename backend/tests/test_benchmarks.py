@@ -34,7 +34,9 @@ def test_lower_pe_beats_more_peers(benches):
 
 
 def test_higher_roe_beats_more_peers(benches):
-    assert bm.peer_context("roe", 11.5, "it", benches)["better_than_pct"] > 85
+    ctx = bm.peer_context("roe", 11.5, "it", benches)
+    assert ctx["better_than_pct"] > 85
+    assert ctx["typical_range"] == "4–9%"  # one unit sign, like the score's ranges
 
 
 def test_small_sector_falls_back_to_market(benches):
