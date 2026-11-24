@@ -117,6 +117,8 @@ Without Docker: `pip install -r requirements.txt` then
 | `python -m stocksense ingest-bhavcopy` | NSE end-of-day prices for every security, 2010 → today, into the lake (resumable; `--start`, `--end`, `--download-only`, `--build-only`, `--rebuild`) | Daily, after ~18:00 IST |
 | `python -m stocksense ingest-corporate-actions` | NSE corporate actions + symbol changes → split/bonus adjustment and the `eod_adjusted` view | Weekly, after `ingest-bhavcopy` |
 | `python -m stocksense check-eod` | Data checks on the price history: gaps, thin days, duplicates, impossible prices, unexplained jumps | After each ingest |
+| `python -m stocksense ingest-indices` | NSE closing values of every index (sector indices, VIX…), 2012 → today, into the lake | Daily, after ~18:00 IST |
+| `python -m stocksense ingest-macro` | Full daily history of crude, gold, copper, gas, USD/INR, dollar index, US 10-year, S&P 500, VIX | Daily |
 
 Jobs accept `--symbols INFY TCS` or `--limit 20` to work on a few stocks,
 `--snapshot` to also write results to the JSON file, and `--no-db` to skip Supabase.
@@ -199,6 +201,25 @@ from stocksense import eod
 eod.adjusted_history(lake, ["TCS", "INFY"], start=date(2015, 1, 1))  # EQ series, adjusted OHLCV
 ```
 
+### Index and macro series (M1.6, part)
+
+| Dataset | What | Source |
+|---|---|---|
+| `index_prices` | Every NSE index each day: open, high, low, close, change %, volume, turnover (₹ cr), P/E, P/B, dividend yield. ~47 indices in 2015, ~165 now | NSE's daily `ind_close_all_<DDMMYYYY>.csv` |
+| `macro_prices` | One table, all series: `BRENT`, `WTI`, `GOLD`, `COPPER`, `NATGAS`, `USDINR`, `DXY`, `US10Y`, `SP500`, `US_VIX`, `NIFTY50_YF` (cross-check) | Yahoo chart endpoint (internal use only, PLAN §4) |
+
+- **Stable index codes.** NSE renamed its "CNX …" indices to "Nifty …" in late 2015;
+  both map to one code (`CNX Bank`, `Nifty Bank` → `NIFTY_BANK`). See `sources/nse_indices.py`.
+- **Why not Yahoo for sector indices:** Yahoo only has full history for NIFTY 50, SENSEX,
+  Bank Nifty, India VIX, IT and Pharma; NSE's own files cover every index.
+- **Futures are front-month continuous series**, so a contract roll can add a small jump.
+- Still to do for M1.6: RBI policy rates, CPI, IIP and forex reserves, with release dates
+  (no look-ahead).
+
+```bash
+python -m stocksense lake-query "select index, count(*) as days, min(date) as since from index_prices group by index order by since limit 20"
+```
+
 ## Code map
 
 ```
@@ -224,6 +245,8 @@ stocksense/
     nse_ipo.py       NSE IPO endpoints
     bhavcopy.py      NSE end-of-day bhavcopy (both archive formats)
     nse_corporate.py NSE corporate actions and symbol changes; split/bonus ratio parsing
+    nse_indices.py   NSE daily closing values of every index; stable codes across renames
+    yahoo_history.py full daily history of global macro series (crude, gold, rupee, US markets)
     screener.py      Screener.in scraping — fallback for promoter holding / sales growth
     fallbacks.py     hardcoded large-cap ownership values (last resort, goes stale)
     upstox.py        OAuth token storage, REST quotes, WebSocket URL

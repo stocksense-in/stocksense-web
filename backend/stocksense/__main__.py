@@ -19,6 +19,8 @@ Jobs
     ingest-bhavcopy  NSE end-of-day prices for every security, 2010 → today, into the lake  (daily)
     ingest-corporate-actions  splits/bonuses/renames → adjusted price history (eod_adjusted)  (weekly)
     check-eod      data checks on the price history: gaps, duplicates, bad prices, unexplained jumps
+    ingest-indices NSE index closes (every sector index), 2012 → today, into the lake  (daily)
+    ingest-macro   crude, gold, rupee, US rates and equities — full daily history  (daily)
 
 Common options
     --symbols INFY TCS   only these stocks          --limit N    only the first N stocks
@@ -110,6 +112,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
     jobs.add_parser("ingest-corporate-actions", help="corporate actions → adjusted price history")
     jobs.add_parser("check-eod", help="data checks on the price history")
+
+    p = jobs.add_parser("ingest-indices", help="NSE index closes into the lake")
+    _add_range(p)
+    p.add_argument("--rebuild", action="store_true", help="rebuild days already in clean/")
+    jobs.add_parser("ingest-macro", help="global macro series into the lake")
     return parser
 
 
@@ -184,6 +191,15 @@ def main() -> None:
             ingest_corporate_actions.check()
         else:
             ingest_corporate_actions.run()
+        return
+
+    if args.job in ("ingest-indices", "ingest-macro"):
+        from .jobs import ingest_market
+
+        if args.job == "ingest-indices":
+            ingest_market.run_indices(args.start, args.end, rebuild=args.rebuild)
+        else:
+            ingest_market.run_macro()
         return
 
     store = _store(args)
