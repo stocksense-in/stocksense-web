@@ -18,10 +18,11 @@ from typing import Callable, Literal
 from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
-from .. import analytics, geo, ipo, rhp
+from .. import analytics, benchmarks, geo, ipo, rhp
+from .. import valuation as valuation_mod
 from ..config import DATA_DIR, get_settings
 from ..market import MarketData, Stock, TTLCache
-from ..scoring import score_stock
+from ..scoring import GUIDE, WEIGHTS, healthy_range, score_stock
 from ..sectors import SECTOR_LABELS
 from ..sources import chart, news, nse_ipo
 from . import schemas
@@ -33,6 +34,8 @@ CHART_TTL_SECONDS = {"1d": 120, "5d": 600}  # intraday refreshes often; daily ra
 MAX_UPLOAD_BYTES = 60 * 1024 * 1024  # DRHPs run 10–40 MB
 MAX_CONCURRENT_SCANS = 2  # PDF text extraction is CPU-heavy; don't let a burst starve other requests
 ANALOGUES_PATH = DATA_DIR / "geo_analogues.json"  # written by `python -m stocksense event-study`
+VALUATION_PATH = DATA_DIR / "valuation_context.json"  # written by `python -m stocksense valuation-context`
+BENCHMARKS_TTL_SECONDS = 5 * 60  # peer quartiles change only when fundamentals do
 
 Range = Literal["1d", "5d", "1mo", "6mo", "1y", "5y"]
 SortField = Literal["score", "market_cap", "change_pct", "pe", "roe", "de", "name"]
@@ -49,18 +52,29 @@ def _verdict(score: int | None) -> str | None:
     return "Strong" if score >= 65 else "Fair" if score >= 45 else "Weak"
 
 
-_analogue_cache: dict = {}
+_json_cache: dict[Path, tuple[float, dict]] = {}
 
 
-def load_analogues(path: Path = ANALOGUES_PATH) -> dict | None:
-    """The published event study (backend/data/geo_analogues.json), re-read only when the file changes."""
+def _load_json(path: Path) -> dict | None:
+    """A published JSON file, re-read only when it changes on disk."""
     try:
         mtime = path.stat().st_mtime
     except FileNotFoundError:
         return None
-    if _analogue_cache.get("mtime") != mtime:
-        _analogue_cache.update(mtime=mtime, doc=json.loads(path.read_text(encoding="utf-8")))
-    return _analogue_cache["doc"]
+    cached = _json_cache.get(path)
+    if cached is None or cached[0] != mtime:
+        _json_cache[path] = (mtime, json.loads(path.read_text(encoding="utf-8")))
+    return _json_cache[path][1]
+
+
+def load_analogues(path: Path = ANALOGUES_PATH) -> dict | None:
+    """The published event study (backend/data/geo_analogues.json)."""
+    return _load_json(path)
+
+
+def load_valuation(path: Path = VALUATION_PATH) -> dict | None:
+    """Sector valuations vs their history (backend/data/valuation_context.json)."""
+    return _load_json(path)
 
 
 def _warm(app: FastAPI) -> None:
@@ -76,6 +90,7 @@ def create_app(
     history: Callable[[str, str], list[tuple[int, float]]] | None = None,
     nse=nse_ipo,
     analogues: Callable[[], dict | None] | None = None,
+    valuation: Callable[[], dict | None] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -104,6 +119,7 @@ def create_app(
     app.state.cache = TTLCache()
     app.state.nse = nse
     app.state.analogues = analogues or load_analogues
+    app.state.valuation = valuation or load_valuation
     app.state.scan_slots = threading.BoundedSemaphore(MAX_CONCURRENT_SCANS)
 
     def market_of(request: Request) -> MarketData:
@@ -192,6 +208,45 @@ def create_app(
     def search(request: Request, q: str = Query(..., min_length=1, max_length=40), limit: int = Query(8, ge=1, le=25)):
         return [_stock_out(s) for s in analytics.search(market_of(request).stocks(), q, limit)]
 
+    def _benchmarks(request: Request) -> benchmarks.Benchmarks:
+        return request.app.state.cache.get("benchmarks", BENCHMARKS_TTL_SECONDS,
+                                           lambda: benchmarks.build(market_of(request).fresh_stocks()))
+
+    @app.get("/learn/metrics", response_model=schemas.LearnMetrics, tags=["learn"])
+    def learn_metrics(request: Request, sector: str = Query("general", description="Sector code from /sectors, e.g. it, bank, fmcg")):
+        """
+        How to read a company in this sector: each metric's meaning, its weight in the
+        score, the score's healthy range, what's typical among the sector's companies,
+        how a company's stage changes the reading, and whether the sector itself is
+        cheap or expensive today versus its own history. Teaching, not advice.
+        """
+        code = sector.lower()
+        peer = _benchmarks(request)
+        return schemas.LearnMetrics(
+            sector=code,
+            sector_label=SECTOR_LABELS.get(code, "All companies"),
+            market_note=valuation_mod.sector_note(code, request.app.state.valuation()),
+            stages={k: v for k, v in benchmarks.STAGE_TEXT.items() if v},
+            metrics=[
+                schemas.MetricGuide(
+                    metric=m, label=GUIDE[m]["label"], measures=GUIDE[m]["measures"],
+                    higher_is_better=GUIDE[m]["higher_is_better"], weight=WEIGHTS[m],
+                    healthy_range=(r := healthy_range(m, code)) and r["text"],
+                    peers=_typical(m, code, peer),
+                )
+                for m in WEIGHTS
+            ],
+        )
+
+    def _typical(metric: str, sector: str, peer: benchmarks.Benchmarks) -> dict | None:
+        """The sector's typical range for a metric, without ranking any company."""
+        bench = benchmarks.benchmark_for(peer, sector, metric)
+        if bench is None:
+            return None
+        ctx = benchmarks.peer_context(metric, bench.quantile(0.5), sector, peer)
+        return {**ctx, "better_than_pct": None, "standing": None,
+                "text": f"Typical for {ctx['group']}: {ctx['typical_range']} (median of {ctx['peers']})."}
+
     @app.get("/stocks/{symbol}", response_model=schemas.StockDetail, tags=["stocks"])
     def stock_detail(request: Request, symbol: str, peers: int = Query(6, ge=0, le=15)):
         """One stock with its score explained metric by metric, and its largest sector peers."""
@@ -201,11 +256,13 @@ def create_app(
             raise HTTPException(404, f"No NSE stock with symbol {symbol.upper()}.")
         metrics = {"pe": stock.pe, "roe": stock.roe, "de": stock.de, "margin": stock.margin, "promoter": stock.promoter, "cagr": stock.cagr}
         coverage = score_stock(metrics, stock.sector).coverage
+        stage = benchmarks.stage(stock)
         return schemas.StockDetail(
             stock=_stock_out(stock),
             score=schemas.ScoreDetail(
                 value=stock.score, verdict=_verdict(stock.score), coverage=coverage,
-                breakdown=analytics.score_breakdown(stock),
+                stage=stage, stage_text=benchmarks.STAGE_TEXT.get(stage),
+                breakdown=analytics.score_breakdown(stock, _benchmarks(request), request.app.state.valuation()),
             ),
             peers=[_stock_out(s) for s in analytics.peers(m.fresh_stocks(), stock, peers)] if peers else [],
         )
