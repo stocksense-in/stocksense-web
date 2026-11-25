@@ -265,6 +265,9 @@ def create_app(
         return {**ctx, "better_than_pct": None, "standing": None,
                 "text": f"Typical for {ctx['group']}: {ctx['typical_range']} (median of {ctx['peers']})."}
 
+    def _financials_of(request: Request, symbol: str) -> dict | None:
+        return ((request.app.state.financials() or {}).get("companies") or {}).get(symbol.upper())
+
     def _holders_of(request: Request, symbol: str) -> dict | None:
         return ((request.app.state.holders() or {}).get("companies") or {}).get(symbol.upper())
 
@@ -281,7 +284,7 @@ def create_app(
     def stock_financials(request: Request, symbol: str):
         """Quarterly and yearly revenue and profit from the company's own filings, on one basis."""
         doc = request.app.state.financials() or {}
-        data = doc.get("companies", {}).get(symbol.upper())
+        data = _financials_of(request, symbol)
         if data is None:
             raise HTTPException(404, f"No filed results for {symbol.upper()} yet")
         return {"symbol": symbol.upper(), "source": doc["source"], "unit": doc["unit"], **data}
@@ -302,7 +305,8 @@ def create_app(
                 value=stock.score, verdict=_verdict(stock.score), coverage=coverage,
                 stage=stage, stage_text=benchmarks.STAGE_TEXT.get(stage),
                 breakdown=analytics.score_breakdown(stock, _benchmarks(request), request.app.state.valuation(),
-                                                    _holders_of(request, stock.symbol)),
+                                                    _holders_of(request, stock.symbol),
+                                                    _financials_of(request, stock.symbol)),
             ),
             peers=[_stock_out(s) for s in analytics.peers(m.fresh_stocks(), stock, peers)] if peers else [],
         )

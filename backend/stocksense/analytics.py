@@ -12,6 +12,7 @@ from dataclasses import dataclass
 
 from . import benchmarks as bm
 from . import blend
+from . import financials as fin
 from . import holders as own
 from .market import Stock
 from .scoring import COLUMN_FOR_METRIC, WEIGHTS, explain, metric_score, verdict_for
@@ -173,7 +174,7 @@ def peers(stocks: list[Stock], stock: Stock, count: int = 6) -> list[Stock]:
 
 
 def score_breakdown(stock: Stock, benchmarks: bm.Benchmarks | None = None, valuation: dict | None = None,
-                    holders: dict | None = None) -> list[dict]:
+                    holders: dict | None = None, financials: dict | None = None) -> list[dict]:
     """
     How each metric contributed: its 0–100 sub-score (70% versus sector peers + 30%
     the fixed curve, as in blend.py — both parts shown), its effective weight after
@@ -183,7 +184,9 @@ def score_breakdown(stock: Stock, benchmarks: bm.Benchmarks | None = None, valua
     With `benchmarks` (benchmarks.build over all stocks) each metric is also placed among
     sector peers; with `valuation` (valuation_context.json) P/E gets the sector's
     valuation today versus its own history; with `holders` (this company's entry in
-    holders.json) promoter holding gets its one-year trend and a pledge warning.
+    holders.json) promoter holding gets its one-year trend and a pledge warning; with
+    `financials` (its entry in financials.json) net margin gets its place in the
+    company's own five-year range.
     """
     values = {
         "pe": stock.pe,
@@ -221,7 +224,8 @@ def score_breakdown(stock: Stock, benchmarks: bm.Benchmarks | None = None, valua
                 "peers": bm.peer_context(key, value, stock.sector, benchmarks) if benchmarks else None,
                 "stage_note": bm.stage_note(key, stock),
                 "market_note": sector_note(stock.sector, valuation) if key == "pe" else None,
-                "history_note": own.trend_note(holders) if key == "promoter" else None,
+                "history_note": (own.trend_note(holders) if key == "promoter" else
+                                 fin.margin_note(financials) if key == "margin" else None),
                 "guardrail": bm.guardrails(key, stock) or (own.pledge_warning(holders) if key == "promoter" else None),
             }
         )

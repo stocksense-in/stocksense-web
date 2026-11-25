@@ -148,6 +148,15 @@ class FilingMetrics(BaseModel):
     debt_equity: float | None
 
 
+class MarginHistory(BaseModel):
+    now: float | None
+    low: float | None
+    median: float | None
+    high: float | None
+    since: str
+    percentile: int = Field(description="Share of the last five years' trailing margins below today's")
+
+
 class Financials(BaseModel):
     symbol: str
     source: str
@@ -157,6 +166,7 @@ class Financials(BaseModel):
     revenue_means: str
     quarters: list[FinancialQuarter]
     years: list[FinancialYear]
+    margin_history: MarginHistory | None = None
     metrics: FilingMetrics
 
 

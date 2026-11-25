@@ -48,3 +48,19 @@ def test_api_serves_financials_and_404s_unknown(market):
     assert body["years"][-1]["fiscal_year"] == 2024
     missing = client.get("/stocks/NOPE/financials")
     assert missing.status_code == 404 and "No filed results" in missing.json()["detail"]
+
+
+def test_margin_against_its_own_range():
+    df = results()  # 16 quarters; margin a steady 10%
+    df.loc[(df["period_end"] >= date(2024, 1, 1)), "net_profit"] = df["revenue"] * 0.20  # last year: 20%
+    acme = financials.build(df)["companies"]["ACME"]
+    h = acme["margin_history"]
+    assert h["now"] == 20.0 and h["low"] == 10.0 and h["percentile"] >= 75
+    assert "near the top of its own range since 2021" in financials.margin_note(acme)
+    assert financials.margin_note({"margin_history": None}) is None
+
+
+def test_too_little_history_has_no_range():
+    df = results()
+    df = df[df["period_end"] >= date(2023, 1, 1)]  # 8 quarters → 5 trailing points
+    assert financials.build(df)["companies"]["ACME"]["margin_history"] is None
