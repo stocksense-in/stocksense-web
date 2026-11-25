@@ -13,6 +13,16 @@ standalone and consolidated, from 2005 to Sep 2026, in ₹ crore:
 request after long bursts on 25 Nov; the job now stops after three failures in a row and
 the weekly engine run picks up the rest.
 
+## Update, 26 Nov: 50 companies
+
+The backfill now covers the 50 largest companies (6,252 filings). On the wider set:
+**profit 154 of 168 within 2% (92%)**, revenue 88 of 151 (58%), 76% overall (48 companies).
+The revenue misses are systematic: ours is higher in 55 of 63, typically by 2–4%, most at
+IOC (+14%) and ITC (+13%), where filed revenue from operations includes excise duty and
+Yahoo nets it out, and TVS Motor (+20%, consolidated financing arm). Profit agreeing while
+revenue differs one way points to a definition gap, not bad data; a next step is to read
+the excise and other-operating-revenue lines and match Yahoo's net revenue.
+
 ## Check against published annual results
 
 `ml/checks/results_spot_check.py` sums four quarters per fiscal year (FY2023–FY2026) and
