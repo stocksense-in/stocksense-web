@@ -26,7 +26,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 
-from .. import eod, lake_checks, valuation
+from .. import eod, financials, lake_checks, valuation
 from ..lake import Lake
 from ..log import get_logger
 
@@ -74,6 +74,7 @@ def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
         Step("valuation_context", lambda: valuation.write(lake), weekly=True),
         # Results arrive quarterly; weekly picks up each filing within days, fetching only new ones.
         Step("results", lambda: ingest_results.run(top=RESULTS_TOP, lake=lake), weekly=True),
+        Step("financials_export", lambda: financials.write(lake), weekly=True),
     ]
 
 

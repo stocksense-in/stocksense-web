@@ -57,6 +57,7 @@ python -m stocksense api --reload        # http://localhost:8000/docs — intera
 | `GET /stocks/search?q=` | Symbol / company-name search |
 | `GET /stocks/{symbol}` | One stock, its score broken down metric by metric — each metric explained in three layers (see "Reading a metric") — and sector peers |
 | `GET /learn/metrics?sector=` | How to read a company in a sector: each metric's meaning, weight, healthy range and what's typical among its companies; how stage changes the reading; whether the sector is cheap or expensive today |
+| `GET /stocks/{symbol}/financials` | Last 12 quarters and 6 fiscal years of revenue and profit from the company's own filings, one basis (consolidated or standalone), plus filing-based margin, growth, ROE, D/E. 404 until a company's results are in (`data/financials.json`, from `financials-export`) |
 | `GET /stocks/{symbol}/history?range=` | Closing prices: `1d` (5-min), `5d`, `1mo`, `6mo`, `1y`, `5y`. Works for indices too (`NIFTY50`) |
 | `GET /news` | Market-moving headlines tagged with topics and affected sectors (`topic=`, `sector=` filters) |
 | `GET /geopolitics` | Sector exposure computed from the last few days of news, plus the headlines behind it |
@@ -275,6 +276,10 @@ companies. Amounts in ₹ crore: `revenue` (interest earned for banks), `net_rev
   published annual results (FY2025 joins the two feeds).
 - Purpose: point-in-time fundamentals for calibrating the score (which blend, which
   metrics identify companies that stay sound) without look-ahead.
+
+**Serving them.** `python -m stocksense financials-export` writes
+`backend/data/financials.json` (committed, like the valuation context) for
+`GET /stocks/{symbol}/financials`; the weekly engine run refreshes it after new results.
 
 **Scoring from filings.** `stocksense/filing_metrics.py` turns the latest four
 consecutive quarters into net margin (trailing profit ÷ trailing net revenue) and 3-year

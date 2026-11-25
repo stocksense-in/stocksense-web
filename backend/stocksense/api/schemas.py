@@ -123,6 +123,41 @@ class MetricGuide(BaseModel):
     peers: PeerContext | None = Field(description="What's typical among this sector's companies (no company value, so not ranked)")
 
 
+class FinancialQuarter(BaseModel):
+    period_end: str
+    revenue: float | None = Field(description="₹ crore; for lenders net interest income + other income")
+    net_profit: float | None = Field(description="₹ crore, owners' share")
+    eps: float | None
+    margin_pct: float | None
+
+
+class FinancialYear(BaseModel):
+    fiscal_year: int = Field(description="Year ending 31 March")
+    revenue: float | None
+    net_profit: float | None
+    margin_pct: float | None
+
+
+class FilingMetrics(BaseModel):
+    as_of: str = Field(description="Quarter end of the latest four quarters used")
+    net_margin: float | None
+    revenue_cagr_3yr: float | None
+    roe: float | None
+    debt_equity: float | None
+
+
+class Financials(BaseModel):
+    symbol: str
+    source: str
+    unit: str
+    basis: str = Field(description="consolidated or standalone — never a mix")
+    kind: str
+    revenue_means: str
+    quarters: list[FinancialQuarter]
+    years: list[FinancialYear]
+    metrics: FilingMetrics
+
+
 class LearnMetrics(BaseModel):
     sector: str
     sector_label: str

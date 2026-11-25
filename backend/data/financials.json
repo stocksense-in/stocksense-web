@@ -1,0 +1,2236 @@
+{
+ "generated": "2026-11-25",
+ "source": "Company filings with NSE (results to Dec 2024; SEBI integrated filing after)",
+ "unit": "₹ crore",
+ "companies": {
+  "ADANIENT": {
+   "basis": "consolidated",
+   "kind": "company",
+   "revenue_means": "revenue from operations",
+   "quarters": [
+    {
+     "period_end": "2021-12-31",
+     "revenue": 18757.9,
+     "net_profit": -11.6,
+     "eps": -0.11,
+     "margin_pct": -0.1
+    },
+    {
+     "period_end": "2022-03-31",
+     "revenue": 24865.5,
+     "net_profit": 304.3,
+     "eps": 2.77,
+     "margin_pct": 1.2
+    },
+    {
+     "period_end": "2022-09-30",
+     "revenue": 38175.2,
+     "net_profit": 460.9,
+     "eps": 4.05,
+     "margin_pct": 1.2
+    },
+    {
+     "period_end": "2022-12-31",
+     "revenue": 26612.2,
+     "net_profit": 820.1,
+     "eps": 7.21,
+     "margin_pct": 3.1
+    },
+    {
+     "period_end": "2023-03-31",
+     "revenue": 31346.0,
+     "net_profit": 722.5,
+     "eps": 6.34,
+     "margin_pct": 2.3
+    },
+    {
+     "period_end": "2023-06-30",
+     "revenue": 25438.5,
+     "net_profit": 673.9,
+     "eps": 5.91,
+     "margin_pct": 2.6
+    },
+    {
+     "period_end": "2023-09-30",
+     "revenue": 22517.3,
+     "net_profit": 227.8,
+     "eps": 2.0,
+     "margin_pct": 1.0
+    },
+    {
+     "period_end": "2023-12-31",
+     "revenue": 28336.4,
+     "net_profit": 1888.4,
+     "eps": 16.57,
+     "margin_pct": 6.7
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 29180.0,
+     "net_profit": 450.6,
+     "eps": 3.48,
+     "margin_pct": 1.5
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 25472.4,
+     "net_profit": 1454.5,
+     "eps": 12.33,
+     "margin_pct": 5.7
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 22608.1,
+     "net_profit": 1741.8,
+     "eps": 14.87,
+     "margin_pct": 7.7
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 22848.4,
+     "net_profit": 57.8,
+     "eps": 0.07,
+     "margin_pct": 0.3
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2021,
+     "revenue": 39537.1,
+     "net_profit": 718.9,
+     "margin_pct": 1.8
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 69420.2,
+     "net_profit": 776.6,
+     "margin_pct": 1.1
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 105472.2,
+     "net_profit": 3240.8,
+     "margin_pct": 3.1
+    }
+   ],
+   "metrics": {
+    "as_of": "2024-12-31",
+    "net_margin": 3.7,
+    "revenue_cagr_3yr": 19.9,
+    "roe": null,
+    "debt_equity": null
+   }
+  },
+  "ADANIPORTS": {
+   "basis": "consolidated",
+   "kind": "company",
+   "revenue_means": "revenue from operations",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 6920.1,
+     "net_profit": 2208.4,
+     "eps": 10.22,
+     "margin_pct": 31.9
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 6896.5,
+     "net_profit": 2039.7,
+     "eps": 9.44,
+     "margin_pct": 29.6
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 7559.6,
+     "net_profit": 3112.8,
+     "eps": 14.41,
+     "margin_pct": 41.2
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 7067.0,
+     "net_profit": 2445.0,
+     "eps": 11.32,
+     "margin_pct": 34.6
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 7963.6,
+     "net_profit": 2520.3,
+     "eps": 11.67,
+     "margin_pct": 31.6
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 8488.4,
+     "net_profit": 3014.2,
+     "eps": 13.95,
+     "margin_pct": 35.5
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 9126.1,
+     "net_profit": 3310.6,
+     "eps": 15.34,
+     "margin_pct": 36.3
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 9167.5,
+     "net_profit": 3109.1,
+     "eps": 14.39,
+     "margin_pct": 33.9
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 9704.6,
+     "net_profit": 3053.6,
+     "eps": 14.04,
+     "margin_pct": 31.5
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 10737.6,
+     "net_profit": 3308.3,
+     "eps": 14.45,
+     "margin_pct": 30.8
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 10820.8,
+     "net_profit": 3620.4,
+     "eps": 15.71,
+     "margin_pct": 33.5
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 11340.4,
+     "net_profit": 3621.9,
+     "eps": 15.72,
+     "margin_pct": 31.9
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2021,
+     "revenue": 12549.6,
+     "net_profit": 4994.3,
+     "margin_pct": 39.8
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 15731.4,
+     "net_profit": 4754.7,
+     "margin_pct": 30.2
+    },
+    {
+     "fiscal_year": 2023,
+     "revenue": 20431.8,
+     "net_profit": 5224.3,
+     "margin_pct": 25.6
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 26710.6,
+     "net_profit": 8110.6,
+     "margin_pct": 30.4
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 31078.6,
+     "net_profit": 11092.3,
+     "margin_pct": 35.7
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 38735.8,
+     "net_profit": 12781.6,
+     "margin_pct": 33.0
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 31.93,
+    "revenue_cagr_3yr": 21.97,
+    "roe": 16.07,
+    "debt_equity": 0.565
+   }
+  },
+  "AXISBANK": {
+   "basis": "consolidated",
+   "kind": "bank",
+   "revenue_means": "net interest income + other income",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 19194.2,
+     "net_profit": 6491.7,
+     "eps": 21.06,
+     "margin_pct": 33.8
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 21108.9,
+     "net_profit": 7599.0,
+     "eps": 24.63,
+     "margin_pct": 36.0
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 20534.9,
+     "net_profit": 6436.4,
+     "eps": 20.84,
+     "margin_pct": 31.3
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 21588.9,
+     "net_profit": 7401.3,
+     "eps": 23.94,
+     "margin_pct": 34.3
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 20919.5,
+     "net_profit": 6742.3,
+     "eps": 21.79,
+     "margin_pct": 32.2
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 21837.3,
+     "net_profit": 7475.1,
+     "eps": 24.14,
+     "margin_pct": 34.2
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 22162.3,
+     "net_profit": 6243.7,
+     "eps": 20.15,
+     "margin_pct": 28.2
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 21798.4,
+     "net_profit": 5527.9,
+     "eps": 17.82,
+     "margin_pct": 25.4
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 22113.3,
+     "net_profit": 7010.6,
+     "eps": 22.59,
+     "margin_pct": 31.7
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 22063.0,
+     "net_profit": 7602.6,
+     "eps": 24.47,
+     "margin_pct": 34.5
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 22998.1,
+     "net_profit": 7632.3,
+     "eps": 24.55,
+     "margin_pct": 33.2
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 23741.4,
+     "net_profit": 7704.7,
+     "eps": 24.76,
+     "margin_pct": 32.5
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2021,
+     "revenue": 45921.5,
+     "net_profit": 7195.5,
+     "margin_pct": 15.7
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 51421.2,
+     "net_profit": 14119.3,
+     "margin_pct": 27.5
+    },
+    {
+     "fiscal_year": 2023,
+     "revenue": 62765.6,
+     "net_profit": 10818.4,
+     "margin_pct": 17.2
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 76598.6,
+     "net_profit": 26386.2,
+     "margin_pct": 34.4
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 84880.6,
+     "net_profit": 28055.1,
+     "margin_pct": 33.1
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 88137.0,
+     "net_profit": 26384.9,
+     "margin_pct": 29.9
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 32.94,
+    "revenue_cagr_3yr": 8.68,
+    "roe": null,
+    "debt_equity": null
+   }
+  },
+  "BAJFINANCE": {
+   "basis": "consolidated",
+   "kind": "finance",
+   "revenue_means": "net interest income + other income",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 9298.0,
+     "net_profit": 3638.9,
+     "eps": 59.42,
+     "margin_pct": 39.1
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 9714.9,
+     "net_profit": 3824.5,
+     "eps": 61.91,
+     "margin_pct": 39.4
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 10418.5,
+     "net_profit": 3955.3,
+     "eps": 63.28,
+     "margin_pct": 38.0
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 10946.1,
+     "net_profit": 3999.7,
+     "eps": 64.66,
+     "margin_pct": 36.5
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 11672.7,
+     "net_profit": 4246.5,
+     "eps": 68.63,
+     "margin_pct": 36.4
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 11916.8,
+     "net_profit": 4479.6,
+     "eps": 72.35,
+     "margin_pct": 37.6
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 12610.1,
+     "net_profit": 4699.6,
+     "eps": 7.57,
+     "margin_pct": 37.3
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 13169.5,
+     "net_profit": 4875.4,
+     "eps": 7.85,
+     "margin_pct": 37.0
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 13875.9,
+     "net_profit": 3977.8,
+     "eps": 6.4,
+     "margin_pct": 28.7
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 14208.2,
+     "net_profit": 5464.6,
+     "eps": 8.79,
+     "margin_pct": 38.5
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 15224.3,
+     "net_profit": 5985.8,
+     "eps": 9.62,
+     "margin_pct": 39.3
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 15974.1,
+     "net_profit": 6266.2,
+     "eps": 10.07,
+     "margin_pct": 39.2
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2021,
+     "revenue": 17272.4,
+     "net_profit": 4419.8,
+     "margin_pct": 25.6
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 21892.2,
+     "net_profit": 7028.2,
+     "margin_pct": 32.1
+    },
+    {
+     "fiscal_year": 2023,
+     "revenue": 28844.8,
+     "net_profit": 11507.7,
+     "margin_pct": 39.9
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 36255.6,
+     "net_profit": 14451.2,
+     "margin_pct": 39.9
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 44954.0,
+     "net_profit": 16681.1,
+     "margin_pct": 37.1
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 53863.6,
+     "net_profit": 19017.4,
+     "margin_pct": 35.3
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 36.59,
+    "revenue_cagr_3yr": 22.25,
+    "roe": 19.17,
+    "debt_equity": null
+   }
+  },
+  "BHARTIARTL": {
+   "basis": "consolidated",
+   "kind": "company",
+   "revenue_means": "revenue from operations",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 37899.5,
+     "net_profit": 2442.2,
+     "eps": 4.27,
+     "margin_pct": 6.4
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 37599.1,
+     "net_profit": 2071.6,
+     "eps": 3.61,
+     "margin_pct": 5.5
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 38506.4,
+     "net_profit": 4159.9,
+     "eps": 7.21,
+     "margin_pct": 10.8
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 41473.3,
+     "net_profit": 3593.2,
+     "eps": 6.21,
+     "margin_pct": 8.7
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 45129.3,
+     "net_profit": 14781.2,
+     "eps": 25.54,
+     "margin_pct": 32.8
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 47876.2,
+     "net_profit": 11021.8,
+     "eps": 19.02,
+     "margin_pct": 23.0
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 49462.6,
+     "net_profit": 5947.9,
+     "eps": 10.26,
+     "margin_pct": 12.0
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 52145.4,
+     "net_profit": 6791.7,
+     "eps": 11.66,
+     "margin_pct": 13.0
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 53981.6,
+     "net_profit": 6630.5,
+     "eps": 11.44,
+     "margin_pct": 12.3
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 55383.2,
+     "net_profit": 7325.1,
+     "eps": 12.53,
+     "margin_pct": 13.2
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 58539.1,
+     "net_profit": 8167.4,
+     "eps": 13.38,
+     "margin_pct": 14.0
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 60877.5,
+     "net_profit": 8887.5,
+     "eps": 14.25,
+     "margin_pct": 14.6
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2021,
+     "revenue": 101988.8,
+     "net_profit": -15083.5,
+     "margin_pct": -14.8
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 116546.9,
+     "net_profit": 4254.9,
+     "margin_pct": 3.7
+    },
+    {
+     "fiscal_year": 2023,
+     "revenue": 139144.8,
+     "net_profit": 8345.9,
+     "margin_pct": 6.0
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 149982.4,
+     "net_profit": 7467.0,
+     "margin_pct": 5.0
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 172985.2,
+     "net_profit": 33556.1,
+     "margin_pct": 19.4
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 210972.8,
+     "net_profit": 26695.2,
+     "margin_pct": 12.7
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 13.55,
+    "revenue_cagr_3yr": 16.07,
+    "roe": 22.48,
+    "debt_equity": 0.766
+   }
+  },
+  "HDFCBANK": {
+   "basis": "consolidated",
+   "kind": "bank",
+   "revenue_means": "net interest income + other income",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 71773.1,
+     "net_profit": 17257.9,
+     "eps": 22.74,
+     "margin_pct": 24.0
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 80699.8,
+     "net_profit": 17622.4,
+     "eps": 23.2,
+     "margin_pct": 21.8
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 72417.0,
+     "net_profit": 16474.8,
+     "eps": 21.67,
+     "margin_pct": 22.7
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 76042.5,
+     "net_profit": 17825.9,
+     "eps": 23.4,
+     "margin_pct": 23.4
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 65279.7,
+     "net_profit": 17656.6,
+     "eps": 23.11,
+     "margin_pct": 27.0
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 73282.5,
+     "net_profit": 18385.2,
+     "eps": 24.62,
+     "margin_pct": 25.1
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 85346.5,
+     "net_profit": 16257.9,
+     "eps": 21.23,
+     "margin_pct": 19.0
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 71819.8,
+     "net_profit": 19610.7,
+     "eps": 12.78,
+     "margin_pct": 27.3
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 81105.9,
+     "net_profit": 19806.6,
+     "eps": 12.88,
+     "margin_pct": 24.4
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 71699.5,
+     "net_profit": 20350.8,
+     "eps": 13.22,
+     "margin_pct": 28.4
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 85484.7,
+     "net_profit": 19244.7,
+     "eps": 12.5,
+     "margin_pct": 22.5
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 78691.3,
+     "net_profit": 20700.0,
+     "eps": 13.43,
+     "margin_pct": 26.3
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2021,
+     "revenue": 96637.7,
+     "net_profit": 31833.2,
+     "margin_pct": 32.9
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 109111.1,
+     "net_profit": 38052.8,
+     "margin_pct": 34.9
+    },
+    {
+     "fiscal_year": 2023,
+     "revenue": 126886.2,
+     "net_profit": 45997.1,
+     "margin_pct": 36.3
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 253856.2,
+     "net_profit": 64062.0,
+     "margin_pct": 25.2
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 287021.7,
+     "net_profit": 70342.6,
+     "margin_pct": 24.5
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 309971.6,
+     "net_profit": 76026.0,
+     "margin_pct": 24.5
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 25.27,
+    "revenue_cagr_3yr": 23.19,
+    "roe": null,
+    "debt_equity": null
+   }
+  },
+  "HINDUNILVR": {
+   "basis": "consolidated",
+   "kind": "company",
+   "revenue_means": "revenue from operations",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 15567.0,
+     "net_profit": 2509.0,
+     "eps": 10.68,
+     "margin_pct": 16.1
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 15210.0,
+     "net_profit": 2558.0,
+     "eps": 10.89,
+     "margin_pct": 16.8
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 15707.0,
+     "net_profit": 2610.0,
+     "eps": 11.11,
+     "margin_pct": 16.6
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 15926.0,
+     "net_profit": 2591.0,
+     "eps": 11.03,
+     "margin_pct": 16.3
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 15818.0,
+     "net_profit": 2984.0,
+     "eps": 12.7,
+     "margin_pct": 18.9
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 15670.0,
+     "net_profit": 2464.0,
+     "eps": 10.48,
+     "margin_pct": 15.7
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 16514.0,
+     "net_profit": 2756.0,
+     "eps": 11.73,
+     "margin_pct": 16.7
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 16241.0,
+     "net_profit": 2685.0,
+     "eps": 11.43,
+     "margin_pct": 16.5
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 16441.0,
+     "net_profit": 6607.0,
+     "eps": 28.12,
+     "margin_pct": 40.2
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 16351.0,
+     "net_profit": 2992.0,
+     "eps": 12.73,
+     "margin_pct": 18.3
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 17341.0,
+     "net_profit": 2673.0,
+     "eps": 11.38,
+     "margin_pct": 15.4
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 18226.0,
+     "net_profit": 2790.0,
+     "eps": 11.87,
+     "margin_pct": 15.3
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2021,
+     "revenue": 47028.0,
+     "net_profit": 7995.0,
+     "margin_pct": 17.0
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 52446.0,
+     "net_profit": 8879.0,
+     "margin_pct": 16.9
+    },
+    {
+     "fiscal_year": 2023,
+     "revenue": 60580.0,
+     "net_profit": 10120.0,
+     "margin_pct": 16.7
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 61896.0,
+     "net_profit": 10277.0,
+     "margin_pct": 16.6
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 63121.0,
+     "net_profit": 10649.0,
+     "margin_pct": 16.9
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 65547.0,
+     "net_profit": 15040.0,
+     "margin_pct": 22.9
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 22.03,
+    "revenue_cagr_3yr": 3.35,
+    "roe": 30.88,
+    "debt_equity": 0.0
+   }
+  },
+  "ICICIBANK": {
+   "basis": "consolidated",
+   "kind": "bank",
+   "revenue_means": "net interest income + other income",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 40071.0,
+     "net_profit": 11052.6,
+     "eps": 15.77,
+     "margin_pct": 27.6
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 46758.0,
+     "net_profit": 11671.5,
+     "eps": 16.63,
+     "margin_pct": 25.0
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 46148.4,
+     "net_profit": 11695.8,
+     "eps": 16.64,
+     "margin_pct": 25.3
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 50717.2,
+     "net_profit": 12947.8,
+     "eps": 18.39,
+     "margin_pct": 25.5
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 51993.2,
+     "net_profit": 12883.4,
+     "eps": 18.26,
+     "margin_pct": 24.8
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 56700.4,
+     "net_profit": 13502.2,
+     "eps": 19.11,
+     "margin_pct": 23.8
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 51486.0,
+     "net_profit": 13557.6,
+     "eps": 19.02,
+     "margin_pct": 26.3
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 54129.2,
+     "net_profit": 13357.1,
+     "eps": 18.71,
+     "margin_pct": 24.7
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 54907.8,
+     "net_profit": 12538.0,
+     "eps": 17.54,
+     "margin_pct": 22.8
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 62566.9,
+     "net_profit": 14755.1,
+     "eps": 20.62,
+     "margin_pct": 23.6
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 56625.5,
+     "net_profit": 15440.1,
+     "eps": 21.54,
+     "margin_pct": 27.3
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 62504.9,
+     "net_profit": 16333.2,
+     "eps": 22.76,
+     "margin_pct": 26.1
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2020,
+     "revenue": 104945.4,
+     "net_profit": 9566.3,
+     "margin_pct": 9.1
+    },
+    {
+     "fiscal_year": 2021,
+     "revenue": 118533.1,
+     "net_profit": 18384.3,
+     "margin_pct": 15.5
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 119829.9,
+     "net_profit": 25094.8,
+     "margin_pct": 20.9
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 161929.6,
+     "net_profit": 44256.4,
+     "margin_pct": 27.3
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 205559.3,
+     "net_profit": 51029.2,
+     "margin_pct": 24.8
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 223089.8,
+     "net_profit": 54207.7,
+     "margin_pct": 24.3
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 24.96,
+    "revenue_cagr_3yr": 16.56,
+    "roe": null,
+    "debt_equity": null
+   }
+  },
+  "INFY": {
+   "basis": "consolidated",
+   "kind": "company",
+   "revenue_means": "revenue from operations",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 38821.0,
+     "net_profit": 6106.0,
+     "eps": 14.76,
+     "margin_pct": 15.7
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 37923.0,
+     "net_profit": 7969.0,
+     "eps": 19.25,
+     "margin_pct": 21.0
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 39315.0,
+     "net_profit": 6368.0,
+     "eps": 15.38,
+     "margin_pct": 16.2
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 40986.0,
+     "net_profit": 6506.0,
+     "eps": 15.71,
+     "margin_pct": 15.9
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 41764.0,
+     "net_profit": 6806.0,
+     "eps": 16.43,
+     "margin_pct": 16.3
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 40925.0,
+     "net_profit": 7033.0,
+     "eps": 16.98,
+     "margin_pct": 17.2
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 42279.0,
+     "net_profit": 6921.0,
+     "eps": 16.7,
+     "margin_pct": 16.4
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 44490.0,
+     "net_profit": 7364.0,
+     "eps": 17.76,
+     "margin_pct": 16.6
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 45479.0,
+     "net_profit": 6654.0,
+     "eps": 16.17,
+     "margin_pct": 14.6
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 46402.0,
+     "net_profit": 8501.0,
+     "eps": 21.01,
+     "margin_pct": 18.3
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 48211.0,
+     "net_profit": 7769.0,
+     "eps": 19.19,
+     "margin_pct": 16.1
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 49244.0,
+     "net_profit": 7823.0,
+     "eps": 19.32,
+     "margin_pct": 15.9
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2021,
+     "revenue": 100473.0,
+     "net_profit": 19351.0,
+     "margin_pct": 19.3
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 121641.0,
+     "net_profit": 22111.0,
+     "margin_pct": 18.2
+    },
+    {
+     "fiscal_year": 2023,
+     "revenue": 146767.0,
+     "net_profit": 24095.0,
+     "margin_pct": 16.4
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 153671.0,
+     "net_profit": 26419.0,
+     "margin_pct": 17.2
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 162990.0,
+     "net_profit": 26713.0,
+     "margin_pct": 16.4
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 178650.0,
+     "net_profit": 29440.0,
+     "margin_pct": 16.5
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 16.24,
+    "revenue_cagr_3yr": 7.43,
+    "roe": 30.38,
+    "debt_equity": 0.0
+   }
+  },
+  "KOTAKBANK": {
+   "basis": "consolidated",
+   "kind": "bank",
+   "revenue_means": "net interest income + other income",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 18097.7,
+     "net_profit": 4264.8,
+     "eps": 21.46,
+     "margin_pct": 23.6
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 21695.2,
+     "net_profit": 5337.2,
+     "eps": 26.66,
+     "margin_pct": 24.6
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 18270.6,
+     "net_profit": 7448.2,
+     "eps": 37.47,
+     "margin_pct": 40.8
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 19741.0,
+     "net_profit": 5044.1,
+     "eps": 25.37,
+     "margin_pct": 25.6
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 16775.0,
+     "net_profit": 4701.0,
+     "eps": 23.64,
+     "margin_pct": 28.0
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 20014.8,
+     "net_profit": 4932.8,
+     "eps": 24.81,
+     "margin_pct": 24.6
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 19174.6,
+     "net_profit": 4472.2,
+     "eps": 22.49,
+     "margin_pct": 23.3
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 17568.8,
+     "net_profit": 4468.3,
+     "eps": 22.47,
+     "margin_pct": 25.4
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 20466.4,
+     "net_profit": 4924.3,
+     "eps": 4.95,
+     "margin_pct": 24.1
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 20731.7,
+     "net_profit": 5423.1,
+     "eps": 5.45,
+     "margin_pct": 26.2
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 22366.1,
+     "net_profit": 5480.5,
+     "eps": 5.51,
+     "margin_pct": 24.5
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 20746.3,
+     "net_profit": 5645.4,
+     "eps": 5.68,
+     "margin_pct": 27.2
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2020,
+     "revenue": 34399.0,
+     "net_profit": 8593.4,
+     "margin_pct": 25.0
+    },
+    {
+     "fiscal_year": 2021,
+     "revenue": 43958.9,
+     "net_profit": 9990.2,
+     "margin_pct": 22.7
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 47558.3,
+     "net_profit": 12089.4,
+     "margin_pct": 25.4
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 71706.7,
+     "net_profit": 18213.2,
+     "margin_pct": 25.4
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 74801.6,
+     "net_profit": 22126.0,
+     "margin_pct": 29.6
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 77941.5,
+     "net_profit": 19287.9,
+     "margin_pct": 24.7
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 25.47,
+    "revenue_cagr_3yr": 10.15,
+    "roe": null,
+    "debt_equity": null
+   }
+  },
+  "LICI": {
+   "basis": "consolidated",
+   "kind": "insurance",
+   "revenue_means": "total income",
+   "quarters": [
+    {
+     "period_end": "2025-03-31",
+     "revenue": 243692.7,
+     "net_profit": 19038.7,
+     "eps": null,
+     "margin_pct": 7.8
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 224950.2,
+     "net_profit": 10957.0,
+     "eps": null,
+     "margin_pct": 4.9
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 241536.4,
+     "net_profit": 10098.5,
+     "eps": null,
+     "margin_pct": 4.2
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 236094.3,
+     "net_profit": 12930.4,
+     "eps": null,
+     "margin_pct": 5.5
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 279197.8,
+     "net_profit": 23467.2,
+     "eps": null,
+     "margin_pct": 8.4
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 240167.8,
+     "net_profit": 13584.2,
+     "eps": null,
+     "margin_pct": 5.7
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 264861.4,
+     "net_profit": 12114.8,
+     "eps": null,
+     "margin_pct": 4.6
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2026,
+     "revenue": 981778.7,
+     "net_profit": 57453.2,
+     "margin_pct": 5.9
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 6.09,
+    "revenue_cagr_3yr": null,
+    "roe": null,
+    "debt_equity": null
+   }
+  },
+  "LT": {
+   "basis": "consolidated",
+   "kind": "company",
+   "revenue_means": "revenue from operations",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 55127.8,
+     "net_profit": 2947.4,
+     "eps": 21.44,
+     "margin_pct": 5.3
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 67078.7,
+     "net_profit": 4396.1,
+     "eps": 31.98,
+     "margin_pct": 6.6
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 55119.8,
+     "net_profit": 2785.7,
+     "eps": 20.26,
+     "margin_pct": 5.1
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 61554.6,
+     "net_profit": 3395.3,
+     "eps": 24.69,
+     "margin_pct": 5.5
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 64667.8,
+     "net_profit": 3358.8,
+     "eps": 24.43,
+     "margin_pct": 5.2
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 74392.3,
+     "net_profit": 5497.3,
+     "eps": 39.98,
+     "margin_pct": 7.4
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 63678.9,
+     "net_profit": 3617.2,
+     "eps": 26.3,
+     "margin_pct": 5.7
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 67983.5,
+     "net_profit": 3926.1,
+     "eps": 28.54,
+     "margin_pct": 5.8
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 71449.7,
+     "net_profit": 3215.1,
+     "eps": 23.37,
+     "margin_pct": 4.5
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 82762.2,
+     "net_profit": 5325.6,
+     "eps": 38.71,
+     "margin_pct": 6.4
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 67941.7,
+     "net_profit": 4122.9,
+     "eps": 29.97,
+     "margin_pct": 6.1
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 78749.9,
+     "net_profit": 5202.1,
+     "eps": 37.81,
+     "margin_pct": 6.6
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2020,
+     "revenue": 145452.4,
+     "net_profit": 9549.0,
+     "margin_pct": 6.6
+    },
+    {
+     "fiscal_year": 2021,
+     "revenue": 135979.0,
+     "net_profit": 11582.9,
+     "margin_pct": 8.5
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 156521.2,
+     "net_profit": 8669.3,
+     "margin_pct": 5.5
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 221112.9,
+     "net_profit": 13059.1,
+     "margin_pct": 5.9
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 255734.5,
+     "net_profit": 15037.1,
+     "margin_pct": 5.9
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 285874.3,
+     "net_profit": 16084.0,
+     "margin_pct": 5.6
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 5.94,
+    "revenue_cagr_3yr": 13.9,
+    "roe": 16.66,
+    "debt_equity": 1.205
+   }
+  },
+  "RELIANCE": {
+   "basis": "consolidated",
+   "kind": "company",
+   "revenue_means": "revenue from operations",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 227970.0,
+     "net_profit": 17265.0,
+     "eps": 25.52,
+     "margin_pct": 7.6
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 240715.0,
+     "net_profit": 18951.0,
+     "eps": 28.01,
+     "margin_pct": 7.9
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 236217.0,
+     "net_profit": 15138.0,
+     "eps": 22.37,
+     "margin_pct": 6.4
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 235481.0,
+     "net_profit": 16563.0,
+     "eps": 24.48,
+     "margin_pct": 7.0
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 243865.0,
+     "net_profit": 18540.0,
+     "eps": 13.7,
+     "margin_pct": 7.6
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 264573.0,
+     "net_profit": 19407.0,
+     "eps": 14.34,
+     "margin_pct": 7.3
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 248660.0,
+     "net_profit": 26994.0,
+     "eps": 19.95,
+     "margin_pct": 10.9
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 258898.0,
+     "net_profit": 18165.0,
+     "eps": 13.42,
+     "margin_pct": 7.0
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 269496.0,
+     "net_profit": 18645.0,
+     "eps": 13.78,
+     "margin_pct": 6.9
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 298621.0,
+     "net_profit": 16971.0,
+     "eps": 12.54,
+     "margin_pct": 5.7
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 311850.0,
+     "net_profit": 20946.0,
+     "eps": 15.48,
+     "margin_pct": 6.7
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 332861.0,
+     "net_profit": 25548.0,
+     "eps": 18.88,
+     "margin_pct": 7.7
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2020,
+     "revenue": 609583.0,
+     "net_profit": 39354.0,
+     "margin_pct": 6.5
+    },
+    {
+     "fiscal_year": 2021,
+     "revenue": 486326.0,
+     "net_profit": 49128.0,
+     "margin_pct": 10.1
+    },
+    {
+     "fiscal_year": 2023,
+     "revenue": 892944.0,
+     "net_profit": 66702.0,
+     "margin_pct": 7.5
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 914472.0,
+     "net_profit": 69621.0,
+     "margin_pct": 7.6
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 980136.0,
+     "net_profit": 69648.0,
+     "margin_pct": 7.1
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 1075675.0,
+     "net_profit": 80775.0,
+     "margin_pct": 7.5
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 6.77,
+    "revenue_cagr_3yr": 11.17,
+    "roe": 9.01,
+    "debt_equity": 0.408
+   }
+  },
+  "SBIN": {
+   "basis": "consolidated",
+   "kind": "bank",
+   "revenue_means": "net interest income + other income",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 84979.7,
+     "net_profit": 11064.1,
+     "eps": 12.4,
+     "margin_pct": 13.0
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 94270.3,
+     "net_profit": 21384.2,
+     "eps": 23.96,
+     "margin_pct": 22.7
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 80424.3,
+     "net_profit": 19325.0,
+     "eps": 21.65,
+     "margin_pct": 24.0
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 90183.6,
+     "net_profit": 19782.8,
+     "eps": 22.17,
+     "margin_pct": 21.9
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 90456.8,
+     "net_profit": 18853.2,
+     "eps": 21.12,
+     "margin_pct": 20.8
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 101335.3,
+     "net_profit": 19600.5,
+     "eps": 21.96,
+     "margin_pct": 19.3
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 88725.4,
+     "net_profit": 21201.5,
+     "eps": 23.76,
+     "margin_pct": 23.9
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 97895.4,
+     "net_profit": 21137.3,
+     "eps": 22.81,
+     "margin_pct": 21.6
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 106865.8,
+     "net_profit": 21317.1,
+     "eps": 23.09,
+     "margin_pct": 19.9
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 101125.6,
+     "net_profit": 19642.9,
+     "eps": 21.28,
+     "margin_pct": 19.4
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 97814.3,
+     "net_profit": 24113.0,
+     "eps": 26.12,
+     "margin_pct": 24.7
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 103483.6,
+     "net_profit": 25361.2,
+     "eps": 27.47,
+     "margin_pct": 24.5
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2020,
+     "revenue": 201313.2,
+     "net_profit": 19767.8,
+     "margin_pct": 9.8
+    },
+    {
+     "fiscal_year": 2021,
+     "revenue": 227960.5,
+     "net_profit": 22405.5,
+     "margin_pct": 9.8
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 250778.8,
+     "net_profit": 35373.9,
+     "margin_pct": 14.1
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 334838.8,
+     "net_profit": 67084.7,
+     "margin_pct": 20.0
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 362400.0,
+     "net_profit": 77561.3,
+     "margin_pct": 21.4
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 394612.2,
+     "net_profit": 83298.8,
+     "margin_pct": 21.1
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 22.1,
+    "revenue_cagr_3yr": 8.91,
+    "roe": null,
+    "debt_equity": null
+   }
+  },
+  "SUNPHARMA": {
+   "basis": "consolidated",
+   "kind": "company",
+   "revenue_means": "revenue from operations",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 12380.7,
+     "net_profit": 2523.8,
+     "eps": 10.5,
+     "margin_pct": 20.4
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 11982.9,
+     "net_profit": 2654.6,
+     "eps": 11.1,
+     "margin_pct": 22.2
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 12652.8,
+     "net_profit": 2835.6,
+     "eps": 11.8,
+     "margin_pct": 22.4
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 13291.4,
+     "net_profit": 3040.2,
+     "eps": 12.7,
+     "margin_pct": 22.9
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 13675.5,
+     "net_profit": 2903.4,
+     "eps": 12.1,
+     "margin_pct": 21.2
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 12958.8,
+     "net_profit": 2149.9,
+     "eps": 9.0,
+     "margin_pct": 16.6
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 13851.4,
+     "net_profit": 2278.6,
+     "eps": 9.5,
+     "margin_pct": 16.5
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 14478.3,
+     "net_profit": 3117.9,
+     "eps": 13.0,
+     "margin_pct": 21.5
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 15520.5,
+     "net_profit": 3368.8,
+     "eps": 14.0,
+     "margin_pct": 21.7
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 14611.8,
+     "net_profit": 2714.0,
+     "eps": 11.3,
+     "margin_pct": 18.6
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 15299.9,
+     "net_profit": 2894.8,
+     "eps": 12.1,
+     "margin_pct": 18.9
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 16198.7,
+     "net_profit": 1988.5,
+     "eps": 8.3,
+     "margin_pct": 12.3
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2020,
+     "revenue": 32837.5,
+     "net_profit": 3764.9,
+     "margin_pct": 11.5
+    },
+    {
+     "fiscal_year": 2021,
+     "revenue": 33498.1,
+     "net_profit": 2903.8,
+     "margin_pct": 8.7
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 38654.5,
+     "net_profit": 3272.7,
+     "margin_pct": 8.5
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 48496.8,
+     "net_profit": 9576.4,
+     "margin_pct": 19.7
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 52578.4,
+     "net_profit": 10929.0,
+     "margin_pct": 20.8
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 58462.0,
+     "net_profit": 11479.4,
+     "margin_pct": 19.6
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 17.79,
+    "revenue_cagr_3yr": 10.0,
+    "roe": 13.13,
+    "debt_equity": 0.03
+   }
+  },
+  "TCS": {
+   "basis": "consolidated",
+   "kind": "company",
+   "revenue_means": "revenue from operations",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 60583.0,
+     "net_profit": 11058.0,
+     "eps": 30.29,
+     "margin_pct": 18.3
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 61237.0,
+     "net_profit": 12434.0,
+     "eps": 34.37,
+     "margin_pct": 20.3
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 62613.0,
+     "net_profit": 12040.0,
+     "eps": 33.28,
+     "margin_pct": 19.2
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 64259.0,
+     "net_profit": 11909.0,
+     "eps": 32.92,
+     "margin_pct": 18.5
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 63973.0,
+     "net_profit": 12380.0,
+     "eps": 34.21,
+     "margin_pct": 19.4
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 64479.0,
+     "net_profit": 12224.0,
+     "eps": 33.79,
+     "margin_pct": 19.0
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 63437.0,
+     "net_profit": 12760.0,
+     "eps": 35.27,
+     "margin_pct": 20.1
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 65799.0,
+     "net_profit": 12075.0,
+     "eps": 33.37,
+     "margin_pct": 18.4
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 67087.0,
+     "net_profit": 10657.0,
+     "eps": 29.45,
+     "margin_pct": 15.9
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 70698.0,
+     "net_profit": 13718.0,
+     "eps": 37.92,
+     "margin_pct": 19.4
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 72275.0,
+     "net_profit": 13349.0,
+     "eps": 36.9,
+     "margin_pct": 18.5
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 73188.0,
+     "net_profit": 13884.0,
+     "eps": 38.37,
+     "margin_pct": 19.0
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2021,
+     "revenue": 164177.0,
+     "net_profit": 32430.0,
+     "margin_pct": 19.8
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 191754.0,
+     "net_profit": 38327.0,
+     "margin_pct": 20.0
+    },
+    {
+     "fiscal_year": 2023,
+     "revenue": 225458.0,
+     "net_profit": 42147.0,
+     "margin_pct": 18.7
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 240893.0,
+     "net_profit": 45908.0,
+     "margin_pct": 19.1
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 255324.0,
+     "net_profit": 48553.0,
+     "margin_pct": 19.0
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 267021.0,
+     "net_profit": 49210.0,
+     "margin_pct": 18.4
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 18.22,
+    "revenue_cagr_3yr": 6.2,
+    "roe": 45.79,
+    "debt_equity": 0.0
+   }
+  },
+  "TITAN": {
+   "basis": "consolidated",
+   "kind": "company",
+   "revenue_means": "revenue from operations",
+   "quarters": [
+    {
+     "period_end": "2023-12-31",
+     "revenue": 14164.0,
+     "net_profit": 1053.3,
+     "eps": 11.91,
+     "margin_pct": 7.4
+    },
+    {
+     "period_end": "2024-03-31",
+     "revenue": 12494.0,
+     "net_profit": 771.0,
+     "eps": 8.68,
+     "margin_pct": 6.2
+    },
+    {
+     "period_end": "2024-06-30",
+     "revenue": 13266.0,
+     "net_profit": 715.0,
+     "eps": 8.06,
+     "margin_pct": 5.4
+    },
+    {
+     "period_end": "2024-09-30",
+     "revenue": 14534.0,
+     "net_profit": 704.0,
+     "eps": 7.94,
+     "margin_pct": 4.8
+    },
+    {
+     "period_end": "2024-12-31",
+     "revenue": 17740.0,
+     "net_profit": 1047.0,
+     "eps": 11.8,
+     "margin_pct": 5.9
+    },
+    {
+     "period_end": "2025-03-31",
+     "revenue": 14916.0,
+     "net_profit": 871.0,
+     "eps": 9.82,
+     "margin_pct": 5.8
+    },
+    {
+     "period_end": "2025-06-30",
+     "revenue": 16523.0,
+     "net_profit": 1091.0,
+     "eps": 12.3,
+     "margin_pct": 6.6
+    },
+    {
+     "period_end": "2025-09-30",
+     "revenue": 18725.0,
+     "net_profit": 1120.0,
+     "eps": 12.63,
+     "margin_pct": 6.0
+    },
+    {
+     "period_end": "2025-12-31",
+     "revenue": 25416.0,
+     "net_profit": 1684.0,
+     "eps": 18.98,
+     "margin_pct": 6.6
+    },
+    {
+     "period_end": "2026-03-31",
+     "revenue": 26920.0,
+     "net_profit": 1179.0,
+     "eps": 13.0,
+     "margin_pct": 4.4
+    },
+    {
+     "period_end": "2026-06-30",
+     "revenue": 21356.0,
+     "net_profit": 1777.0,
+     "eps": 20.03,
+     "margin_pct": 8.3
+    },
+    {
+     "period_end": "2026-09-30",
+     "revenue": 20614.0,
+     "net_profit": 2393.0,
+     "eps": 26.96,
+     "margin_pct": 11.6
+    }
+   ],
+   "years": [
+    {
+     "fiscal_year": 2021,
+     "revenue": 21645.0,
+     "net_profit": 973.6,
+     "margin_pct": 4.5
+    },
+    {
+     "fiscal_year": 2022,
+     "revenue": 28799.1,
+     "net_profit": 2173.5,
+     "margin_pct": 7.5
+    },
+    {
+     "fiscal_year": 2023,
+     "revenue": 40575.0,
+     "net_profit": 3250.3,
+     "margin_pct": 8.0
+    },
+    {
+     "fiscal_year": 2024,
+     "revenue": 51084.4,
+     "net_profit": 3492.4,
+     "margin_pct": 6.8
+    },
+    {
+     "fiscal_year": 2025,
+     "revenue": 60456.0,
+     "net_profit": 3337.0,
+     "margin_pct": 5.5
+    },
+    {
+     "fiscal_year": 2026,
+     "revenue": 87584.0,
+     "net_profit": 5074.0,
+     "margin_pct": 5.8
+    }
+   ],
+   "metrics": {
+    "as_of": "2026-09-30",
+    "net_margin": 7.46,
+    "revenue_cagr_3yr": 26.67,
+    "roe": 45.28,
+    "debt_equity": 1.329
+   }
+  }
+ }
+}
