@@ -25,6 +25,8 @@ from .config import DATA_DIR
 OUTPUT = DATA_DIR / "financials.json"
 QUARTERS = 12
 YEARS = 6
+HISTORY_YEARS = 5   # the company's own range: trailing margins over the last five years
+MIN_HISTORY = 8     # trailing-margin points needed before a range means anything
 
 
 def _num(value, digits: int = 1):
@@ -34,6 +36,35 @@ def _num(value, digits: int = 1):
 def _fiscal_year(d: date) -> int:
     """FY ending 31 March: Jun 2025 → FY2026."""
     return d.year + 1 if d.month > 3 else d.year
+
+
+def margin_history(rows: pd.DataFrame, basis: bool) -> dict | None:
+    """Trailing-twelve-month margin now vs its own range over the last five years."""
+    ttm = filing_metrics.trailing_twelve_months(rows[rows["consolidated"] == basis])
+    ttm = ttm.dropna(subset=["revenue", "net_profit"])
+    ttm = ttm[ttm["revenue"] > 0]
+    if not len(ttm):
+        return None
+    end = ttm["period_end"].max()
+    window = ttm[ttm["period_end"] > end - pd.DateOffset(years=HISTORY_YEARS)]
+    if len(window) < MIN_HISTORY:
+        return None
+    margins = 100 * window["net_profit"] / window["revenue"]
+    now = margins.iloc[-1]
+    return {"now": _num(now), "low": _num(margins.min()), "median": _num(margins.median()), "high": _num(margins.max()),
+            "since": window["period_end"].min().date().isoformat(),
+            "percentile": int(round(100 * (margins < now).mean()))}
+
+
+def margin_note(entry: dict | None) -> str | None:
+    """Plain-language: where today's margin sits in the company's own five-year range."""
+    h = (entry or {}).get("margin_history")
+    if not h:
+        return None
+    where = ("near the top of" if h["percentile"] >= 75 else "near the bottom of" if h["percentile"] <= 25
+             else "in the middle of")
+    return (f"Its trailing margin of {h['now']:.1f}% is {where} its own range since {h['since'][:4]} "
+            f"({h['low']:.1f}%–{h['high']:.1f}%, median {h['median']:.1f}%).")
 
 
 def company(rows: pd.DataFrame, latest: dict) -> dict:
@@ -61,6 +92,7 @@ def company(rows: pd.DataFrame, latest: dict) -> dict:
                           "total income" if kind == "insurance" else "revenue from operations"),
         "quarters": quarters,
         "years": years[-YEARS:],
+        "margin_history": margin_history(rows, basis),
         "metrics": {"as_of": latest["as_of"].isoformat(), "net_margin": _num(latest["net_margin"], 2),
                     "revenue_cagr_3yr": _num(latest["revenue_cagr_3yr"], 2), "roe": _num(latest["roe"], 2),
                     "debt_equity": _num(latest["debt_equity"], 3)},

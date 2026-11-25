@@ -5,7 +5,7 @@ scheduler to call once a day (M0.4). Nothing here installs a scheduler.
     python -m stocksense engine-daily              # last 10 days of every daily source (prices, indices,
                                                    # macro, GDELT, F&O)
     python -m stocksense engine-daily --weekly     # also corporate actions, the event study, sector
-                                                   # valuation and new quarterly results
+                                                   # valuation, new quarterly results, shareholding
     python -m stocksense engine-daily --days 30    # catch up after the machine was off
 
 Steps run in order; one failing doesn't stop the rest (each source is independent).
@@ -26,7 +26,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 
-from .. import eod, financials, lake_checks, valuation
+from .. import eod, financials, holders, lake_checks, valuation
 from ..lake import Lake
 from ..log import get_logger
 
@@ -55,11 +55,12 @@ class RunReport:
 
 
 RESULTS_TOP = 20  # companies whose quarterly results the weekly run keeps current
+SHAREHOLDING_RESTS = 6  # NSE throttles long runs; rest and resume up to this many times
 
 
 def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
     from . import (event_study, ingest_bhavcopy, ingest_corporate_actions, ingest_filings, ingest_fno,
-                   ingest_gdelt, ingest_market, ingest_results)
+                   ingest_gdelt, ingest_market, ingest_results, ingest_shareholding)
 
     start = today - timedelta(days=days)
     return [
@@ -75,6 +76,10 @@ def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
         # Results arrive quarterly; weekly picks up each filing within days, fetching only new ones.
         Step("results", lambda: ingest_results.run(top=RESULTS_TOP, lake=lake), weekly=True),
         Step("financials_export", lambda: financials.write(lake), weekly=True),
+        # Two requests per company, every NSE equity (~2 h); pledge history builds from these snapshots.
+        Step("shareholding", lambda: ingest_shareholding.run(everything=True, lake=lake, rests=SHAREHOLDING_RESTS),
+             weekly=True),
+        Step("holders_export", lambda: holders.write(lake), weekly=True),
     ]
 
 

@@ -29,7 +29,8 @@ FOUR_QUARTERS_DAYS = (260, 290)
 
 BALANCE_SHEET_LAG_DAYS = 200  # use a balance sheet up to two quarters older than the P&L
 
-COLUMNS = {"net_margin": "net_margin", "cagr": "revenue_cagr_3yr", "roe": "roe", "de": "debt_equity"}
+COLUMNS = {"net_margin": "net_margin", "cagr": "revenue_cagr_3yr", "roe": "roe", "de": "debt_equity",
+           "promoter": "promoter_holding"}
 
 
 def _prepare(df: pd.DataFrame) -> pd.DataFrame:
@@ -127,6 +128,21 @@ def latest(df: pd.DataFrame) -> pd.DataFrame:
                      **_balance_sheet(sheets.get((symbol, basis)), end, now["net_profit"], symbol in banks)})
     return pd.DataFrame(rows, columns=["symbol", "as_of", "consolidated", "ttm_revenue", "ttm_net_profit",
                                        "net_margin", "revenue_cagr_3yr", "roe", "debt_equity"])
+
+
+def with_promoter(metrics: pd.DataFrame, shareholding: pd.DataFrame) -> pd.DataFrame:
+    """Add promoter holding from the latest filed shareholding pattern (M1.3). Companies with
+    a pattern but no results get a row of their own, dated by the pattern's quarter."""
+    if shareholding is None or not len(shareholding):
+        return metrics
+    sh = shareholding.copy()
+    sh["quarter_end"] = pd.to_datetime(sh["quarter_end"]).dt.date
+    latest = (sh.dropna(subset=["promoter_pct"]).sort_values("quarter_end").groupby("symbol").last()
+                .reset_index()[["symbol", "quarter_end", "promoter_pct"]]
+                .rename(columns={"promoter_pct": "promoter_holding", "quarter_end": "promoter_as_of"}))
+    out = metrics.merge(latest, on="symbol", how="outer")
+    out["as_of"] = out["as_of"].where(out["as_of"].notna(), out["promoter_as_of"])
+    return out.drop(columns="promoter_as_of")
 
 
 def overlay(rows: list[dict], metrics: pd.DataFrame) -> tuple[list[dict], int]:

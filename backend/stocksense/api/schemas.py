@@ -101,6 +101,7 @@ class ScorePart(BaseModel):
     peers: PeerContext | None = Field(None, description="Layer 1: standing among sector peers")
     stage_note: str | None = Field(None, description="Layer 2: what the company's stage means for this metric")
     market_note: str | None = Field(None, description="Layer 3 (P/E only): the sector's valuation today vs its own history")
+    history_note: str | None = Field(None, description="The company against its own history (promoter stake over a year)")
     guardrail: str | None = Field(None, description="An absolute warning that holds whatever peers do")
 
 
@@ -121,6 +122,7 @@ class MetricGuide(BaseModel):
     weight: float = Field(description="Weight in the StockSense score")
     healthy_range: str | None = Field(description="The score's strong / fair / weak bands for this sector")
     peers: PeerContext | None = Field(description="What's typical among this sector's companies (no company value, so not ranked)")
+    watch_for: str | None = Field(None, description="The common trap when reading this metric")
 
 
 class FinancialQuarter(BaseModel):
@@ -146,6 +148,15 @@ class FilingMetrics(BaseModel):
     debt_equity: float | None
 
 
+class MarginHistory(BaseModel):
+    now: float | None
+    low: float | None
+    median: float | None
+    high: float | None
+    since: str
+    percentile: int = Field(description="Share of the last five years' trailing margins below today's")
+
+
 class Financials(BaseModel):
     symbol: str
     source: str
@@ -155,7 +166,37 @@ class Financials(BaseModel):
     revenue_means: str
     quarters: list[FinancialQuarter]
     years: list[FinancialYear]
+    margin_history: MarginHistory | None = None
     metrics: FilingMetrics
+
+
+class HolderQuarter(BaseModel):
+    quarter_end: str
+    promoter_pct: float | None
+    public_pct: float | None
+    employee_trusts_pct: float | None
+    fii_pct: float | None = Field(None, description="Foreign institutions (FPIs); latest quarters only")
+    dii_pct: float | None = Field(None, description="Domestic institutions: mutual funds, insurers, banks, pension funds")
+    mutual_funds_pct: float | None = None
+    insurance_pct: float | None = None
+    small_retail_pct: float | None = Field(None, description="Individuals holding up to ₹2 lakh of share capital")
+    government_pct: float | None = None
+
+
+class Pledge(BaseModel):
+    as_of: str
+    pledged_pct_of_promoter: float | None = Field(description="Share of the promoters' own stake pledged")
+    pledged_pct_of_total: float | None
+    all_pledges_pct_of_total: float | None = Field(description="Every depository pledge by any holder — context only")
+
+
+class Holders(BaseModel):
+    symbol: str
+    source: str
+    quarters: list[HolderQuarter]
+    pledge: Pledge | None
+    trend_note: str | None
+    pledge_warning: str | None
 
 
 class LearnMetrics(BaseModel):

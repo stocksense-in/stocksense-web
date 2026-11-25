@@ -25,7 +25,9 @@ Jobs
     event-study    what sectors did after past crude spikes, rupee moves, conflict flare-ups…  (weekly)
     valuation-context  each sector's P/E today vs its own history → data/valuation_context.json  (weekly)
     financials-export  quarterly + yearly results from filings → data/financials.json  (weekly)
+    holders-export     promoter holding over time + pledges → data/holders.json  (weekly)
     ingest-results quarterly P&L history since 2005 from NSE filings (default: 20 largest companies)
+    ingest-shareholding  promoter holding by quarter + promoter pledges (default: 50 largest; --all)
     engine-daily   update every lake source for the last N days, check the data, log the run  (daily)
     check-lake     data checks on the index, macro and GDELT datasets
     ingest-fno     NSE futures & options end-of-day file, 2010 → today: OI, put/call ratios  (daily)
@@ -141,10 +143,18 @@ def _build_parser() -> argparse.ArgumentParser:
     jobs.add_parser("event-study", help="historical sector reactions to event types")
     jobs.add_parser("valuation-context", help="sector valuations vs their history, for the API")
     jobs.add_parser("financials-export", help="company financials from filings, for the API")
+    jobs.add_parser("holders-export", help="promoter holding and pledges, for the API")
 
     p = jobs.add_parser("ingest-results", help="quarterly P&L history from NSE filings")
     p.add_argument("--symbols", nargs="+", metavar="SYM", help="these companies (default: the largest by market cap)")
     p.add_argument("--top", type=int, default=20, help="how many of the largest companies")
+    p.add_argument("--rests", type=int, default=0,
+                   help="when NSE stops answering, rest 15 min and resume, up to this many times")
+
+    p = jobs.add_parser("ingest-shareholding", help="promoter holding by quarter and promoter pledges")
+    p.add_argument("--symbols", nargs="+", metavar="SYM", help="these companies")
+    p.add_argument("--top", type=int, default=50, help="how many of the largest companies")
+    p.add_argument("--all", action="store_true", help="every NSE equity")
     p.add_argument("--rests", type=int, default=0,
                    help="when NSE stops answering, rest 15 min and resume, up to this many times")
 
@@ -259,10 +269,24 @@ def main() -> None:
                          rebuild=args.rebuild, workers=args.workers)
         return
 
+    if args.job == "ingest-shareholding":
+        from .jobs import ingest_shareholding
+
+        ingest_shareholding.run(args.symbols, args.top, everything=args.all, rests=args.rests)
+        return
+
     if args.job == "ingest-results":
         from .jobs import ingest_results
 
         ingest_results.run(args.symbols, args.top, rests=args.rests)
+        return
+
+    if args.job == "holders-export":
+        from . import holders
+        from .lake import Lake
+
+        doc = holders.write(Lake.from_settings())
+        print(f"Wrote holders for {len(doc['companies'])} companies to {holders.OUTPUT}")
         return
 
     if args.job == "financials-export":

@@ -62,3 +62,10 @@ def test_learn_metrics_without_valuation_or_sector(market):
     body = client.get("/learn/metrics").json()
     assert body["sector"] == "general" and body["market_note"] is None
     assert len(body["metrics"]) == 6
+
+
+def test_every_metric_says_what_to_watch_for(client):
+    metrics = client.get("/learn/metrics?sector=bank").json()["metrics"]
+    assert all(m["watch_for"] for m in metrics)
+    de = next(m for m in metrics if m["metric"] == "de")
+    assert "banks" in de["watch_for"]
