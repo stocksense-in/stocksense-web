@@ -173,6 +173,7 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 - [ ] **M2.2 Command bar**: `INFY ⏎` opens a company, `INFY FA` financials, `INFY HDS` holders, `INFY N` news, `IPO`, `GEO`, `FLOWS`. Keyboard navigation throughout. *Accept:* every screen reachable without a mouse.
 - [ ] **M2.3 Company page**: overview, financials (from M1.2), holders (M1.3), events, news, peers, score breakdown. *Accept:* parity with the data available for 20 sample stocks.
 - [ ] **M2.4 Watchlists & alerts**: price moves, unusual volume, pledge changes, large orders, results dates. *Accept:* alerts fire on historical replay of a known event.
+  *Part done 26 Nov: alert rules over the lake (`alerts.py`, `python -m stocksense alerts --date --symbols`): 5%+ moves vs NIFTY, 3× volume, results filed, order wins, promoter stake ±1 pt, pledge ±2 pts. Replaying 27 Jan 2023 (Adani sell-off) fires on Adani Enterprises, Ports and Green and nothing on TCS or a control day (`ml/checks/alerts_replay.py`). Still to do: watchlists and delivery to the site (needs a place to publish: a Supabase table, your call).*
 
 ### Phase 3 — Intelligence (GPU)
 

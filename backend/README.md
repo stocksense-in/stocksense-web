@@ -322,6 +322,17 @@ only if every filing figure is under 200 days old); the default stays Yahoo. Fin
   the score breakdown's promoter metric shows the stake's one-year move (or a slow
   multi-year drift) and warns when promoters have pledged 10% or more of their stake.
 
+### Alerts (M2.4)
+
+`python -m stocksense alerts --date 2023-01-27 --symbols ADANIENT TCS` lists what happened
+to companies on a day, from the lake: a 5%+ move (with NIFTY 50's move), volume 3× the
+previous 20 sessions' median, a quarterly result filed, an order/contract win, a new
+shareholding pattern with the promoters' stake ±1 point, and pledges ±2 points of the
+promoters' stake. Each alert has one sentence a beginner can read. Any past day replays:
+`ml/checks/alerts_replay.py` checks the January 2023 Adani sell-off fires (and a quiet day
+doesn't). Not yet delivered to the site — that needs a published store (e.g. a Supabase
+table).
+
 ### Announcements, insider trades, FII/DII flows (M1.4)
 
 | Dataset | What | Partitioned by |
@@ -409,6 +420,7 @@ stocksense/
   financials.py      company financials export for the API (data/financials.json)
   holders.py         promoter holding + pledges export, trend note, pledge warning (M1.3)
   results_reaction.py  the market's move after each quarterly result, vs NIFTY 50
+  alerts.py          day alerts: moves, volume, results, orders, promoter stake, pledges (M2.4)
   sectors.py         Yahoo sector/industry → StockSense sector code
   symbols.py         NSE equity list (EQUITY_L.csv), cached 24h in _nse_symbols_cache.json
   db.py              write side: Store saves rows to Supabase and/or a JSON snapshot
