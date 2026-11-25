@@ -87,18 +87,33 @@ def top_symbols(n: int) -> list[str]:
     return [s.symbol for s in stocks[:n]]
 
 
-def fetch(lake: Lake, symbols: Iterable[str], pause: float = PAUSE_SECONDS) -> int:
-    """Download filings not already in raw/. Returns how many were fetched. Stops early,
-    keeping what it has, if NSE fails MAX_FAILURES_IN_A_ROW requests in a row."""
-    fetched = 0
-    breaker = Breaker()
-    try:
-        with nse_results.client() as c:
-            for symbol in symbols:
-                fetched += _fetch_company(c, lake, symbol, pause, breaker)
-    except NseUnavailable as exc:
-        log.warning(f"{SOURCE}: stopping — NSE is not responding ({exc}); a later run resumes from here")
-    return fetched
+REST_SECONDS = 15 * 60  # NSE throttles long runs for a while, then answers again
+
+
+def fetch(lake: Lake, symbols: Iterable[str], pause: float = PAUSE_SECONDS, rests: int = 0,
+          rest_seconds: float = REST_SECONDS) -> int:
+    """Download filings not already in raw/. Returns how many were fetched.
+
+    If NSE fails MAX_FAILURES_IN_A_ROW requests in a row, wait `rest_seconds` and carry on
+    from the same company, up to `rests` times; then stop, keeping what it has."""
+    symbols = list(symbols)
+    fetched, position = 0, 0
+    while True:
+        breaker = Breaker()
+        try:
+            with nse_results.client() as c:
+                while position < len(symbols):
+                    fetched += _fetch_company(c, lake, symbols[position], pause, breaker)
+                    position += 1
+            return fetched
+        except NseUnavailable as exc:
+            if rests <= 0:
+                log.warning(f"{SOURCE}: stopping — NSE is not responding ({exc}); a later run resumes from here")
+                return fetched
+            rests -= 1
+            log.warning(f"{SOURCE}: NSE is not responding ({exc}); resting {rest_seconds / 60:.0f} min "
+                        f"before {symbols[position]} ({rests} rests left)")
+            time.sleep(rest_seconds)
 
 
 def _fetch_company(c, lake: Lake, symbol: str, pause: float, breaker: Breaker) -> int:
@@ -218,9 +233,9 @@ def build(lake: Lake) -> pd.DataFrame:
     return df
 
 
-def run(symbols: list[str] | None = None, top: int = 20, lake: Lake | None = None) -> pd.DataFrame:
+def run(symbols: list[str] | None = None, top: int = 20, lake: Lake | None = None, rests: int = 0) -> pd.DataFrame:
     lake = lake or Lake.from_settings()
     targets = [s.upper() for s in symbols] if symbols else top_symbols(top)
     log.info(f"{SOURCE}: {len(targets)} companies")
-    fetch(lake, targets)
+    fetch(lake, targets, rests=rests)
     return build(lake)
