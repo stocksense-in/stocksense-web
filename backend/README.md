@@ -281,6 +281,10 @@ companies. Amounts in ₹ crore: `revenue` (interest earned for banks), `net_rev
 **Serving them.** `python -m stocksense financials-export` writes
 `backend/data/financials.json` (committed, like the valuation context) for
 `GET /stocks/{symbol}/financials`; the weekly engine run refreshes it after new results.
+Each company also gets its margin's place in its own five-year range and the market's
+reaction to its last 8 results (`results_reaction.py`): the move against NIFTY 50 over 1
+and 5 trading days from the last close before the market could react (a filing after
+15:30 counts from that day's close), next to year-on-year revenue and profit growth.
 
 **Scoring from filings.** `stocksense/filing_metrics.py` turns the latest four
 consecutive quarters into net margin (trailing profit ÷ trailing net revenue) and 3-year
@@ -404,6 +408,7 @@ stocksense/
   filing_metrics.py  margin, growth, ROE, D/E from quarterly filings (M1.2), promoter from patterns
   financials.py      company financials export for the API (data/financials.json)
   holders.py         promoter holding + pledges export, trend note, pledge warning (M1.3)
+  results_reaction.py  the market's move after each quarterly result, vs NIFTY 50
   sectors.py         Yahoo sector/industry → StockSense sector code
   symbols.py         NSE equity list (EQUITY_L.csv), cached 24h in _nse_symbols_cache.json
   db.py              write side: Store saves rows to Supabase and/or a JSON snapshot
