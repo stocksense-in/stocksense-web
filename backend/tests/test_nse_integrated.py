@@ -31,6 +31,7 @@ TCS = xbrl("""
  <in-capmkt:TaxExpense contextRef="OneD" decimals="-7">47040000000</in-capmkt:TaxExpense>
  <in-capmkt:ProfitLossForPeriod contextRef="OneD" decimals="-7">139340000000</in-capmkt:ProfitLossForPeriod>
  <in-capmkt:ProfitOrLossAttributableToOwnersOfParent contextRef="OneD" decimals="-7">138840000000</in-capmkt:ProfitOrLossAttributableToOwnersOfParent>
+ <in-capmkt:ProfitOrLossAttributableToNonControllingInterests contextRef="OneD" decimals="-7">500000000</in-capmkt:ProfitOrLossAttributableToNonControllingInterests>
  <in-capmkt:BasicEarningsLossPerShareFromContinuingAndDiscontinuedOperations contextRef="OneD" decimals="INF">38.37</in-capmkt:BasicEarningsLossPerShareFromContinuingAndDiscontinuedOperations>
  <in-capmkt:EquityAttributableToOwnersOfParent contextRef="OneI" decimals="-7">1189860000000</in-capmkt:EquityAttributableToOwnersOfParent>
  <in-capmkt:EquityAttributableToOwnersOfParent contextRef="PY_I" decimals="-7">1</in-capmkt:EquityAttributableToOwnersOfParent>
@@ -85,6 +86,18 @@ def test_insurer_revenue_is_total_income():
     r = ni.normalise({**FILING, "symbol": "LICI", "xbrl": "https://x/INTEGRATED_FILING_LI_1753945_05112026064353_WEB.xml"}, lic)
     assert r["kind"] == "insurance" and r["revenue"] == pytest.approx(262739.27)
     assert r["net_profit"] == pytest.approx(12076.02) and r["profit_before_tax"] == pytest.approx(12125.82)
+
+
+def test_mis_tagged_profit_split_falls_back_to_total_profit():
+    # Adani Ports Jun 2025 consolidated: the OCI split filed as the profit split.
+    bad = xbrl("""
+ <in-capmkt:RevenueFromOperations contextRef="OneD">91261400000</in-capmkt:RevenueFromOperations>
+ <in-capmkt:ProfitLossForPeriod contextRef="OneD">33106000000</in-capmkt:ProfitLossForPeriod>
+ <in-capmkt:ProfitOrLossAttributableToOwnersOfParent contextRef="OneD">526700000</in-capmkt:ProfitOrLossAttributableToOwnersOfParent>
+ <in-capmkt:ProfitOrLossAttributableToNonControllingInterests contextRef="OneD">476600000</in-capmkt:ProfitOrLossAttributableToNonControllingInterests>
+""")
+    assert ni.normalise({**FILING, "symbol": "ADANIPORTS"}, bad)["net_profit"] == pytest.approx(3310.6)
+    assert ni.normalise(FILING, TCS)["net_profit"] == pytest.approx(13884.0)  # a consistent split is kept
 
 
 def test_filing_kind_from_file_name():
