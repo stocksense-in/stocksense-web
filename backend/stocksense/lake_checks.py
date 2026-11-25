@@ -22,6 +22,7 @@ STALE_AFTER_DAYS = 5  # a daily series whose latest value is older than this is 
 THIN_DAY_SHARE = 0.3  # a GDELT day with < 30% of its 30-day median events is flagged
 CAN_BE_NEGATIVE = ("US10Y", "WTI")
 LIQUID_CALL_OI = 1_000_000  # put/call ratios are judged only above this call OI
+SHAREHOLDING_DUE_DAYS = 120  # patterns are due 21 days after quarter end; 120 means one was missed
 RESULTS_DUE_DAYS = 150  # results are due 45–60 days after quarter end; 150 means one was missed
 
 
@@ -196,8 +197,38 @@ def check_results(lake: Lake, today: date | None = None) -> dict:
             "without_revenue": int(totals["no_revenue"]), "duplicates": dupes, "behind": behind, "problems": problems}
 
 
+def check_shareholding(lake: Lake, today: date | None = None) -> dict:
+    """Shareholding: percentages add to 100, are in range, no duplicates, nobody far behind."""
+    today = today or date.today()
+    q = lake.query
+    dupes = int(q("select count(*) from (select symbol, quarter_end from shareholding group by 1, 2 having count(*) > 1)").iloc[0, 0])
+    off = int(q("select count(*) from shareholding where abs(coalesce(promoter_pct, 0) + coalesce(public_pct, 0) "
+                "+ coalesce(employee_trusts_pct, 0) - 100) > 0.1").iloc[0, 0])
+    out_of_range = int(q("select count(*) from shareholding where promoter_pct < 0 or promoter_pct > 100").iloc[0, 0])
+    latest = q("select symbol, max(quarter_end) as last from shareholding group by symbol")
+    latest["last"] = pd.to_datetime(latest["last"]).dt.date
+    behind = sorted(latest.loc[latest["last"].map(lambda d: (today - d).days > SHAREHOLDING_DUE_DAYS), "symbol"])
+    problems = []
+    if dupes:
+        problems.append(f"{dupes} duplicate (symbol, quarter) rows")
+    if off:
+        problems.append(f"{off} quarters where promoter + public + trusts is not 100%")
+    if out_of_range:
+        problems.append(f"{out_of_range} promoter holdings outside 0–100%")
+    if behind:
+        problems.append(f"{len(behind)} companies with no shareholding pattern for over {SHAREHOLDING_DUE_DAYS} days: "
+                        f"{' '.join(behind[:10])}")
+    out = {"rows": int(len(q("select 1 from shareholding"))), "companies": int(len(latest)), "duplicates": dupes,
+           "not_100": off, "behind": behind}
+    if "pledges" in set(lake.datasets()):
+        out["pledge_snapshots"] = int(q("select count(*) from pledges").iloc[0, 0])
+    out["problems"] = problems
+    return out
+
+
 CHECKS = {"index_prices": check_indices, "macro_prices": check_macro, "gdelt_daily": check_gdelt,
-          "fno_summary": check_fno, "announcements": check_filings, "financial_results": check_results}
+          "fno_summary": check_fno, "announcements": check_filings, "financial_results": check_results,
+          "shareholding": check_shareholding}
 
 
 def check_all(lake: Lake, today: date | None = None) -> dict[str, dict]:

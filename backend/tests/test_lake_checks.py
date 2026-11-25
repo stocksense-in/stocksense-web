@@ -94,3 +94,14 @@ def test_results_checks(tmp_path):
     assert r["companies"] == 2 and r["duplicates"] == 0 and r["behind"] == ["OLDCO"]
     text = " | ".join(r["problems"])
     assert "negative revenue" in text and "OLDCO" in text and "TCS" not in text
+
+
+def test_shareholding_checks(tmp_path):
+    lake = Lake(tmp_path)
+    lake.write_table(pd.DataFrame([
+        {"symbol": "TCS", "quarter_end": date(2026, 9, 30), "promoter_pct": 71.77, "public_pct": 28.23, "employee_trusts_pct": 0.0},
+        {"symbol": "OLD", "quarter_end": date(2025, 12, 31), "promoter_pct": 50.0, "public_pct": 40.0, "employee_trusts_pct": 0.0},
+    ]), "shareholding")
+    r = lake_checks.check_shareholding(lake, date(2026, 11, 26))
+    assert r["companies"] == 2 and r["not_100"] == 1 and r["behind"] == ["OLD"]
+    assert any("not 100%" in p for p in r["problems"]) and not any("TCS" in p for p in r["problems"])
