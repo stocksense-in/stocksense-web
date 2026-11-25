@@ -8,8 +8,8 @@ with it, because each stock's score depends on all its peers.
     python -m stocksense rescore --fundamentals filings           # compare only, nothing saved
     python -m stocksense rescore --fundamentals filings --apply   # publish filing-based scores
 
-With `--fundamentals filings`, net margin, 3-year revenue growth, ROE and debt to
-equity come from the companies' own quarterly filings (stocksense/filing_metrics.py) wherever the lake has
+With `--fundamentals filings`, net margin, 3-year revenue growth, ROE, debt to equity
+and promoter holding come from the companies' own filings (stocksense/filing_metrics.py) wherever the lake has
 them. It prints Yahoo-based and filing-based scores side by side and saves nothing
 unless `--apply` is given — and even then only if every filing-based figure is recent.
 """
@@ -52,6 +52,7 @@ def compare(rows: list[dict], metrics: pd.DataFrame) -> pd.DataFrame:
                     "cagr_yahoo": old.get("revenue_cagr_3yr"), "cagr_filings": new.get("revenue_cagr_3yr"),
                     "roe_yahoo": old.get("roe"), "roe_filings": new.get("roe"),
                     "de_yahoo": old.get("debt_equity"), "de_filings": new.get("debt_equity"),
+                    "promoter_yahoo": old.get("promoter_holding"), "promoter_filings": new.get("promoter_holding"),
                     "score_yahoo": s0.composite, "score_filings": s1.composite})
     df = pd.DataFrame(out)
     if len(df):
@@ -64,7 +65,12 @@ def run(store: Store, fundamentals: str = "yahoo", apply: bool = False) -> None:
     if fundamentals == "filings":
         from ..lake import Lake
 
-        metrics = filing_metrics.latest(Lake.from_settings().query("select * from financial_results"))
+        lake = Lake.from_settings()
+        present = set(lake.datasets())
+        metrics = (filing_metrics.latest(lake.query("select * from financial_results"))
+                   if "financial_results" in present else pd.DataFrame(columns=["symbol", "as_of"]))
+        if "shareholding" in present:
+            metrics = filing_metrics.with_promoter(metrics, lake.query("select * from shareholding"))
         report = compare(rows, metrics)
         with pd.option_context("display.width", 160, "display.max_rows", 500):
             log.info("Yahoo vs filings:\n" + report.to_string(index=False))
