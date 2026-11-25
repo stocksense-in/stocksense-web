@@ -174,13 +174,14 @@ def consistent_kind(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-SUSPECT_FACTOR = 10  # a quarter 10× off its neighbours is a filing error, not a business change
+SUSPECT_FACTOR = 4  # a large company's revenue 4× off its neighbours is a filing error, not a business change
 
 
 def suspect(df: pd.DataFrame) -> pd.Series:
-    """Quarters whose revenue is over 10× off the median of the surrounding two years (same
+    """Quarters whose revenue is over 4× off the median of the surrounding two years (same
     company and basis) — e.g. L&T's consolidated Jun 2022 filing at ₹83 crore instead of
-    ~₹35,850 crore. Kept in the table, flagged, and left out of sums."""
+    ~₹35,850 crore, Sun Pharma's at ₹1,921 crore instead of ~₹11,000 crore. Kept in the
+    table, flagged, and left out of sums."""
     df = df.sort_values(["symbol", "consolidated", "period_end"])
     median = (df.groupby(["symbol", "consolidated"])["revenue"]
                 .transform(lambda s: s.rolling(9, center=True, min_periods=3).median()))
