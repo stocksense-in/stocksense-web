@@ -69,6 +69,14 @@ def _num(fields: dict, *names: str) -> float | None:
     return None
 
 
+def _profit(fields: dict, *names: str) -> float | None:
+    """Like _num, but a 0 is a placeholder when a later field has the actual profit
+    (Bajaj Finance's Dec 2022 consolidated filing: owners' share "0", profit ₹2,973 crore)."""
+    values = [_num(fields, n) for n in names]
+    present = [v for v in values if v is not None]
+    return next((v for v in present if v != 0), present[0] if present else None)
+
+
 def _raw(fields: dict, name: str) -> float | None:
     try:
         return float(fields[name])
@@ -105,19 +113,20 @@ def normalise(filing: dict, detail: dict) -> dict:
         "tax": tax,
         # What EPS is based on: new filings split out the owners' share; in old consolidated
         # filings the reported profit is already after minority interest.
-        "net_profit": _num(f, "re_pl_own_par", "re_con_pro_loss", "re_net_profit"),
+        "net_profit": _profit(f, "re_pl_own_par", "re_con_pro_loss", "re_net_profit"),
         "eps": _raw(f, "re_bsc_eps_bfr_exi") or _raw(f, "re_basic_eps_for_cont_dic_opr") or _raw(f, "re_basic_eps"),
         "paid_up_capital": _num(f, "re_pdup"),
         "face_value": _raw(f, "re_face_val"),
     }
-    row["net_revenue"] = _net_revenue(row)
+    row["net_revenue"] = net_revenue(row)
     return row
 
 
-def _net_revenue(row: dict) -> float | None:
-    """The revenue a margin is measured on. For banks, net interest income + other income
-    (gross interest earned would make every bank look low-margin); others, revenue."""
-    if not row["bank"]:
+def net_revenue(row: dict) -> float | None:
+    """The revenue a margin is measured on. For lenders (banks and finance companies), net
+    interest income + other income — gross interest would make every lender look
+    low-margin, and it's what Yahoo's margins use; for everyone else, revenue."""
+    if row["kind"] not in ("bank", "finance"):
         return row["revenue"]
     if row["revenue"] is None or row["finance_cost"] is None:
         return None

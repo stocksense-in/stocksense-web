@@ -53,7 +53,15 @@ def test_bank_net_revenue_is_net_interest_plus_other_income():
     assert r["net_revenue"] == pytest.approx(85040.17 - 46914.28 + 27153.77)
     assert r["total_income"] == pytest.approx(112193.94)
     assert r["net_profit"] == pytest.approx(17656.61)  # owners' share, after minority interest
-    assert nr.normalise({**FILING_NEW, "bank": "F"}, detail)["kind"] == "finance"
+    fin = nr.normalise({**FILING_NEW, "bank": "F"}, detail)
+    assert fin["kind"] == "finance" and fin["net_revenue"] == pytest.approx(r["net_revenue"])
+
+
+def test_zero_owners_share_is_a_placeholder():
+    # Bajaj Finance Dec 2022 consolidated (₹ lakh): owners' line "0", profit in the next field.
+    r = nr.normalise(FILING_NEW, {"resultsData2": {"re_pl_own_par": "0", "re_con_pro_loss": "297300"}})
+    assert r["net_profit"] == pytest.approx(2973.0)
+    assert nr.normalise(FILING_NEW, {"resultsData2": {"re_pl_own_par": "0"}})["net_profit"] == 0.0
 
 
 def test_missing_values_stay_missing():

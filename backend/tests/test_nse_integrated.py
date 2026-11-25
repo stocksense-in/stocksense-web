@@ -75,6 +75,18 @@ def test_bank_taxonomy_and_net_revenue():
     assert r["net_profit"] == pytest.approx(20700.03) and r["equity"] is None and r["borrowings"] is None
 
 
+def test_insurer_revenue_is_total_income():
+    # LIC Q2 FY27 standalone, rupees.
+    lic = xbrl("""
+ <in-capmkt:Income contextRef="OneD">2627392700000</in-capmkt:Income>
+ <in-capmkt:ProfitLossBeforeTax contextRef="OneD">121258200000</in-capmkt:ProfitLossBeforeTax>
+ <in-capmkt:ProfitLossAfterTaxAndExtraordinaryItems contextRef="OneD">120760200000</in-capmkt:ProfitLossAfterTaxAndExtraordinaryItems>
+""")
+    r = ni.normalise({**FILING, "symbol": "LICI", "xbrl": "https://x/INTEGRATED_FILING_LI_1753945_05112026064353_WEB.xml"}, lic)
+    assert r["kind"] == "insurance" and r["revenue"] == pytest.approx(262739.27)
+    assert r["net_profit"] == pytest.approx(12076.02) and r["profit_before_tax"] == pytest.approx(12125.82)
+
+
 def test_filing_kind_from_file_name():
     assert ni.kind({"xbrl": "…/INTEGRATED_FILING_NBFC_INDAS_1_WEB.xml"}) == "finance"
     assert ni.kind({"xbrl": None}) == "company"

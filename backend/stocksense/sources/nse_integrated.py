@@ -9,8 +9,9 @@ Filing" replaced the old results feed (nse_results.py, which stops at Dec 2024).
 
 XBRL amounts are in rupees; `normalise` returns the same ₹-crore columns as
 nse_results.normalise, plus equity / borrowings / total assets when the filing has a
-balance sheet. Three taxonomies: Ind-AS companies, NBFCs (same P&L tags) and banks
-(InterestEarned, InterestExpended, …) — the file name says which.
+balance sheet. Four taxonomies: Ind-AS companies, NBFCs (same P&L tags), banks
+(InterestEarned, InterestExpended, …) and insurers (_LI_ / _GI_: total income and
+shareholders' profit) — the file name says which.
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ from datetime import date, datetime
 
 import httpx
 
-from .nse_results import BASE, HEADERS
+from .nse_results import BASE, HEADERS, net_revenue
 
 RUPEES_PER_CRORE = 1e7
 FILING_TYPE = "Integrated Filing- Financials"
@@ -59,7 +60,7 @@ def kind(filing: dict) -> str:
         return "bank"
     if "NBFC" in name:
         return "finance"
-    if "INSURANCE" in name:
+    if "INSURANCE" in name or "_LI_" in name or "_GI_" in name:
         return "insurance"
     return "company"
 
@@ -113,6 +114,8 @@ def normalise(filing: dict, xml: str) -> dict:
     end = _d(filing.get("qe_Date"))
     f, b = facts(xml, end) if end else ({}, {})
     k = kind(filing)
+    if k == "insurance":  # no "revenue from operations": premiums + investment income = total income
+        f = {**f, "RevenueFromOperations": f["Income"]} if "Income" in f and "RevenueFromOperations" not in f else f
     row = {
         "symbol": (filing.get("symbol") or "").upper(),
         "period_from": None,
@@ -130,12 +133,12 @@ def normalise(filing: dict, xml: str) -> dict:
         "total_expenses": _cr(f, "Expenses", "ExpenditureExcludingProvisionsAndContingencies"),
         "depreciation": _cr(f, "DepreciationDepletionAndAmortisationExpense"),
         "finance_cost": _cr(f, "FinanceCosts", "InterestExpended"),
-        "profit_before_tax": _cr(f, "ProfitBeforeTax", "ProfitLossFromOrdinaryActivitiesBeforeTax"),
+        "profit_before_tax": _cr(f, "ProfitBeforeTax", "ProfitLossFromOrdinaryActivitiesBeforeTax", "ProfitLossBeforeTax"),
         "tax": _cr(f, "TaxExpense"),
         # Owners' share where the filing splits it out (consolidated), else the period's profit.
         "net_profit": _cr(f, "ProfitOrLossAttributableToOwnersOfParent",
                           "ProfitLossAfterTaxesMinorityInterestAndShareOfProfitLossOfAssociates",
-                          "ProfitLossForPeriod", "ProfitLossForThePeriod"),
+                          "ProfitLossForPeriod", "ProfitLossForThePeriod", "ProfitLossAfterTaxAndExtraordinaryItems"),
         "eps": _first(f, "BasicEarningsLossPerShareFromContinuingAndDiscontinuedOperations",
                       "BasicEarningsLossPerShareFromContinuingOperations",
                       "BasicEarningsPerShareBeforeExtraordinaryItems"),
@@ -147,9 +150,5 @@ def normalise(filing: dict, xml: str) -> dict:
                        ((b.get("BorrowingsNoncurrent") or 0) + (b.get("BorrowingsCurrent") or 0)) / RUPEES_PER_CRORE),
         "total_assets": _cr(b, "Assets"),
     }
-    if row["bank"]:
-        row["net_revenue"] = (None if row["revenue"] is None or row["finance_cost"] is None else
-                              row["revenue"] - row["finance_cost"] + (row["other_income"] or 0))
-    else:
-        row["net_revenue"] = row["revenue"]
+    row["net_revenue"] = net_revenue(row)
     return row
