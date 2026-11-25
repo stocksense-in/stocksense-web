@@ -23,6 +23,7 @@ import json
 import time
 from collections.abc import Iterable
 
+import httpx
 import pandas as pd
 
 from ..lake import Lake
@@ -53,10 +54,22 @@ class Breaker:
         self.in_a_row = 0
 
     def fail(self, what: str, exc: Exception) -> None:
-        self.in_a_row += 1
         log.warning(f"{what} failed: {exc}")
+        if _answered(exc):  # NSE replied (e.g. a filing's XBRL link is a 404): it isn't refusing us
+            self.in_a_row = 0
+            return
+        self.in_a_row += 1
         if self.in_a_row >= self.limit:
             raise NseUnavailable(f"{self.in_a_row} requests in a row failed")
+
+
+def _answered(exc: Exception) -> bool:
+    """A definite answer about one file (404, 410…) rather than NSE refusing or not replying
+    (timeouts, 403, 429, 5xx). On 26 Nov three dead XBRL links for one company stopped a run."""
+    if isinstance(exc, httpx.HTTPStatusError):
+        status = exc.response.status_code
+        return 400 <= status < 500 and status not in (403, 429)
+    return False
 
 
 def _seq(f: dict) -> int:
