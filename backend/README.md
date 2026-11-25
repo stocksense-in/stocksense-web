@@ -258,25 +258,30 @@ companies. Amounts in ₹ crore: `revenue` (interest earned for banks), `net_rev
 (banks: net interest income + other income; others: revenue), `other_income`,
 `total_income`, `total_expenses`, `depreciation`, `finance_cost`, `profit_before_tax`,
 `tax`, `net_profit` (owners' share, what EPS is based on), `eps`, `paid_up_capital`;
-`kind` is company / bank / finance / insurance (the statement format filed).
+`kind` is company / bank / finance / insurance (the statement format filed). From Mar
+2025, half-year and year-end rows also carry the balance sheet: `equity` (owners'),
+`borrowings`, `total_assets`. `source` says which feed a row came from.
 
-- One NSE endpoint serves old (pre-Ind-AS) and new filings in the same structure; a
-  few field names differ and are mapped in `sources/nse_results.py`.
+- **Two feeds, one table.** To Dec 2024, NSE's results endpoint serves old (pre-Ind-AS)
+  and new filings in one structure (`sources/nse_results.py`). From Mar 2025, SEBI's
+  integrated filing replaced it: NSE lists those filings separately, each with an XBRL
+  file (Ind-AS, NBFC and banking taxonomies), parsed by `sources/nse_integrated.py`.
 - **Never mix bases.** Many companies (banks especially) filed consolidated figures only
   some quarters. Annual and trailing sums use consolidated when all four quarters have it,
   else standalone — a 3 + 1 mix is how a first version got HDFC Bank's revenue 40% wrong.
-- **Known gap:** NSE's filing list currently ends at the Dec 2024 quarter; later results
-  appear to live in SEBI's 2025 "Integrated Filing" system, not ingested yet.
-- Verified by `ml/checks/results_spot_check.py`: FY2023 and FY2024 sums against
-  published annual results.
+- `check-lake` flags duplicates, negative revenue and companies with no results for
+  over 150 days (a missed filing).
+- Verified by `ml/checks/results_spot_check.py`: FY2023–FY2026 sums against
+  published annual results (FY2025 joins the two feeds).
 - Purpose: point-in-time fundamentals for calibrating the score (which blend, which
   metrics identify companies that stay sound) without look-ahead.
 
 **Scoring from filings.** `stocksense/filing_metrics.py` turns the latest four
 consecutive quarters into net margin (trailing profit ÷ trailing net revenue) and 3-year
-revenue CAGR. `python -m stocksense rescore --fundamentals filings` prints Yahoo-based and
+revenue CAGR, and the latest balance sheet into ROE (on average equity) and debt to
+equity. `python -m stocksense rescore --fundamentals filings` prints Yahoo-based and
 filing-based scores side by side and saves only if every filing figure is under 200 days
-old — with NSE's feed ending Dec 2024 it is a comparison for now; the default stays Yahoo.
+old; the default stays Yahoo.
 
 ### Announcements, insider trades, FII/DII flows (M1.4)
 
@@ -361,7 +366,7 @@ stocksense/
   config.py          reads .env (the only file that touches environment variables)
   scoring.py         the score's fixed curves + weights, and the plain-language metric guide
   blend.py           the published score: 70% versus sector peers + 30% fixed curves
-  filing_metrics.py  net margin + 3-yr revenue growth from quarterly filings (M1.2)
+  filing_metrics.py  margin, growth, ROE, D/E from quarterly filings (M1.2)
   sectors.py         Yahoo sector/industry → StockSense sector code
   symbols.py         NSE equity list (EQUITY_L.csv), cached 24h in _nse_symbols_cache.json
   db.py              write side: Store saves rows to Supabase and/or a JSON snapshot
@@ -389,7 +394,8 @@ stocksense/
     gdelt.py         GDELT 1.0 daily event files → daily aggregates and salient events
     fno_bhavcopy.py  NSE F&O bhavcopy (both formats) and the per-underlying summary
     nse_filings.py   NSE announcements, insider trades (PIT) and FII/DII flows
-    nse_results.py   NSE quarterly results (P&L) since 2005, old and new formats
+    nse_results.py   NSE quarterly results (P&L) 2005 → Dec 2024, old and new formats
+    nse_integrated.py  quarterly results from Mar 2025 (SEBI integrated filing, XBRL)
     screener.py      Screener.in scraping — fallback for promoter holding / sales growth
     fallbacks.py     hardcoded large-cap ownership values (last resort, goes stale)
     upstox.py        OAuth token storage, REST quotes, WebSocket URL
