@@ -111,7 +111,7 @@ Without Docker: `pip install -r requirements.txt` then
 | `python -m stocksense realtime` | Streams Upstox ticks into `live_prices` (1 write/sec) | Runs until stopped |
 | `python -m stocksense upstox-login` | Opens Upstox sign-in and saves the day's token | Every morning |
 | `python -m stocksense scheduler` | Runs the jobs above on an IST market-hours timetable | Leave running |
-| `python -m stocksense rescore` | Recomputes every stored score after a change to `scoring.py` (seconds, no Yahoo) | After scoring changes |
+| `python -m stocksense rescore` | Recomputes every stored score after a change to `scoring.py` (seconds, no Yahoo). `--fundamentals filings` compares scores using margin and growth from NSE filings | After scoring changes |
 | `python -m stocksense cleanup` | Lists stocks no longer on NSE's list; `--apply` deletes them | Occasionally |
 | `python -m stocksense snapshot` | Copies ~70 large caps into `data/snapshot.json`, the API's offline data | After a fundamentals run |
 | `python -m stocksense api` | Serves the REST API | Always on, in production |
@@ -128,6 +128,7 @@ Without Docker: `pip install -r requirements.txt` then
 | `python -m stocksense check-lake` | Data checks on the index, macro, GDELT and F&O datasets (gaps, duplicates, impossible values, staleness) | After each ingest |
 | `python -m stocksense ingest-fno` | NSE futures & options end-of-day file, 2010 → today: every contract plus a per-underlying summary (OI, put/call ratios, max-OI strikes) | Daily, after ~19:00 IST |
 | `python -m stocksense ingest-filings` | NSE corporate announcements and insider trades since 2015 (monthly windows; the latest two months refetched), plus today's FII/DII cash flows | Daily |
+| `python -m stocksense ingest-results` | Quarterly P&L history since 2005 from NSE filings (`--top N` largest companies, or `--symbols`); resumable | Weekly / after results season |
 | `python -m stocksense filings TCS` | A company's latest announcements and insider trades from the lake (`--since`, `--limit`) | Ad hoc |
 
 Jobs accept `--symbols INFY TCS` or `--limit 20` to work on a few stocks,
@@ -249,6 +250,40 @@ python -m stocksense lake-query "select index, count(*) as days, min(date) as si
 python -m stocksense lake-query "select strike, option_type, close, open_interest from fno_prices where date = '2026-10-16' and symbol = 'NIFTY' and expiry = (select min(expiry) from fno_prices where date = '2026-10-16' and symbol = 'NIFTY' and option_type = 'CE') order by strike, option_type"
 ```
 
+### Quarterly results — fundamentals history (M1.2)
+
+`clean/financial_results`: one row per company, quarter and basis (standalone and
+consolidated) from the company's own NSE filings, back to 2005 for long-listed
+companies. Amounts in ₹ crore: `revenue` (interest earned for banks), `net_revenue`
+(banks: net interest income + other income; others: revenue), `other_income`,
+`total_income`, `total_expenses`, `depreciation`, `finance_cost`, `profit_before_tax`,
+`tax`, `net_profit` (owners' share, what EPS is based on), `eps`, `paid_up_capital`;
+`kind` is company / bank / finance / insurance (the statement format filed). From Mar
+2025, half-year and year-end rows also carry the balance sheet: `equity` (owners'),
+`borrowings`, `total_assets`. `source` says which feed a row came from.
+
+- **Two feeds, one table.** To Dec 2024, NSE's results endpoint serves old (pre-Ind-AS)
+  and new filings in one structure (`sources/nse_results.py`). From Mar 2025, SEBI's
+  integrated filing replaced it: NSE lists those filings separately, each with an XBRL
+  file (Ind-AS, NBFC and banking taxonomies), parsed by `sources/nse_integrated.py`.
+- **Never mix bases.** Many companies (banks especially) filed consolidated figures only
+  some quarters. Annual and trailing sums use consolidated when all four quarters have it,
+  else standalone — a 3 + 1 mix is how a first version got HDFC Bank's revenue 40% wrong.
+- `check-lake` flags duplicates, negative revenue and companies with no results for
+  over 150 days (a missed filing).
+- Verified by `ml/checks/results_spot_check.py`: FY2023–FY2026 sums against
+  published annual results (FY2025 joins the two feeds).
+- Purpose: point-in-time fundamentals for calibrating the score (which blend, which
+  metrics identify companies that stay sound) without look-ahead.
+
+**Scoring from filings.** `stocksense/filing_metrics.py` turns the latest four
+consecutive quarters into net margin (trailing profit ÷ trailing net revenue) and 3-year
+revenue CAGR, and the latest balance sheet into ROE (on average equity) and debt to
+equity. `python -m stocksense rescore --fundamentals filings` prints Yahoo-based and
+filing-based scores side by side and saves nothing unless `--apply` is given (and then
+only if every filing figure is under 200 days old); the default stays Yahoo. Findings:
+[`docs/fundamentals-from-filings-2026-11.md`](../docs/fundamentals-from-filings-2026-11.md).
+
 ### Announcements, insider trades, FII/DII flows (M1.4)
 
 | Dataset | What | Partitioned by |
@@ -332,6 +367,7 @@ stocksense/
   config.py          reads .env (the only file that touches environment variables)
   scoring.py         the score's fixed curves + weights, and the plain-language metric guide
   blend.py           the published score: 70% versus sector peers + 30% fixed curves
+  filing_metrics.py  margin, growth, ROE, D/E from quarterly filings (M1.2)
   sectors.py         Yahoo sector/industry → StockSense sector code
   symbols.py         NSE equity list (EQUITY_L.csv), cached 24h in _nse_symbols_cache.json
   db.py              write side: Store saves rows to Supabase and/or a JSON snapshot
@@ -359,6 +395,8 @@ stocksense/
     gdelt.py         GDELT 1.0 daily event files → daily aggregates and salient events
     fno_bhavcopy.py  NSE F&O bhavcopy (both formats) and the per-underlying summary
     nse_filings.py   NSE announcements, insider trades (PIT) and FII/DII flows
+    nse_results.py   NSE quarterly results (P&L) 2005 → Dec 2024, old and new formats
+    nse_integrated.py  quarterly results from Mar 2025 (SEBI integrated filing, XBRL)
     screener.py      Screener.in scraping — fallback for promoter holding / sales growth
     fallbacks.py     hardcoded large-cap ownership values (last resort, goes stale)
     upstox.py        OAuth token storage, REST quotes, WebSocket URL

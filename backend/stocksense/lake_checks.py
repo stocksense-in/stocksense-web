@@ -22,6 +22,7 @@ STALE_AFTER_DAYS = 5  # a daily series whose latest value is older than this is 
 THIN_DAY_SHARE = 0.3  # a GDELT day with < 30% of its 30-day median events is flagged
 CAN_BE_NEGATIVE = ("US10Y", "WTI")
 LIQUID_CALL_OI = 1_000_000  # put/call ratios are judged only above this call OI
+RESULTS_DUE_DAYS = 150  # results are due 45–60 days after quarter end; 150 means one was missed
 
 
 def _gaps(days: pd.Series, max_days: int) -> list[str]:
@@ -171,8 +172,32 @@ def check_filings(lake: Lake, today: date | None = None) -> dict:
     return out
 
 
+def check_results(lake: Lake, today: date | None = None) -> dict:
+    """Quarterly results: duplicates, negative revenue, missing revenue, companies behind on filing."""
+    today = today or date.today()
+    q = lake.query
+    dupes = int(q("select count(*) from (select symbol, period_end, consolidated from financial_results "
+                  "group by 1, 2, 3 having count(*) > 1)").iloc[0, 0])
+    totals = q("select count(*) as n, count(distinct symbol) as companies, min(period_end) as first, "
+               "max(period_end) as last, count(*) filter (where revenue < 0) as negative, "
+               "count(*) filter (where revenue is null) as no_revenue from financial_results").iloc[0]
+    latest = q("select symbol, max(period_end) as last from financial_results group by symbol")
+    latest["last"] = pd.to_datetime(latest["last"]).dt.date
+    behind = sorted(latest.loc[latest["last"].map(lambda d: (today - d).days > RESULTS_DUE_DAYS), "symbol"])
+    problems = []
+    if dupes:
+        problems.append(f"{dupes} duplicate (symbol, quarter, basis) rows")
+    if int(totals["negative"]):
+        problems.append(f"{int(totals['negative'])} quarters with negative revenue")
+    if behind:
+        problems.append(f"{len(behind)} companies with no results for over {RESULTS_DUE_DAYS} days: {' '.join(behind[:10])}")
+    return {"rows": int(totals["n"]), "companies": int(totals["companies"]),
+            "first": str(pd.Timestamp(totals["first"]).date()), "last": str(pd.Timestamp(totals["last"]).date()),
+            "without_revenue": int(totals["no_revenue"]), "duplicates": dupes, "behind": behind, "problems": problems}
+
+
 CHECKS = {"index_prices": check_indices, "macro_prices": check_macro, "gdelt_daily": check_gdelt,
-          "fno_summary": check_fno, "announcements": check_filings}
+          "fno_summary": check_fno, "announcements": check_filings, "financial_results": check_results}
 
 
 def check_all(lake: Lake, today: date | None = None) -> dict[str, dict]:

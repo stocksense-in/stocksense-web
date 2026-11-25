@@ -1,0 +1,189 @@
+"""
+Results ingest job — companies' quarterly P&L history from NSE filings (M1.2).
+
+    python -m stocksense ingest-results                    # the 20 largest companies
+    python -m stocksense ingest-results --top 100
+    python -m stocksense ingest-results --symbols TCS INFY
+
+For each company: list its quarterly filings, keep one per quarter and basis (standalone
+and consolidated — many companies filed consolidated figures only some quarters, so a
+year's sum must not mix the two), and fetch the figures — one request a second. Each
+filing is saved raw (raw/nse_results/<quarter end>/<SYMBOL>_<seq>.json, filing metadata
++ figures), so reruns only fetch what's new. Then clean/financial_results is rebuilt from
+all raw files: one row per company, quarter and basis, amounts in ₹ crore.
+
+Results from Mar 2025 on come from SEBI's integrated filing (sources/nse_integrated.py:
+an XBRL file per filing, saved raw under raw/nse_integrated/), so one run covers 2005 to
+the latest quarter.
+"""
+
+from __future__ import annotations
+
+import json
+import time
+from collections.abc import Iterable
+
+import pandas as pd
+
+from ..lake import Lake
+from ..log import get_logger
+from ..sources import nse_integrated, nse_results
+
+log = get_logger(__name__)
+
+SOURCE = "nse_results"
+INTEGRATED = "nse_integrated"
+DATASET = "financial_results"
+PAUSE_SECONDS = 1.0
+
+
+def _seq(f: dict) -> int:
+    try:
+        return int(f.get("seqNumber") or 0)
+    except ValueError:
+        return 0
+
+
+def quarterly(filings: list[dict]) -> list[dict]:
+    """One filing per quarter and basis (the latest, if a result was refiled); quarterly, not cumulative."""
+    best: dict[tuple, dict] = {}
+    for f in filings:
+        if (f.get("cumulative") or "Non-cumulative").lower().startswith("cumulative"):
+            continue
+        if not f.get("toDate"):
+            continue
+        key = (f["toDate"], f.get("consolidated") == "Consolidated")
+        if key not in best or _seq(f) > _seq(best[key]):
+            best[key] = f
+    return list(best.values())
+
+
+def top_symbols(n: int) -> list[str]:
+    from ..market import MarketData
+
+    stocks = sorted((s for s in MarketData().fresh_stocks() if s.market_cap), key=lambda s: s.market_cap, reverse=True)
+    return [s.symbol for s in stocks[:n]]
+
+
+def fetch(lake: Lake, symbols: Iterable[str], pause: float = PAUSE_SECONDS) -> int:
+    """Download filings not already in raw/. Returns how many were fetched."""
+    fetched = 0
+    with nse_results.client() as c:
+        for symbol in symbols:
+            try:
+                filings = quarterly(nse_results.fetch_filings(c, symbol))
+            except Exception as exc:  # NSE hiccup: skip this company, the next run retries
+                log.warning(f"{SOURCE}: {symbol} filing list failed: {exc}")
+                continue
+            new = 0
+            for f in filings:
+                end = nse_results._d(f.get("toDate"))
+                if end is None:
+                    continue
+                path = lake.raw_dir(SOURCE, end) / f"{symbol}_{f.get('seqNumber')}.json"
+                if path.exists():
+                    continue
+                try:
+                    detail = nse_results.fetch_detail(c, f)
+                except Exception as exc:
+                    log.warning(f"{SOURCE}: {symbol} {end} failed: {exc}")
+                    continue
+                path.write_text(json.dumps({"filing": f, "detail": detail}), encoding="utf-8")
+                new += 1
+                time.sleep(pause)
+            fetched += new
+            log.info(f"{SOURCE}: {symbol} — {len(filings)} filings, {new} new")
+            time.sleep(pause)
+            fetched += fetch_integrated(c, lake, symbol, pause)
+    return fetched
+
+
+def fetch_integrated(c, lake: Lake, symbol: str, pause: float = PAUSE_SECONDS) -> int:
+    """Integrated filings (Mar 2025 on) not already in raw/: filing metadata + XBRL text."""
+    try:
+        filings = nse_integrated.fetch_filings(c, symbol)
+    except Exception as exc:
+        log.warning(f"{INTEGRATED}: {symbol} filing list failed: {exc}")
+        return 0
+    new = 0
+    for f in filings:
+        end = nse_integrated._d(f.get("qe_Date"))
+        if end is None or not f.get("xbrl"):
+            continue
+        path = lake.raw_dir(INTEGRATED, end) / f"{symbol}_{f.get('seq_Id')}.json"
+        if path.exists():
+            continue
+        try:
+            xml = nse_integrated.fetch_xbrl(c, f)
+        except Exception as exc:
+            log.warning(f"{INTEGRATED}: {symbol} {end} failed: {exc}")
+            continue
+        path.write_text(json.dumps({"filing": f, "xml": xml}), encoding="utf-8")
+        new += 1
+        time.sleep(pause)
+    log.info(f"{INTEGRATED}: {symbol} — {len(filings)} filings, {new} new")
+    time.sleep(pause)
+    return new
+
+
+def consistent_kind(df: pd.DataFrame) -> pd.DataFrame:
+    """One statement kind per company: a lender stays a lender even in a quarter NSE tagged
+    as a plain company (Bajaj Finance, Mar 2023) — otherwise that quarter's revenue isn't netted."""
+    special = df[df["kind"] != "company"].sort_values("period_end").groupby("symbol")["kind"].last()
+    df = df.copy()
+    df["kind"] = df["symbol"].map(special).fillna(df["kind"])
+    df["bank"] = df["kind"] == "bank"
+    df["net_revenue"] = [nse_results.net_revenue(r) for r in df[["kind", "revenue", "finance_cost", "other_income"]]
+                         .to_dict("records")]
+    return df
+
+
+SUSPECT_FACTOR = 10  # a quarter 10× off its neighbours is a filing error, not a business change
+
+
+def suspect(df: pd.DataFrame) -> pd.Series:
+    """Quarters whose revenue is over 10× off the median of the surrounding two years (same
+    company and basis) — e.g. L&T's consolidated Jun 2022 filing at ₹83 crore instead of
+    ~₹35,850 crore. Kept in the table, flagged, and left out of sums."""
+    df = df.sort_values(["symbol", "consolidated", "period_end"])
+    median = (df.groupby(["symbol", "consolidated"])["revenue"]
+                .transform(lambda s: s.rolling(9, center=True, min_periods=3).median()))
+    ratio = df["revenue"] / median
+    flag = (median > 0) & (df["revenue"] > 0) & ((ratio < 1 / SUSPECT_FACTOR) | (ratio > SUSPECT_FACTOR))
+    return flag.reindex(df.index).fillna(False).astype(bool)
+
+
+def build(lake: Lake) -> pd.DataFrame:
+    """Rebuild clean/financial_results from every raw filing."""
+    rows = []
+    # Integrated filings second, so they win if both feeds carry a quarter.
+    for rank, (source, parse) in enumerate([
+        (SOURCE, lambda doc: nse_results.normalise(doc["filing"], doc["detail"])),
+        (INTEGRATED, lambda doc: nse_integrated.normalise(doc["filing"], doc["xml"])),
+    ]):
+        for path in sorted((lake.raw / source).glob("*/*.json")):
+            try:
+                row = parse(json.loads(path.read_text(encoding="utf-8")))
+            except Exception as exc:  # a broken file: report it, keep going
+                log.warning(f"{source}: could not read {path.name}: {exc}")
+                continue
+            rows.append({**row, "source": source, "_rank": rank})
+    df = pd.DataFrame(rows)
+    if not df.empty:
+        df["_seq"] = pd.to_numeric(df["seq"], errors="coerce")
+        df = (df.sort_values(["symbol", "period_end", "consolidated", "_rank", "_seq"])
+                .drop_duplicates(["symbol", "period_end", "consolidated"], keep="last")
+                .drop(columns=["_seq", "_rank"]))
+        df = consistent_kind(df)
+        df["suspect"] = suspect(df)
+        lake.write_table(df.reset_index(drop=True), DATASET)
+    log.info(f"{DATASET}: {len(df)} filings for {df['symbol'].nunique() if len(df) else 0} companies")
+    return df
+
+
+def run(symbols: list[str] | None = None, top: int = 20, lake: Lake | None = None) -> pd.DataFrame:
+    lake = lake or Lake.from_settings()
+    targets = [s.upper() for s in symbols] if symbols else top_symbols(top)
+    log.info(f"{SOURCE}: {len(targets)} companies")
+    fetch(lake, targets)
+    return build(lake)
