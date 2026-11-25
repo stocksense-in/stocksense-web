@@ -111,7 +111,7 @@ Without Docker: `pip install -r requirements.txt` then
 | `python -m stocksense realtime` | Streams Upstox ticks into `live_prices` (1 write/sec) | Runs until stopped |
 | `python -m stocksense upstox-login` | Opens Upstox sign-in and saves the day's token | Every morning |
 | `python -m stocksense scheduler` | Runs the jobs above on an IST market-hours timetable | Leave running |
-| `python -m stocksense rescore` | Recomputes every stored score after a change to `scoring.py` (seconds, no Yahoo) | After scoring changes |
+| `python -m stocksense rescore` | Recomputes every stored score after a change to `scoring.py` (seconds, no Yahoo). `--fundamentals filings` compares scores using margin and growth from NSE filings | After scoring changes |
 | `python -m stocksense cleanup` | Lists stocks no longer on NSE's list; `--apply` deletes them | Occasionally |
 | `python -m stocksense snapshot` | Copies ~70 large caps into `data/snapshot.json`, the API's offline data | After a fundamentals run |
 | `python -m stocksense api` | Serves the REST API | Always on, in production |
@@ -252,20 +252,31 @@ python -m stocksense lake-query "select strike, option_type, close, open_interes
 
 ### Quarterly results — fundamentals history (M1.2)
 
-`clean/financial_results`: one row per company and quarter from the company's own NSE
-filings — consolidated where it exists, else standalone — back to 2005 for long-listed
-companies. Amounts in ₹ crore: `revenue` (interest earned for banks), `other_income`,
+`clean/financial_results`: one row per company, quarter and basis (standalone and
+consolidated) from the company's own NSE filings, back to 2005 for long-listed
+companies. Amounts in ₹ crore: `revenue` (interest earned for banks), `net_revenue`
+(banks: net interest income + other income; others: revenue), `other_income`,
 `total_income`, `total_expenses`, `depreciation`, `finance_cost`, `profit_before_tax`,
-`tax`, `net_profit` (owners' share, what EPS is based on), `eps`, `paid_up_capital`.
+`tax`, `net_profit` (owners' share, what EPS is based on), `eps`, `paid_up_capital`;
+`kind` is company / bank / finance / insurance (the statement format filed).
 
 - One NSE endpoint serves old (pre-Ind-AS) and new filings in the same structure; a
   few field names differ and are mapped in `sources/nse_results.py`.
+- **Never mix bases.** Many companies (banks especially) filed consolidated figures only
+  some quarters. Annual and trailing sums use consolidated when all four quarters have it,
+  else standalone — a 3 + 1 mix is how a first version got HDFC Bank's revenue 40% wrong.
 - **Known gap:** NSE's filing list currently ends at the Dec 2024 quarter; later results
   appear to live in SEBI's 2025 "Integrated Filing" system, not ingested yet.
 - Verified by `ml/checks/results_spot_check.py`: FY2023 and FY2024 sums against
   published annual results.
 - Purpose: point-in-time fundamentals for calibrating the score (which blend, which
   metrics identify companies that stay sound) without look-ahead.
+
+**Scoring from filings.** `stocksense/filing_metrics.py` turns the latest four
+consecutive quarters into net margin (trailing profit ÷ trailing net revenue) and 3-year
+revenue CAGR. `python -m stocksense rescore --fundamentals filings` prints Yahoo-based and
+filing-based scores side by side and saves only if every filing figure is under 200 days
+old — with NSE's feed ending Dec 2024 it is a comparison for now; the default stays Yahoo.
 
 ### Announcements, insider trades, FII/DII flows (M1.4)
 
@@ -350,6 +361,7 @@ stocksense/
   config.py          reads .env (the only file that touches environment variables)
   scoring.py         the score's fixed curves + weights, and the plain-language metric guide
   blend.py           the published score: 70% versus sector peers + 30% fixed curves
+  filing_metrics.py  net margin + 3-yr revenue growth from quarterly filings (M1.2)
   sectors.py         Yahoo sector/industry → StockSense sector code
   symbols.py         NSE equity list (EQUITY_L.csv), cached 24h in _nse_symbols_cache.json
   db.py              write side: Store saves rows to Supabase and/or a JSON snapshot
