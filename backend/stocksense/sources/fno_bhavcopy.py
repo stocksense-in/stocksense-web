@@ -22,7 +22,7 @@ from datetime import date
 import numpy as np
 import pandas as pd
 
-from ..symbols import _HEADERS as HEADERS  # browser-like headers the archive expects
+from ..symbols import _HEADERS as HEADERS  # noqa: F401 — browser-like headers the archive expects; jobs use it from here
 
 ARCHIVE = "https://nsearchives.nseindia.com"
 UDIFF_FROM = date(2024, 7, 8)
