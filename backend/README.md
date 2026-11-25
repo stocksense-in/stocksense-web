@@ -280,8 +280,9 @@ companies. Amounts in ₹ crore: `revenue` (interest earned for banks), `net_rev
 consecutive quarters into net margin (trailing profit ÷ trailing net revenue) and 3-year
 revenue CAGR, and the latest balance sheet into ROE (on average equity) and debt to
 equity. `python -m stocksense rescore --fundamentals filings` prints Yahoo-based and
-filing-based scores side by side and saves only if every filing figure is under 200 days
-old; the default stays Yahoo.
+filing-based scores side by side and saves nothing unless `--apply` is given (and then
+only if every filing figure is under 200 days old); the default stays Yahoo. Findings:
+[`docs/fundamentals-from-filings-2026-11.md`](../docs/fundamentals-from-filings-2026-11.md).
 
 ### Announcements, insider trades, FII/DII flows (M1.4)
 
