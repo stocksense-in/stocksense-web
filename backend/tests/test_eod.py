@@ -51,6 +51,16 @@ def test_dividend_per_share():
     assert nc.dividend_per_share("Bonus 1:1") is None
 
 
+def test_dividend_with_several_amounts():
+    tcs = "Interim Dividend Rs 11 Per Share/ Special Dividend Rs 46 Per Share"
+    assert nc.dividend_per_share(tcs) == 57.0  # was 11: the special dividend went missing
+    assert nc.dividend_per_share("Annual General Meeting And Dividend - Final - Rs.23/- And Special - Rs.28/- Per Share") == 51.0
+    total_then_parts = ("Annual General Meeting And Dividend Rs.50/- Per Share (Special Dividend Rs.25/- Per Share "
+                        "And Final Dividend Rs.25/- Per Share)")
+    assert nc.dividend_per_share(total_then_parts) == 50.0
+    assert nc.dividend_per_share("Annual General Meeting/Dividend Rs.10/- Per Share/Election Of Directors") == 10.0
+
+
 def test_actions_frame_types_and_dedupe():
     rows = [
         {"symbol": "tcs", "series": "EQ", "isin": "INE467B01029", "comp": "TCS", "exDate": "31-May-2018",
