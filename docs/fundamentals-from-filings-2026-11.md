@@ -9,17 +9,19 @@ standalone and consolidated, from 2005 to Sep 2026, in ₹ crore:
 - **Mar 2025 → now** from SEBI's integrated filing (`sources/nse_integrated.py`), one
   XBRL file per filing. Half-year filings include the balance sheet.
 
-13 of the 20 largest companies are in (1,580 filings). The rest wait for a rerun: NSE
-started timing out every request mid-run on 25 Nov, and the job was stopped rather than
-kept retrying.
+17 of the 20 largest companies are in (2,138 filings). NSE started timing out every
+request after long bursts on 25 Nov; the job now stops after three failures in a row and
+the weekly engine run picks up the rest.
 
 ## Check against published annual results
 
 `ml/checks/results_spot_check.py` sums four quarters per fiscal year (FY2023–FY2026) and
 compares them with Yahoo's annual income statement.
 
-**53 of 63 judged comparisons are within 2% (84%): profit 34 of 38, revenue 19 of 25.**
-TCS, Reliance, Bharti, ICICI Bank, L&T (FY24–26) and Sun Pharma match to the crore.
+**78 of 89 judged comparisons are within 2% (88%) across 16 companies: profit 49 of 53,
+revenue 29 of 36.** TCS, Reliance, Bharti, ICICI Bank, Axis Bank, Adani Ports, L&T
+(FY24–26) and Sun Pharma (FY24–26) match to the crore; the only profit misses are HDFC
+Bank's, explained below.
 FY2025 sums three quarters from the old feed and one from integrated filings, and it
 matches as well as the other years.
 
@@ -41,8 +43,11 @@ which Yahoo leaves out), and Infosys (Yahoo reports its statements in USD).
   summed three consolidated quarters with one standalone and got HDFC Bank's revenue 40%
   wrong. Now a year or trailing window uses one basis, never a mix.
 - **Bad filings.** L&T's consolidated Jun 2022 filing reports ₹83 crore of revenue
-  (actual ≈ ₹35,850 crore). Quarters more than 10× off their neighbours are flagged
-  `suspect` and left out of sums.
+  (actual ≈ ₹35,850 crore), Sun Pharma's ₹1,921 crore (≈ ₹11,000 crore). Quarters more
+  than 4× off their neighbours are flagged `suspect` and left out of sums.
+- **Mis-tagged splits.** Adani Ports filed its other-comprehensive-income split as the
+  Jun 2025 profit split (₹53 crore to owners on ₹3,311 crore profit). When owners' plus
+  minority share doesn't add up to the period's profit, the total is used.
 - **Placeholders.** Bajaj Finance's Dec 2022 consolidated filing has the owners'-profit
   field as "0", with the real figure in another field.
 - **Formats.** NSE marks banks "B", NBFCs "F"; insurers file a fourth XBRL taxonomy; NSE
@@ -54,9 +59,12 @@ which Yahoo leaves out), and Infosys (Yahoo reports its statements in USD).
 and debt to equity from filings where available, and Yahoo's values elsewhere. It saves
 nothing unless `--apply` is given.
 
-**Across the 13 companies the median score moves 2 points; the largest move is 7
-(Hindustan Unilever).** Margins agree closely for non-financials (TCS 18.22% both ways).
-The differences are explainable:
+**Across the 17 companies the median score moves 2 points; the largest move is 13
+(Titan).** Margins agree closely for non-financials (TCS 18.22% both ways). The
+differences are explainable:
+
+- **Filings fill gaps.** Titan has no ROE in the stored Yahoo data; from filings it is
+  45%, which (with lower D/E) lifts its score from 38 to 51. HUL (+7) is the same story.
 
 - **Debt to equity** is 0 from filings for TCS, Infosys and HUL, against Yahoo's 0.03–0.10.
   Yahoo counts lease liabilities as debt; filings' "borrowings" don't include them.
