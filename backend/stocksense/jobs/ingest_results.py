@@ -11,6 +11,10 @@ year's sum must not mix the two), and fetch the figures — one request a second
 filing is saved raw (raw/nse_results/<quarter end>/<SYMBOL>_<seq>.json, filing metadata
 + figures), so reruns only fetch what's new. Then clean/financial_results is rebuilt from
 all raw files: one row per company, quarter and basis, amounts in ₹ crore.
+
+Results from Mar 2025 on come from SEBI's integrated filing (sources/nse_integrated.py:
+an XBRL file per filing, saved raw under raw/nse_integrated/), so one run covers 2005 to
+the latest quarter.
 """
 
 from __future__ import annotations
@@ -23,11 +27,12 @@ import pandas as pd
 
 from ..lake import Lake
 from ..log import get_logger
-from ..sources import nse_results
+from ..sources import nse_integrated, nse_results
 
 log = get_logger(__name__)
 
 SOURCE = "nse_results"
+INTEGRATED = "nse_integrated"
 DATASET = "financial_results"
 PAUSE_SECONDS = 1.0
 
@@ -89,23 +94,59 @@ def fetch(lake: Lake, symbols: Iterable[str], pause: float = PAUSE_SECONDS) -> i
             fetched += new
             log.info(f"{SOURCE}: {symbol} — {len(filings)} filings, {new} new")
             time.sleep(pause)
+            fetched += fetch_integrated(c, lake, symbol, pause)
     return fetched
+
+
+def fetch_integrated(c, lake: Lake, symbol: str, pause: float = PAUSE_SECONDS) -> int:
+    """Integrated filings (Mar 2025 on) not already in raw/: filing metadata + XBRL text."""
+    try:
+        filings = nse_integrated.fetch_filings(c, symbol)
+    except Exception as exc:
+        log.warning(f"{INTEGRATED}: {symbol} filing list failed: {exc}")
+        return 0
+    new = 0
+    for f in filings:
+        end = nse_integrated._d(f.get("qe_Date"))
+        if end is None or not f.get("xbrl"):
+            continue
+        path = lake.raw_dir(INTEGRATED, end) / f"{symbol}_{f.get('seq_Id')}.json"
+        if path.exists():
+            continue
+        try:
+            xml = nse_integrated.fetch_xbrl(c, f)
+        except Exception as exc:
+            log.warning(f"{INTEGRATED}: {symbol} {end} failed: {exc}")
+            continue
+        path.write_text(json.dumps({"filing": f, "xml": xml}), encoding="utf-8")
+        new += 1
+        time.sleep(pause)
+    log.info(f"{INTEGRATED}: {symbol} — {len(filings)} filings, {new} new")
+    time.sleep(pause)
+    return new
 
 
 def build(lake: Lake) -> pd.DataFrame:
     """Rebuild clean/financial_results from every raw filing."""
     rows = []
-    for path in sorted((lake.raw / SOURCE).glob("*/*.json")):
-        try:
-            doc = json.loads(path.read_text(encoding="utf-8"))
-            rows.append(nse_results.normalise(doc["filing"], doc["detail"]))
-        except Exception as exc:  # a broken file: report it, keep going
-            log.warning(f"{SOURCE}: could not read {path.name}: {exc}")
+    # Integrated filings second, so they win if both feeds carry a quarter.
+    for rank, (source, parse) in enumerate([
+        (SOURCE, lambda doc: nse_results.normalise(doc["filing"], doc["detail"])),
+        (INTEGRATED, lambda doc: nse_integrated.normalise(doc["filing"], doc["xml"])),
+    ]):
+        for path in sorted((lake.raw / source).glob("*/*.json")):
+            try:
+                row = parse(json.loads(path.read_text(encoding="utf-8")))
+            except Exception as exc:  # a broken file: report it, keep going
+                log.warning(f"{source}: could not read {path.name}: {exc}")
+                continue
+            rows.append({**row, "source": source, "_rank": rank})
     df = pd.DataFrame(rows)
     if not df.empty:
         df["_seq"] = pd.to_numeric(df["seq"], errors="coerce")
-        df = (df.sort_values(["symbol", "period_end", "consolidated", "_seq"])
-                .drop_duplicates(["symbol", "period_end", "consolidated"], keep="last").drop(columns="_seq"))
+        df = (df.sort_values(["symbol", "period_end", "consolidated", "_rank", "_seq"])
+                .drop_duplicates(["symbol", "period_end", "consolidated"], keep="last")
+                .drop(columns=["_seq", "_rank"]))
         lake.write_table(df.reset_index(drop=True), DATASET)
     log.info(f"{DATASET}: {len(df)} filings for {df['symbol'].nunique() if len(df) else 0} companies")
     return df

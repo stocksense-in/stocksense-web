@@ -4,7 +4,7 @@ import pytest
 
 from stocksense.jobs import ingest_results
 from stocksense.lake import Lake
-from stocksense.sources import nse_results
+from stocksense.sources import nse_integrated, nse_results
 
 
 def filing(end, consolidated=True, seq="1", cumulative="Non-cumulative"):
@@ -45,8 +45,22 @@ def test_fetch_is_resumable_and_build_makes_one_table(tmp_path, monkeypatch):
         return {"resultsData2": {"re_net_sale": "6397300", "re_pl_own_par": "1238000"}}
 
     monkeypatch.setattr(nse_results, "fetch_detail", detail)
+    monkeypatch.setattr(nse_integrated, "fetch_filings", lambda c, s: [])
     assert ingest_results.fetch(lake, ["TCS"], pause=0) == 2
     assert ingest_results.fetch(lake, ["TCS"], pause=0) == 0 and fake.detail_calls == 2  # nothing refetched
     df = ingest_results.build(lake)
     assert df["period_end"].tolist() == [date(2024, 9, 30), date(2024, 12, 31)]
     assert lake.query("select sum(revenue) from financial_results").iloc[0, 0] == pytest.approx(2 * 63973.0)
+
+
+def test_integrated_filings_join_the_same_table(tmp_path, monkeypatch):
+    from tests.test_nse_integrated import FILING, TCS
+
+    lake = Lake(tmp_path)
+    monkeypatch.setattr(nse_integrated, "fetch_filings", lambda c, s: [FILING])
+    monkeypatch.setattr(nse_integrated, "fetch_xbrl", lambda c, f: TCS)
+    assert ingest_results.fetch_integrated(None, lake, "TCS", pause=0) == 1
+    assert ingest_results.fetch_integrated(None, lake, "TCS", pause=0) == 0  # already saved
+    df = ingest_results.build(lake)
+    row = df.iloc[0]
+    assert (row["period_end"], row["source"], row["equity"]) == (date(2026, 9, 30), "nse_integrated", pytest.approx(118986.0))
