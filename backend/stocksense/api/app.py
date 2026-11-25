@@ -299,16 +299,17 @@ def create_app(
         metrics = {"pe": stock.pe, "roe": stock.roe, "de": stock.de, "margin": stock.margin, "promoter": stock.promoter, "cagr": stock.cagr}
         coverage = score_stock(metrics, stock.sector).coverage
         stage = benchmarks.stage(stock)
+        financials, holders = _financials_of(request, stock.symbol), _holders_of(request, stock.symbol)
         return schemas.StockDetail(
             stock=_stock_out(stock),
             score=schemas.ScoreDetail(
                 value=stock.score, verdict=_verdict(stock.score), coverage=coverage,
                 stage=stage, stage_text=benchmarks.STAGE_TEXT.get(stage),
                 breakdown=analytics.score_breakdown(stock, _benchmarks(request), request.app.state.valuation(),
-                                                    _holders_of(request, stock.symbol),
-                                                    _financials_of(request, stock.symbol)),
+                                                    holders, financials),
             ),
             peers=[_stock_out(s) for s in analytics.peers(m.fresh_stocks(), stock, peers)] if peers else [],
+            available=schemas.Available(financials=financials is not None, holders=holders is not None),
         )
 
     @app.get("/stocks/{symbol}/history", response_model=schemas.History, tags=["stocks"])

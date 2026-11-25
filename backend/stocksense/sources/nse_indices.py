@@ -16,7 +16,7 @@ from datetime import date
 
 import pandas as pd
 
-from ..symbols import _HEADERS as HEADERS
+from ..symbols import _HEADERS as HEADERS  # noqa: F401 — browser-like headers the archive expects; jobs use it from here
 
 ARCHIVE = "https://nsearchives.nseindia.com/content/indices"
 
