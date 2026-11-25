@@ -17,6 +17,7 @@ group — unlike Yahoo's "insiders", which the score has been using as a stand-i
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
 from datetime import date, datetime
 
 import httpx
@@ -40,6 +41,48 @@ def fetch_pledges(c: httpx.Client, symbol: str) -> list[dict]:
     resp.raise_for_status()
     data = resp.json()
     return data.get("data", []) if isinstance(data, dict) else data
+
+
+# Shareholding-pattern XBRL categories → our columns (percent of all shares).
+CATEGORIES = {
+    "InstitutionsForeignMember": "fii_pct",
+    "InstitutionsDomesticMember": "dii_pct",
+    "MutualFundsOrUTIMember": "mutual_funds_pct",
+    "InsuranceCompaniesMember": "insurance_pct",
+    "ResidentIndividualShareholdersHoldingNominalShareCapitalUpToRsTwoLakhMember": "small_retail_pct",
+    "NonInstitutionsMember": "non_institutions_pct",
+    "GovernmentsMember": "government_pct",
+}
+PERCENT_TAG = "ShareholdingAsAPercentageOfTotalNumberOfShares"
+
+
+def fetch_xbrl(c: httpx.Client, url: str) -> bytes:
+    resp = c.get(url)
+    resp.raise_for_status()
+    return resp.content
+
+
+def categories(xml: bytes | str) -> dict:
+    """Who holds the rest: foreign and domestic institutions, mutual funds, insurers, small
+    retail, government — percent of all shares, from the pattern's XBRL (2023+ format)."""
+    root = ET.fromstring(xml)
+    member_of = {}
+    for ctx in root.iter():
+        if ctx.tag.endswith("}context"):
+            members = [m.text.split(":")[-1] for m in ctx.iter() if m.tag.endswith("explicitMember")]
+            if len(members) == 1:
+                member_of[ctx.get("id")] = members[0]
+    out = {}
+    for el in root:
+        if el.tag.split("}")[-1] != PERCENT_TAG:
+            continue
+        column = CATEGORIES.get(member_of.get(el.get("contextRef")))
+        if column and column not in out:
+            try:
+                out[column] = round(100 * float(el.text), 2)
+            except (TypeError, ValueError):
+                continue
+    return out
 
 
 def _date(value: str | None, fmt: str = "%d-%b-%Y") -> date | None:

@@ -44,3 +44,24 @@ def test_pledge_as_share_of_promoter_and_total():
 def test_no_promoter_no_promoter_pledge():
     p = sh.pledge(PLEDGE_ITC, "ITC", date(2026, 11, 26))
     assert p["pledged_pct_of_promoter"] is None and p["all_pledges_pct_of_total"] == 2.0
+
+
+def test_categories_from_pattern_xbrl():
+    xml = """<xbrli:xbrl xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xbrldi="http://xbrl.org/2006/xbrldi"
+        xmlns:in-capmkt="http://x">
+      <xbrli:context id="F"><xbrli:entity><xbrli:segment>
+        <xbrldi:explicitMember dimension="d">in-capmkt:InstitutionsForeignMember</xbrldi:explicitMember>
+      </xbrli:segment></xbrli:entity></xbrli:context>
+      <xbrli:context id="D"><xbrli:entity><xbrli:segment>
+        <xbrldi:explicitMember dimension="d">in-capmkt:InstitutionsDomesticMember</xbrldi:explicitMember>
+      </xbrli:segment></xbrli:entity></xbrli:context>
+      <xbrli:context id="D2"><xbrli:entity><xbrli:segment>
+        <xbrldi:explicitMember dimension="d">in-capmkt:InstitutionsDomesticMember</xbrldi:explicitMember>
+        <xbrldi:explicitMember dimension="e">in-capmkt:SomeHolderMember</xbrldi:explicitMember>
+      </xbrli:segment></xbrli:entity></xbrli:context>
+      <in-capmkt:ShareholdingAsAPercentageOfTotalNumberOfShares contextRef="D2">0.5</in-capmkt:ShareholdingAsAPercentageOfTotalNumberOfShares>
+      <in-capmkt:ShareholdingAsAPercentageOfTotalNumberOfShares contextRef="F">0.0901</in-capmkt:ShareholdingAsAPercentageOfTotalNumberOfShares>
+      <in-capmkt:ShareholdingAsAPercentageOfTotalNumberOfShares contextRef="D">0.1357</in-capmkt:ShareholdingAsAPercentageOfTotalNumberOfShares>
+      <in-capmkt:NumberOfShares contextRef="F">123</in-capmkt:NumberOfShares>
+    </xbrli:xbrl>"""
+    assert sh.categories(xml) == {"fii_pct": 9.01, "dii_pct": 13.57}  # TCS, Sep 2026

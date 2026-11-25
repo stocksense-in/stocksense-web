@@ -5,12 +5,16 @@ Shareholding ingest job — promoter holding by quarter and promoter pledges (M1
     python -m stocksense ingest-shareholding --all --rests 6     # every NSE equity, ~2 h
     python -m stocksense ingest-shareholding --symbols TCS ADANIENT
 
-Two requests per company (shareholding patterns, pledge position), one a second. Raw
+Two requests per company (shareholding patterns, pledge position), one a second, plus
+the latest quarter's full pattern (XBRL, ~1 MB) once per quarter for the FII/DII split —
+only the parsed categories are kept (raw/nse_shp_categories/<quarter>/<SYMBOL>.json). Raw
 responses are saved per fetch day (raw/nse_shareholding/<day>/<SYMBOL>.json), so a
 company already fetched today is skipped and pledge snapshots accumulate into history.
 Then two clean tables are rebuilt from every raw file:
 
-  • shareholding — one row per company and quarter: promoter %, public %, employee trusts %
+  • shareholding — one row per company and quarter: promoter %, public %, employee trusts %,
+                   and for quarters whose full pattern was read, FII %, DII %, mutual funds %,
+                   insurers %, small retail %, government %
   • pledges      — one row per company and fetch day: promoter shares pledged, as % of
                    the promoters' holding and of all shares
 """
@@ -32,13 +36,19 @@ from .ingest_results import Breaker, NseUnavailable
 log = get_logger(__name__)
 
 SOURCE = "nse_shareholding"
+CATEGORIES = "nse_shp_categories"
 PAUSE_SECONDS = 1.0
 REST_SECONDS = 15 * 60  # NSE throttles long runs for a while, then answers again
 
 
 def _fetch_company(c, lake: Lake, symbol: str, today: date, pause: float, breaker: Breaker) -> bool:
     path = lake.raw_dir(SOURCE, today) / f"{symbol}.json"
-    if path.exists():
+    if path.exists():  # fetched today already; still pick up the pattern split if it's missing
+        try:
+            master = json.loads(path.read_text(encoding="utf-8")).get("master") or []
+        except (OSError, ValueError):
+            master = []
+        _fetch_categories(c, lake, symbol, master, pause, breaker)
         return False
     doc = {"symbol": symbol, "fetched": today.isoformat()}
     for key, fetch in (("master", nse_shareholding.fetch_master), ("pledges", nse_shareholding.fetch_pledges)):
@@ -51,7 +61,29 @@ def _fetch_company(c, lake: Lake, symbol: str, today: date, pause: float, breake
     if "master" not in doc and "pledges" not in doc:
         return False
     path.write_text(json.dumps(doc), encoding="utf-8")
+    _fetch_categories(c, lake, symbol, doc.get("master") or [], pause, breaker)
     return True
+
+
+def _fetch_categories(c, lake: Lake, symbol: str, master: list[dict], pause: float, breaker: Breaker) -> None:
+    """The latest quarter's FII/DII split, once per quarter."""
+    rows = [r for r in nse_shareholding.holdings(master) if r.get("xbrl")]
+    if not rows:
+        return
+    latest = rows[-1]
+    path = lake.raw_dir(CATEGORIES, latest["quarter_end"]) / f"{symbol}.json"
+    if path.exists():
+        return
+    try:
+        cats = nse_shareholding.categories(nse_shareholding.fetch_xbrl(c, latest["xbrl"]))
+        breaker.ok()
+    except Exception as exc:
+        breaker.fail(f"{CATEGORIES}: {symbol} {latest['quarter_end']}", exc)
+        return
+    finally:
+        time.sleep(pause)
+    path.write_text(json.dumps({"symbol": symbol, "quarter_end": latest["quarter_end"].isoformat(),
+                                "xbrl": latest["xbrl"], **cats}), encoding="utf-8")
 
 
 def fetch(lake: Lake, symbols: Iterable[str], today: date | None = None, pause: float = PAUSE_SECONDS,
@@ -98,6 +130,18 @@ def build(lake: Lake) -> tuple[pd.DataFrame, pd.DataFrame]:
         # A later fetch carries any revision, so the newest fetch of a quarter wins.
         h = (h.sort_values(["symbol", "quarter_end", "fetched"]).drop_duplicates(["symbol", "quarter_end"], keep="last")
               .drop(columns="fetched").reset_index(drop=True))
+        cats = []
+        for path in sorted((lake.raw / CATEGORIES).glob("*/*.json")):
+            try:
+                doc = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            doc.pop("xbrl", None)
+            doc["quarter_end"] = date.fromisoformat(doc["quarter_end"])
+            cats.append(doc)
+        if cats:
+            h = h.merge(pd.DataFrame(cats).drop_duplicates(["symbol", "quarter_end"], keep="last"),
+                        on=["symbol", "quarter_end"], how="left")
         lake.write_table(h, "shareholding")
     if len(p):
         p = p.sort_values(["symbol", "fetched"]).drop_duplicates(["symbol", "fetched"], keep="last").reset_index(drop=True)
