@@ -431,13 +431,13 @@
      "filed": "2026-10-28 15:52:24",
      "revenue_yoy_pct": 23.7,
      "profit_yoy_pct": 16.5,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": 6.29,
+     "excess_1d_pct": 5.24,
+     "move_5d_pct": 8.44,
+     "excess_5d_pct": 2.88
     }
    ],
-   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day."
+   "reaction_note": "After 1 of its last 8 results the share moved 5% or more against the market the next day."
   },
   "AXISBANK": {
    "basis": "consolidated",
@@ -658,13 +658,13 @@
      "filed": "2026-10-17 16:19:45",
      "revenue_yoy_pct": 8.91,
      "profit_yoy_pct": 39.38,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": -4.19,
+     "excess_1d_pct": -3.07,
+     "move_5d_pct": -5.43,
+     "excess_5d_pct": -3.73
     }
    ],
-   "reaction_note": "After 3 of its last 7 results the share moved 5% or more against the market the next day. 3 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "After 3 of its last 8 results the share moved 5% or more against the market the next day. 4 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "BAJFINANCE": {
    "basis": "consolidated",
@@ -885,13 +885,13 @@
      "filed": "2026-10-19 19:58:29",
      "revenue_yoy_pct": 21.3,
      "profit_yoy_pct": 28.53,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": -3.27,
+     "excess_1d_pct": -2.94,
+     "move_5d_pct": -4.74,
+     "excess_5d_pct": -4.13
     }
    ],
-   "reaction_note": "After 3 of its last 7 results the share moved 5% or more against the market the next day. 3 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "After 3 of its last 8 results the share moved 5% or more against the market the next day. 4 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "BHARTIARTL": {
    "basis": "consolidated",
@@ -1112,13 +1112,13 @@
      "filed": "2026-11-05 19:29:25",
      "revenue_yoy_pct": 16.75,
      "profit_yoy_pct": 30.86,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": 2.45,
+     "excess_1d_pct": 0.43,
+     "move_5d_pct": 1.9,
+     "excess_5d_pct": -1.21
     }
    ],
-   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. 2 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "None of its last 8 results moved the share 5% or more against the market the next day. Twice it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "HDFCBANK": {
    "basis": "consolidated",
@@ -1339,13 +1339,13 @@
      "filed": "2026-10-17 17:46:30",
      "revenue_yoy_pct": 9.57,
      "profit_yoy_pct": 5.55,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": -2.31,
+     "excess_1d_pct": -1.2,
+     "move_5d_pct": -5.6,
+     "excess_5d_pct": -3.9
     }
    ],
-   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "None of its last 8 results moved the share 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "HINDUNILVR": {
    "basis": "consolidated",
@@ -1566,13 +1566,13 @@
      "filed": "2026-10-28 19:24:48",
      "revenue_yoy_pct": 12.22,
      "profit_yoy_pct": 3.91,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": 2.34,
+     "excess_1d_pct": 1.29,
+     "move_5d_pct": 8.88,
+     "excess_5d_pct": 3.32
     }
    ],
-   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. 3 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "None of its last 8 results moved the share 5% or more against the market the next day. 3 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "ICICIBANK": {
    "basis": "consolidated",
@@ -1793,13 +1793,13 @@
      "filed": "2026-10-17 17:27:59",
      "revenue_yoy_pct": 15.47,
      "profit_yoy_pct": 22.28,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": -1.15,
+     "excess_1d_pct": -0.03,
+     "move_5d_pct": 0.43,
+     "excess_5d_pct": 2.13
     }
    ],
-   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "None of its last 8 results moved the share 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "INFY": {
    "basis": "consolidated",
@@ -2020,13 +2020,13 @@
      "filed": "2026-10-23 20:16:14",
      "revenue_yoy_pct": 10.69,
      "profit_yoy_pct": 6.23,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": 1.06,
+     "excess_1d_pct": 0.38,
+     "move_5d_pct": 2.7,
+     "excess_5d_pct": 0.7
     }
    ],
-   "reaction_note": "After 3 of its last 7 results the share moved 5% or more against the market the next day. 4 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "After 3 of its last 8 results the share moved 5% or more against the market the next day. 4 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "KOTAKBANK": {
    "basis": "consolidated",
@@ -2247,13 +2247,13 @@
      "filed": "2026-10-24 17:07:37",
      "revenue_yoy_pct": 18.09,
      "profit_yoy_pct": 26.34,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": 2.38,
+     "excess_1d_pct": 1.7,
+     "move_5d_pct": 7.22,
+     "excess_5d_pct": 5.22
     }
    ],
-   "reaction_note": "After 2 of its last 7 results the share moved 5% or more against the market the next day. 2 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "After 2 of its last 8 results the share moved 5% or more against the market the next day. Twice it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "LICI": {
    "basis": "consolidated",
@@ -2392,13 +2392,13 @@
      "filed": "2026-11-05 18:43:16",
      "revenue_yoy_pct": 9.66,
      "profit_yoy_pct": 19.97,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": -3.43,
+     "excess_1d_pct": -5.44,
+     "move_5d_pct": -0.98,
+     "excess_5d_pct": -4.09
     }
    ],
-   "reaction_note": "After 1 of its last 6 results the share moved 5% or more against the market the next day."
+   "reaction_note": "After 2 of its last 7 results the share moved 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "LT": {
    "basis": "consolidated",
@@ -2619,13 +2619,13 @@
      "filed": "2026-10-27 20:13:19",
      "revenue_yoy_pct": 15.84,
      "profit_yoy_pct": 32.5,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": 3.72,
+     "excess_1d_pct": 3.94,
+     "move_5d_pct": 7.72,
+     "excess_5d_pct": 3.06
     }
    ],
-   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "None of its last 8 results moved the share 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "RELIANCE": {
    "basis": "consolidated",
@@ -2846,13 +2846,13 @@
      "filed": "2026-10-30 21:32:05",
      "revenue_yoy_pct": 28.57,
      "profit_yoy_pct": 40.64,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": 11.6,
+     "excess_1d_pct": 9.92,
+     "move_5d_pct": 13.31,
+     "excess_5d_pct": 4.74
     }
    ],
-   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. 3 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "After 1 of its last 8 results the share moved 5% or more against the market the next day. 3 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "SBIN": {
    "basis": "consolidated",
@@ -3073,13 +3073,13 @@
      "filed": "2026-11-03 15:21:58",
      "revenue_yoy_pct": 5.71,
      "profit_yoy_pct": 19.98,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": -1.7,
+     "excess_1d_pct": -3.28,
+     "move_5d_pct": 2.94,
+     "excess_5d_pct": -3.66
     }
    ],
-   "reaction_note": "After 1 of its last 7 results the share moved 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "After 1 of its last 8 results the share moved 5% or more against the market the next day. Twice it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "SUNPHARMA": {
    "basis": "consolidated",
@@ -3300,13 +3300,13 @@
      "filed": "2026-10-30 19:33:07",
      "revenue_yoy_pct": 11.88,
      "profit_yoy_pct": -36.22,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": -0.43,
+     "excess_1d_pct": -2.11,
+     "move_5d_pct": 4.63,
+     "excess_5d_pct": -3.95
     }
    ],
-   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "None of its last 8 results moved the share 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "TCS": {
    "basis": "consolidated",
@@ -3533,7 +3533,7 @@
      "excess_5d_pct": 9.75
     }
    ],
-   "reaction_note": "After 1 of its last 8 results the share moved 5% or more against the market the next day. 2 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "After 1 of its last 8 results the share moved 5% or more against the market the next day. Twice it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "TITAN": {
    "basis": "consolidated",
@@ -3754,13 +3754,13 @@
      "filed": "2026-11-05 19:10:30",
      "revenue_yoy_pct": 10.09,
      "profit_yoy_pct": 113.66,
-     "move_1d_pct": null,
-     "excess_1d_pct": null,
-     "move_5d_pct": null,
-     "excess_5d_pct": null
+     "move_1d_pct": 3.42,
+     "excess_1d_pct": 1.41,
+     "move_5d_pct": 1.81,
+     "excess_5d_pct": -1.3
     }
    ],
-   "reaction_note": "After 2 of its last 7 results the share moved 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
+   "reaction_note": "After 2 of its last 8 results the share moved 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   }
  }
 }
