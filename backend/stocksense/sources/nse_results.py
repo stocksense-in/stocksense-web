@@ -1,0 +1,108 @@
+"""
+NSE financial results — every quarterly result a company has filed (TCS: 162 filings
+since Mar 2005, standalone and consolidated), with the full profit-and-loss figures.
+
+  • GET /api/corporates-financial-results?index=equities&symbol=<S>&period=Quarterly
+    lists the filings (period, standalone/consolidated, audited, format, ids).
+  • GET /api/corporates-financial-results-data?…params=…&seq_id=… returns one filing's
+    figures in `resultsData2` — the same structure for old (pre-Ind-AS) and new filings,
+    with a few field names that differ (handled in `normalise`).
+
+NSE stores the figures in ₹ lakh; `normalise` converts to ₹ crore. Checked against
+TCS's published Q3 FY25 consolidated results: revenue ₹63,973 crore, profit ₹12,444
+crore (₹12,380 crore attributable to owners).
+"""
+
+from __future__ import annotations
+
+from datetime import date, datetime
+
+import httpx
+
+from .nse_ipo import _HEADERS as HEADERS
+
+BASE = "https://www.nseindia.com/api"
+LAKH_PER_CRORE = 100
+
+
+def client() -> httpx.Client:
+    return httpx.Client(headers=HEADERS, timeout=60, follow_redirects=True)
+
+
+def fetch_filings(c: httpx.Client, symbol: str) -> list[dict]:
+    resp = c.get(f"{BASE}/corporates-financial-results",
+                 params={"index": "equities", "symbol": symbol, "period": "Quarterly"})
+    resp.raise_for_status()
+    data = resp.json()
+    return data if isinstance(data, list) else data.get("data", [])
+
+
+def fetch_detail(c: httpx.Client, filing: dict) -> dict:
+    resp = c.get(f"{BASE}/corporates-financial-results-data", params={
+        "index": "equities", "params": filing["params"], "seq_id": filing["seqNumber"],
+        "industry": filing.get("industry") or "-", "frOldNewFlag": filing.get("oldNewFlag") or "N",
+        "ind": filing.get("reInd") or "N", "format": filing.get("format") or "New",
+    })
+    resp.raise_for_status()
+    return resp.json()
+
+
+def _d(value: str | None) -> date | None:
+    try:
+        return datetime.strptime(value.strip(), "%d-%b-%Y").date()
+    except (AttributeError, ValueError):
+        return None
+
+
+def _num(fields: dict, *names: str) -> float | None:
+    """First of `names` present as a number, in ₹ crore (NSE reports ₹ lakh)."""
+    for name in names:
+        value = fields.get(name)
+        if value in (None, "", "-"):
+            continue
+        try:
+            return float(str(value).replace(",", "")) / LAKH_PER_CRORE
+        except ValueError:
+            continue
+    return None
+
+
+def _raw(fields: dict, name: str) -> float | None:
+    try:
+        return float(fields[name])
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def normalise(filing: dict, detail: dict) -> dict:
+    """One filing → one row of standard columns (amounts in ₹ crore)."""
+    f = detail.get("resultsData2") or detail.get("resultsData") or {}
+    tax = _num(f, "re_tax")
+    if tax is None and (f.get("re_curr_tax") is not None or f.get("re_deff_tax") is not None):
+        tax = (_num(f, "re_curr_tax") or 0) + (_num(f, "re_deff_tax") or 0)
+    return {
+        "symbol": (filing.get("symbol") or "").upper(),
+        "period_from": _d(filing.get("fromDate")),
+        "period_end": _d(filing.get("toDate")),
+        "consolidated": filing.get("consolidated") == "Consolidated",
+        "audited": filing.get("audited") == "Audited",
+        "ind_as": "Ind-AS" in (filing.get("indAs") or ""),
+        "bank": filing.get("bank") == "Y",
+        "filed_at": filing.get("filingDate"),
+        "seq": str(filing.get("seqNumber") or ""),
+        # Banks report interest earned instead of sales.
+        "revenue": _num(f, "re_net_sale", "re_int_earned"),
+        "other_income": _num(f, "re_oth_inc_new", "re_oth_inc"),
+        "total_income": _num(f, "re_total_inc", "re_gro_inc"),
+        "total_expenses": _num(f, "re_oth_tot_exp", "re_oper_exp"),
+        "depreciation": _num(f, "re_depr_und_exp"),
+        "finance_cost": _num(f, "re_int_new", "re_int", "re_int_expd"),
+        "profit_before_tax": _num(f, "re_pro_loss_bef_tax"),
+        "tax": tax,
+        # What EPS is based on: new filings split out the owners' share; in old consolidated
+        # filings the reported profit is already after minority interest.
+        "net_profit": _num(f, "re_pl_own_par", "re_con_pro_loss", "re_net_profit"),
+        "eps": _raw(f, "re_bsc_eps_bfr_exi") or _raw(f, "re_basic_eps_for_cont_dic_opr") or _raw(f, "re_basic_eps"),
+        "paid_up_capital": _num(f, "re_pdup"),
+        "face_value": _raw(f, "re_face_val"),
+    }
