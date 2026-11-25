@@ -440,7 +440,7 @@ stocksense/
     upstox_feed.py   decoder for Upstox WebSocket (protobuf v3) messages
   jobs/              one module per pipeline job
   api/               FastAPI app (app.py) and response schemas (schemas.py)
-tests/               pytest — `pytest` runs everything offline in under a second
+tests/               pytest — `pytest` runs everything offline (~15 s); `ruff check stocksense tests` lints (CI runs both)
 schema.sql           database tables, columns, and access rules
 Dockerfile           API container
 ```
