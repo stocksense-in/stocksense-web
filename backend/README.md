@@ -57,6 +57,7 @@ python -m stocksense api --reload        # http://localhost:8000/docs — intera
 | `GET /stocks/search?q=` | Symbol / company-name search |
 | `GET /stocks/{symbol}` | One stock, its score broken down metric by metric — each metric explained in three layers (see "Reading a metric") — and sector peers |
 | `GET /learn/metrics?sector=` | How to read a company in a sector: each metric's meaning, weight, healthy range and what's typical among its companies; how stage changes the reading; whether the sector is cheap or expensive today |
+| `GET /stocks/{symbol}/holders` | Promoter holding by quarter (12 quarters) and the promoters' pledges, with a plain-language trend note and pledge warning. 404 until a company's filings are in (`data/holders.json`) |
 | `GET /stocks/{symbol}/financials` | Last 12 quarters and 6 fiscal years of revenue and profit from the company's own filings, one basis (consolidated or standalone), plus filing-based margin, growth, ROE, D/E. 404 until a company's results are in (`data/financials.json`, from `financials-export`) |
 | `GET /stocks/{symbol}/history?range=` | Closing prices: `1d` (5-min), `5d`, `1mo`, `6mo`, `1y`, `5y`. Works for indices too (`NIFTY50`) |
 | `GET /news` | Market-moving headlines tagged with topics and affected sectors (`topic=`, `sector=` filters) |
@@ -289,6 +290,30 @@ filing-based scores side by side and saves nothing unless `--apply` is given (an
 only if every filing figure is under 200 days old); the default stays Yahoo. Findings:
 [`docs/fundamentals-from-filings-2026-11.md`](../docs/fundamentals-from-filings-2026-11.md).
 
+### Shareholding and promoter pledges (M1.3)
+
+| Dataset | What | Key |
+|---|---|---|
+| `shareholding` | Promoter & promoter-group %, public %, employee trusts % per quarter (about five years; revised patterns replace the original) | symbol, quarter end |
+| `pledges` | The promoters' pledged/encumbered shares as % of their stake and of all shares, plus every depository pledge by anyone (context only) | symbol, fetch day |
+
+- `python -m stocksense ingest-shareholding` (50 largest; `--all` every equity, `--rests`
+  for NSE's throttling). Two requests per company; raw responses saved per day.
+- NSE serves only the current pledge position, so pledge history accumulates from the
+  weekly snapshots.
+- **Promoter holding is what Indian filings mean by it** — founders/parent and their group.
+  Yahoo's "insiders", which the score has used, is off by more than 5 points for 13 of the
+  50 largest companies (ITC: 29% against no promoter; Hindustan Zinc: 89% against 61%).
+  `rescore --fundamentals filings` uses the filed figure (compare-only).
+- **Pledges: read the right field.** `numSharesPledged` counts every depository pledge by
+  any holder — ITC, with no promoter, shows 2% of its shares. Promoter pledges are
+  `percPromoterShares` (% of the promoters' stake).
+- `check-lake` flags patterns that don't add to 100%, values out of range, duplicates and
+  companies with no pattern for 120 days.
+- Served: `holders-export` writes `data/holders.json` for `GET /stocks/{symbol}/holders`;
+  the score breakdown's promoter metric shows the stake's one-year move (or a slow
+  multi-year drift) and warns when promoters have pledged 10% or more of their stake.
+
 ### Announcements, insider trades, FII/DII flows (M1.4)
 
 | Dataset | What | Partitioned by |
@@ -372,7 +397,9 @@ stocksense/
   config.py          reads .env (the only file that touches environment variables)
   scoring.py         the score's fixed curves + weights, and the plain-language metric guide
   blend.py           the published score: 70% versus sector peers + 30% fixed curves
-  filing_metrics.py  margin, growth, ROE, D/E from quarterly filings (M1.2)
+  filing_metrics.py  margin, growth, ROE, D/E from quarterly filings (M1.2), promoter from patterns
+  financials.py      company financials export for the API (data/financials.json)
+  holders.py         promoter holding + pledges export, trend note, pledge warning (M1.3)
   sectors.py         Yahoo sector/industry → StockSense sector code
   symbols.py         NSE equity list (EQUITY_L.csv), cached 24h in _nse_symbols_cache.json
   db.py              write side: Store saves rows to Supabase and/or a JSON snapshot
@@ -402,6 +429,7 @@ stocksense/
     nse_filings.py   NSE announcements, insider trades (PIT) and FII/DII flows
     nse_results.py   NSE quarterly results (P&L) 2005 → Dec 2024, old and new formats
     nse_integrated.py  quarterly results from Mar 2025 (SEBI integrated filing, XBRL)
+    nse_shareholding.py  shareholding patterns (promoter %) and promoter pledges
     screener.py      Screener.in scraping — fallback for promoter holding / sales growth
     fallbacks.py     hardcoded large-cap ownership values (last resort, goes stale)
     upstox.py        OAuth token storage, REST quotes, WebSocket URL
