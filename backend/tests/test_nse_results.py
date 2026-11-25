@@ -28,6 +28,7 @@ def test_new_format_in_crore():
     assert r["net_profit"] == pytest.approx(12380.0)   # owners' share
     assert r["profit_before_tax"] == pytest.approx(16666.0) and r["tax"] == pytest.approx(4222.0)
     assert r["eps"] == 34.21 and r["face_value"] == 1.0
+    assert r["kind"] == "company" and r["net_revenue"] == r["revenue"]
 
 
 def test_old_format_maps_the_same_columns():
@@ -39,8 +40,20 @@ def test_old_format_maps_the_same_columns():
 
 def test_tax_from_current_plus_deferred_and_bank_revenue():
     detail = {"resultsData2": {"re_curr_tax": "300", "re_deff_tax": "-100", "re_int_earned": "50000"}}
-    r = nr.normalise({**FILING_NEW, "bank": "Y"}, detail)
+    r = nr.normalise({**FILING_NEW, "bank": "B"}, detail)
     assert r["tax"] == pytest.approx(2.0) and r["revenue"] == pytest.approx(500.0) and r["bank"]
+    assert r["kind"] == "bank" and r["net_revenue"] is None  # no interest expended given
+
+
+def test_bank_net_revenue_is_net_interest_plus_other_income():
+    # HDFC Bank Q3 FY25 consolidated (₹ lakh)
+    detail = {"resultsData2": {"re_int_earned": "8504017", "re_int_expd": "4691428", "re_oth_inc": "2715377",
+                               "re_tot_inc": "11219394", "re_net_profit": "1834011", "re_con_pro_loss": "1765661"}}
+    r = nr.normalise({**FILING_NEW, "symbol": "HDFCBANK", "bank": "B"}, detail)
+    assert r["net_revenue"] == pytest.approx(85040.17 - 46914.28 + 27153.77)
+    assert r["total_income"] == pytest.approx(112193.94)
+    assert r["net_profit"] == pytest.approx(17656.61)  # owners' share, after minority interest
+    assert nr.normalise({**FILING_NEW, "bank": "F"}, detail)["kind"] == "finance"
 
 
 def test_missing_values_stay_missing():

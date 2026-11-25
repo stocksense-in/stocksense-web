@@ -23,6 +23,8 @@ from .nse_ipo import _HEADERS as HEADERS
 
 BASE = "https://www.nseindia.com/api"
 LAKH_PER_CRORE = 100
+# The filing's format: banks and finance companies file different statements.
+KIND = {"B": "bank", "Y": "bank", "F": "finance", "I": "insurance"}
 
 
 def client() -> httpx.Client:
@@ -77,23 +79,25 @@ def _raw(fields: dict, name: str) -> float | None:
 def normalise(filing: dict, detail: dict) -> dict:
     """One filing → one row of standard columns (amounts in ₹ crore)."""
     f = detail.get("resultsData2") or detail.get("resultsData") or {}
+    kind = KIND.get(filing.get("bank") or "", "company")
     tax = _num(f, "re_tax")
     if tax is None and (f.get("re_curr_tax") is not None or f.get("re_deff_tax") is not None):
         tax = (_num(f, "re_curr_tax") or 0) + (_num(f, "re_deff_tax") or 0)
-    return {
+    row = {
         "symbol": (filing.get("symbol") or "").upper(),
         "period_from": _d(filing.get("fromDate")),
         "period_end": _d(filing.get("toDate")),
         "consolidated": filing.get("consolidated") == "Consolidated",
         "audited": filing.get("audited") == "Audited",
         "ind_as": "Ind-AS" in (filing.get("indAs") or ""),
-        "bank": filing.get("bank") == "Y",
+        "kind": kind,
+        "bank": kind == "bank",
         "filed_at": filing.get("filingDate"),
         "seq": str(filing.get("seqNumber") or ""),
         # Banks report interest earned instead of sales.
         "revenue": _num(f, "re_net_sale", "re_int_earned"),
         "other_income": _num(f, "re_oth_inc_new", "re_oth_inc"),
-        "total_income": _num(f, "re_total_inc", "re_gro_inc"),
+        "total_income": _num(f, "re_total_inc", "re_tot_inc", "re_gro_inc"),
         "total_expenses": _num(f, "re_oth_tot_exp", "re_oper_exp"),
         "depreciation": _num(f, "re_depr_und_exp"),
         "finance_cost": _num(f, "re_int_new", "re_int", "re_int_expd"),
@@ -106,3 +110,15 @@ def normalise(filing: dict, detail: dict) -> dict:
         "paid_up_capital": _num(f, "re_pdup"),
         "face_value": _raw(f, "re_face_val"),
     }
+    row["net_revenue"] = _net_revenue(row)
+    return row
+
+
+def _net_revenue(row: dict) -> float | None:
+    """The revenue a margin is measured on. For banks, net interest income + other income
+    (gross interest earned would make every bank look low-margin); others, revenue."""
+    if not row["bank"]:
+        return row["revenue"]
+    if row["revenue"] is None or row["finance_cost"] is None:
+        return None
+    return row["revenue"] - row["finance_cost"] + (row["other_income"] or 0)
