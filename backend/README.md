@@ -351,7 +351,7 @@ table).
 - Searchable by symbol and date: `python -m stocksense filings ACMESOLAR --since 2026-09-01`,
   or SQL on the datasets above.
 
-### The daily run (prep for M0.4)
+### The daily run (M0.4)
 
 `engine-daily` is the one command a scheduler should call each evening. Steps run in
 order and independently (a failing source doesn't stop the others); every step is
@@ -364,7 +364,20 @@ line to `<lake>/runs.jsonl`:
 ```
 
 The exit code is non-zero when a step failed or a check found a problem, so a scheduler
-can alert. No scheduler is installed yet (M0.4 needs approval).
+can alert.
+
+**Scheduled on the engine PC (M0.4, set up 26 Nov):** Windows Task Scheduler runs
+`E:\stocksense\scripts\engine-daily.cmd` daily at 19:30 ("StockSense engine daily") and
+with `--weekly` on Sundays ("StockSense engine weekly"); logs go to `E:\stocksense\logs\`.
+
+- **The venvs must point at the real Python path.** Python was installed from inside the
+  Claude desktop app, which is an MSIX package: its writes to `AppData\Roaming` land in
+  `AppData\Local\Packages\Claude_…\LocalCache\Roaming`. Inside the app both paths work;
+  Task Scheduler runs outside it and saw "No Python at …\Roaming\uv\python\…". So `home`
+  in `backend\.venv\pyvenv.cfg` (and `.venv-ml`) names the `LocalCache` path. Recreating
+  a venv from inside the app writes the virtual path again — fix `home` afterwards.
+- Several jobs can share the lake: `Lake.connect` waits while another process holds
+  `catalog.duckdb` (on Windows the error reads "being used by another process").
 
 ### News events (GDELT)
 
