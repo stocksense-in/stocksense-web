@@ -5,11 +5,12 @@ Results ingest job — companies' quarterly P&L history from NSE filings (M1.2).
     python -m stocksense ingest-results --top 100
     python -m stocksense ingest-results --symbols TCS INFY
 
-For each company: list its quarterly filings, keep one per quarter (consolidated where
-it exists, else standalone), and fetch the figures — one request a second. Each filing
-is saved raw (raw/nse_results/<quarter end>/<SYMBOL>_<seq>.json, filing metadata +
-figures), so reruns only fetch what's new. Then clean/financial_results is rebuilt from
-all raw files: one row per company and quarter, amounts in ₹ crore.
+For each company: list its quarterly filings, keep one per quarter and basis (standalone
+and consolidated — many companies filed consolidated figures only some quarters, so a
+year's sum must not mix the two), and fetch the figures — one request a second. Each
+filing is saved raw (raw/nse_results/<quarter end>/<SYMBOL>_<seq>.json, filing metadata
++ figures), so reruns only fetch what's new. Then clean/financial_results is rebuilt from
+all raw files: one row per company, quarter and basis, amounts in ₹ crore.
 """
 
 from __future__ import annotations
@@ -31,16 +32,23 @@ DATASET = "financial_results"
 PAUSE_SECONDS = 1.0
 
 
-def one_per_quarter(filings: list[dict]) -> list[dict]:
-    """Consolidated filing for each quarter when there is one, else standalone; quarterly, not cumulative."""
-    best: dict[str, dict] = {}
+def _seq(f: dict) -> int:
+    try:
+        return int(f.get("seqNumber") or 0)
+    except ValueError:
+        return 0
+
+
+def quarterly(filings: list[dict]) -> list[dict]:
+    """One filing per quarter and basis (the latest, if a result was refiled); quarterly, not cumulative."""
+    best: dict[tuple, dict] = {}
     for f in filings:
         if (f.get("cumulative") or "Non-cumulative").lower().startswith("cumulative"):
             continue
-        key = f.get("toDate")
-        if not key:
+        if not f.get("toDate"):
             continue
-        if key not in best or (f.get("consolidated") == "Consolidated" and best[key].get("consolidated") != "Consolidated"):
+        key = (f["toDate"], f.get("consolidated") == "Consolidated")
+        if key not in best or _seq(f) > _seq(best[key]):
             best[key] = f
     return list(best.values())
 
@@ -58,7 +66,7 @@ def fetch(lake: Lake, symbols: Iterable[str], pause: float = PAUSE_SECONDS) -> i
     with nse_results.client() as c:
         for symbol in symbols:
             try:
-                filings = one_per_quarter(nse_results.fetch_filings(c, symbol))
+                filings = quarterly(nse_results.fetch_filings(c, symbol))
             except Exception as exc:  # NSE hiccup: skip this company, the next run retries
                 log.warning(f"{SOURCE}: {symbol} filing list failed: {exc}")
                 continue
@@ -79,7 +87,7 @@ def fetch(lake: Lake, symbols: Iterable[str], pause: float = PAUSE_SECONDS) -> i
                 new += 1
                 time.sleep(pause)
             fetched += new
-            log.info(f"{SOURCE}: {symbol} — {len(filings)} quarters, {new} new")
+            log.info(f"{SOURCE}: {symbol} — {len(filings)} filings, {new} new")
             time.sleep(pause)
     return fetched
 
@@ -95,9 +103,11 @@ def build(lake: Lake) -> pd.DataFrame:
             log.warning(f"{SOURCE}: could not read {path.name}: {exc}")
     df = pd.DataFrame(rows)
     if not df.empty:
-        df = df.sort_values(["symbol", "period_end"]).drop_duplicates(["symbol", "period_end"], keep="last")
+        df["_seq"] = pd.to_numeric(df["seq"], errors="coerce")
+        df = (df.sort_values(["symbol", "period_end", "consolidated", "_seq"])
+                .drop_duplicates(["symbol", "period_end", "consolidated"], keep="last").drop(columns="_seq"))
         lake.write_table(df.reset_index(drop=True), DATASET)
-    log.info(f"{DATASET}: {len(df)} company-quarters for {df['symbol'].nunique() if len(df) else 0} companies")
+    log.info(f"{DATASET}: {len(df)} filings for {df['symbol'].nunique() if len(df) else 0} companies")
     return df
 
 

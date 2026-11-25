@@ -30,6 +30,20 @@ def test_gap_in_filings_breaks_the_trailing_window():
     assert m["as_of"] == date(2024, 6, 30)  # Dec 2024's four would span a gap
 
 
+def test_never_mixes_standalone_and_consolidated_quarters():
+    cons = quarters(margin=0.20)
+    cons = cons[cons["period_end"] != date(2024, 6, 30)].assign(consolidated=True)  # one quarter only standalone
+    alone = quarters(margin=0.10).assign(consolidated=False)
+    m = fm.latest(pd.concat([cons, alone])).iloc[0]
+    assert m["as_of"] == date(2024, 12, 31) and not m["consolidated"]
+    assert m["net_margin"] == pytest.approx(10.0)  # all-standalone window, not 3 + 1
+
+
+def test_bank_margin_uses_net_revenue():
+    df = quarters(margin=0.05).assign(net_revenue=lambda d: d["revenue"] / 2)
+    assert fm.latest(df).iloc[0]["net_margin"] == pytest.approx(10.0)
+
+
 def test_no_cagr_without_three_years_of_history():
     m = fm.latest(quarters(ends=QUARTER_ENDS[-8:])).iloc[0]
     assert m["net_margin"] == pytest.approx(10.0)

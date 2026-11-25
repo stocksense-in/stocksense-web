@@ -13,13 +13,14 @@ def filing(end, consolidated=True, seq="1", cumulative="Non-cumulative"):
             "audited": "Audited", "indAs": "Ind-AS New", "bank": "N", "format": "New"}
 
 
-def test_one_per_quarter_prefers_consolidated():
-    picked = ingest_results.one_per_quarter([
-        filing("31-Dec-2024", consolidated=False, seq="a"), filing("31-Dec-2024", seq="b"),
-        filing("30-Sep-2024", consolidated=False, seq="c"),
-        filing("31-Mar-2024", seq="d", cumulative="Cumulative"),
+def test_quarterly_keeps_both_bases_and_the_latest_refiling():
+    picked = ingest_results.quarterly([
+        filing("31-Dec-2024", consolidated=False, seq="1"), filing("31-Dec-2024", seq="2"),
+        filing("31-Dec-2024", seq="5"),  # refiled
+        filing("30-Sep-2024", consolidated=False, seq="3"),
+        filing("31-Mar-2024", seq="4", cumulative="Cumulative"),
     ])
-    assert sorted(f["seqNumber"] for f in picked) == ["b", "c"]
+    assert sorted(f["seqNumber"] for f in picked) == ["1", "3", "5"]
 
 
 class FakeClient:
