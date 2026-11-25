@@ -104,7 +104,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     p = jobs.add_parser("rescore", help="recompute stored scores without refetching")
     p.add_argument("--fundamentals", choices=["yahoo", "filings"], default="yahoo",
-                   help="where margin and revenue growth come from (filings: compare, save only if recent)")
+                   help="where margin, growth, ROE and D/E come from (filings: compare, save only if recent)")
     _add_storage(p)
 
     p = jobs.add_parser("snapshot", help="refresh the frontend's offline data file")

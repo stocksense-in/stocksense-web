@@ -2,15 +2,18 @@
 Score inputs computed from companies' own quarterly filings (clean/financial_results)
 instead of Yahoo's summary fields (M1.2).
 
-Two of the six score metrics come from the profit-and-loss statement:
+Four of the six score metrics come from the filings:
 
   • net margin      — trailing-twelve-month profit ÷ trailing-twelve-month revenue
   • revenue growth  — 3-year CAGR of trailing-twelve-month revenue
+  • ROE             — trailing profit ÷ average owners' equity (latest balance sheet and
+                      the one a year before, when both exist)
+  • debt to equity  — borrowings ÷ owners' equity, latest balance sheet (not for banks)
 
-Both use the latest four consecutive quarters a company has filed, so `as_of` says how
-current each figure is. NSE's per-company filing feed ends at Dec 2024 (later results
-moved to SEBI's integrated filing), which is why `rescore --fundamentals filings`
-refuses to publish figures older than MAX_AGE_DAYS.
+The P&L figures use the latest four consecutive quarters a company has filed, so `as_of`
+says how current each figure is; balance sheets are filed at half-year ends, from Mar
+2025 (integrated filings). `rescore --fundamentals filings` refuses to publish figures
+older than MAX_AGE_DAYS.
 """
 
 from __future__ import annotations
@@ -24,7 +27,9 @@ CAGR_YEARS = 3
 # Four quarter-ends in a row span ~273 days (31 Mar → 31 Dec); allow month-end jitter.
 FOUR_QUARTERS_DAYS = (260, 290)
 
-COLUMNS = {"net_margin": "net_margin", "cagr": "revenue_cagr_3yr"}
+BALANCE_SHEET_LAG_DAYS = 200  # use a balance sheet up to two quarters older than the P&L
+
+COLUMNS = {"net_margin": "net_margin", "cagr": "revenue_cagr_3yr", "roe": "roe", "de": "debt_equity"}
 
 
 def _prepare(df: pd.DataFrame) -> pd.DataFrame:
@@ -68,12 +73,39 @@ def _cagr(g: pd.DataFrame, end: pd.Timestamp) -> float | None:
     return 100 * ((now / past) ** (1 / CAGR_YEARS) - 1)
 
 
+def _balance_sheet(sheets: pd.DataFrame, end: pd.Timestamp, ttm_profit: float, bank: bool) -> dict:
+    """ROE and D/E from one company-basis's balance sheets, as of P&L date `end`."""
+    out = {"roe": None, "debt_equity": None}
+    if sheets is None or not len(sheets):
+        return out
+    usable = sheets[(sheets.index <= end) & (sheets.index >= end - pd.Timedelta(days=BALANCE_SHEET_LAG_DAYS))]
+    if not len(usable):
+        return out
+    when, now = usable.index[-1], usable.iloc[-1]
+    if not now["equity"] > 0:
+        return out
+    year_ago = sheets[(sheets.index >= when - pd.Timedelta(days=380)) & (sheets.index <= when - pd.Timedelta(days=350))]
+    average = (now["equity"] + year_ago.iloc[-1]["equity"]) / 2 if len(year_ago) and year_ago.iloc[-1]["equity"] > 0         else now["equity"]
+    if pd.notna(ttm_profit):
+        out["roe"] = round(100 * ttm_profit / average, 2)
+    if not bank and pd.notna(now.get("borrowings")):
+        out["debt_equity"] = round(now["borrowings"] / now["equity"], 3)
+    return out
+
+
 def latest(df: pd.DataFrame) -> pd.DataFrame:
     """Per company, as of its latest complete four quarters: net_margin and revenue_cagr_3yr (percent).
 
     Consolidated figures where the four quarters all have them, else standalone — never a mix.
     Growth comes from the same basis, falling back to the other basis at the same date."""
     ttm = trailing_twelve_months(df).dropna(subset=["revenue"])
+    prepared = _prepare(df)
+    sheets = {}
+    if "equity" in prepared:
+        bs = prepared.dropna(subset=["equity"])
+        for key, g in bs.groupby(["symbol", "consolidated"]):
+            sheets[key] = g.drop_duplicates("period_end", keep="last").set_index("period_end").sort_index()
+    banks = set(prepared.loc[prepared["bank"].fillna(False).astype(bool), "symbol"]) if "bank" in prepared else set()
     rows = []
     for symbol, s in ttm.groupby("symbol"):
         bases = {c: g.set_index("period_end").sort_index() for c, g in s.groupby("consolidated")}
@@ -89,9 +121,10 @@ def latest(df: pd.DataFrame) -> pd.DataFrame:
                      "ttm_revenue": round(float(now["revenue"]), 1),
                      "ttm_net_profit": round(float(now["net_profit"]), 1) if pd.notna(now["net_profit"]) else None,
                      "net_margin": round(margin, 2) if margin is not None else None,
-                     "revenue_cagr_3yr": round(cagr, 2) if cagr is not None else None})
+                     "revenue_cagr_3yr": round(cagr, 2) if cagr is not None else None,
+                     **_balance_sheet(sheets.get((symbol, basis)), end, now["net_profit"], symbol in banks)})
     return pd.DataFrame(rows, columns=["symbol", "as_of", "consolidated", "ttm_revenue", "ttm_net_profit",
-                                       "net_margin", "revenue_cagr_3yr"])
+                                       "net_margin", "revenue_cagr_3yr", "roe", "debt_equity"])
 
 
 def overlay(rows: list[dict], metrics: pd.DataFrame) -> tuple[list[dict], int]:

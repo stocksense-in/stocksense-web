@@ -44,6 +44,28 @@ def test_bank_margin_uses_net_revenue():
     assert fm.latest(df).iloc[0]["net_margin"] == pytest.approx(10.0)
 
 
+def test_roe_on_average_equity_and_debt_to_equity():
+    df = quarters(margin=0.10)  # trailing profit 40
+    df["equity"], df["borrowings"] = None, None
+    df.loc[df["period_end"] == date(2023, 12, 31), ["equity", "borrowings"]] = [150.0, 30.0]
+    df.loc[df["period_end"] == date(2024, 12, 31), ["equity", "borrowings"]] = [250.0, 50.0]
+    m = fm.latest(df).iloc[0]
+    assert m["roe"] == pytest.approx(20.0)          # 40 / average(150, 250)
+    assert m["debt_equity"] == pytest.approx(0.2)   # 50 / 250, latest sheet
+
+
+def test_no_balance_sheet_ratios_from_a_stale_sheet_or_for_banks():
+    df = quarters()
+    df["equity"], df["borrowings"], df["bank"] = None, None, False
+    df.loc[df["period_end"] == date(2023, 12, 31), ["equity", "borrowings"]] = [100.0, 10.0]
+    m = fm.latest(df).iloc[0]
+    assert pd.isna(m["roe"]) and pd.isna(m["debt_equity"])  # a year older than the P&L
+    df.loc[df["period_end"] == date(2024, 9, 30), ["equity", "borrowings"]] = [100.0, 10.0]
+    df["bank"] = True
+    m = fm.latest(df).iloc[0]
+    assert m["roe"] == pytest.approx(40.0) and pd.isna(m["debt_equity"])
+
+
 def test_no_cagr_without_three_years_of_history():
     m = fm.latest(quarters(ends=QUARTER_ENDS[-8:])).iloc[0]
     assert m["net_margin"] == pytest.approx(10.0)

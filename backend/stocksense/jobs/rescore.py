@@ -7,8 +7,8 @@ with it, because each stock's score depends on all its peers.
     python -m stocksense rescore
     python -m stocksense rescore --fundamentals filings   # margin + growth from NSE filings (M1.2)
 
-With `--fundamentals filings`, net margin and 3-year revenue growth come from the
-companies' own quarterly filings (stocksense/filing_metrics.py) wherever the lake has
+With `--fundamentals filings`, net margin, 3-year revenue growth, ROE and debt to
+equity come from the companies' own quarterly filings (stocksense/filing_metrics.py) wherever the lake has
 them. It prints Yahoo-based and filing-based scores side by side, and writes only if
 every filing-based figure is recent — otherwise it is a comparison, nothing saved.
 """
@@ -49,6 +49,8 @@ def compare(rows: list[dict], metrics: pd.DataFrame) -> pd.DataFrame:
         out.append({"symbol": old["symbol"], "as_of": as_of[old["symbol"]],
                     "margin_yahoo": old.get("net_margin"), "margin_filings": new.get("net_margin"),
                     "cagr_yahoo": old.get("revenue_cagr_3yr"), "cagr_filings": new.get("revenue_cagr_3yr"),
+                    "roe_yahoo": old.get("roe"), "roe_filings": new.get("roe"),
+                    "de_yahoo": old.get("debt_equity"), "de_filings": new.get("debt_equity"),
                     "score_yahoo": s0.composite, "score_filings": s1.composite})
     df = pd.DataFrame(out)
     if len(df):
