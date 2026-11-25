@@ -102,3 +102,27 @@ def test_rescore_compare_reports_both_scores():
     r = report.iloc[0]
     assert (r["margin_yahoo"], r["margin_filings"]) == (10, 30.0)
     assert r["score_filings"] > r["score_yahoo"] and r["score_move"] > 0
+
+
+def test_rescore_filings_saves_nothing_without_apply(monkeypatch):
+    from stocksense import lake as lake_module
+    from stocksense.jobs import rescore
+
+    rows = [{"symbol": f"S{i}", "sector": "it", "pe_ratio": 20, "roe": 15, "debt_equity": 0.1, "net_margin": 10,
+             "promoter_holding": 50, "revenue_cagr_3yr": 8} for i in range(12)]
+    monkeypatch.setattr(rescore, "load_rows", lambda: rows)
+
+    class FakeLake:
+        def query(self, sql):
+            return quarters(symbol="S0")
+
+    monkeypatch.setattr(lake_module.Lake, "from_settings", classmethod(lambda cls: FakeLake()))
+
+    class Store:
+        saved = None
+
+        def upsert_stocks(self, changed):
+            Store.saved = changed
+
+    rescore.run(Store(), "filings")
+    assert Store.saved is None

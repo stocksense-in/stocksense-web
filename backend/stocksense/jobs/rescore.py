@@ -5,12 +5,13 @@ No Yahoo requests, so it takes seconds. The fundamentals and ownership jobs end
 with it, because each stock's score depends on all its peers.
 
     python -m stocksense rescore
-    python -m stocksense rescore --fundamentals filings   # margin + growth from NSE filings (M1.2)
+    python -m stocksense rescore --fundamentals filings           # compare only, nothing saved
+    python -m stocksense rescore --fundamentals filings --apply   # publish filing-based scores
 
 With `--fundamentals filings`, net margin, 3-year revenue growth, ROE and debt to
 equity come from the companies' own quarterly filings (stocksense/filing_metrics.py) wherever the lake has
-them. It prints Yahoo-based and filing-based scores side by side, and writes only if
-every filing-based figure is recent — otherwise it is a comparison, nothing saved.
+them. It prints Yahoo-based and filing-based scores side by side and saves nothing
+unless `--apply` is given — and even then only if every filing-based figure is recent.
 """
 
 from __future__ import annotations
@@ -58,7 +59,7 @@ def compare(rows: list[dict], metrics: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def run(store: Store, fundamentals: str = "yahoo") -> None:
+def run(store: Store, fundamentals: str = "yahoo", apply: bool = False) -> None:
     rows = load_rows()
     if fundamentals == "filings":
         from ..lake import Lake
@@ -70,6 +71,9 @@ def run(store: Store, fundamentals: str = "yahoo") -> None:
         if len(report):
             moves = report["score_move"].dropna().abs()
             log.info(f"{len(report)} companies; median score move {moves.median():.0f}, largest {moves.max():.0f}")
+        if not apply:
+            log.info("Comparison only — nothing saved (add --apply to publish these scores).")
+            return
         old = filing_metrics.stale(metrics)
         if old:
             log.info(f"Not saved: {len(old)} companies' filing figures are over "
