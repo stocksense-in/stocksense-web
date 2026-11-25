@@ -109,3 +109,22 @@ def test_a_success_resets_the_count():
     b.fail("x", Exception("2"))  # 1 in a row again, no stop
     with pytest.raises(ingest_results.NseUnavailable):
         b.fail("x", Exception("3"))
+
+
+def test_rests_then_resumes_from_the_same_company(tmp_path, monkeypatch):
+    lake = Lake(tmp_path)
+    monkeypatch.setattr(nse_results, "client", lambda: FakeClient())
+    monkeypatch.setattr(nse_integrated, "fetch_filings", lambda c, s: [])
+    state = {"down": True, "rests": 0}
+    monkeypatch.setattr(ingest_results.time, "sleep", lambda s: state.update(down=False, rests=state["rests"] + 1) if s > 60 else None)
+
+    def filings(c, symbol):
+        if state["down"] and symbol == "B":
+            raise TimeoutError("timed out")
+        return [filing("31-Dec-2024", seq=symbol)]
+
+    monkeypatch.setattr(nse_results, "fetch_filings", filings)
+    monkeypatch.setattr(nse_results, "fetch_detail", lambda c, f: {"resultsData2": {"re_net_sale": "100"}})
+    monkeypatch.setattr(ingest_results.Breaker.__init__, "__defaults__", (1,))  # one failure trips it
+    assert ingest_results.fetch(lake, ["A", "B", "C"], pause=0, rests=1, rest_seconds=900) == 3
+    assert state["rests"] == 1

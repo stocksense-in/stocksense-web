@@ -145,6 +145,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p = jobs.add_parser("ingest-results", help="quarterly P&L history from NSE filings")
     p.add_argument("--symbols", nargs="+", metavar="SYM", help="these companies (default: the largest by market cap)")
     p.add_argument("--top", type=int, default=20, help="how many of the largest companies")
+    p.add_argument("--rests", type=int, default=0,
+                   help="when NSE stops answering, rest 15 min and resume, up to this many times")
 
     p = jobs.add_parser("engine-daily", help="update the whole lake and check it")
     p.add_argument("--days", type=int, default=10, help="how many recent days to fetch (catch-up after downtime)")
@@ -260,7 +262,7 @@ def main() -> None:
     if args.job == "ingest-results":
         from .jobs import ingest_results
 
-        ingest_results.run(args.symbols, args.top)
+        ingest_results.run(args.symbols, args.top, rests=args.rests)
         return
 
     if args.job == "financials-export":
