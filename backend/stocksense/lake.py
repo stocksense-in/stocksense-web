@@ -43,6 +43,13 @@ CATALOG_FILE = "catalog.duckdb"
 _NAME = re.compile(r"^[a-z][a-z0-9_]*$")
 
 
+def _is_busy(exc: Exception) -> bool:
+    """Another process holds catalog.duckdb. DuckDB says "lock" on Linux; on Windows the OS
+    error is "being used by another process" (25 Nov: three engine steps failed on it)."""
+    text = str(exc).lower()
+    return "lock" in text or "being used by another process" in text
+
+
 class LakeNotConfigured(RuntimeError):
     pass
 
@@ -222,7 +229,7 @@ class Lake:
             try:
                 return duckdb.connect(str(self.catalog_path), read_only=read_only)
             except duckdb.IOException as exc:
-                if "lock" not in str(exc).lower() or time.monotonic() > deadline:
+                if not _is_busy(exc) or time.monotonic() > deadline:
                     raise
                 time.sleep(0.5)
 

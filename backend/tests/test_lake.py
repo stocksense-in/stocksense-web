@@ -118,3 +118,39 @@ def test_lake_prices_job(lake):
     assert df["price"].tolist() == [22721.0, 2114.4]
     assert pd.isna(df.loc[0, "change_pct"])
     assert {"updated_at", "snapshot_at", "date"} <= set(df.columns)
+
+
+def test_connect_waits_while_another_process_holds_the_catalog(tmp_path, monkeypatch):
+    import duckdb
+
+    from stocksense import lake as lake_module
+
+    lake = lake_module.Lake(tmp_path)
+    lake.ensure()
+    real, attempts = duckdb.connect, []
+
+    def busy_then_free(path, read_only=True):
+        attempts.append(1)
+        if len(attempts) < 3:  # Windows' wording, not DuckDB's "lock"
+            raise duckdb.IOException('IO Error: Cannot open file "catalog.duckdb": The process cannot access the file '
+                                     "because it is being used by another process.")
+        return real(path, read_only=False)
+
+    monkeypatch.setattr(lake_module.duckdb, "connect", busy_then_free)
+    monkeypatch.setattr(lake_module.time, "sleep", lambda s: None)
+    lake.connect(read_only=False).close()
+    assert len(attempts) == 3
+
+
+def test_connect_does_not_retry_other_io_errors(tmp_path, monkeypatch):
+    import duckdb
+    import pytest
+
+    from stocksense import lake as lake_module
+
+    def broken(path, read_only=True):
+        raise duckdb.IOException("IO Error: disk is full")
+
+    monkeypatch.setattr(lake_module.duckdb, "connect", broken)
+    with pytest.raises(duckdb.IOException):
+        lake_module.Lake(tmp_path).connect()
