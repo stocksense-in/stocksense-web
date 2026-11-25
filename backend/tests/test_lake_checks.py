@@ -80,3 +80,17 @@ def test_filings_checks(tmp_path):
     assert r["announcements"] == 2 and r["problems"] == []
     assert r["insider_trades"]["last"] == "2026-03-20"  # reported, not a problem
     assert lake_checks.check_filings(lake, date(2026, 12, 1))["problems"] == ["latest announcement 2026-10-15 is stale"]
+
+
+def test_results_checks(tmp_path):
+    lake = Lake(tmp_path)
+    rows = pd.DataFrame([
+        {"symbol": "TCS", "period_end": date(2026, 9, 30), "consolidated": True, "revenue": 73188.0},
+        {"symbol": "TCS", "period_end": date(2026, 9, 30), "consolidated": False, "revenue": 64000.0},
+        {"symbol": "OLDCO", "period_end": date(2024, 12, 31), "consolidated": True, "revenue": -1.0},
+    ])
+    lake.write_table(rows, "financial_results")
+    r = lake_checks.check_results(lake, date(2026, 11, 25))
+    assert r["companies"] == 2 and r["duplicates"] == 0 and r["behind"] == ["OLDCO"]
+    text = " | ".join(r["problems"])
+    assert "negative revenue" in text and "OLDCO" in text and "TCS" not in text
