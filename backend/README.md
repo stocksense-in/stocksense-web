@@ -128,6 +128,7 @@ Without Docker: `pip install -r requirements.txt` then
 | `python -m stocksense check-lake` | Data checks on the index, macro, GDELT and F&O datasets (gaps, duplicates, impossible values, staleness) | After each ingest |
 | `python -m stocksense ingest-fno` | NSE futures & options end-of-day file, 2010 → today: every contract plus a per-underlying summary (OI, put/call ratios, max-OI strikes) | Daily, after ~19:00 IST |
 | `python -m stocksense ingest-filings` | NSE corporate announcements and insider trades since 2015 (monthly windows; the latest two months refetched), plus today's FII/DII cash flows | Daily |
+| `python -m stocksense ingest-results` | Quarterly P&L history since 2005 from NSE filings (`--top N` largest companies, or `--symbols`); resumable | Weekly / after results season |
 | `python -m stocksense filings TCS` | A company's latest announcements and insider trades from the lake (`--since`, `--limit`) | Ad hoc |
 
 Jobs accept `--symbols INFY TCS` or `--limit 20` to work on a few stocks,
@@ -249,6 +250,23 @@ python -m stocksense lake-query "select index, count(*) as days, min(date) as si
 python -m stocksense lake-query "select strike, option_type, close, open_interest from fno_prices where date = '2026-10-16' and symbol = 'NIFTY' and expiry = (select min(expiry) from fno_prices where date = '2026-10-16' and symbol = 'NIFTY' and option_type = 'CE') order by strike, option_type"
 ```
 
+### Quarterly results — fundamentals history (M1.2)
+
+`clean/financial_results`: one row per company and quarter from the company's own NSE
+filings — consolidated where it exists, else standalone — back to 2005 for long-listed
+companies. Amounts in ₹ crore: `revenue` (interest earned for banks), `other_income`,
+`total_income`, `total_expenses`, `depreciation`, `finance_cost`, `profit_before_tax`,
+`tax`, `net_profit` (owners' share, what EPS is based on), `eps`, `paid_up_capital`.
+
+- One NSE endpoint serves old (pre-Ind-AS) and new filings in the same structure; a
+  few field names differ and are mapped in `sources/nse_results.py`.
+- **Known gap:** NSE's filing list currently ends at the Dec 2024 quarter; later results
+  appear to live in SEBI's 2025 "Integrated Filing" system, not ingested yet.
+- Verified by `ml/checks/results_spot_check.py`: FY2023 and FY2024 sums against
+  published annual results.
+- Purpose: point-in-time fundamentals for calibrating the score (which blend, which
+  metrics identify companies that stay sound) without look-ahead.
+
 ### Announcements, insider trades, FII/DII flows (M1.4)
 
 | Dataset | What | Partitioned by |
@@ -359,6 +377,7 @@ stocksense/
     gdelt.py         GDELT 1.0 daily event files → daily aggregates and salient events
     fno_bhavcopy.py  NSE F&O bhavcopy (both formats) and the per-underlying summary
     nse_filings.py   NSE announcements, insider trades (PIT) and FII/DII flows
+    nse_results.py   NSE quarterly results (P&L) since 2005, old and new formats
     screener.py      Screener.in scraping — fallback for promoter holding / sales growth
     fallbacks.py     hardcoded large-cap ownership values (last resort, goes stale)
     upstox.py        OAuth token storage, REST quotes, WebSocket URL
