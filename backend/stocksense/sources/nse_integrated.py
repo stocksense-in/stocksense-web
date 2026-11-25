@@ -150,5 +150,19 @@ def normalise(filing: dict, xml: str) -> dict:
                        ((b.get("BorrowingsNoncurrent") or 0) + (b.get("BorrowingsCurrent") or 0)) / RUPEES_PER_CRORE),
         "total_assets": _cr(b, "Assets"),
     }
+    row["net_profit"] = _owners_profit(f, row["net_profit"])
     row["net_revenue"] = net_revenue(row)
     return row
+
+
+def _owners_profit(f: dict, owners: float | None) -> float | None:
+    """Owners' + minority share must add up to the period's profit. When they don't, the
+    split was mis-tagged (Adani Ports, Jun 2025: its OCI split, ₹53 + ₹48 crore, filed as
+    the profit split) and the period's total profit is the better figure."""
+    total = _cr(f, "ProfitLossForPeriod")
+    minority = _cr(f, "ProfitOrLossAttributableToNonControllingInterests")
+    if owners is None or total is None or minority is None or "ProfitOrLossAttributableToOwnersOfParent" not in f:
+        return owners
+    if abs(owners + minority - total) > 0.05 * max(abs(total), 1):
+        return total
+    return owners
