@@ -52,6 +52,7 @@ CATEGORIES = {
     "ResidentIndividualShareholdersHoldingNominalShareCapitalUpToRsTwoLakhMember": "small_retail_pct",
     "NonInstitutionsMember": "non_institutions_pct",
     "GovernmentsMember": "government_pct",
+    "ShareholdingOfPromoterAndPromoterGroupMember": "promoter_pct_pattern",  # cross-check with the summary
 }
 PERCENT_TAG = "ShareholdingAsAPercentageOfTotalNumberOfShares"
 
