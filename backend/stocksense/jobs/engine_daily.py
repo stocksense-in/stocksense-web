@@ -26,7 +26,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 
-from .. import eod, financials, holders, lake_checks, valuation
+from .. import dividends, eod, financials, holders, lake_checks, valuation
 from ..lake import Lake
 from ..log import get_logger
 
@@ -71,6 +71,7 @@ def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
         Step("fno", lambda: ingest_fno.run(start, today, lake=lake)),
         Step("filings", lambda: ingest_filings.run(start, today, lake=lake)),
         Step("corporate_actions", lambda: ingest_corporate_actions.run(lake=lake, today=today), weekly=True),
+        Step("dividends_export", lambda: dividends.write(lake), weekly=True),
         Step("event_study", lambda: event_study.run(lake=lake), weekly=True),
         Step("valuation_context", lambda: valuation.write(lake), weekly=True),
         # Results arrive quarterly; weekly picks up each filing within days, fetching only new ones.

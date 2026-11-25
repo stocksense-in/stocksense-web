@@ -19,6 +19,7 @@ from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from .. import analytics, benchmarks, geo, ipo, rhp
+from .. import dividends as dividends_mod
 from .. import holders as own
 from .. import valuation as valuation_mod
 from ..config import DATA_DIR, get_settings
@@ -38,6 +39,7 @@ ANALOGUES_PATH = DATA_DIR / "geo_analogues.json"  # written by `python -m stocks
 VALUATION_PATH = DATA_DIR / "valuation_context.json"  # written by `python -m stocksense valuation-context`
 FINANCIALS_PATH = DATA_DIR / "financials.json"  # written by `python -m stocksense financials-export`
 HOLDERS_PATH = DATA_DIR / "holders.json"  # written by `python -m stocksense holders-export`
+DIVIDENDS_PATH = DATA_DIR / "dividends.json"  # written by `python -m stocksense dividends-export`
 BENCHMARKS_TTL_SECONDS = 5 * 60  # peer quartiles change only when fundamentals do
 
 Range = Literal["1d", "5d", "1mo", "6mo", "1y", "5y"]
@@ -90,6 +92,11 @@ def load_holders(path: Path = HOLDERS_PATH) -> dict | None:
     return _load_json(path)
 
 
+def load_dividends(path: Path = DIVIDENDS_PATH) -> dict | None:
+    """Dividends and capital actions (backend/data/dividends.json)."""
+    return _load_json(path)
+
+
 def _warm(app: FastAPI) -> None:
     try:
         app.state.market.stocks()
@@ -106,6 +113,7 @@ def create_app(
     valuation: Callable[[], dict | None] | None = None,
     financials: Callable[[], dict | None] | None = None,
     holders: Callable[[], dict | None] | None = None,
+    dividends: Callable[[], dict | None] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -137,6 +145,7 @@ def create_app(
     app.state.valuation = valuation or load_valuation
     app.state.financials = financials or load_financials
     app.state.holders = holders or load_holders
+    app.state.dividends = dividends or load_dividends
     app.state.scan_slots = threading.BoundedSemaphore(MAX_CONCURRENT_SCANS)
 
     def market_of(request: Request) -> MarketData:
@@ -268,6 +277,19 @@ def create_app(
     def _financials_of(request: Request, symbol: str) -> dict | None:
         return ((request.app.state.financials() or {}).get("companies") or {}).get(symbol.upper())
 
+    def _dividends_of(request: Request, symbol: str) -> dict | None:
+        return ((request.app.state.dividends() or {}).get("companies") or {}).get(symbol.upper())
+
+    @app.get("/stocks/{symbol}/dividends", response_model=schemas.Dividends, tags=["stocks"])
+    def stock_dividends(request: Request, symbol: str):
+        """Dividend per share by fiscal year, the last 12 months, the paying streak, and recent splits/bonuses."""
+        entry = _dividends_of(request, symbol)
+        if entry is None:
+            raise HTTPException(404, f"No corporate actions for {symbol.upper()}")
+        stock = market_of(request).stock(symbol)
+        return {"symbol": symbol.upper(), "source": request.app.state.dividends()["source"], **entry,
+                "note": dividends_mod.note(entry, stock.price if stock else None)}
+
     def _holders_of(request: Request, symbol: str) -> dict | None:
         return ((request.app.state.holders() or {}).get("companies") or {}).get(symbol.upper())
 
@@ -309,7 +331,8 @@ def create_app(
                                                     holders, financials),
             ),
             peers=[_stock_out(s) for s in analytics.peers(m.fresh_stocks(), stock, peers)] if peers else [],
-            available=schemas.Available(financials=financials is not None, holders=holders is not None),
+            available=schemas.Available(financials=financials is not None, holders=holders is not None,
+                                        dividends=_dividends_of(request, stock.symbol) is not None),
         )
 
     @app.get("/stocks/{symbol}/history", response_model=schemas.History, tags=["stocks"])
