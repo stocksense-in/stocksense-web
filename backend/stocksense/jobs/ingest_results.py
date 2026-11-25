@@ -35,6 +35,28 @@ SOURCE = "nse_results"
 INTEGRATED = "nse_integrated"
 DATASET = "financial_results"
 PAUSE_SECONDS = 1.0
+MAX_FAILURES_IN_A_ROW = 3  # then NSE is refusing us, not hiccuping: stop and let a later run resume
+
+
+class NseUnavailable(Exception):
+    pass
+
+
+class Breaker:
+    """Counts failures in a row; on 25 Nov 2026 NSE timed out every request for 40 minutes,
+    and retrying each one for a minute is neither polite nor useful."""
+
+    def __init__(self, limit: int = MAX_FAILURES_IN_A_ROW):
+        self.limit, self.in_a_row = limit, 0
+
+    def ok(self) -> None:
+        self.in_a_row = 0
+
+    def fail(self, what: str, exc: Exception) -> None:
+        self.in_a_row += 1
+        log.warning(f"{what} failed: {exc}")
+        if self.in_a_row >= self.limit:
+            raise NseUnavailable(f"{self.in_a_row} requests in a row failed")
 
 
 def _seq(f: dict) -> int:
@@ -66,44 +88,57 @@ def top_symbols(n: int) -> list[str]:
 
 
 def fetch(lake: Lake, symbols: Iterable[str], pause: float = PAUSE_SECONDS) -> int:
-    """Download filings not already in raw/. Returns how many were fetched."""
+    """Download filings not already in raw/. Returns how many were fetched. Stops early,
+    keeping what it has, if NSE fails MAX_FAILURES_IN_A_ROW requests in a row."""
     fetched = 0
-    with nse_results.client() as c:
-        for symbol in symbols:
-            try:
-                filings = quarterly(nse_results.fetch_filings(c, symbol))
-            except Exception as exc:  # NSE hiccup: skip this company, the next run retries
-                log.warning(f"{SOURCE}: {symbol} filing list failed: {exc}")
-                continue
-            new = 0
-            for f in filings:
-                end = nse_results._d(f.get("toDate"))
-                if end is None:
-                    continue
-                path = lake.raw_dir(SOURCE, end) / f"{symbol}_{f.get('seqNumber')}.json"
-                if path.exists():
-                    continue
-                try:
-                    detail = nse_results.fetch_detail(c, f)
-                except Exception as exc:
-                    log.warning(f"{SOURCE}: {symbol} {end} failed: {exc}")
-                    continue
-                path.write_text(json.dumps({"filing": f, "detail": detail}), encoding="utf-8")
-                new += 1
-                time.sleep(pause)
-            fetched += new
-            log.info(f"{SOURCE}: {symbol} — {len(filings)} filings, {new} new")
-            time.sleep(pause)
-            fetched += fetch_integrated(c, lake, symbol, pause)
+    breaker = Breaker()
+    try:
+        with nse_results.client() as c:
+            for symbol in symbols:
+                fetched += _fetch_company(c, lake, symbol, pause, breaker)
+    except NseUnavailable as exc:
+        log.warning(f"{SOURCE}: stopping — NSE is not responding ({exc}); a later run resumes from here")
     return fetched
 
 
-def fetch_integrated(c, lake: Lake, symbol: str, pause: float = PAUSE_SECONDS) -> int:
+def _fetch_company(c, lake: Lake, symbol: str, pause: float, breaker: Breaker) -> int:
+    """One company's filings from both feeds."""
+    try:
+        filings = quarterly(nse_results.fetch_filings(c, symbol))
+        breaker.ok()
+    except Exception as exc:  # NSE hiccup: skip this feed for the company, the next run retries
+        breaker.fail(f"{SOURCE}: {symbol} filing list", exc)
+        filings = []
+    new = 0
+    for f in filings:
+        end = nse_results._d(f.get("toDate"))
+        if end is None:
+            continue
+        path = lake.raw_dir(SOURCE, end) / f"{symbol}_{f.get('seqNumber')}.json"
+        if path.exists():
+            continue
+        try:
+            detail = nse_results.fetch_detail(c, f)
+            breaker.ok()
+        except Exception as exc:
+            breaker.fail(f"{SOURCE}: {symbol} {end}", exc)
+            continue
+        path.write_text(json.dumps({"filing": f, "detail": detail}), encoding="utf-8")
+        new += 1
+        time.sleep(pause)
+    log.info(f"{SOURCE}: {symbol} — {len(filings)} filings, {new} new")
+    time.sleep(pause)
+    return new + fetch_integrated(c, lake, symbol, pause, breaker)
+
+
+def fetch_integrated(c, lake: Lake, symbol: str, pause: float = PAUSE_SECONDS, breaker: Breaker | None = None) -> int:
     """Integrated filings (Mar 2025 on) not already in raw/: filing metadata + XBRL text."""
+    breaker = breaker or Breaker()
     try:
         filings = nse_integrated.fetch_filings(c, symbol)
+        breaker.ok()
     except Exception as exc:
-        log.warning(f"{INTEGRATED}: {symbol} filing list failed: {exc}")
+        breaker.fail(f"{INTEGRATED}: {symbol} filing list", exc)
         return 0
     new = 0
     for f in filings:
@@ -115,8 +150,9 @@ def fetch_integrated(c, lake: Lake, symbol: str, pause: float = PAUSE_SECONDS) -
             continue
         try:
             xml = nse_integrated.fetch_xbrl(c, f)
+            breaker.ok()
         except Exception as exc:
-            log.warning(f"{INTEGRATED}: {symbol} {end} failed: {exc}")
+            breaker.fail(f"{INTEGRATED}: {symbol} {end}", exc)
             continue
         path.write_text(json.dumps({"filing": f, "xml": xml}), encoding="utf-8")
         new += 1

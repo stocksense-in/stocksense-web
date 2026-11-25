@@ -83,3 +83,29 @@ def test_a_lender_stays_a_lender():
                        "other_income": [1.0, 1.0], "net_revenue": [71.0, 110.0]})
     out = ingest_results.consistent_kind(df)
     assert out["kind"].tolist() == ["finance", "finance"] and out["net_revenue"].tolist() == [71.0, 76.0]
+
+
+def test_fetch_stops_when_nse_stops_responding(tmp_path, monkeypatch):
+    lake = Lake(tmp_path)
+    monkeypatch.setattr(nse_results, "client", lambda: FakeClient())
+    monkeypatch.setattr(nse_results, "fetch_filings",
+                        lambda c, s: [filing(f"{d}-Dec-2024", seq=d) for d in ("27", "28", "29", "30")])
+    calls = []
+
+    def timeout(c, f):
+        calls.append(f["seqNumber"])
+        raise TimeoutError("The read operation timed out")
+
+    monkeypatch.setattr(nse_results, "fetch_detail", timeout)
+    monkeypatch.setattr(nse_integrated, "fetch_filings", lambda c, s: calls.append("integrated") or [])
+    assert ingest_results.fetch(lake, ["SUNPHARMA", "TITAN"], pause=0) == 0
+    assert len(calls) == ingest_results.MAX_FAILURES_IN_A_ROW  # stopped, didn't try the rest or TITAN
+
+
+def test_a_success_resets_the_count():
+    b = ingest_results.Breaker(limit=2)
+    b.fail("x", Exception("1"))
+    b.ok()
+    b.fail("x", Exception("2"))  # 1 in a row again, no stop
+    with pytest.raises(ingest_results.NseUnavailable):
+        b.fail("x", Exception("3"))
