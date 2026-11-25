@@ -105,3 +105,13 @@ def test_shareholding_checks(tmp_path):
     r = lake_checks.check_shareholding(lake, date(2026, 11, 26))
     assert r["companies"] == 2 and r["not_100"] == 1 and r["behind"] == ["OLD"]
     assert any("not 100%" in p for p in r["problems"]) and not any("TCS" in p for p in r["problems"])
+
+
+def test_shareholding_split_must_add_up(tmp_path):
+    lake = Lake(tmp_path)
+    base = {"quarter_end": date(2026, 9, 30), "public_pct": 28.23, "employee_trusts_pct": 0.0, "promoter_pct": 71.77,
+            "fii_pct": 9.01, "dii_pct": 13.57, "government_pct": 0.0}
+    lake.write_table(pd.DataFrame([{**base, "symbol": "TCS", "non_institutions_pct": 5.65},
+                                   {**base, "symbol": "BAD", "non_institutions_pct": 1.0}]), "shareholding")
+    r = lake_checks.check_shareholding(lake, date(2026, 11, 26))
+    assert r["split_not_100"] == 1 and any("split" in p for p in r["problems"])

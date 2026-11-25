@@ -164,6 +164,12 @@ class HolderQuarter(BaseModel):
     promoter_pct: float | None
     public_pct: float | None
     employee_trusts_pct: float | None
+    fii_pct: float | None = Field(None, description="Foreign institutions (FPIs); latest quarters only")
+    dii_pct: float | None = Field(None, description="Domestic institutions: mutual funds, insurers, banks, pension funds")
+    mutual_funds_pct: float | None = None
+    insurance_pct: float | None = None
+    small_retail_pct: float | None = Field(None, description="Individuals holding up to ₹2 lakh of share capital")
+    government_pct: float | None = None
 
 
 class Pledge(BaseModel):

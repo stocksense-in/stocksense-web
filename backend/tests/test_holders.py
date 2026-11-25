@@ -54,3 +54,10 @@ def test_slow_drift_and_no_promoter():
     entry = {"quarters": [{"promoter_pct": p} for p in hz]}
     assert holders.trend_note(entry) == "Steady over the past year (60.7%), but down from 64.9% 3 years ago."
     assert "No promoter group" in holders.trend_note({"quarters": [{"promoter_pct": 0.0}] * 6})
+
+
+def test_split_carried_where_known():
+    sh = shareholding("TCS", [71.77] * 7)
+    sh["fii_pct"] = [None] * 6 + [9.01]
+    q = holders.build(sh)["companies"]["TCS"]["quarters"]
+    assert q[-1]["fii_pct"] == 9.01 and q[0]["fii_pct"] is None and q[-1]["dii_pct"] is None

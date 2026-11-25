@@ -24,6 +24,7 @@ OUTPUT = DATA_DIR / "holders.json"
 QUARTERS = 12
 PLEDGE_WARN = 10.0   # % of the promoters' stake pledged: worth knowing
 PLEDGE_HIGH = 25.0   # a real risk in a falling market
+SPLIT = ("fii_pct", "dii_pct", "mutual_funds_pct", "insurance_pct", "small_retail_pct", "government_pct")
 STAKE_MOVE = 2.0     # percentage points over a year that count as a change
 LONG_DRIFT = 3.0     # percentage points over the whole history shown that count as a slow trend
 
@@ -42,9 +43,10 @@ def build(shareholding: pd.DataFrame, pledges: pd.DataFrame | None = None, today
         latest_pledge = p.sort_values("fetched").groupby("symbol").last().to_dict("index")
     companies = {}
     for symbol, g in sh.sort_values("quarter_end").groupby("symbol"):
-        quarters = [{"quarter_end": r.quarter_end.isoformat(), "promoter_pct": _num(r.promoter_pct),
-                     "public_pct": _num(r.public_pct), "employee_trusts_pct": _num(r.employee_trusts_pct)}
-                    for r in g.tail(QUARTERS).itertuples()]
+        quarters = [{"quarter_end": r["quarter_end"].isoformat(), "promoter_pct": _num(r["promoter_pct"]),
+                     "public_pct": _num(r["public_pct"]), "employee_trusts_pct": _num(r["employee_trusts_pct"]),
+                     **{c: _num(r.get(c)) for c in SPLIT}}
+                    for r in g.tail(QUARTERS).to_dict("records")]
         entry = {"quarters": quarters, "pledge": None}
         pl = latest_pledge.get(symbol)
         if pl:

@@ -205,6 +205,12 @@ def check_shareholding(lake: Lake, today: date | None = None) -> dict:
     off = int(q("select count(*) from shareholding where abs(coalesce(promoter_pct, 0) + coalesce(public_pct, 0) "
                 "+ coalesce(employee_trusts_pct, 0) - 100) > 0.1").iloc[0, 0])
     out_of_range = int(q("select count(*) from shareholding where promoter_pct < 0 or promoter_pct > 100").iloc[0, 0])
+    columns = set(q("select * from shareholding limit 0").columns)
+    split_off = 0
+    if "fii_pct" in columns:  # the full pattern's split must add up too
+        split_off = int(q("select count(*) from shareholding where fii_pct is not null and abs(promoter_pct + fii_pct "
+                          "+ dii_pct + non_institutions_pct + coalesce(government_pct, 0) "
+                          "+ coalesce(employee_trusts_pct, 0) - 100) > 0.1").iloc[0, 0])
     latest = q("select symbol, max(quarter_end) as last from shareholding group by symbol")
     latest["last"] = pd.to_datetime(latest["last"]).dt.date
     behind = sorted(latest.loc[latest["last"].map(lambda d: (today - d).days > SHAREHOLDING_DUE_DAYS), "symbol"])
@@ -215,11 +221,13 @@ def check_shareholding(lake: Lake, today: date | None = None) -> dict:
         problems.append(f"{off} quarters where promoter + public + trusts is not 100%")
     if out_of_range:
         problems.append(f"{out_of_range} promoter holdings outside 0–100%")
+    if split_off:
+        problems.append(f"{split_off} quarters where the FII/DII/retail split doesn't add to 100%")
     if behind:
         problems.append(f"{len(behind)} companies with no shareholding pattern for over {SHAREHOLDING_DUE_DAYS} days: "
                         f"{' '.join(behind[:10])}")
     out = {"rows": int(len(q("select 1 from shareholding"))), "companies": int(len(latest)), "duplicates": dupes,
-           "not_100": off, "behind": behind}
+           "not_100": off, "split_not_100": split_off, "behind": behind}
     if "pledges" in set(lake.datasets()):
         out["pledge_snapshots"] = int(q("select count(*) from pledges").iloc[0, 0])
     out["problems"] = problems
