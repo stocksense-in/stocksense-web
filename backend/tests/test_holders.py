@@ -61,3 +61,11 @@ def test_split_carried_where_known():
     sh["fii_pct"] = [None] * 6 + [9.01]
     q = holders.build(sh)["companies"]["TCS"]["quarters"]
     assert q[-1]["fii_pct"] == 9.01 and q[0]["fii_pct"] is None and q[-1]["dii_pct"] is None
+
+
+def test_stock_detail_says_which_panels_exist(market):
+    symbol = ROWS[0]["symbol"]
+    doc = holders.build(shareholding(symbol, [60] * 7))
+    client = TestClient(create_app(market=market, headlines=lambda: [], history=lambda s, r: [],
+                                   holders=lambda: doc, financials=lambda: None))
+    assert client.get(f"/stocks/{symbol}").json()["available"] == {"financials": False, "holders": True}

@@ -207,10 +207,16 @@ class LearnMetrics(BaseModel):
     metrics: list[MetricGuide]
 
 
+class Available(BaseModel):
+    financials: bool = Field(description="GET /stocks/{symbol}/financials has filed results for this company")
+    holders: bool = Field(description="GET /stocks/{symbol}/holders has shareholding filings for this company")
+
+
 class StockDetail(BaseModel):
     stock: StockOut
     score: ScoreDetail
     peers: list[StockOut]
+    available: Available = Field(description="Which company-page panels have data, so the UI can skip the rest")
 
 
 class PricePoint(BaseModel):
