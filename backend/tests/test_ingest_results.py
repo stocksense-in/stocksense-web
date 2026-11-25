@@ -128,3 +128,18 @@ def test_rests_then_resumes_from_the_same_company(tmp_path, monkeypatch):
     monkeypatch.setattr(ingest_results.Breaker.__init__, "__defaults__", (1,))  # one failure trips it
     assert ingest_results.fetch(lake, ["A", "B", "C"], pause=0, rests=1, rest_seconds=900) == 3
     assert state["rests"] == 1
+
+
+def test_missing_files_do_not_count_as_nse_refusing():
+    import httpx
+
+    def status(code):
+        req = httpx.Request("GET", "https://nsearchives.nseindia.in/x.xml")
+        return httpx.HTTPStatusError("err", request=req, response=httpx.Response(code, request=req))
+
+    b = ingest_results.Breaker(limit=2)
+    for _ in range(5):
+        b.fail("xbrl", status(404))  # dead links: answered, never trips
+    b.fail("list", status(403))
+    with pytest.raises(ingest_results.NseUnavailable):
+        b.fail("list", status(429))
