@@ -223,6 +223,36 @@ class LearnMetrics(BaseModel):
 class Available(BaseModel):
     financials: bool = Field(description="GET /stocks/{symbol}/financials has filed results for this company")
     holders: bool = Field(description="GET /stocks/{symbol}/holders has shareholding filings for this company")
+    dividends: bool = Field(False, description="GET /stocks/{symbol}/dividends has corporate actions for this company")
+
+
+class DividendYear(BaseModel):
+    fiscal_year: int = Field(description="Year ending 31 March, by ex-date")
+    per_share: float
+
+
+class LastDividend(BaseModel):
+    ex_date: str
+    per_share: float
+
+
+class CapitalAction(BaseModel):
+    ex_date: str
+    kind: str = Field(description="split, bonus, rights, restructuring (demerger/merger), consolidation")
+    subject: str
+
+
+class Dividends(BaseModel):
+    symbol: str
+    source: str
+    years: list[DividendYear]
+    ttm_per_share: float
+    paid_years_in_a_row: int
+    streak_since_data_start: bool = Field(False, description="The streak reaches back to where the data starts")
+    data_from_fiscal_year: int | None = None
+    last_dividend: LastDividend | None
+    capital_actions: list[CapitalAction]
+    note: str | None = Field(None, description="The dividend habit and yield at today's price, in one line")
 
 
 class StockDetail(BaseModel):

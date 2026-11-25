@@ -57,6 +57,7 @@ python -m stocksense api --reload        # http://localhost:8000/docs — intera
 | `GET /stocks/search?q=` | Symbol / company-name search |
 | `GET /stocks/{symbol}` | One stock, its score broken down metric by metric — each metric explained in three layers (see "Reading a metric") — and sector peers |
 | `GET /learn/metrics?sector=` | How to read a company in a sector: each metric's meaning, weight, healthy range and what's typical among its companies; how stage changes the reading; whether the sector is cheap or expensive today |
+| `GET /stocks/{symbol}/dividends` | Dividend per share for five fiscal years, the last 12 months (with yield at today's price), the paying streak, and recent splits/bonuses/rights/demergers — every listed company (`data/dividends.json`, from `dividends-export`) |
 | `GET /stocks/{symbol}/holders` | Promoter holding by quarter (12 quarters) and the promoters' pledges, with a plain-language trend note and pledge warning. 404 until a company's filings are in (`data/holders.json`) |
 | `GET /stocks/{symbol}/financials` | Last 12 quarters and 6 fiscal years of revenue and profit from the company's own filings, one basis (consolidated or standalone), plus filing-based margin, growth, ROE, D/E. 404 until a company's results are in (`data/financials.json`, from `financials-export`) |
 | `GET /stocks/{symbol}/history?range=` | Closing prices: `1d` (5-min), `5d`, `1mo`, `6mo`, `1y`, `5y`. Works for indices too (`NIFTY50`) |
@@ -434,6 +435,7 @@ stocksense/
   holders.py         promoter holding + pledges export, trend note, pledge warning (M1.3)
   results_reaction.py  the market's move after each quarterly result, vs NIFTY 50
   alerts.py          day alerts: moves, volume, results, orders, promoter stake, pledges (M2.4)
+  dividends.py       dividends by fiscal year, streak, yield note, capital actions export
   sectors.py         Yahoo sector/industry → StockSense sector code
   symbols.py         NSE equity list (EQUITY_L.csv), cached 24h in _nse_symbols_cache.json
   db.py              write side: Store saves rows to Supabase and/or a JSON snapshot

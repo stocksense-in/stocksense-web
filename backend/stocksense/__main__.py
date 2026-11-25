@@ -26,6 +26,7 @@ Jobs
     valuation-context  each sector's P/E today vs its own history → data/valuation_context.json  (weekly)
     financials-export  quarterly + yearly results from filings → data/financials.json  (weekly)
     holders-export     promoter holding over time + pledges → data/holders.json  (weekly)
+    dividends-export   dividends by year + splits/bonuses → data/dividends.json  (weekly)
     alerts         what happened to companies on a day: big moves, volume, results, orders, stakes, pledges
     ingest-results quarterly P&L history since 2005 from NSE filings (default: 20 largest companies)
     ingest-shareholding  promoter holding by quarter + promoter pledges (default: 50 largest; --all)
@@ -145,6 +146,7 @@ def _build_parser() -> argparse.ArgumentParser:
     jobs.add_parser("valuation-context", help="sector valuations vs their history, for the API")
     jobs.add_parser("financials-export", help="company financials from filings, for the API")
     jobs.add_parser("holders-export", help="promoter holding and pledges, for the API")
+    jobs.add_parser("dividends-export", help="dividends and capital actions, for the API")
     p = jobs.add_parser("alerts", help="alerts for a day (any past day replays)")
     p.add_argument("--date", help="YYYY-MM-DD (default: today)")
     p.add_argument("--symbols", nargs="+", metavar="SYM", help="only these companies (a watchlist)")
@@ -296,6 +298,14 @@ def main() -> None:
         for a in found:
             print(f"{a['symbol']:<12} {a['kind']:<15} {a['text']}")
         print(f"{len(found)} alerts for {day}")
+        return
+
+    if args.job == "dividends-export":
+        from . import dividends
+        from .lake import Lake
+
+        doc = dividends.write(Lake.from_settings())
+        print(f"Wrote dividends for {len(doc['companies'])} companies to {dividends.OUTPUT}")
         return
 
     if args.job == "holders-export":

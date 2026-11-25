@@ -36,6 +36,8 @@ _BONUS = re.compile(rf"bonus\D{{0,30}}?{_NUM}\s*:\s*{_NUM}", re.I)
 _SPLIT = re.compile(rf"(?:split|sub-?\s?division).*?{_RUPEES}{_NUM}\s*(?:/-)?.*?\bto\b\s*(?:face value\s*)?{_RUPEES}{_NUM}", re.I)
 _CONSOLIDATION = re.compile(rf"consolidation\D*?{_RUPEES}{_NUM}\D*?\bto\b\s*{_RUPEES}{_NUM}", re.I)
 _DIVIDEND = re.compile(rf"dividend\D{{0,25}}?{_RUPEES}{_NUM}", re.I)
+# A second amount named by its kind only: "Dividend - Final - Rs.23/- And Special - Rs.28/-".
+_KIND_AMOUNT = re.compile(rf"\b(?:special|final|interim)\W{{0,12}}{_RUPEES}{_NUM}", re.I)
 
 
 def classify(subject: str) -> str:
@@ -99,8 +101,16 @@ def rights_terms(subject: str) -> tuple[float, float, float] | None:
 
 
 def dividend_per_share(subject: str) -> float | None:
-    d = _DIVIDEND.search(subject)
-    return float(d.group(1)) if d else None
+    """Total dividend per share on this ex-date. Subjects often announce two at once ("Final Rs 4
+    And Special Rs 10" → 14); one that states a total and then its parts ("Rs 50 (Special Rs 25 And
+    Final Rs 25)") counts the total once."""
+    if not _DIVIDEND.search(subject):
+        return None
+    found = {m.start(1): float(m.group(1)) for rx in (_DIVIDEND, _KIND_AMOUNT) for m in rx.finditer(subject)}
+    amounts = [found[k] for k in sorted(found)]
+    if len(amounts) >= 3 and abs(amounts[0] - sum(amounts[1:])) < 0.01:
+        return amounts[0]
+    return round(sum(amounts), 4)
 
 
 def _date(value: str | None) -> date | None:
