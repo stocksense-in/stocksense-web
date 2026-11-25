@@ -5,9 +5,11 @@ NSE shareholding — promoter holding by quarter and promoter pledges (M1.3).
     every quarterly shareholding pattern a company filed (about five years): promoter &
     promoter group %, public %, employee trusts %, and a link to the full XBRL.
   • GET /api/corporate-pledgedata?index=equities&symbol=<S>
-    the latest pledge position: promoter shares pledged (from SAST disclosures) and the
-    shares shown as encumbered in the last shareholding pattern. Only the current
-    figure is served, so history builds up from regular snapshots.
+    the latest pledge position: promoter shares pledged/encumbered (totPromoterShares,
+    percPromoterShares — % of the promoters' holding), and separately every pledge
+    recorded at the depository by any shareholder (numSharesPledged — mostly margin
+    pledges, not a promoter signal: ITC, with no promoter, shows 2% of its shares). Only
+    the current figure is served, so history builds up from regular snapshots.
 
 Promoter holding here is what Indian filings mean by it — the founders/parent and their
 group — unlike Yahoo's "insiders", which the score has been using as a stand-in.
@@ -83,19 +85,18 @@ def pledge(rows: list[dict], symbol: str, fetched: date) -> dict | None:
     if not rows:
         return None
     r = rows[0]
-    promoter_shares = _float(r.get("totPromoterHolding"))
-    pledged = _float(r.get("numSharesPledged"))
-    total = _float(r.get("totIssuedShares"))
+    promoter_pct = _float(r.get("percPromoterHolding"))
+    has_promoter = promoter_pct is not None and promoter_pct > 0
     return {
         "symbol": symbol.upper(),
         "fetched": fetched,
         "shp_quarter_end": _date(r.get("shp")),
-        "promoter_pct": _float(r.get("percPromoterHolding")),
-        # From SAST disclosures (current): pledged shares ÷ promoters' shares.
-        "pledged_pct_of_promoter": round(100 * pledged / promoter_shares, 2) if pledged is not None and promoter_shares else None,
-        "pledged_pct_of_total": round(100 * pledged / total, 2) if pledged is not None and total else None,
-        # As shown in the last shareholding pattern (quarter end).
-        "encumbered_pct_of_promoter_shp": _float(r.get("percPromoterShares")),
-        "shares_pledged": pledged,
-        "promoter_shares": promoter_shares,
+        "promoter_pct": promoter_pct,
+        "promoter_shares": _float(r.get("totPromoterHolding")),
+        "promoter_shares_pledged": _float(r.get("totPromoterShares")) if has_promoter else None,
+        # The red-flag number: how much of the promoters' own stake is pledged.
+        "pledged_pct_of_promoter": _float(r.get("percPromoterShares")) if has_promoter else None,
+        "pledged_pct_of_total": _float(r.get("percTotShares")) if has_promoter else None,
+        # Every depository pledge, by anyone (context, not a promoter signal).
+        "all_pledges_pct_of_total": _float(r.get("percSharesPledged")),
     }

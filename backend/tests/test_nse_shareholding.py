@@ -17,7 +17,12 @@ MASTER = [
 ]
 # Adani Enterprises pledge position, 25 Nov 2026.
 PLEDGE = [{"shp": "30-Sep-2026", "percPromoterHolding": "    71.97", "percPromoterShares": "     0.79",
-           "numSharesPledged": "23446206", "totPromoterHolding": "974234554", "totIssuedShares": "1353722600"}]
+           "percTotShares": "     0.57", "totPromoterShares": "7700000", "numSharesPledged": "23446206",
+           "percSharesPledged": "1.73", "totPromoterHolding": "974234554", "totIssuedShares": "1353722600"}]
+# ITC: no promoter group to speak of; depository pledges are other holders' margin pledges.
+PLEDGE_ITC = [{"shp": "30-Sep-2026", "percPromoterHolding": "     0.00", "percPromoterShares": "     0.00",
+               "totPromoterShares": "0", "numSharesPledged": "249875656", "percSharesPledged": "2",
+               "totPromoterHolding": "0"}]
 
 
 def test_holdings_one_row_per_quarter_latest_submission():
@@ -30,6 +35,12 @@ def test_holdings_one_row_per_quarter_latest_submission():
 def test_pledge_as_share_of_promoter_and_total():
     p = sh.pledge(PLEDGE, "adanient", date(2026, 11, 26))
     assert p["symbol"] == "ADANIENT" and p["shp_quarter_end"] == date(2026, 9, 30)
-    assert p["promoter_pct"] == 71.97 and p["encumbered_pct_of_promoter_shp"] == 0.79
-    assert p["pledged_pct_of_promoter"] == pytest.approx(2.41) and p["pledged_pct_of_total"] == pytest.approx(1.73)
+    assert p["promoter_pct"] == 71.97 and p["promoter_shares_pledged"] == 7700000
+    assert p["pledged_pct_of_promoter"] == 0.79 and p["pledged_pct_of_total"] == 0.57
+    assert p["all_pledges_pct_of_total"] == pytest.approx(1.73)  # anyone's pledges, not the promoters'
     assert sh.pledge([], "X", date(2026, 11, 26)) is None
+
+
+def test_no_promoter_no_promoter_pledge():
+    p = sh.pledge(PLEDGE_ITC, "ITC", date(2026, 11, 26))
+    assert p["pledged_pct_of_promoter"] is None and p["all_pledges_pct_of_total"] == 2.0
