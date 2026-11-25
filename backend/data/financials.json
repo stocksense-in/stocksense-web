@@ -127,7 +127,90 @@
     "revenue_cagr_3yr": 19.9,
     "roe": null,
     "debt_equity": null
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2023-03-31",
+     "filed": "2023-05-05 14:21:00",
+     "revenue_yoy_pct": 26.06,
+     "profit_yoy_pct": 137.41,
+     "move_1d_pct": 0.47,
+     "excess_1d_pct": 1.5,
+     "move_5d_pct": 3.84,
+     "excess_5d_pct": 3.61
+    },
+    {
+     "period_end": "2023-06-30",
+     "filed": "2023-08-04 13:44:00",
+     "revenue_yoy_pct": -44.42,
+     "profit_yoy_pct": 32.59,
+     "move_1d_pct": 0.36,
+     "excess_1d_pct": -0.34,
+     "move_5d_pct": 0.78,
+     "excess_5d_pct": -0.05
+    },
+    {
+     "period_end": "2023-09-30",
+     "filed": "2023-11-03 13:47:00",
+     "revenue_yoy_pct": -41.02,
+     "profit_yoy_pct": -50.57,
+     "move_1d_pct": 0.66,
+     "excess_1d_pct": 0.15,
+     "move_5d_pct": -0.03,
+     "excess_5d_pct": -1.4
+    },
+    {
+     "period_end": "2023-12-31",
+     "filed": "2024-02-02 13:02:00",
+     "revenue_yoy_pct": 6.48,
+     "profit_yoy_pct": 130.28,
+     "move_1d_pct": 0.13,
+     "excess_1d_pct": -0.6,
+     "move_5d_pct": 0.48,
+     "excess_5d_pct": 0.38
+    },
+    {
+     "period_end": "2024-03-31",
+     "filed": "2024-05-03 13:33:00",
+     "revenue_yoy_pct": -6.91,
+     "profit_yoy_pct": -37.63,
+     "move_1d_pct": -1.52,
+     "excess_1d_pct": -0.76,
+     "move_5d_pct": -8.98,
+     "excess_5d_pct": -5.93
+    },
+    {
+     "period_end": "2024-06-30",
+     "filed": "2024-08-01 20:27:00",
+     "revenue_yoy_pct": 0.13,
+     "profit_yoy_pct": 115.82,
+     "move_1d_pct": -1.75,
+     "excess_1d_pct": -0.58,
+     "move_5d_pct": -1.54,
+     "excess_5d_pct": 2.03
+    },
+    {
+     "period_end": "2024-09-30",
+     "filed": "2024-10-30 09:19:00",
+     "revenue_yoy_pct": 0.4,
+     "profit_yoy_pct": 664.53,
+     "move_1d_pct": 4.24,
+     "excess_1d_pct": 4.75,
+     "move_5d_pct": 2.35,
+     "excess_5d_pct": 3.39
+    },
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-31 12:38:00",
+     "revenue_yoy_pct": -19.37,
+     "profit_yoy_pct": -96.94,
+     "move_1d_pct": 1.56,
+     "excess_1d_pct": 0.45,
+     "move_5d_pct": 3.2,
+     "excess_5d_pct": 1.27
+    }
+   ],
+   "reaction_note": "None of its last 8 results moved the share 5% or more against the market the next day."
   },
   "ADANIPORTS": {
    "basis": "consolidated",
@@ -271,7 +354,90 @@
     "revenue_cagr_3yr": 21.97,
     "roe": 16.07,
     "debt_equity": 0.565
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-09-30",
+     "filed": "2024-10-29 20:09:00",
+     "revenue_yoy_pct": 6.33,
+     "profit_yoy_pct": 39.89,
+     "move_1d_pct": 1.71,
+     "excess_1d_pct": 2.23,
+     "move_5d_pct": -3.16,
+     "excess_5d_pct": -2.12
+    },
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-30 16:09:00",
+     "revenue_yoy_pct": 15.08,
+     "profit_yoy_pct": 14.12,
+     "move_1d_pct": 2.07,
+     "excess_1d_pct": 0.96,
+     "move_5d_pct": 6.25,
+     "excess_5d_pct": 4.33
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-05-01 21:56:50",
+     "revenue_yoy_pct": 23.08,
+     "profit_yoy_pct": 47.78,
+     "move_1d_pct": 4.16,
+     "excess_1d_pct": 4.11,
+     "move_5d_pct": 9.58,
+     "excess_5d_pct": 9.83
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-08-05 16:12:57",
+     "revenue_yoy_pct": 20.72,
+     "profit_yoy_pct": 6.35,
+     "move_1d_pct": 0.66,
+     "excess_1d_pct": 0.97,
+     "move_5d_pct": -2.03,
+     "excess_5d_pct": -1.37
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-11-04 17:23:11",
+     "revenue_yoy_pct": 29.72,
+     "profit_yoy_pct": 27.16,
+     "move_1d_pct": -0.53,
+     "excess_1d_pct": -0.18,
+     "move_5d_pct": 4.33,
+     "excess_5d_pct": 3.24
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-02-03 15:46:06",
+     "revenue_yoy_pct": 21.86,
+     "profit_yoy_pct": 21.16,
+     "move_1d_pct": 2.42,
+     "excess_1d_pct": 2.24,
+     "move_5d_pct": 1.56,
+     "excess_5d_pct": 0.75
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-04-30 18:33:02",
+     "revenue_yoy_pct": 26.5,
+     "profit_yoy_pct": 9.76,
+     "move_1d_pct": 5.15,
+     "excess_1d_pct": 4.64,
+     "move_5d_pct": 6.22,
+     "excess_5d_pct": 5.48
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-10-28 15:52:24",
+     "revenue_yoy_pct": 23.7,
+     "profit_yoy_pct": 16.5,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day."
   },
   "AXISBANK": {
    "basis": "consolidated",
@@ -415,7 +581,90 @@
     "revenue_cagr_3yr": 8.68,
     "roe": null,
     "debt_equity": null
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-06-30",
+     "filed": "2024-07-25 11:40:00",
+     "revenue_yoy_pct": 14.58,
+     "profit_yoy_pct": 5.67,
+     "move_1d_pct": -5.11,
+     "excess_1d_pct": -5.08,
+     "move_5d_pct": -5.9,
+     "excess_5d_pct": -8.11
+    },
+    {
+     "period_end": "2024-09-30",
+     "filed": "2024-10-18 13:26:00",
+     "revenue_yoy_pct": 17.5,
+     "profit_yoy_pct": 19.3,
+     "move_1d_pct": 5.74,
+     "excess_1d_pct": 5.32,
+     "move_5d_pct": 3.14,
+     "excess_5d_pct": 4.55
+    },
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-16 20:05:00",
+     "revenue_yoy_pct": 8.99,
+     "profit_yoy_pct": 3.86,
+     "move_1d_pct": -4.52,
+     "excess_1d_pct": -4.06,
+     "move_5d_pct": -8.38,
+     "excess_5d_pct": -7.92
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-04-24 19:51:40",
+     "revenue_yoy_pct": 3.45,
+     "profit_yoy_pct": -1.63,
+     "move_1d_pct": -3.38,
+     "excess_1d_pct": -2.52,
+     "move_5d_pct": -2.06,
+     "excess_5d_pct": -2.48
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-07-17 18:29:25",
+     "revenue_yoy_pct": 7.93,
+     "profit_yoy_pct": -2.99,
+     "move_1d_pct": -5.22,
+     "excess_1d_pct": -4.65,
+     "move_5d_pct": -5.58,
+     "excess_5d_pct": -5.38
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-04-28 15:55:21",
+     "revenue_yoy_pct": 1.03,
+     "profit_yoy_pct": 1.71,
+     "move_1d_pct": 0.57,
+     "excess_1d_pct": -0.18,
+     "move_5d_pct": 0.4,
+     "excess_5d_pct": -0.99
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-07-18 15:19:03",
+     "revenue_yoy_pct": 3.77,
+     "profit_yoy_pct": 22.24,
+     "move_1d_pct": -5.46,
+     "excess_1d_pct": -5.06,
+     "move_5d_pct": -7.62,
+     "excess_5d_pct": -5.29
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-10-17 16:19:45",
+     "revenue_yoy_pct": 8.91,
+     "profit_yoy_pct": 39.38,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "After 3 of its last 7 results the share moved 5% or more against the market the next day. 3 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "BAJFINANCE": {
    "basis": "consolidated",
@@ -559,7 +808,90 @@
     "revenue_cagr_3yr": 22.25,
     "roe": 19.17,
     "debt_equity": null
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-29 19:47:00",
+     "revenue_yoy_pct": 25.54,
+     "profit_yoy_pct": 16.7,
+     "move_1d_pct": 1.83,
+     "excess_1d_pct": 1.46,
+     "move_5d_pct": 9.22,
+     "excess_5d_pct": 6.74
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-04-29 20:57:01",
+     "revenue_yoy_pct": 22.66,
+     "profit_yoy_pct": 17.13,
+     "move_1d_pct": -5.04,
+     "excess_1d_pct": -5.04,
+     "move_5d_pct": -1.17,
+     "excess_5d_pct": -1.49
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-07-24 19:42:54",
+     "revenue_yoy_pct": 21.04,
+     "profit_yoy_pct": 18.82,
+     "move_1d_pct": -4.71,
+     "excess_1d_pct": -3.82,
+     "move_5d_pct": -8.11,
+     "excess_5d_pct": -6.94
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-11-10 22:00:00",
+     "revenue_yoy_pct": 20.31,
+     "profit_yoy_pct": 21.89,
+     "move_1d_pct": -7.35,
+     "excess_1d_pct": -7.83,
+     "move_5d_pct": -5.36,
+     "excess_5d_pct": -7.08
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-02-03 19:12:05",
+     "revenue_yoy_pct": 18.87,
+     "profit_yoy_pct": -6.33,
+     "move_1d_pct": -0.11,
+     "excess_1d_pct": -0.3,
+     "move_5d_pct": 0.12,
+     "excess_5d_pct": -0.68
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-04-29 22:41:32",
+     "revenue_yoy_pct": 19.23,
+     "profit_yoy_pct": 21.99,
+     "move_1d_pct": 0.75,
+     "excess_1d_pct": 1.5,
+     "move_5d_pct": 4.6,
+     "excess_5d_pct": 3.98
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-07-30 18:59:06",
+     "revenue_yoy_pct": 20.73,
+     "profit_yoy_pct": 27.37,
+     "move_1d_pct": 8.32,
+     "excess_1d_pct": 8.05,
+     "move_5d_pct": 8.67,
+     "excess_5d_pct": 7.36
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-10-19 19:58:29",
+     "revenue_yoy_pct": 21.3,
+     "profit_yoy_pct": 28.53,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "After 3 of its last 7 results the share moved 5% or more against the market the next day. 3 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "BHARTIARTL": {
    "basis": "consolidated",
@@ -703,7 +1035,90 @@
     "revenue_cagr_3yr": 16.07,
     "roe": 22.48,
     "debt_equity": 0.766
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-09-30",
+     "filed": "2024-10-28 22:29:00",
+     "revenue_yoy_pct": 11.96,
+     "profit_yoy_pct": 168.01,
+     "move_1d_pct": -1.58,
+     "excess_1d_pct": -2.1,
+     "move_5d_pct": -4.33,
+     "excess_5d_pct": -2.92
+    },
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-02-06 22:19:00",
+     "revenue_yoy_pct": 19.08,
+     "profit_yoy_pct": 505.24,
+     "move_1d_pct": 3.52,
+     "excess_1d_pct": 3.7,
+     "move_5d_pct": 5.86,
+     "excess_5d_pct": 8.28
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-05-13 20:17:37",
+     "revenue_yoy_pct": 27.33,
+     "profit_yoy_pct": 432.04,
+     "move_1d_pct": 0.75,
+     "excess_1d_pct": 0.39,
+     "move_5d_pct": -0.64,
+     "excess_5d_pct": -1.07
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-08-05 20:14:40",
+     "revenue_yoy_pct": 28.45,
+     "profit_yoy_pct": 42.98,
+     "move_1d_pct": -0.11,
+     "excess_1d_pct": 0.2,
+     "move_5d_pct": -4.22,
+     "excess_5d_pct": -3.56
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-11-03 19:31:51",
+     "revenue_yoy_pct": 25.73,
+     "profit_yoy_pct": 89.02,
+     "move_1d_pct": 1.89,
+     "excess_1d_pct": 2.54,
+     "move_5d_pct": -1.53,
+     "excess_5d_pct": -1.26
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-02-05 19:48:12",
+     "revenue_yoy_pct": 19.62,
+     "profit_yoy_pct": -55.14,
+     "move_1d_pct": 2.31,
+     "excess_1d_pct": 2.11,
+     "move_5d_pct": 1.11,
+     "excess_5d_pct": 0.47
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-08-04 20:18:59",
+     "revenue_yoy_pct": 18.35,
+     "profit_yoy_pct": 37.32,
+     "move_1d_pct": 0.4,
+     "excess_1d_pct": 0.36,
+     "move_5d_pct": -2.79,
+     "excess_5d_pct": -2.2
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-11-05 19:29:25",
+     "revenue_yoy_pct": 16.75,
+     "profit_yoy_pct": 30.86,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. 2 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "HDFCBANK": {
    "basis": "consolidated",
@@ -847,7 +1262,90 @@
     "revenue_cagr_3yr": 23.19,
     "roe": null,
     "debt_equity": null
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-23 12:25:00",
+     "revenue_yoy_pct": -9.05,
+     "profit_yoy_pct": 2.31,
+     "move_1d_pct": -0.07,
+     "excess_1d_pct": -0.28,
+     "move_5d_pct": 0.68,
+     "excess_5d_pct": 0.64
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-04-19 22:42:15",
+     "revenue_yoy_pct": -9.19,
+     "profit_yoy_pct": 4.33,
+     "move_1d_pct": 1.07,
+     "excess_1d_pct": -0.08,
+     "move_5d_pct": 0.24,
+     "excess_5d_pct": -0.55
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-07-19 18:46:45",
+     "revenue_yoy_pct": 17.85,
+     "profit_yoy_pct": -1.32,
+     "move_1d_pct": 2.2,
+     "excess_1d_pct": 1.71,
+     "move_5d_pct": 2.41,
+     "excess_5d_pct": 2.94
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-10-18 20:22:39",
+     "revenue_yoy_pct": -5.55,
+     "profit_yoy_pct": 10.01,
+     "move_1d_pct": 0.04,
+     "excess_1d_pct": -0.48,
+     "move_5d_pct": 0.04,
+     "excess_5d_pct": -0.96
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-01-17 21:26:14",
+     "revenue_yoy_pct": 24.24,
+     "profit_yoy_pct": 12.18,
+     "move_1d_pct": -0.34,
+     "excess_1d_pct": 0.08,
+     "move_5d_pct": -1.61,
+     "excess_5d_pct": 0.9
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-04-18 19:28:36",
+     "revenue_yoy_pct": -2.16,
+     "profit_yoy_pct": 10.69,
+     "move_1d_pct": -0.56,
+     "excess_1d_pct": -0.6,
+     "move_5d_pct": -1.88,
+     "excess_5d_pct": -0.01
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-07-18 16:01:10",
+     "revenue_yoy_pct": 0.16,
+     "profit_yoy_pct": 18.37,
+     "move_1d_pct": -5.12,
+     "excess_1d_pct": -4.73,
+     "move_5d_pct": -9.37,
+     "excess_5d_pct": -7.04
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-10-17 17:46:30",
+     "revenue_yoy_pct": 9.57,
+     "profit_yoy_pct": 5.55,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "HINDUNILVR": {
    "basis": "consolidated",
@@ -991,7 +1489,90 @@
     "revenue_cagr_3yr": 3.35,
     "roe": 30.88,
     "debt_equity": 0.0
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-22 20:01:00",
+     "revenue_yoy_pct": 1.61,
+     "profit_yoy_pct": 18.93,
+     "move_1d_pct": -0.91,
+     "excess_1d_pct": -1.12,
+     "move_5d_pct": 1.75,
+     "excess_5d_pct": 1.72
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-04-24 19:54:26",
+     "revenue_yoy_pct": 3.02,
+     "profit_yoy_pct": -3.67,
+     "move_1d_pct": 0.3,
+     "excess_1d_pct": 1.15,
+     "move_5d_pct": -0.06,
+     "excess_5d_pct": -0.47
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-07-31 19:42:31",
+     "revenue_yoy_pct": 5.14,
+     "profit_yoy_pct": 5.59,
+     "move_1d_pct": 1.29,
+     "excess_1d_pct": 2.11,
+     "move_5d_pct": -0.15,
+     "excess_5d_pct": 0.55
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-10-23 22:55:35",
+     "revenue_yoy_pct": 1.98,
+     "profit_yoy_pct": 3.63,
+     "move_1d_pct": -3.27,
+     "excess_1d_pct": -2.9,
+     "move_5d_pct": -5.07,
+     "excess_5d_pct": -5.02
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-02-12 17:24:12",
+     "revenue_yoy_pct": 3.94,
+     "profit_yoy_pct": 121.41,
+     "move_1d_pct": -4.34,
+     "excess_1d_pct": -3.03,
+     "move_5d_pct": -5.41,
+     "excess_5d_pct": -4.04
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-04-30 21:04:44",
+     "revenue_yoy_pct": 4.35,
+     "profit_yoy_pct": 21.43,
+     "move_1d_pct": 2.59,
+     "excess_1d_pct": 2.09,
+     "move_5d_pct": 1.63,
+     "excess_5d_pct": 0.89
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-07-28 19:40:21",
+     "revenue_yoy_pct": 5.01,
+     "profit_yoy_pct": -3.01,
+     "move_1d_pct": 4.7,
+     "excess_1d_pct": 3.6,
+     "move_5d_pct": 3.65,
+     "excess_5d_pct": 1.02
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-10-28 19:24:48",
+     "revenue_yoy_pct": 12.22,
+     "profit_yoy_pct": 3.91,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. 3 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "ICICIBANK": {
    "basis": "consolidated",
@@ -1135,7 +1716,90 @@
     "revenue_cagr_3yr": 16.56,
     "roe": null,
     "debt_equity": null
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-25 15:45:00",
+     "revenue_yoy_pct": 29.75,
+     "profit_yoy_pct": 16.56,
+     "move_1d_pct": 1.55,
+     "excess_1d_pct": 2.69,
+     "move_5d_pct": 3.61,
+     "excess_5d_pct": 1.8
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-04-19 20:21:41",
+     "revenue_yoy_pct": 21.26,
+     "profit_yoy_pct": 15.69,
+     "move_1d_pct": 0.22,
+     "excess_1d_pct": -0.93,
+     "move_5d_pct": -0.14,
+     "excess_5d_pct": -0.92
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-07-19 15:19:51",
+     "revenue_yoy_pct": 11.57,
+     "profit_yoy_pct": 15.92,
+     "move_1d_pct": 2.81,
+     "excess_1d_pct": 2.32,
+     "move_5d_pct": 3.6,
+     "excess_5d_pct": 4.12
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-10-18 20:16:20",
+     "revenue_yoy_pct": 6.73,
+     "profit_yoy_pct": 3.16,
+     "move_1d_pct": -3.22,
+     "excess_1d_pct": -3.74,
+     "move_5d_pct": -4.11,
+     "excess_5d_pct": -5.1
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-01-17 16:25:01",
+     "revenue_yoy_pct": 5.61,
+     "profit_yoy_pct": -2.68,
+     "move_1d_pct": -2.14,
+     "excess_1d_pct": -1.72,
+     "move_5d_pct": -4.78,
+     "excess_5d_pct": -2.26
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-04-18 18:07:54",
+     "revenue_yoy_pct": 10.35,
+     "profit_yoy_pct": 9.28,
+     "move_1d_pct": 0.7,
+     "excess_1d_pct": 0.65,
+     "move_5d_pct": -1.53,
+     "excess_5d_pct": 0.34
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-07-18 17:06:10",
+     "revenue_yoy_pct": 9.98,
+     "profit_yoy_pct": 13.88,
+     "move_1d_pct": 1.1,
+     "excess_1d_pct": 1.49,
+     "move_5d_pct": -0.79,
+     "excess_5d_pct": 1.54
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-10-17 17:27:59",
+     "revenue_yoy_pct": 15.47,
+     "profit_yoy_pct": 22.28,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "INFY": {
    "basis": "consolidated",
@@ -1279,7 +1943,90 @@
     "revenue_cagr_3yr": 7.43,
     "roe": 30.38,
     "debt_equity": 0.0
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-16 19:40:00",
+     "revenue_yoy_pct": 7.58,
+     "profit_yoy_pct": 11.46,
+     "move_1d_pct": -5.86,
+     "excess_1d_pct": -5.39,
+     "move_5d_pct": -3.27,
+     "excess_5d_pct": -2.81
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-04-17 23:30:35",
+     "revenue_yoy_pct": 7.92,
+     "profit_yoy_pct": -11.75,
+     "move_1d_pct": 2.22,
+     "excess_1d_pct": 1.07,
+     "move_5d_pct": 4.28,
+     "excess_5d_pct": 3.49
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-07-23 20:54:50",
+     "revenue_yoy_pct": 7.54,
+     "profit_yoy_pct": 8.68,
+     "move_1d_pct": -1.4,
+     "excess_1d_pct": -0.77,
+     "move_5d_pct": -3.52,
+     "excess_5d_pct": -2.08
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-10-16 21:39:13",
+     "revenue_yoy_pct": 8.55,
+     "profit_yoy_pct": 13.19,
+     "move_1d_pct": -2.07,
+     "excess_1d_pct": -2.55,
+     "move_5d_pct": 3.66,
+     "excess_5d_pct": 2.84
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-01-14 20:38:22",
+     "revenue_yoy_pct": 8.9,
+     "profit_yoy_pct": -2.23,
+     "move_1d_pct": 5.63,
+     "excess_1d_pct": 5.51,
+     "move_5d_pct": 3.98,
+     "excess_5d_pct": 5.45
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-04-23 20:47:17",
+     "revenue_yoy_pct": 13.38,
+     "profit_yoy_pct": 20.87,
+     "move_1d_pct": -6.93,
+     "excess_1d_pct": -5.79,
+     "move_5d_pct": -4.74,
+     "excess_5d_pct": -4.01
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-07-23 17:40:57",
+     "revenue_yoy_pct": 14.03,
+     "profit_yoy_pct": 12.25,
+     "move_1d_pct": -0.62,
+     "excess_1d_pct": -0.19,
+     "move_5d_pct": 10.28,
+     "excess_5d_pct": 8.41
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-10-23 20:16:14",
+     "revenue_yoy_pct": 10.69,
+     "profit_yoy_pct": 6.23,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "After 3 of its last 7 results the share moved 5% or more against the market the next day. 4 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "KOTAKBANK": {
    "basis": "consolidated",
@@ -1423,7 +2170,90 @@
     "revenue_cagr_3yr": 10.15,
     "roe": null,
     "debt_equity": null
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-18 19:36:00",
+     "revenue_yoy_pct": -7.31,
+     "profit_yoy_pct": 10.23,
+     "move_1d_pct": 9.21,
+     "excess_1d_pct": 8.6,
+     "move_5d_pct": 7.26,
+     "excess_5d_pct": 7.73
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-05-06 16:58:32",
+     "revenue_yoy_pct": -7.75,
+     "profit_yoy_pct": -7.58,
+     "move_1d_pct": 1.01,
+     "excess_1d_pct": 0.86,
+     "move_5d_pct": 2.01,
+     "excess_5d_pct": 1.19
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-07-26 16:09:38",
+     "revenue_yoy_pct": 4.95,
+     "profit_yoy_pct": -39.96,
+     "move_1d_pct": -7.44,
+     "excess_1d_pct": -6.81,
+     "move_5d_pct": -6.22,
+     "excess_5d_pct": -5.13
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-10-25 17:11:27",
+     "revenue_yoy_pct": -11.0,
+     "profit_yoy_pct": -11.42,
+     "move_1d_pct": -1.76,
+     "excess_1d_pct": -2.42,
+     "move_5d_pct": -3.88,
+     "excess_5d_pct": -3.59
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-01-24 16:53:04",
+     "revenue_yoy_pct": 22.0,
+     "profit_yoy_pct": 4.75,
+     "move_1d_pct": -3.33,
+     "excess_1d_pct": -3.84,
+     "move_5d_pct": -3.68,
+     "excess_5d_pct": -2.79
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-05-02 18:51:32",
+     "revenue_yoy_pct": 3.58,
+     "profit_yoy_pct": 9.94,
+     "move_1d_pct": -3.04,
+     "excess_1d_pct": -3.55,
+     "move_5d_pct": -0.65,
+     "excess_5d_pct": -1.4
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-07-18 18:47:07",
+     "revenue_yoy_pct": 16.64,
+     "profit_yoy_pct": 22.55,
+     "move_1d_pct": -2.03,
+     "excess_1d_pct": -1.63,
+     "move_5d_pct": -1.33,
+     "excess_5d_pct": 1.0
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-10-24 17:07:37",
+     "revenue_yoy_pct": 18.09,
+     "profit_yoy_pct": 26.34,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "After 2 of its last 7 results the share moved 5% or more against the market the next day. 2 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "LICI": {
    "basis": "consolidated",
@@ -1495,7 +2325,80 @@
     "revenue_cagr_3yr": null,
     "roe": null,
     "debt_equity": null
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-05-28 17:02:03",
+     "revenue_yoy_pct": null,
+     "profit_yoy_pct": null,
+     "move_1d_pct": 0.26,
+     "excess_1d_pct": -0.07,
+     "move_5d_pct": 1.19,
+     "excess_5d_pct": 1.73
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-08-07 17:21:13",
+     "revenue_yoy_pct": null,
+     "profit_yoy_pct": null,
+     "move_1d_pct": 3.16,
+     "excess_1d_pct": 4.1,
+     "move_5d_pct": 0.31,
+     "excess_5d_pct": 0.17
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-11-06 18:06:44",
+     "revenue_yoy_pct": null,
+     "profit_yoy_pct": null,
+     "move_1d_pct": 3.13,
+     "excess_1d_pct": 3.2,
+     "move_5d_pct": 0.75,
+     "excess_5d_pct": -0.7
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-02-05 17:09:13",
+     "revenue_yoy_pct": null,
+     "profit_yoy_pct": null,
+     "move_1d_pct": 7.4,
+     "excess_1d_pct": 7.2,
+     "move_5d_pct": 4.91,
+     "excess_5d_pct": 4.27
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-05-21 20:23:23",
+     "revenue_yoy_pct": 14.57,
+     "profit_yoy_pct": 23.26,
+     "move_1d_pct": 1.59,
+     "excess_1d_pct": 1.32,
+     "move_5d_pct": 2.81,
+     "excess_5d_pct": 3.26
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-08-06 17:35:11",
+     "revenue_yoy_pct": 6.76,
+     "profit_yoy_pct": 23.98,
+     "move_1d_pct": 1.66,
+     "excess_1d_pct": 1.93,
+     "move_5d_pct": 6.35,
+     "excess_5d_pct": 7.32
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-11-05 18:43:16",
+     "revenue_yoy_pct": 9.66,
+     "profit_yoy_pct": 19.97,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "After 1 of its last 6 results the share moved 5% or more against the market the next day."
   },
   "LT": {
    "basis": "consolidated",
@@ -1639,7 +2542,90 @@
     "revenue_cagr_3yr": 13.9,
     "roe": 16.66,
     "debt_equity": 1.205
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-31 13:55:00",
+     "revenue_yoy_pct": 17.31,
+     "profit_yoy_pct": 13.96,
+     "move_1d_pct": 4.28,
+     "excess_1d_pct": 3.17,
+     "move_5d_pct": -1.1,
+     "excess_5d_pct": -3.03
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-05-09 13:40:28",
+     "revenue_yoy_pct": 10.9,
+     "profit_yoy_pct": 25.05,
+     "move_1d_pct": 3.61,
+     "excess_1d_pct": 4.71,
+     "move_5d_pct": 8.85,
+     "excess_5d_pct": 5.61
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-07-29 19:25:28",
+     "revenue_yoy_pct": 15.53,
+     "profit_yoy_pct": 29.85,
+     "move_1d_pct": 4.85,
+     "excess_1d_pct": 4.71,
+     "move_5d_pct": 4.49,
+     "excess_5d_pct": 5.18
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-10-29 19:55:10",
+     "revenue_yoy_pct": 10.44,
+     "profit_yoy_pct": 15.63,
+     "move_1d_pct": 0.74,
+     "excess_1d_pct": 1.42,
+     "move_5d_pct": -1.93,
+     "excess_5d_pct": 0.16
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-01-28 19:55:10",
+     "revenue_yoy_pct": 10.49,
+     "profit_yoy_pct": -4.28,
+     "move_1d_pct": 3.66,
+     "excess_1d_pct": 3.36,
+     "move_5d_pct": 6.45,
+     "excess_5d_pct": 4.93
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-05-05 19:30:17",
+     "revenue_yoy_pct": 11.25,
+     "profit_yoy_pct": -3.12,
+     "move_1d_pct": -1.13,
+     "excess_1d_pct": -2.38,
+     "move_5d_pct": -4.88,
+     "excess_5d_pct": -2.17
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-07-28 18:17:12",
+     "revenue_yoy_pct": 6.69,
+     "profit_yoy_pct": 13.98,
+     "move_1d_pct": 2.59,
+     "excess_1d_pct": 1.49,
+     "move_5d_pct": 4.12,
+     "excess_5d_pct": 1.5
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-10-27 20:13:19",
+     "revenue_yoy_pct": 15.84,
+     "profit_yoy_pct": 32.5,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "RELIANCE": {
    "basis": "consolidated",
@@ -1783,7 +2769,90 @@
     "revenue_cagr_3yr": 11.17,
     "roe": 9.01,
     "debt_equity": 0.408
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-16 20:15:00",
+     "revenue_yoy_pct": 6.97,
+     "profit_yoy_pct": 7.38,
+     "move_1d_pct": 2.83,
+     "excess_1d_pct": 3.3,
+     "move_5d_pct": -0.22,
+     "excess_5d_pct": 0.24
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-04-25 21:56:50",
+     "revenue_yoy_pct": 9.91,
+     "profit_yoy_pct": 2.41,
+     "move_1d_pct": 5.26,
+     "excess_1d_pct": 4.06,
+     "move_5d_pct": 10.07,
+     "excess_5d_pct": 8.31
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-07-18 20:15:17",
+     "revenue_yoy_pct": 5.27,
+     "profit_yoy_pct": 78.32,
+     "move_1d_pct": -3.21,
+     "excess_1d_pct": -3.7,
+     "move_5d_pct": -5.71,
+     "excess_5d_pct": -5.19
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-10-17 19:36:07",
+     "revenue_yoy_pct": 9.94,
+     "profit_yoy_pct": 9.67,
+     "move_1d_pct": 3.53,
+     "excess_1d_pct": 3.01,
+     "move_5d_pct": 4.75,
+     "excess_5d_pct": 3.75
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-01-16 19:38:13",
+     "revenue_yoy_pct": 10.51,
+     "profit_yoy_pct": 0.57,
+     "move_1d_pct": -3.04,
+     "excess_1d_pct": -2.61,
+     "move_5d_pct": -4.92,
+     "excess_5d_pct": -2.41
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-04-24 22:56:47",
+     "revenue_yoy_pct": 12.87,
+     "profit_yoy_pct": -12.55,
+     "move_1d_pct": 2.86,
+     "excess_1d_pct": 2.05,
+     "move_5d_pct": 10.19,
+     "excess_5d_pct": 9.26
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-07-17 19:49:04",
+     "revenue_yoy_pct": 25.41,
+     "profit_yoy_pct": -22.4,
+     "move_1d_pct": -0.31,
+     "excess_1d_pct": 0.08,
+     "move_5d_pct": -3.71,
+     "excess_5d_pct": -1.38
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-10-30 21:32:05",
+     "revenue_yoy_pct": 28.57,
+     "profit_yoy_pct": 40.64,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. 3 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "SBIN": {
    "basis": "consolidated",
@@ -1927,7 +2996,90 @@
     "revenue_cagr_3yr": 8.91,
     "roe": null,
     "debt_equity": null
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-02-06 16:50:00",
+     "revenue_yoy_pct": 6.45,
+     "profit_yoy_pct": 70.4,
+     "move_1d_pct": -2.0,
+     "excess_1d_pct": -1.82,
+     "move_5d_pct": -3.27,
+     "excess_5d_pct": -0.85
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-05-03 18:10:46",
+     "revenue_yoy_pct": 7.49,
+     "profit_yoy_pct": -8.34,
+     "move_1d_pct": -1.25,
+     "excess_1d_pct": -1.72,
+     "move_5d_pct": -2.59,
+     "excess_5d_pct": -1.2
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-08-08 15:16:03",
+     "revenue_yoy_pct": 10.32,
+     "profit_yoy_pct": 9.71,
+     "move_1d_pct": -0.11,
+     "excess_1d_pct": 0.84,
+     "move_5d_pct": 2.66,
+     "excess_5d_pct": 2.51
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-11-04 16:08:41",
+     "revenue_yoy_pct": 8.55,
+     "profit_yoy_pct": 6.85,
+     "move_1d_pct": 0.33,
+     "excess_1d_pct": 0.67,
+     "move_5d_pct": -0.05,
+     "excess_5d_pct": -1.13
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-02-07 15:24:06",
+     "revenue_yoy_pct": 18.14,
+     "profit_yoy_pct": 13.07,
+     "move_1d_pct": 7.46,
+     "excess_1d_pct": 6.79,
+     "move_5d_pct": 12.4,
+     "excess_5d_pct": 13.26
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-05-08 16:40:13",
+     "revenue_yoy_pct": -0.21,
+     "profit_yoy_pct": 0.22,
+     "move_1d_pct": -4.48,
+     "excess_1d_pct": -2.99,
+     "move_5d_pct": -5.5,
+     "excess_5d_pct": -3.3
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-08-07 14:59:25",
+     "revenue_yoy_pct": 10.24,
+     "profit_yoy_pct": 13.73,
+     "move_1d_pct": 1.12,
+     "excess_1d_pct": 1.39,
+     "move_5d_pct": -0.18,
+     "excess_5d_pct": 0.79
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-11-03 15:21:58",
+     "revenue_yoy_pct": 5.71,
+     "profit_yoy_pct": 19.98,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "After 1 of its last 7 results the share moved 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "SUNPHARMA": {
    "basis": "consolidated",
@@ -2071,7 +3223,90 @@
     "revenue_cagr_3yr": 10.0,
     "roe": 13.13,
     "debt_equity": 0.03
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-31 19:31:00",
+     "revenue_yoy_pct": 10.46,
+     "profit_yoy_pct": 15.04,
+     "move_1d_pct": -0.1,
+     "excess_1d_pct": 0.01,
+     "move_5d_pct": -0.11,
+     "excess_5d_pct": -0.52
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-05-22 20:01:24",
+     "revenue_yoy_pct": 8.14,
+     "profit_yoy_pct": -19.01,
+     "move_1d_pct": -2.04,
+     "excess_1d_pct": -3.03,
+     "move_5d_pct": -1.1,
+     "excess_5d_pct": -2.01
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-07-31 18:43:08",
+     "revenue_yoy_pct": 9.47,
+     "profit_yoy_pct": -19.64,
+     "move_1d_pct": -4.51,
+     "excess_1d_pct": -3.69,
+     "move_5d_pct": -6.35,
+     "excess_5d_pct": -5.65
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-11-05 19:05:15",
+     "revenue_yoy_pct": 8.93,
+     "profit_yoy_pct": 2.56,
+     "move_1d_pct": -0.24,
+     "excess_1d_pct": 0.1,
+     "move_5d_pct": 2.49,
+     "excess_5d_pct": 1.4
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-01-31 17:06:13",
+     "revenue_yoy_pct": 13.49,
+     "profit_yoy_pct": 16.03,
+     "move_1d_pct": 0.93,
+     "excess_1d_pct": 2.88,
+     "move_5d_pct": 6.73,
+     "excess_5d_pct": 5.45
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-05-22 18:38:01",
+     "revenue_yoy_pct": 12.76,
+     "profit_yoy_pct": 26.24,
+     "move_1d_pct": -0.22,
+     "excess_1d_pct": -1.53,
+     "move_5d_pct": -2.61,
+     "excess_5d_pct": -1.19
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-07-31 18:24:06",
+     "revenue_yoy_pct": 10.46,
+     "profit_yoy_pct": 27.04,
+     "move_1d_pct": -1.36,
+     "excess_1d_pct": -2.96,
+     "move_5d_pct": -2.29,
+     "excess_5d_pct": -3.05
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-10-30 19:33:07",
+     "revenue_yoy_pct": 11.88,
+     "profit_yoy_pct": -36.22,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "None of its last 7 results moved the share 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "TCS": {
    "basis": "consolidated",
@@ -2215,7 +3450,90 @@
     "revenue_cagr_3yr": 6.2,
     "roe": 45.79,
     "debt_equity": 0.0
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-01-09 21:36:00",
+     "revenue_yoy_pct": 5.6,
+     "profit_yoy_pct": 11.96,
+     "move_1d_pct": 5.62,
+     "excess_1d_pct": 6.02,
+     "move_5d_pct": 4.15,
+     "excess_5d_pct": 5.06
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-04-11 00:10:07",
+     "revenue_yoy_pct": 5.29,
+     "profit_yoy_pct": -1.69,
+     "move_1d_pct": -0.47,
+     "excess_1d_pct": -2.38,
+     "move_5d_pct": 2.31,
+     "excess_5d_pct": -5.4
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-07-10 18:37:33",
+     "revenue_yoy_pct": 1.32,
+     "profit_yoy_pct": 5.98,
+     "move_1d_pct": -3.43,
+     "excess_1d_pct": -2.62,
+     "move_5d_pct": -5.11,
+     "excess_5d_pct": -4.15
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-10-09 23:52:58",
+     "revenue_yoy_pct": 2.4,
+     "profit_yoy_pct": 1.39,
+     "move_1d_pct": -1.09,
+     "excess_1d_pct": -1.5,
+     "move_5d_pct": -2.97,
+     "excess_5d_pct": -4.57
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-01-12 18:43:07",
+     "revenue_yoy_pct": 4.87,
+     "profit_yoy_pct": -13.92,
+     "move_1d_pct": 0.88,
+     "excess_1d_pct": 1.1,
+     "move_5d_pct": -4.24,
+     "excess_5d_pct": -2.08
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-04-09 23:41:29",
+     "revenue_yoy_pct": 9.65,
+     "profit_yoy_pct": 12.22,
+     "move_1d_pct": -2.5,
+     "excess_1d_pct": -3.66,
+     "move_5d_pct": -0.29,
+     "excess_5d_pct": -2.72
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-07-09 18:36:09",
+     "revenue_yoy_pct": 13.93,
+     "profit_yoy_pct": 4.62,
+     "move_1d_pct": 0.95,
+     "excess_1d_pct": -0.07,
+     "move_5d_pct": 7.39,
+     "excess_5d_pct": 6.93
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-10-08 22:07:30",
+     "revenue_yoy_pct": 11.23,
+     "profit_yoy_pct": 14.98,
+     "move_1d_pct": 3.85,
+     "excess_1d_pct": 2.56,
+     "move_5d_pct": 13.2,
+     "excess_5d_pct": 9.75
+    }
+   ],
+   "reaction_note": "After 1 of its last 8 results the share moved 5% or more against the market the next day. 2 times it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   },
   "TITAN": {
    "basis": "consolidated",
@@ -2359,7 +3677,90 @@
     "revenue_cagr_3yr": 26.67,
     "roe": 45.28,
     "debt_equity": 1.329
-   }
+   },
+   "reactions": [
+    {
+     "period_end": "2024-12-31",
+     "filed": "2025-02-04 22:51:00",
+     "revenue_yoy_pct": 25.25,
+     "profit_yoy_pct": -0.6,
+     "move_1d_pct": -2.97,
+     "excess_1d_pct": -2.79,
+     "move_5d_pct": -8.78,
+     "excess_5d_pct": -5.97
+    },
+    {
+     "period_end": "2025-03-31",
+     "filed": "2025-05-08 22:53:57",
+     "revenue_yoy_pct": 19.39,
+     "profit_yoy_pct": 12.97,
+     "move_1d_pct": 4.18,
+     "excess_1d_pct": 5.28,
+     "move_5d_pct": 7.94,
+     "excess_5d_pct": 4.69
+    },
+    {
+     "period_end": "2025-06-30",
+     "filed": "2025-08-08 12:35:11",
+     "revenue_yoy_pct": 24.55,
+     "profit_yoy_pct": 52.59,
+     "move_1d_pct": 1.3,
+     "excess_1d_pct": 2.25,
+     "move_5d_pct": 2.16,
+     "excess_5d_pct": 2.01
+    },
+    {
+     "period_end": "2025-09-30",
+     "filed": "2025-11-03 22:35:42",
+     "revenue_yoy_pct": 28.84,
+     "profit_yoy_pct": 59.09,
+     "move_1d_pct": 2.39,
+     "excess_1d_pct": 3.03,
+     "move_5d_pct": 2.36,
+     "excess_5d_pct": 2.63
+    },
+    {
+     "period_end": "2025-12-31",
+     "filed": "2026-02-10 18:52:11",
+     "revenue_yoy_pct": 43.27,
+     "profit_yoy_pct": 60.84,
+     "move_1d_pct": -0.47,
+     "excess_1d_pct": -0.54,
+     "move_5d_pct": -0.77,
+     "excess_5d_pct": 0.04
+    },
+    {
+     "period_end": "2026-03-31",
+     "filed": "2026-05-08 19:47:19",
+     "revenue_yoy_pct": 80.48,
+     "profit_yoy_pct": 35.36,
+     "move_1d_pct": -6.73,
+     "excess_1d_pct": -5.24,
+     "move_5d_pct": -7.54,
+     "excess_5d_pct": -5.34
+    },
+    {
+     "period_end": "2026-06-30",
+     "filed": "2026-08-07 18:43:07",
+     "revenue_yoy_pct": 29.25,
+     "profit_yoy_pct": 62.88,
+     "move_1d_pct": 3.02,
+     "excess_1d_pct": 2.96,
+     "move_5d_pct": 2.33,
+     "excess_5d_pct": 3.16
+    },
+    {
+     "period_end": "2026-09-30",
+     "filed": "2026-11-05 19:10:30",
+     "revenue_yoy_pct": 10.09,
+     "profit_yoy_pct": 113.66,
+     "move_1d_pct": null,
+     "excess_1d_pct": null,
+     "move_5d_pct": null,
+     "excess_5d_pct": null
+    }
+   ],
+   "reaction_note": "After 2 of its last 7 results the share moved 5% or more against the market the next day. Once it moved the opposite way to the profit change — prices react to what investors expected, not only to the numbers."
   }
  }
 }
