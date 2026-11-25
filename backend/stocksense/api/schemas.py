@@ -157,6 +157,17 @@ class MarginHistory(BaseModel):
     percentile: int = Field(description="Share of the last five years' trailing margins below today's")
 
 
+class ResultReaction(BaseModel):
+    period_end: str
+    filed: str = Field(description="When the result reached the exchange (IST)")
+    revenue_yoy_pct: float | None
+    profit_yoy_pct: float | None
+    move_1d_pct: float | None
+    excess_1d_pct: float | None = Field(description="The share's move minus NIFTY 50's, next trading day")
+    move_5d_pct: float | None
+    excess_5d_pct: float | None
+
+
 class Financials(BaseModel):
     symbol: str
     source: str
@@ -167,6 +178,8 @@ class Financials(BaseModel):
     quarters: list[FinancialQuarter]
     years: list[FinancialYear]
     margin_history: MarginHistory | None = None
+    reactions: list[ResultReaction] = []
+    reaction_note: str | None = None
     metrics: FilingMetrics
 
 

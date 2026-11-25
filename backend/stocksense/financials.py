@@ -20,6 +20,7 @@ from pathlib import Path
 import pandas as pd
 
 from . import filing_metrics
+from . import results_reaction
 from .config import DATA_DIR
 
 OUTPUT = DATA_DIR / "financials.json"
@@ -99,7 +100,16 @@ def company(rows: pd.DataFrame, latest: dict) -> dict:
     }
 
 
-def build(df: pd.DataFrame, today: date | None = None) -> dict:
+def _reaction_rows(reactions: pd.DataFrame | None, symbol: str) -> list[dict]:
+    if reactions is None or not len(reactions):
+        return []
+    r = reactions[reactions["symbol"] == symbol].sort_values("period_end").tail(results_reaction.SHOWN)
+    return [{k: (v.isoformat() if isinstance(v, date) else None if v is None or (isinstance(v, float) and pd.isna(v))
+                 else round(v, 2) if isinstance(v, float) else v)
+             for k, v in row.items() if k != "symbol"} for row in r.to_dict("records")]
+
+
+def build(df: pd.DataFrame, today: date | None = None, reactions: pd.DataFrame | None = None) -> dict:
     df = df.copy()
     df["period_end"] = pd.to_datetime(df["period_end"]).dt.date
     if "suspect" in df:
@@ -107,15 +117,30 @@ def build(df: pd.DataFrame, today: date | None = None) -> dict:
     if "net_revenue" not in df:
         df["net_revenue"] = df["revenue"]
     latest = filing_metrics.latest(df).set_index("symbol").to_dict("index")
-    companies = {symbol: company(rows, latest[symbol])
-                 for symbol, rows in df.groupby("symbol") if symbol in latest}
+    companies = {}
+    for symbol, rows in df.groupby("symbol"):
+        if symbol not in latest:
+            continue
+        entry = company(rows, latest[symbol])
+        entry["reactions"] = _reaction_rows(reactions, symbol)
+        entry["reaction_note"] = results_reaction.note(entry["reactions"])
+        companies[symbol] = entry
     return {"generated": (today or date.today()).isoformat(),
             "source": "Company filings with NSE (results to Dec 2024; SEBI integrated filing after)",
             "unit": "₹ crore", "companies": companies}
 
 
 def write(lake, output: Path = OUTPUT) -> dict:
-    doc = build(lake.query("select * from financial_results"))
+    results = lake.query("select * from financial_results")
+    reactions = None
+    present = set(lake.datasets())
+    if "index_prices" in present and ("eod_adjusted" in present or "eod_prices" in present):
+        symbols = pd.DataFrame({"symbol": sorted(results["symbol"].unique())})
+        prices = lake.query("select date, symbol, close from eod_adjusted where series = 'EQ' "
+                            "and symbol in (select symbol from wanted)", frames={"wanted": symbols})
+        nifty = lake.query("select date, close from index_prices where index = 'NIFTY_50'")
+        reactions = results_reaction.reactions(results, prices, nifty)
+    doc = build(results, reactions=reactions)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
     return doc
