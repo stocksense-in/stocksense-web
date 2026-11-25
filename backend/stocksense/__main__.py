@@ -24,6 +24,7 @@ Jobs
     ingest-gdelt   world news events (GDELT) since 2013 → daily aggregates + salient events  (daily)
     event-study    what sectors did after past crude spikes, rupee moves, conflict flare-ups…  (weekly)
     valuation-context  each sector's P/E today vs its own history → data/valuation_context.json  (weekly)
+    ingest-results quarterly P&L history since 2005 from NSE filings (default: 20 largest companies)
     engine-daily   update every lake source for the last N days, check the data, log the run  (daily)
     check-lake     data checks on the index, macro and GDELT datasets
     ingest-fno     NSE futures & options end-of-day file, 2010 → today: OI, put/call ratios  (daily)
@@ -136,6 +137,10 @@ def _build_parser() -> argparse.ArgumentParser:
     jobs.add_parser("event-study", help="historical sector reactions to event types")
     jobs.add_parser("valuation-context", help="sector valuations vs their history, for the API")
 
+    p = jobs.add_parser("ingest-results", help="quarterly P&L history from NSE filings")
+    p.add_argument("--symbols", nargs="+", metavar="SYM", help="these companies (default: the largest by market cap)")
+    p.add_argument("--top", type=int, default=20, help="how many of the largest companies")
+
     p = jobs.add_parser("engine-daily", help="update the whole lake and check it")
     p.add_argument("--days", type=int, default=10, help="how many recent days to fetch (catch-up after downtime)")
     p.add_argument("--weekly", action="store_true", help="also corporate actions and the event study")
@@ -245,6 +250,12 @@ def main() -> None:
 
         ingest_gdelt.run(args.start, args.end, download_only=args.download_only, build_only=args.build_only,
                          rebuild=args.rebuild, workers=args.workers)
+        return
+
+    if args.job == "ingest-results":
+        from .jobs import ingest_results
+
+        ingest_results.run(args.symbols, args.top)
         return
 
     if args.job == "valuation-context":
