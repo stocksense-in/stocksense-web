@@ -35,6 +35,7 @@ MAX_UPLOAD_BYTES = 60 * 1024 * 1024  # DRHPs run 10–40 MB
 MAX_CONCURRENT_SCANS = 2  # PDF text extraction is CPU-heavy; don't let a burst starve other requests
 ANALOGUES_PATH = DATA_DIR / "geo_analogues.json"  # written by `python -m stocksense event-study`
 VALUATION_PATH = DATA_DIR / "valuation_context.json"  # written by `python -m stocksense valuation-context`
+FINANCIALS_PATH = DATA_DIR / "financials.json"  # written by `python -m stocksense financials-export`
 BENCHMARKS_TTL_SECONDS = 5 * 60  # peer quartiles change only when fundamentals do
 
 Range = Literal["1d", "5d", "1mo", "6mo", "1y", "5y"]
@@ -77,6 +78,11 @@ def load_valuation(path: Path = VALUATION_PATH) -> dict | None:
     return _load_json(path)
 
 
+def load_financials(path: Path = FINANCIALS_PATH) -> dict | None:
+    """Company financials from filings (backend/data/financials.json)."""
+    return _load_json(path)
+
+
 def _warm(app: FastAPI) -> None:
     try:
         app.state.market.stocks()
@@ -91,6 +97,7 @@ def create_app(
     nse=nse_ipo,
     analogues: Callable[[], dict | None] | None = None,
     valuation: Callable[[], dict | None] | None = None,
+    financials: Callable[[], dict | None] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -120,6 +127,7 @@ def create_app(
     app.state.nse = nse
     app.state.analogues = analogues or load_analogues
     app.state.valuation = valuation or load_valuation
+    app.state.financials = financials or load_financials
     app.state.scan_slots = threading.BoundedSemaphore(MAX_CONCURRENT_SCANS)
 
     def market_of(request: Request) -> MarketData:
@@ -246,6 +254,15 @@ def create_app(
         ctx = benchmarks.peer_context(metric, bench.quantile(0.5), sector, peer)
         return {**ctx, "better_than_pct": None, "standing": None,
                 "text": f"Typical for {ctx['group']}: {ctx['typical_range']} (median of {ctx['peers']})."}
+
+    @app.get("/stocks/{symbol}/financials", response_model=schemas.Financials, tags=["stocks"])
+    def stock_financials(request: Request, symbol: str):
+        """Quarterly and yearly revenue and profit from the company's own filings, on one basis."""
+        doc = request.app.state.financials() or {}
+        data = doc.get("companies", {}).get(symbol.upper())
+        if data is None:
+            raise HTTPException(404, f"No filed results for {symbol.upper()} yet")
+        return {"symbol": symbol.upper(), "source": doc["source"], "unit": doc["unit"], **data}
 
     @app.get("/stocks/{symbol}", response_model=schemas.StockDetail, tags=["stocks"])
     def stock_detail(request: Request, symbol: str, peers: int = Query(6, ge=0, le=15)):

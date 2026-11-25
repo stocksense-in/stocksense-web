@@ -1,0 +1,89 @@
+"""
+Company financials for the company page — quarterly and yearly revenue and profit from
+the companies' own filings (clean/financial_results, M1.2), written to
+backend/data/financials.json, which the API serves. The public API never reads the
+lake; the engine publishes this file, as it does the valuation context.
+
+    python -m stocksense financials-export
+
+Per company: the last 12 quarters and last 6 fiscal years (April–March) on one basis —
+consolidated where the latest four quarters all have it, else standalone — plus the
+filing-based score inputs (margin, growth, ROE, D/E) with their as-of date.
+"""
+
+from __future__ import annotations
+
+import json
+from datetime import date
+from pathlib import Path
+
+import pandas as pd
+
+from . import filing_metrics
+from .config import DATA_DIR
+
+OUTPUT = DATA_DIR / "financials.json"
+QUARTERS = 12
+YEARS = 6
+
+
+def _num(value, digits: int = 1):
+    return None if value is None or pd.isna(value) else round(float(value), digits)
+
+
+def _fiscal_year(d: date) -> int:
+    """FY ending 31 March: Jun 2025 → FY2026."""
+    return d.year + 1 if d.month > 3 else d.year
+
+
+def company(rows: pd.DataFrame, latest: dict) -> dict:
+    """One company's published financials, on the basis its latest metrics use."""
+    basis = bool(latest["consolidated"])
+    q = rows[rows["consolidated"] == basis].sort_values("period_end")
+    quarters = [{"period_end": r.period_end.isoformat(), "revenue": _num(r.net_revenue),
+                 "net_profit": _num(r.net_profit), "eps": _num(r.eps, 2),
+                 "margin_pct": _num(100 * r.net_profit / r.net_revenue) if r.net_revenue and r.net_revenue > 0
+                 and pd.notna(r.net_profit) else None}
+                for r in q.tail(QUARTERS).itertuples()]
+    q = q.assign(fy=q["period_end"].map(_fiscal_year))
+    years = []
+    for fy, g in q.groupby("fy"):
+        if g["period_end"].nunique() != 4:  # an incomplete year would understate the totals
+            continue
+        revenue, profit = g["net_revenue"].sum(min_count=4), g["net_profit"].sum(min_count=4)
+        years.append({"fiscal_year": int(fy), "revenue": _num(revenue), "net_profit": _num(profit),
+                      "margin_pct": _num(100 * profit / revenue) if revenue and revenue > 0 and pd.notna(profit) else None})
+    kind = rows["kind"].iloc[-1] if "kind" in rows else "company"
+    return {
+        "basis": "consolidated" if basis else "standalone",
+        "kind": kind,
+        "revenue_means": ("net interest income + other income" if kind in ("bank", "finance") else
+                          "total income" if kind == "insurance" else "revenue from operations"),
+        "quarters": quarters,
+        "years": years[-YEARS:],
+        "metrics": {"as_of": latest["as_of"].isoformat(), "net_margin": _num(latest["net_margin"], 2),
+                    "revenue_cagr_3yr": _num(latest["revenue_cagr_3yr"], 2), "roe": _num(latest["roe"], 2),
+                    "debt_equity": _num(latest["debt_equity"], 3)},
+    }
+
+
+def build(df: pd.DataFrame, today: date | None = None) -> dict:
+    df = df.copy()
+    df["period_end"] = pd.to_datetime(df["period_end"]).dt.date
+    if "suspect" in df:
+        df = df[~df["suspect"].fillna(False).astype(bool)]
+    if "net_revenue" not in df:
+        df["net_revenue"] = df["revenue"]
+    latest = filing_metrics.latest(df).set_index("symbol").to_dict("index")
+    companies = {symbol: company(rows, latest[symbol])
+                 for symbol, rows in df.groupby("symbol") if symbol in latest}
+    return {"generated": (today or date.today()).isoformat(),
+            "source": "Company filings with NSE (results to Dec 2024; SEBI integrated filing after)",
+            "unit": "₹ crore", "companies": companies}
+
+
+def write(lake, output: Path = OUTPUT) -> dict:
+    doc = build(lake.query("select * from financial_results"))
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
+    return doc
