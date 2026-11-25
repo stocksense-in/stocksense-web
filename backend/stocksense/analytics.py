@@ -12,6 +12,7 @@ from dataclasses import dataclass
 
 from . import benchmarks as bm
 from . import blend
+from . import holders as own
 from .market import Stock
 from .scoring import COLUMN_FOR_METRIC, WEIGHTS, explain, metric_score, verdict_for
 from .valuation import sector_note
@@ -171,7 +172,8 @@ def peers(stocks: list[Stock], stock: Stock, count: int = 6) -> list[Stock]:
     return same
 
 
-def score_breakdown(stock: Stock, benchmarks: bm.Benchmarks | None = None, valuation: dict | None = None) -> list[dict]:
+def score_breakdown(stock: Stock, benchmarks: bm.Benchmarks | None = None, valuation: dict | None = None,
+                    holders: dict | None = None) -> list[dict]:
     """
     How each metric contributed: its 0–100 sub-score (70% versus sector peers + 30%
     the fixed curve, as in blend.py — both parts shown), its effective weight after
@@ -180,7 +182,8 @@ def score_breakdown(stock: Stock, benchmarks: bm.Benchmarks | None = None, valua
     a strong / fair / weak verdict, so a beginner can read it (scoring.explain).
     With `benchmarks` (benchmarks.build over all stocks) each metric is also placed among
     sector peers; with `valuation` (valuation_context.json) P/E gets the sector's
-    valuation today versus its own history.
+    valuation today versus its own history; with `holders` (this company's entry in
+    holders.json) promoter holding gets its one-year trend and a pledge warning.
     """
     values = {
         "pe": stock.pe,
@@ -218,7 +221,8 @@ def score_breakdown(stock: Stock, benchmarks: bm.Benchmarks | None = None, valua
                 "peers": bm.peer_context(key, value, stock.sector, benchmarks) if benchmarks else None,
                 "stage_note": bm.stage_note(key, stock),
                 "market_note": sector_note(stock.sector, valuation) if key == "pe" else None,
-                "guardrail": bm.guardrails(key, stock),
+                "history_note": own.trend_note(holders) if key == "promoter" else None,
+                "guardrail": bm.guardrails(key, stock) or (own.pledge_warning(holders) if key == "promoter" else None),
             }
         )
     return parts

@@ -19,6 +19,7 @@ from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from .. import analytics, benchmarks, geo, ipo, rhp
+from .. import holders as own
 from .. import valuation as valuation_mod
 from ..config import DATA_DIR, get_settings
 from ..market import MarketData, Stock, TTLCache
@@ -36,6 +37,7 @@ MAX_CONCURRENT_SCANS = 2  # PDF text extraction is CPU-heavy; don't let a burst 
 ANALOGUES_PATH = DATA_DIR / "geo_analogues.json"  # written by `python -m stocksense event-study`
 VALUATION_PATH = DATA_DIR / "valuation_context.json"  # written by `python -m stocksense valuation-context`
 FINANCIALS_PATH = DATA_DIR / "financials.json"  # written by `python -m stocksense financials-export`
+HOLDERS_PATH = DATA_DIR / "holders.json"  # written by `python -m stocksense holders-export`
 BENCHMARKS_TTL_SECONDS = 5 * 60  # peer quartiles change only when fundamentals do
 
 Range = Literal["1d", "5d", "1mo", "6mo", "1y", "5y"]
@@ -83,6 +85,11 @@ def load_financials(path: Path = FINANCIALS_PATH) -> dict | None:
     return _load_json(path)
 
 
+def load_holders(path: Path = HOLDERS_PATH) -> dict | None:
+    """Promoter holding over time and pledges (backend/data/holders.json)."""
+    return _load_json(path)
+
+
 def _warm(app: FastAPI) -> None:
     try:
         app.state.market.stocks()
@@ -98,6 +105,7 @@ def create_app(
     analogues: Callable[[], dict | None] | None = None,
     valuation: Callable[[], dict | None] | None = None,
     financials: Callable[[], dict | None] | None = None,
+    holders: Callable[[], dict | None] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -128,6 +136,7 @@ def create_app(
     app.state.analogues = analogues or load_analogues
     app.state.valuation = valuation or load_valuation
     app.state.financials = financials or load_financials
+    app.state.holders = holders or load_holders
     app.state.scan_slots = threading.BoundedSemaphore(MAX_CONCURRENT_SCANS)
 
     def market_of(request: Request) -> MarketData:
@@ -255,6 +264,18 @@ def create_app(
         return {**ctx, "better_than_pct": None, "standing": None,
                 "text": f"Typical for {ctx['group']}: {ctx['typical_range']} (median of {ctx['peers']})."}
 
+    def _holders_of(request: Request, symbol: str) -> dict | None:
+        return ((request.app.state.holders() or {}).get("companies") or {}).get(symbol.upper())
+
+    @app.get("/stocks/{symbol}/holders", response_model=schemas.Holders, tags=["stocks"])
+    def stock_holders(request: Request, symbol: str):
+        """Promoter holding by quarter and the promoters' pledges, from shareholding filings."""
+        entry = _holders_of(request, symbol)
+        if entry is None:
+            raise HTTPException(404, f"No shareholding filings for {symbol.upper()} yet")
+        return {"symbol": symbol.upper(), "source": request.app.state.holders()["source"], **entry,
+                "trend_note": own.trend_note(entry), "pledge_warning": own.pledge_warning(entry)}
+
     @app.get("/stocks/{symbol}/financials", response_model=schemas.Financials, tags=["stocks"])
     def stock_financials(request: Request, symbol: str):
         """Quarterly and yearly revenue and profit from the company's own filings, on one basis."""
@@ -279,7 +300,8 @@ def create_app(
             score=schemas.ScoreDetail(
                 value=stock.score, verdict=_verdict(stock.score), coverage=coverage,
                 stage=stage, stage_text=benchmarks.STAGE_TEXT.get(stage),
-                breakdown=analytics.score_breakdown(stock, _benchmarks(request), request.app.state.valuation()),
+                breakdown=analytics.score_breakdown(stock, _benchmarks(request), request.app.state.valuation(),
+                                                    _holders_of(request, stock.symbol)),
             ),
             peers=[_stock_out(s) for s in analytics.peers(m.fresh_stocks(), stock, peers)] if peers else [],
         )

@@ -101,6 +101,7 @@ class ScorePart(BaseModel):
     peers: PeerContext | None = Field(None, description="Layer 1: standing among sector peers")
     stage_note: str | None = Field(None, description="Layer 2: what the company's stage means for this metric")
     market_note: str | None = Field(None, description="Layer 3 (P/E only): the sector's valuation today vs its own history")
+    history_note: str | None = Field(None, description="The company against its own history (promoter stake over a year)")
     guardrail: str | None = Field(None, description="An absolute warning that holds whatever peers do")
 
 
@@ -156,6 +157,29 @@ class Financials(BaseModel):
     quarters: list[FinancialQuarter]
     years: list[FinancialYear]
     metrics: FilingMetrics
+
+
+class HolderQuarter(BaseModel):
+    quarter_end: str
+    promoter_pct: float | None
+    public_pct: float | None
+    employee_trusts_pct: float | None
+
+
+class Pledge(BaseModel):
+    as_of: str
+    pledged_pct_of_promoter: float | None = Field(description="Share of the promoters' own stake pledged")
+    pledged_pct_of_total: float | None
+    all_pledges_pct_of_total: float | None = Field(description="Every depository pledge by any holder — context only")
+
+
+class Holders(BaseModel):
+    symbol: str
+    source: str
+    quarters: list[HolderQuarter]
+    pledge: Pledge | None
+    trend_note: str | None
+    pledge_warning: str | None
 
 
 class LearnMetrics(BaseModel):

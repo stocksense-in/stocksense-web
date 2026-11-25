@@ -25,6 +25,7 @@ Jobs
     event-study    what sectors did after past crude spikes, rupee moves, conflict flare-ups…  (weekly)
     valuation-context  each sector's P/E today vs its own history → data/valuation_context.json  (weekly)
     financials-export  quarterly + yearly results from filings → data/financials.json  (weekly)
+    holders-export     promoter holding over time + pledges → data/holders.json  (weekly)
     ingest-results quarterly P&L history since 2005 from NSE filings (default: 20 largest companies)
     ingest-shareholding  promoter holding by quarter + promoter pledges (default: 50 largest; --all)
     engine-daily   update every lake source for the last N days, check the data, log the run  (daily)
@@ -142,6 +143,7 @@ def _build_parser() -> argparse.ArgumentParser:
     jobs.add_parser("event-study", help="historical sector reactions to event types")
     jobs.add_parser("valuation-context", help="sector valuations vs their history, for the API")
     jobs.add_parser("financials-export", help="company financials from filings, for the API")
+    jobs.add_parser("holders-export", help="promoter holding and pledges, for the API")
 
     p = jobs.add_parser("ingest-results", help="quarterly P&L history from NSE filings")
     p.add_argument("--symbols", nargs="+", metavar="SYM", help="these companies (default: the largest by market cap)")
@@ -275,6 +277,14 @@ def main() -> None:
         from .jobs import ingest_results
 
         ingest_results.run(args.symbols, args.top)
+        return
+
+    if args.job == "holders-export":
+        from . import holders
+        from .lake import Lake
+
+        doc = holders.write(Lake.from_settings())
+        print(f"Wrote holders for {len(doc['companies'])} companies to {holders.OUTPUT}")
         return
 
     if args.job == "financials-export":
