@@ -294,7 +294,7 @@ only if every filing figure is under 200 days old); the default stays Yahoo. Fin
 
 | Dataset | What | Key |
 |---|---|---|
-| `shareholding` | Promoter & promoter-group %, public %, employee trusts % per quarter (about five years; revised patterns replace the original) | symbol, quarter end |
+| `shareholding` | Promoter & promoter-group %, public %, employee trusts % per quarter (about five years; revised patterns replace the original); from the latest full pattern on, FII %, DII %, mutual funds %, insurers %, small retail %, government % | symbol, quarter end |
 | `pledges` | The promoters' pledged/encumbered shares as % of their stake and of all shares, plus every depository pledge by anyone (context only) | symbol, fetch day |
 
 - `python -m stocksense ingest-shareholding` (50 largest; `--all` every equity, `--rests`
@@ -308,8 +308,12 @@ only if every filing figure is under 200 days old); the default stays Yahoo. Fin
 - **Pledges: read the right field.** `numSharesPledged` counts every depository pledge by
   any holder — ITC, with no promoter, shows 2% of its shares. Promoter pledges are
   `percPromoterShares` (% of the promoters' stake).
-- `check-lake` flags patterns that don't add to 100%, values out of range, duplicates and
-  companies with no pattern for 120 days.
+- The FII/DII split comes from each quarter's full pattern (XBRL, ~1 MB), read once per
+  quarter; only the parsed categories are kept. History of the split starts now.
+- `check-lake` flags patterns that don't add to 100% (summary and split), values out of
+  range, duplicates and companies with no pattern for 120 days.
+  `ml/checks/shareholding_spot_check.py` checks the summary's promoter holding against the
+  filed pattern: 45 of 45 match exactly.
 - Served: `holders-export` writes `data/holders.json` for `GET /stocks/{symbol}/holders`;
   the score breakdown's promoter metric shows the stake's one-year move (or a slow
   multi-year drift) and warns when promoters have pledged 10% or more of their stake.
