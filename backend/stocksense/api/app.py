@@ -250,6 +250,7 @@ def create_app(
                     higher_is_better=GUIDE[m]["higher_is_better"], weight=WEIGHTS[m],
                     healthy_range=(r := healthy_range(m, code)) and r["text"],
                     peers=_typical(m, code, peer),
+                    watch_for=GUIDE[m].get("watch_for"),
                 )
                 for m in WEIGHTS
             ],

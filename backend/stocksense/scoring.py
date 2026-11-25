@@ -110,17 +110,31 @@ FAIR_SCORE = 40
 
 GUIDE: dict[str, dict] = {
     "pe": {"label": "P/E ratio", "unit": "x", "higher_is_better": False,
-           "measures": "how many rupees investors pay for each rupee of yearly profit — lower means cheaper"},
+           "measures": "how many rupees investors pay for each rupee of yearly profit — lower means cheaper",
+           "watch_for": "A low P/E can mean the market expects profits to fall, and a high one can be fair for a "
+                        "company growing fast — read it with growth. One-off gains or losses distort it for a year."},
     "roe": {"label": "Return on equity", "unit": "%", "higher_is_better": True,
-            "measures": "profit earned each year on every ₹100 of shareholders' money"},
+            "measures": "profit earned each year on every ₹100 of shareholders' money",
+            "watch_for": "Borrowing raises ROE without the business getting better, so read it with debt to equity. "
+                         "A company that has shrunk its equity (losses, big buybacks) can show a flattering ROE."},
     "de": {"label": "Debt to equity", "unit": "x", "higher_is_better": False,
-           "measures": "how much the company has borrowed for every rupee shareholders own"},
+           "measures": "how much the company has borrowed for every rupee shareholders own",
+           "watch_for": "Not meaningful for banks and lenders — borrowing is their raw material. Definitions differ: "
+                        "some sources count lease liabilities as debt, which is why figures for the same company "
+                        "can disagree."},
     "margin": {"label": "Net profit margin", "unit": "%", "higher_is_better": True,
-               "measures": "profit kept from every ₹100 of sales after all costs and tax"},
+               "measures": "profit kept from every ₹100 of sales after all costs and tax",
+               "watch_for": "Only compare within a sector: retailers and refiners live on thin margins, software and "
+                            "consumer brands on fat ones. For banks it is measured on net interest income, not loans."},
     "promoter": {"label": "Promoter holding", "unit": "%", "higher_is_better": True,
-                 "measures": "share of the company owned by its founders/promoters — their own money at stake"},
+                 "measures": "share of the company owned by its founders/promoters — their own money at stake",
+                 "watch_for": "The trend and pledges matter more than the level. Promoters who pledge a large part "
+                              "of their stake, or keep selling, are a warning sign. Many sound companies (most private "
+                              "banks, ITC, L&T) have no promoter at all — that is not a weakness."},
     "cagr": {"label": "Revenue growth (3-yr CAGR)", "unit": "%", "higher_is_better": True,
-             "measures": "how fast sales have grown each year over the last three years"},
+             "measures": "how fast sales have grown each year over the last three years",
+             "watch_for": "Mergers and acquisitions inflate it — HDFC Bank's 2023 merger with HDFC Ltd lifted its "
+                          "three-year growth without the business growing that fast on its own."},
 }
 
 

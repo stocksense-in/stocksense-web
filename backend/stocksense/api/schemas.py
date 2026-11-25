@@ -122,6 +122,7 @@ class MetricGuide(BaseModel):
     weight: float = Field(description="Weight in the StockSense score")
     healthy_range: str | None = Field(description="The score's strong / fair / weak bands for this sector")
     peers: PeerContext | None = Field(description="What's typical among this sector's companies (no company value, so not ranked)")
+    watch_for: str | None = Field(None, description="The common trap when reading this metric")
 
 
 class FinancialQuarter(BaseModel):
