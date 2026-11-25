@@ -4,7 +4,8 @@ scheduler to call once a day (M0.4). Nothing here installs a scheduler.
 
     python -m stocksense engine-daily              # last 10 days of every daily source (prices, indices,
                                                    # macro, GDELT, F&O)
-    python -m stocksense engine-daily --weekly     # also corporate actions + the event study
+    python -m stocksense engine-daily --weekly     # also corporate actions, the event study, sector
+                                                   # valuation and new quarterly results
     python -m stocksense engine-daily --days 30    # catch up after the machine was off
 
 Steps run in order; one failing doesn't stop the rest (each source is independent).
@@ -53,9 +54,12 @@ class RunReport:
         return all(s["ok"] for s in self.steps) and not any(self.problems.values())
 
 
+RESULTS_TOP = 20  # companies whose quarterly results the weekly run keeps current
+
+
 def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
     from . import (event_study, ingest_bhavcopy, ingest_corporate_actions, ingest_filings, ingest_fno,
-                   ingest_gdelt, ingest_market)
+                   ingest_gdelt, ingest_market, ingest_results)
 
     start = today - timedelta(days=days)
     return [
@@ -68,6 +72,8 @@ def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
         Step("corporate_actions", lambda: ingest_corporate_actions.run(lake=lake, today=today), weekly=True),
         Step("event_study", lambda: event_study.run(lake=lake), weekly=True),
         Step("valuation_context", lambda: valuation.write(lake), weekly=True),
+        # Results arrive quarterly; weekly picks up each filing within days, fetching only new ones.
+        Step("results", lambda: ingest_results.run(top=RESULTS_TOP, lake=lake), weekly=True),
     ]
 
 
