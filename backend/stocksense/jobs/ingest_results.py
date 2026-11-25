@@ -126,6 +126,33 @@ def fetch_integrated(c, lake: Lake, symbol: str, pause: float = PAUSE_SECONDS) -
     return new
 
 
+def consistent_kind(df: pd.DataFrame) -> pd.DataFrame:
+    """One statement kind per company: a lender stays a lender even in a quarter NSE tagged
+    as a plain company (Bajaj Finance, Mar 2023) — otherwise that quarter's revenue isn't netted."""
+    special = df[df["kind"] != "company"].sort_values("period_end").groupby("symbol")["kind"].last()
+    df = df.copy()
+    df["kind"] = df["symbol"].map(special).fillna(df["kind"])
+    df["bank"] = df["kind"] == "bank"
+    df["net_revenue"] = [nse_results.net_revenue(r) for r in df[["kind", "revenue", "finance_cost", "other_income"]]
+                         .to_dict("records")]
+    return df
+
+
+SUSPECT_FACTOR = 10  # a quarter 10× off its neighbours is a filing error, not a business change
+
+
+def suspect(df: pd.DataFrame) -> pd.Series:
+    """Quarters whose revenue is over 10× off the median of the surrounding two years (same
+    company and basis) — e.g. L&T's consolidated Jun 2022 filing at ₹83 crore instead of
+    ~₹35,850 crore. Kept in the table, flagged, and left out of sums."""
+    df = df.sort_values(["symbol", "consolidated", "period_end"])
+    median = (df.groupby(["symbol", "consolidated"])["revenue"]
+                .transform(lambda s: s.rolling(9, center=True, min_periods=3).median()))
+    ratio = df["revenue"] / median
+    flag = (median > 0) & (df["revenue"] > 0) & ((ratio < 1 / SUSPECT_FACTOR) | (ratio > SUSPECT_FACTOR))
+    return flag.reindex(df.index).fillna(False).astype(bool)
+
+
 def build(lake: Lake) -> pd.DataFrame:
     """Rebuild clean/financial_results from every raw filing."""
     rows = []
@@ -147,6 +174,8 @@ def build(lake: Lake) -> pd.DataFrame:
         df = (df.sort_values(["symbol", "period_end", "consolidated", "_rank", "_seq"])
                 .drop_duplicates(["symbol", "period_end", "consolidated"], keep="last")
                 .drop(columns=["_seq", "_rank"]))
+        df = consistent_kind(df)
+        df["suspect"] = suspect(df)
         lake.write_table(df.reset_index(drop=True), DATASET)
     log.info(f"{DATASET}: {len(df)} filings for {df['symbol'].nunique() if len(df) else 0} companies")
     return df

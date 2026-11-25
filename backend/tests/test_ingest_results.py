@@ -64,3 +64,22 @@ def test_integrated_filings_join_the_same_table(tmp_path, monkeypatch):
     df = ingest_results.build(lake)
     row = df.iloc[0]
     assert (row["period_end"], row["source"], row["equity"]) == (date(2026, 9, 30), "nse_integrated", pytest.approx(118986.0))
+
+
+def test_suspect_flags_a_quarter_far_off_its_neighbours():
+    import pandas as pd
+
+    ends = pd.date_range("2021-03-31", periods=8, freq="QE").date
+    df = pd.DataFrame({"symbol": "LT", "consolidated": True, "period_end": ends,
+                       "revenue": [40000, 41000, 42000, 83, 43000, 44000, 45000, 46000]})
+    assert ingest_results.suspect(df).tolist() == [False, False, False, True, False, False, False, False]
+
+
+def test_a_lender_stays_a_lender():
+    import pandas as pd
+
+    df = pd.DataFrame({"symbol": "BAJFINANCE", "period_end": [date(2022, 12, 31), date(2023, 3, 31)],
+                       "kind": ["finance", "company"], "revenue": [100.0, 110.0], "finance_cost": [30.0, 35.0],
+                       "other_income": [1.0, 1.0], "net_revenue": [71.0, 110.0]})
+    out = ingest_results.consistent_kind(df)
+    assert out["kind"].tolist() == ["finance", "finance"] and out["net_revenue"].tolist() == [71.0, 76.0]

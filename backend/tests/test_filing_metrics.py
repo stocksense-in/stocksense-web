@@ -39,6 +39,12 @@ def test_never_mixes_standalone_and_consolidated_quarters():
     assert m["net_margin"] == pytest.approx(10.0)  # all-standalone window, not 3 + 1
 
 
+def test_suspect_quarters_count_as_missing():
+    df = quarters().assign(suspect=False)
+    df.loc[df["period_end"] == date(2024, 12, 31), "suspect"] = True
+    assert fm.latest(df).iloc[0]["as_of"] == date(2024, 9, 30)
+
+
 def test_bank_margin_uses_net_revenue():
     df = quarters(margin=0.05).assign(net_revenue=lambda d: d["revenue"] / 2)
     assert fm.latest(df).iloc[0]["net_margin"] == pytest.approx(10.0)

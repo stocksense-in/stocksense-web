@@ -34,6 +34,8 @@ COLUMNS = {"net_margin": "net_margin", "cagr": "revenue_cagr_3yr", "roe": "roe",
 
 def _prepare(df: pd.DataFrame) -> pd.DataFrame:
     df = df.dropna(subset=["period_end"]).copy()
+    if "suspect" in df:  # implausible filings count as missing (see ingest_results.suspect)
+        df = df[~df["suspect"].fillna(False).astype(bool)]
     df["period_end"] = pd.to_datetime(df["period_end"])
     if "consolidated" not in df:
         df["consolidated"] = True
