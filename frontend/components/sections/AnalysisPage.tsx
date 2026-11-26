@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import type { CompanyHeadline, Dividends, Financials, History, Holders, StockDetail, StockOut } from '@/lib/api';
+import type { Alert, CompanyHeadline, Dividends, Financials, History, Holders, StockDetail, StockOut } from '@/lib/api';
 import { API_URL, api, fmtCrore, fmtPct, fmtRupees, stockScoreColor, verdictPill } from '@/lib/api';
 import { PriceChart } from '@/components/company/PriceChart';
 import { ScoreBreakdown } from '@/components/company/ScoreBreakdown';
@@ -10,6 +10,8 @@ import { HoldersPanel } from '@/components/company/HoldersPanel';
 import { DividendsPanel } from '@/components/company/DividendsPanel';
 import { PeersTable } from '@/components/company/PeersTable';
 import { NewsPanel } from '@/components/company/NewsPanel';
+import { AlertsStrip } from '@/components/company/AlertsStrip';
+import { useWatchlist } from '@/lib/watchlist';
 
 type Status = 'loading' | 'ok' | 'notfound' | 'offline';
 export type CompanyTab = 'score' | 'financials' | 'holders' | 'dividends' | 'peers' | 'news';
@@ -53,6 +55,8 @@ export function AnalysisPage() {
   const [tab, setTab] = useState<Tab>(url.tab);
   const [news, setNews] = useState<{ symbol: string; items: CompanyHeadline[] | null } | null>(null);
   const [seenUrl, setSeenUrl] = useState(url.key);
+  const [recentAlerts, setRecentAlerts] = useState<{ symbol: string; items: Alert[] } | null>(null);
+  const watch = useWatchlist();
 
   // When the address changes (command bar, links, back/forward), open what it names.
   // Adjusting state while rendering is React's recommended way to follow a changing input.
@@ -153,6 +157,14 @@ export function AnalysisPage() {
     return () => ctl.abort();
   }, [activeTab, newsFor, news?.symbol]);
 
+  // The company's alerts over the last two weeks.
+  useEffect(() => {
+    if (!newsFor || recentAlerts?.symbol === newsFor) return;
+    const ctl = new AbortController();
+    api.alerts({ symbols: newsFor, days: 10 }, ctl.signal).then(r => { if (!ctl.signal.aborted) setRecentAlerts({ symbol: newsFor, items: r?.alerts ?? [] }); });
+    return () => ctl.abort();
+  }, [newsFor, recentAlerts?.symbol]);
+
   // Keep the address bar in step, so links and reloads open the same company and tab.
   useEffect(() => {
     if (!newsFor) return;
@@ -245,6 +257,11 @@ export function AnalysisPage() {
                 <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.8px', color: 'var(--cream)', marginBottom: 2, fontFamily: 'var(--f-display)' }}>{s.name ?? s.symbol}</div>
                 <div style={{ display: 'flex', gap: 12, marginTop: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                   {sc.verdict && <span className={verdictPill(sc.verdict)}>{sc.verdict} fundamentals</span>}
+                  <button onClick={() => watch.toggle(s.symbol)} aria-pressed={watch.has(s.symbol)} disabled={!watch.has(s.symbol) && watch.full}
+                    title={watch.has(s.symbol) ? 'Remove from your watchlist' : 'Add to your watchlist (saved in this browser)'}
+                    style={{ fontSize: 10, padding: '3px 10px', borderRadius: 3, cursor: 'pointer', fontFamily: 'var(--f-body)', background: watch.has(s.symbol) ? 'rgba(201,168,76,0.12)' : 'transparent', color: 'var(--gold)', border: '1px solid var(--border-bright)' }}>
+                    {watch.has(s.symbol) ? '★ Watching' : '☆ Watch'}
+                  </button>
                   <span style={{ fontSize: 10, color: 'var(--cream-mute)' }}>52W range: {fmtRupees(s.week52_low, 0)} – {fmtRupees(s.week52_high, 0)}</span>
                   <span style={{ fontSize: 10, color: 'var(--cream-mute)' }}>Market cap: {fmtCrore(s.market_cap)}</span>
                 </div>
@@ -269,6 +286,8 @@ export function AnalysisPage() {
               <div style={{ fontSize: 10, color: 'var(--gold)', marginTop: 12 }}>These figures haven&apos;t been refreshed recently{s.updated_at ? ` (last ${s.updated_at.slice(0, 10)})` : ''}.</div>
             )}
           </div>
+
+          {recentAlerts?.symbol === s.symbol && <AlertsStrip alerts={recentAlerts.items} />}
 
           <PriceChart history={shownHistory} range={range} onRange={setRange} />
 

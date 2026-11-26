@@ -5,6 +5,7 @@ import { Page } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import type { Geopolitics, IndexQuote, NewsEvent, Overview, StockOut } from '@/lib/api';
 import { api, effectPill, fmtNum, fmtPct, fmtRupees, stockScoreColor, timeAgo } from '@/lib/api';
+import { WatchlistCard } from '@/components/cards/WatchlistCard';
 
 const INDEX_ORDER = ['NIFTY50', 'SENSEX', 'BANKNIFTY', 'INDIAVIX'];
 const INDEX_LABEL: Record<string, string> = { NIFTY50: 'NIFTY 50', SENSEX: 'SENSEX', BANKNIFTY: 'BANK NIFTY', INDIAVIX: 'INDIA VIX' };
@@ -77,6 +78,7 @@ export function DashboardPage({ onNav }: { onNav: (p: Page) => void }) {
       <div className="split" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 340px', gap: 12, marginBottom: 14 }}>
         {/* Left column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+          <WatchlistCard />
           <div className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
               <div className="ct" style={{ marginBottom: 0 }}>Sector performance · today</div>

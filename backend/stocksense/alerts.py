@@ -18,10 +18,13 @@ replays the January 2023 Adani sell-off).
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+import json
+from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 
 import pandas as pd
 
+from .config import DATA_DIR
 from .lake import Lake
 from .results_reaction import filed_time
 
@@ -31,6 +34,8 @@ VOLUME_LOOKBACK = 20    # sessions
 MIN_HISTORY = 10        # sessions needed before volume is judged
 STAKE_MOVE = 1.0        # percentage points, quarter on quarter
 PLEDGE_MOVE = 2.0       # percentage points of the promoters' stake
+EXPORT_SESSIONS = 10   # trading days kept in data/alerts.json
+OUTPUT = DATA_DIR / "alerts.json"
 ORDER_CATEGORIES = ("Bagging/Receiving of orders/contracts", "Awarding of order(s)/contract(s)")
 
 
@@ -161,3 +166,33 @@ def for_day(lake: Lake, day: date, symbols: list[str] | None = None) -> list[dic
     order = {"price_move": 0, "unusual_volume": 1, "results_filed": 2, "promoter_stake": 3, "pledge_change": 4,
              "large_order": 5}
     return sorted(alerts, key=lambda a: (a["symbol"], order.get(a["kind"], 9)))
+
+
+def sessions(lake: Lake, count: int = EXPORT_SESSIONS, today: date | None = None) -> list[date]:
+    """The last `count` trading days in the lake, oldest first."""
+    if "eod_prices" not in set(lake.datasets()):
+        return []
+    rows = lake.query("select distinct date from eod_prices where date <= ? order by date desc limit ?",
+                      [today or date.today(), count])
+    return sorted(pd.to_datetime(rows["date"]).dt.date.tolist())
+
+
+def recent(lake: Lake, count: int = EXPORT_SESSIONS, today: date | None = None) -> dict:
+    """Every company's alerts over the last `count` sessions, newest day first."""
+    days = sessions(lake, count, today)
+    found: list[dict] = []
+    for day in reversed(days):
+        found += for_day(lake, day)
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "source": "StockSense alert rules over NSE prices, results, announcements and shareholding filings",
+        "days": [d.isoformat() for d in reversed(days)],
+        "alerts": found,
+    }
+
+
+def write(lake: Lake, output: Path = OUTPUT, count: int = EXPORT_SESSIONS) -> dict:
+    doc = recent(lake, count)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(doc, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
+    return doc

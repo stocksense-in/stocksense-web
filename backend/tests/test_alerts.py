@@ -45,3 +45,15 @@ def test_results_orders_stakes_pledges():
     pl = pd.DataFrame([{"symbol": "X", "fetched": date(2026, 11, 26), "pledged_pct_of_promoter": 12.0},
                        {"symbol": "X", "fetched": date(2026, 12, 3), "pledged_pct_of_promoter": 15.5}])
     assert alerts.pledge_change(pl, date(2026, 12, 3))[0]["value"] == 3.5
+
+
+def test_export_covers_recent_sessions_newest_first(tmp_path, monkeypatch):
+    import json
+    days = [date(2026, 11, 24), date(2026, 11, 25), date(2026, 11, 26)]
+    monkeypatch.setattr(alerts, "sessions", lambda lake, count, today=None: days[-count:])
+    monkeypatch.setattr(alerts, "for_day", lambda lake, day, symbols=None: [alerts._alert(day, "TCS", "price_move", 5.5, f"moved on {day}")])
+    out = tmp_path / "alerts.json"
+    doc = alerts.write(object(), output=out, count=2)
+    assert doc["days"] == ["2026-11-26", "2026-11-25"]
+    assert [a["date"] for a in doc["alerts"]] == ["2026-11-26", "2026-11-25"]
+    assert json.loads(out.read_text(encoding="utf-8"))["alerts"][0]["text"] == "moved on 2026-11-26"

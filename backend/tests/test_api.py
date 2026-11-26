@@ -108,3 +108,26 @@ def test_company_news_survives_a_feed_failure(market):
 
     c = TestClient(create_app(market=market, headlines=lambda: [], company_headlines=broken))
     assert c.get("/stocks/TCS/news").json() == []
+
+
+def test_alerts_filter_by_watchlist_kind_and_days(market):
+    doc = {"generated_at": "2026-11-27T00:00:00+00:00", "days": ["2026-11-26", "2026-11-25"], "alerts": [
+        {"date": "2026-11-25", "symbol": "TCS", "kind": "price_move", "value": 6.1, "text": "TCS rose 6.1%"},
+        {"date": "2026-11-26", "symbol": "TCS", "kind": "results_filed", "value": None, "text": "TCS filed results"},
+        {"date": "2026-11-26", "symbol": "INFY", "kind": "price_move", "value": -5.2, "text": "Infosys fell 5.2%"},
+    ]}
+    c = TestClient(create_app(market=market, headlines=lambda: [], alerts=lambda: doc))
+    body = c.get("/alerts", params={"symbols": "tcs"}).json()
+    assert [a["kind"] for a in body["alerts"]] == ["results_filed", "price_move"]  # newest day first
+    assert body["days"] == ["2026-11-26", "2026-11-25"]
+    assert [a["symbol"] for a in c.get("/alerts", params={"kind": "price_move"}).json()["alerts"]] == ["INFY", "TCS"]
+    assert [a["symbol"] for a in c.get("/alerts", params={"days": 1}).json()["alerts"]] == ["TCS", "INFY"]
+    empty = TestClient(create_app(market=market, headlines=lambda: [], alerts=lambda: None)).get("/alerts").json()
+    assert empty == {"generated_at": None, "days": [], "alerts": []}
+
+
+def test_screen_by_symbols_for_a_watchlist(client):
+    body = client.get("/stocks", params={"symbols": "tcs, infy,NOPE"}).json()
+    assert sorted(r["symbol"] for r in body["results"]) == ["INFY", "TCS"]
+    too_many = ",".join(f"S{i}" for i in range(101))
+    assert client.get("/stocks", params={"symbols": too_many}).status_code == 422
