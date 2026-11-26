@@ -149,5 +149,5 @@ def write(lake, output: Path = OUTPUT) -> dict:
         reactions = results_reaction.reactions(results, prices, nifty)
     doc = build(results, reactions=reactions)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
+    output.write_text(json.dumps(doc, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")  # compact: whole market
     return doc
