@@ -51,6 +51,13 @@ python -m stocksense rescore --fundamentals filings --metrics promoter --apply  
 After publishing, the weekly engine run keeps patterns current; re-run the command after it
 (or add it to the weekly steps) so new patterns reach the score.
 
+## It also fills gaps
+
+124 scored companies have no promoter figure from Yahoo; filed patterns already cover 64 of
+them. More broadly, the inputs most often missing are ROE (651 companies), P/E (309) and
+debt to equity (250) — balance-sheet figures that quarterly results provide, which makes
+widening results coverage the next lever for score completeness.
+
 ## Recommendation
 
 Switch promoter holding to filed patterns once the universe pass completes. It corrects a
