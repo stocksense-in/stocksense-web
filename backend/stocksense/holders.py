@@ -100,5 +100,5 @@ def write(lake, output: Path = OUTPUT) -> dict:
     doc = build(lake.query("select * from shareholding"),
                 lake.query("select * from pledges") if "pledges" in present else None)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(doc, indent=1), encoding="utf-8")
+    output.write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")  # compact: ~1,400+ companies
     return doc
