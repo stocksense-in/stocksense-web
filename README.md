@@ -32,7 +32,8 @@ REST API (FastAPI) ◄── Supabase, news RSS, NSE IPOs ◄──┘          
 ```bash
 # Website — http://localhost:3000
 cd frontend
-# .env.local: NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY (anon key only)
+# .env.local: NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY (anon key only);
+# NEXT_PUBLIC_API_URL if the REST API is not at http://localhost:8000 (company pages read it)
 npm install
 npm run dev
 ```
