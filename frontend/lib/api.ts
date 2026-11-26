@@ -212,6 +212,30 @@ export interface IpoBoard { updated_at: string; open: Ipo[]; upcoming: Ipo[] }
 
 export interface Listing { symbol: string; name: string; board: string; listed: string; issue_price: number | null; price: number | null; return_pct: number | null }
 
+export interface ScanRule { id: string; title: string; why: string }
+
+export interface ScanFinding {
+  id: string; title: string; severity: 'high' | 'medium' | 'low' | string; summary: string; why: string;
+  evidence: { page: number; quote: string }[];
+}
+
+export interface ScanResult { pages: number; findings: ScanFinding[]; clear: { id: string; title: string }[] }
+
+/** Upload a prospectus PDF to the scanner. Returns the result or the API's error message. */
+export async function scanProspectus(file: File, signal?: AbortSignal): Promise<{ result: ScanResult } | { error: string }> {
+  const body = new FormData();
+  body.append('file', file);
+  try {
+    const res = await fetch(`${API_URL}/prospectus/scan`, { method: 'POST', body, signal });
+    if (res.ok) return { result: (await res.json()) as ScanResult };
+    let detail = `The scanner returned an error (${res.status}).`;
+    try { const j = await res.json(); if (typeof j?.detail === 'string') detail = j.detail; } catch { /* not JSON */ }
+    return { error: detail };
+  } catch {
+    return { error: `The scanner at ${API_URL} isn't reachable.` };
+  }
+}
+
 export interface ScreenPage {
   total: number;
   page: number;
@@ -249,6 +273,7 @@ export const api = {
   indices: (signal?: AbortSignal) => get<IndexQuote[]>('/market/indices', signal),
   overview: (signal?: AbortSignal) => get<Overview>('/market/overview', signal),
   news: (q: { topic?: string; sector?: string; limit?: number } = {}, signal?: AbortSignal) => get<NewsEvent[]>(`/news${qs(q)}`, signal),
+  prospectusRules: (signal?: AbortSignal) => get<ScanRule[]>('/prospectus/rules', signal),
   ipos: (signal?: AbortSignal) => get<IpoBoard>('/ipos', signal),
   listings: (signal?: AbortSignal) => get<Listing[]>('/ipos/listings', signal),
   analogues: (signal?: AbortSignal) => get<Analogues>('/geopolitics/analogues', signal),
