@@ -20,26 +20,26 @@ const STEPS = [
   {
     num: '01', icon: '◈', tag: 'DISCOVERY',
     title: 'Search any stock or IPO',
-    body: 'Type a ticker like INFY, HDFCBANK, or an upcoming IPO name. StockSense instantly pulls real-time price data, sector classification, and 52-week range — giving you a complete identity card for every listed company on NSE and BSE.',
-    features: ['2,800+ NSE/BSE stocks indexed', 'Live price feeds with <3s latency', 'Auto-complete with sector tags'],
+    body: 'Type a ticker like INFY or a name like HDFC Bank. StockSense pulls the price, sector, 52-week range and market cap, plus the company’s own filed results, shareholding and dividend record — an identity card for every company listed on NSE.',
+    features: ['2,600+ NSE companies', 'Results and shareholding from company filings', 'Type-ahead search with sector tags'],
   },
   {
     num: '02', icon: '▦', tag: 'ANALYSIS',
     title: 'See the full metric breakdown',
-    body: 'Every fundamental metric — PE Ratio, Return on Equity, Debt/Equity, Net Profit Margin, Promoter Holding, and Revenue CAGR — is plotted on an ideal-range gauge calibrated specifically for that stock\'s sector. A banking stock\'s D/E of 9× is normal; the same ratio in IT is a red flag. StockSense knows the difference.',
-    features: ['6 institutional-grade metrics per stock', 'Sector-calibrated ideal zones', 'Click any metric for deep-dive intelligence'],
+    body: 'Six metrics — P/E, return on equity, debt to equity, net margin, promoter holding and revenue growth — each placed among the company’s sector peers, with the range that is healthy for that kind of business and how the company compares with its own history. A bank’s debt to equity of 9× is normal; the same ratio in IT is a red flag. StockSense shows the difference.',
+    features: ['Where it ranks among sector peers', 'Healthy ranges and its own history', 'Plain-language notes on every metric'],
   },
   {
     num: '03', icon: '◉', tag: 'GEOPOLITICS',
     title: 'Get live geopolitical context',
-    body: 'Most retail investors ignore geopolitics until it\'s too late. StockSense\'s Geopolitics Engine maps real-time global events — Iran tensions, Hormuz closure risk, OPEC output cuts, India-US trade pacts — directly to affected Indian sectors. Defence rallies on conflict. Aviation bleeds on crude spikes. You see it before the market prices it in.',
-    features: ['8 sectors tracked against 14 geo-risk sources', 'Historical precedent matching (2020 COVID, 2022 Russia)', 'Sector risk matrix updated every 2 hours'],
+    body: 'World events move Indian sectors. The Geopolitics Engine reads the day’s headlines — conflicts, oil, tariffs, rates — and shows which sectors they touch. Then it shows what those sectors actually did after similar events since 2012: crude spikes, rupee slides, global sell-offs. History, with confidence ranges, not predictions.',
+    features: ['Sector exposure from live headlines', 'Event study: 12 event types since 2012', 'Confidence ranges and sample sizes on every number'],
   },
   {
-    num: '04', icon: '★', tag: 'VERDICT',
-    title: 'Read the AI verdict',
-    body: 'StockSense synthesizes all 6 metrics, sector context, and geopolitical overlay into a single institutional-grade verdict: Strong Buy, Moderate, or Risky. But we don\'t just give you a label — we show the plain-language reasoning behind it. "PE is 24× against a sector ideal of 18–28× — fairly valued. ROE at 31% is top-decile. Zero debt concern. Verdict: Strong Buy."',
-    features: ['Weighted scoring: Fundamentals 60% + Geo 20% + Sentiment 20%', 'Plain-language reasoning for every verdict', 'Click-through to 3-layer metric intelligence'],
+    num: '04', icon: '★', tag: 'SCORE',
+    title: 'Read the reasoning, not a tip',
+    body: 'The StockSense score sums the six metrics into one number out of 100: 70% from how the company compares with its sector peers, 30% from a fixed scale for all companies. Every point is explained — "P/E 15 is better than 74% of IT companies; ROE 30% is in the top quarter; promoter holding 16% is in the bottom quarter." It describes the business. It never tells you to buy or sell.',
+    features: ['Strong, fair or weak — on fundamentals', 'Every point traced to a metric', 'Says which metrics are missing and what that means'],
   },
   {
     num: '05', icon: '◎', tag: 'SIMULATION',
@@ -52,10 +52,10 @@ const STEPS = [
 /* ══ TYPEWRITER DATA ══ */
 const FEATURES = [
   { cat: 'STOCK REPORT CARD', txt: 'See exactly where every metric sits — ideal vs actual, in plain language. PE, ROE, D/E explained for your sector.' },
-  { cat: 'GEOPOLITICS RISK ENGINE', txt: 'Iran tensions? Oil spike? We map live global events to Indian sector risk before the market prices it in.' },
-  { cat: 'IPO ANALYSER', txt: 'GMP, QIB, HNI, fundamentals — scored into one verdict. Subscribe, Risky, or Avoid. No more FOMO.' },
+  { cat: 'GEOPOLITICS ENGINE', txt: 'Oil spike? Rupee slide? See which sectors the news touches, and what they did after similar events since 2012.' },
+  { cat: 'IPO ANALYSER', txt: 'Who is bidding — institutions, HNIs, retail — and how much. What subscription numbers tell you, and what they don’t.' },
   { cat: 'PAPER TRADING', txt: 'Trade with virtual ₹1,00,000 in real market conditions. Learn stop-losses and sizing before it costs you.' },
-  { cat: 'RHP SCANNER', txt: 'Drop any DRHP. Our AI reads 300+ pages and flags related-party risks, litigation, and revenue concentration.' },
+  { cat: 'RHP SCANNER', txt: 'Drop any DRHP. The scanner reads every page and flags customer concentration, litigation and offers for sale, with page numbers.' },
 ];
 
 export default function StockSensePage({
