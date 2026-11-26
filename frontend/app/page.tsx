@@ -1,9 +1,11 @@
 'use client';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Page } from '@/lib/types';
 import { PAGE_TITLES, NAV_ITEMS } from '@/lib/constants';
 import { DashboardPage } from '@/components/sections/DashboardPage';
 import { AnalysisPage } from '@/components/sections/AnalysisPage';
+import type { CompanyTab } from '@/components/sections/AnalysisPage';
+import { CommandBar } from '@/components/ui/CommandBar';
 import { IPOPage } from '@/components/sections/IPOPage';
 import { ScreenerPage } from '@/components/sections/ScreenerPage';
 import { GeoPage } from '@/components/sections/GeoPage';
@@ -68,15 +70,19 @@ export default function StockSensePage({
   const [activePage, setActivePage] = useState<Page>(initialPage ?? 'dashboard');
   const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
-  const navTo = (page: Page) => {
+  const navTo = (page: Page, query = '') => {
     setActivePage(page);
     const routeMap: Record<Page, string> = {
       dashboard: '/dashboard', analysis: '/analysis', ipo: '/ipo',
       paper: '/paper-trading', rhp: '/rhp-analyser', geo: '/geopolitics-engine',
       screener: '/screener', premium: '/premium', profile: '/profile', mf: '/mf',
     };
-    router.push(routeMap[page]);
+    router.push(routeMap[page] + query);
   };
+
+  // Command bar: open a company on a given tab, from any page. The address carries it.
+  const openCompany = (symbol: string, tab: CompanyTab) =>
+    navTo('analysis', `?s=${encodeURIComponent(symbol)}${tab === 'score' ? '' : `&tab=${tab}`}`);
 
   const enter = (page: Page) => {
     setInApp(true);
@@ -277,6 +283,7 @@ export default function StockSensePage({
               <div className="tb-left">
                 <div className="tb-title">{PAGE_TITLES[activePage]}</div>
               </div>
+              <CommandBar onPage={p => navTo(p)} onCompany={openCompany} />
               <div className="tb-r">
                 <div className="live-badge"><div className="live-dot" />NSE Live</div>
                 <div className="tb-date">{today}</div>
@@ -285,7 +292,7 @@ export default function StockSensePage({
             </div>
             <div className="content">
               {activePage === 'dashboard'  && <DashboardPage onNav={navTo} />}
-              {activePage === 'analysis'   && <AnalysisPage />}
+              {activePage === 'analysis'   && <Suspense fallback={null}><AnalysisPage /></Suspense>}
               {activePage === 'ipo'        && <IPOPage />}
               {activePage === 'screener'   && <ScreenerPage />}
               {activePage === 'geo'        && <GeoPage />}
