@@ -11,6 +11,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import re
 import time
 from dataclasses import asdict, dataclass
 
@@ -54,24 +55,34 @@ class Symbol:
         return f"{self.symbol}.BO"
 
 
-def _download() -> list[Symbol]:
-    log.info("Downloading NSE equity list…")
-    resp = requests.get(NSE_EQUITY_URL, headers=_HEADERS, timeout=30)
-    resp.raise_for_status()
+# Rights entitlements (NATCO-RE, PRAXIS-RE3) trade for a few weeks during a rights issue;
+# they are not companies.
+_RIGHTS_ENTITLEMENT = re.compile(r"-RE\d*$")
 
+
+def parse_equity_list(text: str) -> list[Symbol]:
+    """NSE's EQUITY_L.csv → listed companies in the series StockSense covers."""
     symbols = []
-    for raw in csv.DictReader(io.StringIO(resp.text)):
+    for raw in csv.DictReader(io.StringIO(text)):
         row = {k.strip(): (v or "").strip() for k, v in raw.items() if k}
-        if row.get("SYMBOL") and row.get("SERIES") in INCLUDE_SERIES:
+        sym = row.get("SYMBOL", "")
+        if sym and row.get("SERIES") in INCLUDE_SERIES and not _RIGHTS_ENTITLEMENT.search(sym):
             symbols.append(
                 Symbol(
-                    symbol=row["SYMBOL"],
+                    symbol=sym,
                     name=row.get("NAME OF COMPANY", ""),
                     series=row["SERIES"],
                     isin=row.get("ISIN NUMBER", ""),
                 )
             )
     return symbols
+
+
+def _download() -> list[Symbol]:
+    log.info("Downloading NSE equity list…")
+    resp = requests.get(NSE_EQUITY_URL, headers=_HEADERS, timeout=30)
+    resp.raise_for_status()
+    return parse_equity_list(resp.text)
 
 
 def _read_cache() -> list[Symbol]:
