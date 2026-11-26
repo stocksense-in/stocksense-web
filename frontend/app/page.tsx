@@ -70,8 +70,11 @@ export default function StockSensePage({
   const [activePage, setActivePage] = useState<Page>(initialPage ?? 'dashboard');
   const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
+  const [navOpen, setNavOpen] = useState(false);  // the sidebar drawer on phones
+
   const navTo = (page: Page, query = '') => {
     setActivePage(page);
+    setNavOpen(false);
     const routeMap: Record<Page, string> = {
       dashboard: '/dashboard', analysis: '/analysis', ipo: '/ipo',
       paper: '/paper-trading', rhp: '/rhp-analyser', geo: '/geopolitics-engine',
@@ -246,7 +249,8 @@ export default function StockSensePage({
       {/* ── APP SHELL ── */}
       {inApp && (
         <div className="app-shell">
-          <div className="sidebar">
+          {navOpen && <div className="sb-backdrop" onClick={() => setNavOpen(false)} />}
+          <div className={`sidebar${navOpen ? ' open' : ''}`}>
             <div className="sb-brand">
               <div className="sb-logo">Stock<span>Sense</span></div>
               <div className="sb-tier">India Equities Platform</div>
@@ -281,6 +285,7 @@ export default function StockSensePage({
           <div className="main-area">
             <div className="topbar">
               <div className="tb-left">
+                <button className="tb-menu" aria-label="Open the menu" aria-expanded={navOpen} onClick={() => setNavOpen(o => !o)}>☰</button>
                 <div className="tb-title">{PAGE_TITLES[activePage]}</div>
               </div>
               <CommandBar onPage={p => navTo(p)} onCompany={openCompany} />

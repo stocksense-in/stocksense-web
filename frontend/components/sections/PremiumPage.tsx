@@ -31,7 +31,7 @@ export function PremiumPage({ onNav }: { onNav: (p: Page) => void }) {
       </div>
 
       {/* Profile + Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
+      <div className="split" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
         {/* Profile card */}
         <div className="card" style={{ gridColumn: 'span 2' }}>
           <div className="ct">Your Investment Profile</div>

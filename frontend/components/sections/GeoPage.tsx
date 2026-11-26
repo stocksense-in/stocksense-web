@@ -141,7 +141,7 @@ export function GeoPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 320px', gap: 12, marginBottom: 14 }}>
+      <div className="split" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 320px', gap: 12, marginBottom: 14 }}>
         <div className="card" style={{ minWidth: 0 }}>
           <div className="ct">Global pulse feed</div>
           {geo?.events.map(e => {

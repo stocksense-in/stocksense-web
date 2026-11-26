@@ -43,7 +43,7 @@ export function RHPPage() {
   const highs = findings.filter(f => f.severity === 'high').length;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '340px minmax(0,1fr)', gap: 12 }}>
+    <div className="split" style={{ display: 'grid', gridTemplateColumns: '340px minmax(0,1fr)', gap: 12 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div
           className="rhp-upload"
