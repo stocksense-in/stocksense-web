@@ -82,3 +82,29 @@ def test_coverage_note_names_missing_metrics():
                                                          "rougher guide.")
     assert "missing: P/E ratio, debt to equity" in _coverage_note(50, ["P/E ratio", "Debt to equity"])
     assert _coverage_note(None, ["P/E ratio"]).startswith("Not enough data")
+
+
+def test_company_news_filters_to_the_company(market):
+    from datetime import datetime, timezone
+    asked = []
+
+    def company_headlines(query):
+        asked.append(query)
+        when = datetime(2026, 11, 20, tzinfo=timezone.utc)
+        return [Headline("TCS wins a $1 bn deal - Mint", "https://a", "Google News", when),
+                Headline("Markets close higher - Mint", "https://b", "Google News", when)]
+
+    c = TestClient(create_app(market=market, headlines=lambda: [], company_headlines=company_headlines))
+    rows = c.get("/stocks/TCS/news").json()
+    assert asked == ["TCS"]  # fixture name "TCS Limited" → everyday name "TCS"
+    assert rows == [{"title": "TCS wins a $1 bn deal", "link": "https://a", "source": "Mint", "published": "2026-11-20T00:00:00+00:00"}]
+    assert c.get("/stocks/TCS/news").json() == rows and asked == ["TCS"]  # cached
+    assert c.get("/stocks/NOPE/news").status_code == 404
+
+
+def test_company_news_survives_a_feed_failure(market):
+    def broken(query):
+        raise RuntimeError("feed down")
+
+    c = TestClient(create_app(market=market, headlines=lambda: [], company_headlines=broken))
+    assert c.get("/stocks/TCS/news").json() == []
