@@ -164,6 +164,99 @@ export interface History {
   points: { t: number; close: number }[];
 }
 
+export interface IndexQuote { symbol: string; label: string; price: number; change_pct: number | null; updated_at: string | null }
+
+export interface Overview {
+  indices: IndexQuote[];
+  breadth: { advancers: number; decliners: number; unchanged: number };
+  sectors: { sector: string; label: string; change_pct: number; advancers: number; decliners: number }[];
+  movers: { gainers: StockOut[]; losers: StockOut[] };
+  top_scored: StockOut[];
+}
+
+export interface SectorEffect { sector: string; code: string | null; effect: 'risk' | 'opportunity' | 'haven' | 'watch' | string; label: string }
+
+export interface NewsEvent { title: string; link: string; source: string; published: string | null; topics: string[]; sectors: SectorEffect[] }
+
+export interface Exposure { sector: string; code: string | null; sensitivity: number; effect: string; label: string; headlines: number }
+
+export interface Geopolitics { updated_at: string; exposure: Exposure[]; events: NewsEvent[] }
+
+export interface AnalogueSummary { code: string; label: string; rule: string; occurrences: number; first: string | null; last: string | null }
+
+export interface Analogues {
+  generated_at: string; data_from: string; data_through: string; benchmark: string;
+  horizons_days: number[]; method: string; notable_share: Record<string, number>;
+  sector_sources: Record<string, string>; events: AnalogueSummary[];
+}
+
+export interface AnalogueCell {
+  sector: string; horizon_days: number; n: number; mean_excess_pct: number; median_excess_pct: number;
+  hit_rate: number; ci_low_pct: number; ci_high_pct: number; baseline_pct: number; notable: boolean;
+}
+
+export interface AnalogueDetail extends AnalogueSummary {
+  recent: { date: string; evidence: { actors: string; place: string | null; articles: number; url: string }[] }[];
+  sectors: AnalogueCell[];
+}
+
+export interface Ipo {
+  symbol: string; name: string; board: 'mainboard' | 'sme' | string; status: string;
+  opens: string | null; closes: string | null; price_low: number | null; price_high: number | null;
+  shares_offered: number | null; size_crore: number | null;
+  subscription: { qib: number | null; nii: number | null; retail: number | null; employees: number | null; total: number | null; updated_at: string | null };
+  demand: { level: 'strong' | 'moderate' | 'weak' | 'early' | string; summary: string };
+}
+
+export interface IpoBoard { updated_at: string; open: Ipo[]; upcoming: Ipo[] }
+
+export interface Listing { symbol: string; name: string; board: string; listed: string; issue_price: number | null; price: number | null; return_pct: number | null }
+
+export interface ScanRule { id: string; title: string; why: string }
+
+export interface ScanFinding {
+  id: string; title: string; severity: 'high' | 'medium' | 'low' | string; summary: string; why: string;
+  evidence: { page: number; quote: string }[];
+}
+
+export interface ScanResult { pages: number; findings: ScanFinding[]; clear: { id: string; title: string }[] }
+
+/** Upload a prospectus PDF to the scanner. Returns the result or the API's error message. */
+export async function scanProspectus(file: File, signal?: AbortSignal): Promise<{ result: ScanResult } | { error: string }> {
+  const body = new FormData();
+  body.append('file', file);
+  try {
+    const res = await fetch(`${API_URL}/prospectus/scan`, { method: 'POST', body, signal });
+    if (res.ok) return { result: (await res.json()) as ScanResult };
+    let detail = `The scanner returned an error (${res.status}).`;
+    try { const j = await res.json(); if (typeof j?.detail === 'string') detail = j.detail; } catch { /* not JSON */ }
+    return { error: detail };
+  } catch {
+    return { error: `The scanner at ${API_URL} isn't reachable.` };
+  }
+}
+
+export interface ScreenPage {
+  total: number;
+  page: number;
+  page_size: number;
+  results: StockOut[];
+}
+
+export interface SectorOption { code: string; label: string; stocks: number }
+
+export interface ScreenQuery {
+  sector?: string; cap?: 'large' | 'mid' | 'small'; min_score?: number; max_pe?: number; min_roe?: number; max_de?: number;
+  sort?: 'score' | 'market_cap' | 'change_pct' | 'pe' | 'roe' | 'de' | 'name'; order?: 'asc' | 'desc'; page?: number; page_size?: number;
+}
+
+function qs(params: object): string {
+  const parts = Object.entries(params)
+    .filter(([, v]) => v !== undefined && v !== null && v !== '')
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`);
+  return parts.length ? `?${parts.join('&')}` : '';
+}
+
 async function get<T>(path: string, signal?: AbortSignal): Promise<T | null> {
   try {
     const res = await fetch(`${API_URL}${path}`, { signal, headers: { Accept: 'application/json' } });
@@ -177,6 +270,17 @@ async function get<T>(path: string, signal?: AbortSignal): Promise<T | null> {
 const sym = (s: string) => encodeURIComponent(s.trim().toUpperCase());
 
 export const api = {
+  indices: (signal?: AbortSignal) => get<IndexQuote[]>('/market/indices', signal),
+  overview: (signal?: AbortSignal) => get<Overview>('/market/overview', signal),
+  news: (q: { topic?: string; sector?: string; limit?: number } = {}, signal?: AbortSignal) => get<NewsEvent[]>(`/news${qs(q)}`, signal),
+  prospectusRules: (signal?: AbortSignal) => get<ScanRule[]>('/prospectus/rules', signal),
+  ipos: (signal?: AbortSignal) => get<IpoBoard>('/ipos', signal),
+  listings: (signal?: AbortSignal) => get<Listing[]>('/ipos/listings', signal),
+  analogues: (signal?: AbortSignal) => get<Analogues>('/geopolitics/analogues', signal),
+  analogue: (code: string, signal?: AbortSignal) => get<AnalogueDetail>(`/geopolitics/analogues/${encodeURIComponent(code)}`, signal),
+  geopolitics: (events = 12, signal?: AbortSignal) => get<Geopolitics>(`/geopolitics?events=${events}`, signal),
+  screen: (q: ScreenQuery, signal?: AbortSignal) => get<ScreenPage>(`/stocks${qs(q)}`, signal),
+  sectors: (signal?: AbortSignal) => get<SectorOption[]>('/sectors', signal),
   search: (q: string, signal?: AbortSignal) => get<StockOut[]>(`/stocks/search?q=${encodeURIComponent(q.trim())}`, signal),
   stock: (s: string, signal?: AbortSignal) => get<StockDetail>(`/stocks/${sym(s)}`, signal),
   financials: (s: string, signal?: AbortSignal) => get<Financials>(`/stocks/${sym(s)}/financials`, signal),
@@ -238,4 +342,26 @@ export function verdictColor(verdict: string | null | undefined): string {
 export function stockScoreColor(score: number | null | undefined): string {
   if (score === null || score === undefined) return 'var(--cream-mute)';
   return score >= 65 ? 'var(--green)' : score >= 45 ? 'var(--gold)' : 'var(--red)';
+}
+
+/** "3h ago" style age for a timestamp; falls back to the date. */
+export function timeAgo(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return '';
+  const mins = Math.round((Date.now() - t) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.round(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(t).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+
+/** Geopolitics/news effect → pill class. */
+export function effectPill(effect: string): string {
+  if (effect === 'opportunity' || effect === 'haven') return 'pill pill-g';
+  if (effect === 'risk') return 'pill pill-r';
+  return 'pill pill-gold';
 }

@@ -65,6 +65,8 @@ def test_recent_listings_returns_and_filters():
         {"symbol": "OLDCO", "company": "Old Co", "listingDate": "01-JAN-2026", "issuePrice": "100", "securityType": "EQ"},
         {"symbol": "BOND1", "company": "Some Bond", "listingDate": "05-OCT-2026", "issuePrice": "-", "securityType": "DEBT"},
         {"symbol": "NOPX", "company": "No Price", "listingDate": "06-OCT-2026", "issuePrice": "-", "priceRange": "Rs.50 to Rs.55", "securityType": "SME"},
+        {"symbol": "11MGEL29", "company": "Mangalam NCD", "listingDate": "05-OCT-2026", "issuePrice": "100000", "securityType": "EQ"},
+        {"symbol": "13DCCL29A", "company": "Dar Credit NCD", "listingDate": "05-OCT-2026", "issuePrice": "10000", "securityType": "SME"},
     ]
     rows = ipo.recent_listings(past, {"ORIENTCABL": 414.1}, days=30, today=TODAY)
     assert [r["symbol"] for r in rows] == ["NOPX", "ORIENTCABL"]
@@ -123,3 +125,21 @@ def test_today_is_indian_date():
     with mock.patch("stocksense.ipo.datetime") as fake:
         fake.now.side_effect = lambda tz=None: datetime(2026, 10, 14, 20, 0, tzinfo=timezone.utc).astimezone(tz)
         assert ipo.today_ist() == date(2026, 10, 15)
+
+
+def test_debt_symbols_are_not_mistaken_for_equity():
+    assert ipo._DEBT_SYMBOL.match("11MGEL29") and ipo._DEBT_SYMBOL.match("13DCCL29A")
+    for equity in ("20MICRONS", "360ONE", "63MOONS", "3MINDIA", "5PAISA", "21STCENMGM", "INFY"):
+        assert not ipo._DEBT_SYMBOL.match(equity), equity
+
+
+def test_recent_listings_reads_current_nse_labels():
+    """NSE now says "Equity" for mainboard issues, with padded issue prices."""
+    past = [
+        {"symbol": "CRYSTALCP", "company": "Crystal Crop Protection", "listingDate": "26-NOV-2026", "issuePrice": "   272", "securityType": "Equity"},
+        {"symbol": "SMCG04", "company": "SMC Global NCD", "listingDate": "-", "issuePrice": "-", "securityType": "DEBT"},
+        {"symbol": "VPFL", "company": "Vedant Poly Fabs", "listingDate": "09-NOV-2026", "issuePrice": "94", "securityType": "SME"},
+    ]
+    rows = ipo.recent_listings(past, {"CRYSTALCP": 300.0}, days=60, today=date(2026, 11, 27))
+    assert [(r["symbol"], r["board"]) for r in rows] == [("CRYSTALCP", "mainboard"), ("VPFL", "sme")]
+    assert rows[0]["issue_price"] == 272 and rows[0]["return_pct"] == 10.29

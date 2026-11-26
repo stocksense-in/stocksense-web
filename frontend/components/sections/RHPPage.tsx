@@ -1,130 +1,155 @@
 'use client';
-import React, { useState } from 'react';
-import { Pill } from '@/components/ui/Pill';
-import { StatRow } from '@/components/ui/StatRow';
+import { useEffect, useRef, useState } from 'react';
+import type { ScanResult, ScanRule } from '@/lib/api';
+import { api, scanProspectus } from '@/lib/api';
+
+const SEVERITY: Record<string, [string, string, string]> = {
+  high: ['pill pill-r', 'High', 'var(--red)'],
+  medium: ['pill pill-gold', 'Medium', 'var(--gold)'],
+  low: ['pill pill-g', 'Low', 'var(--green)'],
+};
+const ORDER: Record<string, number> = { high: 0, medium: 1, low: 2 };
+const MAX_MB = 60;
 
 export function RHPPage() {
+  const [rules, setRules] = useState<ScanRule[]>([]);
+  const [file, setFile] = useState<File | null>(null);
   const [scanning, setScanning] = useState(false);
-  const [results, setResults] = useState<null | 'done'>(null);
+  const [result, setResult] = useState<ScanResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const input = useRef<HTMLInputElement>(null);
 
-  const rhpDemo = () => {
+  useEffect(() => {
+    const ctl = new AbortController();
+    api.prospectusRules(ctl.signal).then(r => { if (r) setRules(r); });
+    return () => ctl.abort();
+  }, []);
+
+  const scan = async (f: File) => {
+    setFile(f);
+    setResult(null);
+    setError(null);
+    if (!/\.pdf$/i.test(f.name) && f.type !== 'application/pdf') { setError('Choose the prospectus as a PDF file.'); return; }
+    if (f.size > MAX_MB * 1024 * 1024) { setError(`That file is over ${MAX_MB} MB. Upload the DRHP or RHP PDF only.`); return; }
     setScanning(true);
-    setTimeout(() => { setScanning(false); setResults('done'); }, 1400);
+    const out = await scanProspectus(f);
+    setScanning(false);
+    if ('result' in out) setResult(out.result);
+    else setError(out.error);
   };
 
-  const risks = [
-    { level: 'HIGH', c: 'r', title: 'Concentrated Revenue Risk', body: 'Top 3 customers account for 68% of total revenue — significant client concentration risk.' },
-    { level: 'HIGH', c: 'r', title: 'Promoter Litigation Pending', body: '2 civil suits pending against promoter group for ₹42 Cr. Material if adverse judgment.' },
-    { level: 'MED', c: 'gold', title: 'Use of Proceeds — Partial Clarity', body: '₹420 Cr for "general corporate purposes" lacks specific deployment plan in DRHP.' },
-    { level: 'LOW', c: 'g', title: 'Peer Comparison Fair', body: 'Comparable company selection methodology is appropriate and disclosed transparently.' },
-    { level: 'MED', c: 'gold', title: 'EV Market Dependency', body: '100% revenue from EV segment — highly sensitive to EV adoption rate changes and subsidy policy.' },
-  ];
-
-  const scanChecks = [
-    ['Related party transactions', 'r', 'High Risk'],
-    ['Promoter litigation', 'r', 'High Risk'],
-    ['Revenue concentration', 'gold', 'Medium'],
-    ['DRHP vs actual financials', 'r', 'High Risk'],
-    ['Use of proceeds clarity', 'g', 'Low Risk'],
-    ['Peer comparison fairness', 'gold', 'Medium'],
-  ];
-
-  const borderColor = { r: 'var(--red)', gold: 'var(--gold)', g: 'var(--green)' } as any;
-  const dotColor = { r: '#C45C5C', gold: '#C9A84C', g: '#00E676' } as any;
+  const findings = result ? [...result.findings].sort((a, b) => (ORDER[a.severity] ?? 3) - (ORDER[b.severity] ?? 3)) : [];
+  const highs = findings.filter(f => f.severity === 'high').length;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 12 }}>
-
-      {/* Left: Upload + scan checklist */}
+    <div style={{ display: 'grid', gridTemplateColumns: '340px minmax(0,1fr)', gap: 12 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div
           className="rhp-upload"
-          onClick={rhpDemo}
-          style={{ opacity: scanning ? 0.5 : 1, cursor: scanning ? 'wait' : 'pointer' }}
+          onClick={() => !scanning && input.current?.click()}
+          onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f && !scanning) scan(f); }}
+          style={{ opacity: scanning ? 0.6 : 1, cursor: scanning ? 'wait' : 'pointer', borderColor: dragOver ? 'var(--gold)' : undefined }}
+          role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && input.current?.click()}
         >
+          <input ref={input} type="file" accept="application/pdf,.pdf" style={{ display: 'none' }}
+            onChange={e => { const f = e.target.files?.[0]; if (f) scan(f); e.target.value = ''; }} />
           <div style={{ fontSize: 40, marginBottom: 14 }}>📄</div>
-          <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 8, color: 'var(--cream)', letterSpacing: '-0.3px', fontFamily: 'var(--f-display)' }}>Upload RHP / DRHP</div>
-          <div style={{ fontSize: 11, color: 'var(--cream-dim)', marginBottom: 18, lineHeight: 1.7, maxWidth: 260, margin: '0 auto 18px' }}>
-            AI extracts key risk factors in seconds.<br />Drop a PDF or click to browse.
+          <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 8, color: 'var(--cream)', letterSpacing: '-0.3px', fontFamily: 'var(--f-display)' }}>Upload a DRHP or RHP</div>
+          <div style={{ fontSize: 11, color: 'var(--cream-dim)', lineHeight: 1.7, maxWidth: 260, margin: '0 auto 18px' }}>
+            Drop the prospectus PDF here or click to choose it. The scanner reads every page and quotes what it finds. The file isn&apos;t stored.
           </div>
-          <button
-            className="btn-gold-main"
-            onClick={e => { e.stopPropagation(); rhpDemo(); }}
-            style={{ width: '100%' }}
-          >
-            <span>{scanning ? 'Scanning…' : 'Try Demo: Ather Energy DRHP ↗'}</span>
+          <button className="btn-gold-main" style={{ width: '100%' }} disabled={scanning}
+            onClick={e => { e.stopPropagation(); input.current?.click(); }}>
+            <span>{scanning ? 'Reading the prospectus…' : 'Choose a PDF ↗'}</span>
           </button>
+          <div style={{ fontSize: 9, color: 'var(--cream-mute)', marginTop: 10 }}>
+            Prospectuses are on SEBI&apos;s site under Filings → Public issues, and on NSE&apos;s IPO pages.
+          </div>
         </div>
 
         <div className="card">
-          <div className="ct">What We Scan For</div>
-          {scanChecks.map(([label, c, badge]) => (
-            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(201,168,76,0.04)' }}>
-              <span style={{ fontSize: 11, color: 'var(--cream-dim)' }}>{label}</span>
-              <Pill type={c as 'r' | 'g' | 'gold'}>{badge}</Pill>
+          <div className="ct">What the scanner looks for</div>
+          {rules.map(r => (
+            <div key={r.id} style={{ padding: '8px 0', borderBottom: '1px solid rgba(201,168,76,0.04)' }} title={r.why}>
+              <div style={{ fontSize: 11, color: 'var(--cream)' }}>{r.title}</div>
+              <div style={{ fontSize: 9.5, color: 'var(--cream-mute)', marginTop: 3, lineHeight: 1.5 }}>{r.why}</div>
             </div>
           ))}
+          {!rules.length && <div style={{ fontSize: 11, color: 'var(--cream-mute)' }}>The scanner isn&apos;t reachable right now.</div>}
         </div>
       </div>
 
-      {/* Right: Results panel */}
-      <div>
-        {results === null ? (
-          <div style={{ height: '100%', minHeight: 320, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--s1)', border: '1px solid var(--border)', borderRadius: 8, padding: '40px 24px', gap: 12 }}>
-            <div style={{ fontSize: 44, opacity: 0.12, color: 'var(--gold)' }}>◈</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--cream-mute)' }}>Upload a DRHP or try the demo</div>
-            <div style={{ fontSize: 11, color: 'var(--cream-mute)', textAlign: 'center', maxWidth: 260, lineHeight: 1.65, opacity: 0.6 }}>
-              AI reads 300+ pages and surfaces only what matters — in under 2 seconds.
-            </div>
-            <button className="btn-gold-main" onClick={rhpDemo} style={{ marginTop: 8 }}><span>Try Demo</span></button>
+      <div style={{ minWidth: 0 }}>
+        {error && (
+          <div className="card card-alert" style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: 'var(--cream)' }}>{error}</div>
           </div>
-        ) : (
+        )}
+
+        {!result && !error && (
+          <div style={{ minHeight: 320, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--s1)', border: '1px solid var(--border)', borderRadius: 8, padding: '40px 24px', gap: 12 }}>
+            <div style={{ fontSize: 44, opacity: 0.12, color: 'var(--gold)' }}>◈</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--cream-mute)' }}>{scanning ? `Reading ${file?.name ?? 'the prospectus'}…` : 'Upload a prospectus to scan it'}</div>
+            <div style={{ fontSize: 11, color: 'var(--cream-mute)', textAlign: 'center', maxWidth: 320, lineHeight: 1.65, opacity: 0.75 }}>
+              {scanning ? 'Large prospectuses take up to a minute.' : 'You get the warning signs it contains, each with the page and the sentence it came from, so you can check them yourself.'}
+            </div>
+          </div>
+        )}
+
+        {result && (
           <div>
-            {/* Report header */}
             <div style={{ position: 'relative', overflow: 'hidden', background: 'var(--s1)', border: '1px solid var(--border-bright)', borderRadius: 8, padding: '18px 22px', marginBottom: 14 }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(201,168,76,0.28),transparent)' }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
-                <div>
-                  <div className="ct" style={{ marginBottom: 5 }}>RHP Analysis · Ather Energy DRHP</div>
-                  <div style={{ fontSize: 11, color: 'var(--cream-dim)', lineHeight: 1.6 }}>
-                    AI extracted <strong style={{ color: 'var(--cream)' }}>{risks.length} key risk factors</strong> from 342 pages.<br />
-                    <span style={{ color: 'var(--red)' }}>2 high-severity items</span> require attention before subscribing.
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div className="ct" style={{ marginBottom: 4 }}>Risk Score</div>
-                  <div style={{ fontSize: 22, fontWeight: 500, fontFamily: 'var(--f-mono)', color: 'var(--gold)', letterSpacing: '-1.5px', lineHeight: 1 }}>58</div>
-                  <div style={{ fontSize: 9, color: 'var(--cream-mute)', marginTop: 2, fontWeight: 500, fontFamily: 'var(--f-mono)', letterSpacing: '1px' }}>MODERATE</div>
-                </div>
+              <div className="ct" style={{ marginBottom: 5 }}>Prospectus scan · {file?.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--cream-dim)', lineHeight: 1.7 }}>
+                Read <strong style={{ color: 'var(--cream)' }}>{result.pages} pages</strong> and found{' '}
+                <strong style={{ color: 'var(--cream)' }}>{findings.length} warning sign{findings.length === 1 ? '' : 's'}</strong>
+                {highs > 0 && <>, <span style={{ color: 'var(--red)' }}>{highs} of them serious</span></>}.
+                {' '}{result.clear.length} other checks found nothing.
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--cream-mute)', marginTop: 8 }}>
+                Every prospectus lists risks; what matters is how large they are for this company. Read the quoted pages before deciding anything.
               </div>
             </div>
 
-            {/* Risk items */}
-            <div className="card">
-              <div className="ct">Extracted Risk Factors</div>
-              {risks.map((r, i) => (
-                <div
-                  key={r.title}
-                  style={{
-                    display: 'flex',
-                    gap: 14,
-                    padding: '13px 0',
-                    borderBottom: i < risks.length - 1 ? '1px solid rgba(201,168,76,0.04)' : 'none',
-                    paddingLeft: 12,
-                    borderLeft: `2px solid ${borderColor[r.c]}`,
-                    marginBottom: 2,
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 5 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--cream)', letterSpacing: '-0.2px' }}>{r.title}</span>
-                      <Pill type={r.c as 'r' | 'g' | 'gold'}>{r.level}</Pill>
+            {findings.length > 0 && (
+              <div className="card" style={{ marginBottom: 12 }}>
+                <div className="ct">Warning signs, with where they appear</div>
+                {findings.map((f, i) => {
+                  const [cls, label, color] = SEVERITY[f.severity] ?? SEVERITY.medium;
+                  return (
+                    <div key={f.id} style={{ padding: '13px 0 13px 12px', borderBottom: i < findings.length - 1 ? '1px solid rgba(201,168,76,0.04)' : 'none', borderLeft: `2px solid ${color}`, marginBottom: 2 }}>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 5, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--cream)' }}>{f.title}</span>
+                        <span className={cls}>{label}</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--cream)', lineHeight: 1.65 }}>{f.summary}</div>
+                      <div style={{ fontSize: 10.5, color: 'var(--cream-mute)', lineHeight: 1.6, marginTop: 4 }}>Why it matters: {f.why}</div>
+                      {f.evidence.slice(0, 3).map(ev => (
+                        <blockquote key={ev.page + ev.quote.slice(0, 20)} style={{ margin: '8px 0 0', padding: '6px 10px', background: 'rgba(201,168,76,0.04)', borderRadius: 4, fontSize: 10.5, color: 'var(--cream-dim)', lineHeight: 1.6 }}>
+                          <span style={{ fontFamily: 'var(--f-mono)', color: 'var(--gold)', marginRight: 8 }}>p.{ev.page}</span>
+                          “{ev.quote}”
+                        </blockquote>
+                      ))}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--cream-dim)', lineHeight: 1.65 }}>{r.body}</div>
-                  </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {result.clear.length > 0 && (
+              <div className="card">
+                <div className="ct">Checked and not found</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {result.clear.map(c => <span key={c.id} className="pill pill-b">{c.title}</span>)}
                 </div>
-              ))}
-            </div>
+                <p style={{ fontSize: 9.5, color: 'var(--cream-mute)', marginTop: 10, lineHeight: 1.6 }}>
+                  Not found means the scanner&apos;s patterns didn&apos;t match; it isn&apos;t proof the risk is absent.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

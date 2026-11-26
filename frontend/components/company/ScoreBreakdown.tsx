@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import type { ScoreDetail, ScorePart } from '@/lib/api';
 import { fmtNum, verdictColor, verdictPill } from '@/lib/api';
+import { METRIC_CONTENT } from '@/lib/metricContent';
 
 const UNIT: Record<string, string> = { pe: '×', de: '×', roe: '%', margin: '%', promoter: '%', cagr: '%' };
 
@@ -37,6 +38,7 @@ function PartCard({ part }: { part: ScorePart }) {
   const missing = part.value === null || part.value === undefined;
   const notes = [part.guardrail, part.note, part.stage_note, part.history_note, part.market_note].filter(Boolean) as string[];
   const maxPoints = Math.round(part.weight * 100);
+  const learn = (METRIC_CONTENT as Record<string, { medium: { why: string; risks: string[] } } | undefined>)[part.metric]?.medium;
   return (
     <div className={`mc${open ? ' open' : ''}`} onClick={() => setOpen(o => !o)} role="button" tabIndex={0}
       onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setOpen(o => !o)} aria-expanded={open}>
@@ -64,6 +66,16 @@ function PartCard({ part }: { part: ScorePart }) {
             <p key={i} className="exp-body" style={{ marginTop: 10, color: 'var(--cream-dim)' }}>{n}</p>
           ))}
           {missing && <p className="exp-body" style={{ marginTop: 10, color: 'var(--cream-dim)' }}>No figure is available for this metric yet, so the score is built from the others.</p>}
+          {learn && (
+            <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(201,168,76,0.06)' }}>
+              <div className="ct" style={{ marginBottom: 8 }}>Why it matters</div>
+              <p className="exp-body" style={{ color: 'var(--cream-dim)' }}>{learn.why}</p>
+              <div className="ct" style={{ margin: '12px 0 8px' }}>Watch out for</div>
+              <ul style={{ margin: 0, paddingLeft: 16 }}>
+                {learn.risks.map(r => <li key={r} className="exp-body" style={{ color: 'var(--cream-dim)', marginBottom: 4 }}>{r}</li>)}
+              </ul>
+            </div>
+          )}
         </div>
       )}
       <div style={{ fontSize: 9, color: 'var(--cream-mute)', marginTop: 10 }}>{open ? 'Less ▲' : 'Ranges and context ▼'}</div>
