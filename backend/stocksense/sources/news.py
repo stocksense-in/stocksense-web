@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
+from urllib.parse import quote_plus
 
 import httpx
 
@@ -103,3 +104,16 @@ def fetch_headlines(feeds: dict[str, str] = FEEDS) -> list[Headline]:
             unique.append(headline)
     oldest = datetime.min.replace(tzinfo=timezone.utc)
     return sorted(unique, key=lambda h: h.published or oldest, reverse=True)
+
+
+def company_feed_url(query: str) -> str:
+    """Google News search for one company's market news (English, India edition)."""
+    q = quote_plus(f'"{query}" (share OR shares OR stock OR results OR profit)')
+    return f"https://news.google.com/rss/search?q={q}&hl=en-IN&gl=IN&ceid=IN:en"
+
+
+def fetch_company_headlines(query: str) -> list[Headline]:
+    """Recent headlines that mention a company, newest first."""
+    oldest = datetime.min.replace(tzinfo=timezone.utc)
+    found = _fetch(f"Google News — {query}", company_feed_url(query))
+    return sorted(found, key=lambda h: h.published or oldest, reverse=True)

@@ -283,6 +283,13 @@ class SectorEffect(BaseModel):
     label: str
 
 
+class CompanyHeadline(BaseModel):
+    title: str
+    link: str
+    source: str = Field(description="Publisher")
+    published: str | None
+
+
 class NewsEvent(BaseModel):
     title: str
     link: str

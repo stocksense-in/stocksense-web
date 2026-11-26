@@ -18,16 +18,19 @@ from typing import Callable, Literal
 from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
-from .. import analytics, benchmarks, geo, ipo, rhp
+from .. import analytics, benchmarks, company_news, geo, ipo, rhp
 from .. import dividends as dividends_mod
 from .. import holders as own
 from .. import valuation as valuation_mod
 from ..config import DATA_DIR, get_settings
+from ..log import get_logger
 from ..market import MarketData, Stock, TTLCache
 from ..scoring import GUIDE, WEIGHTS, healthy_range, score_stock
 from ..sectors import SECTOR_LABELS
 from ..sources import chart, news, nse_ipo
 from . import schemas
+
+log = get_logger(__name__)
 
 NEWS_TTL_SECONDS = 15 * 60
 IPO_TTL_SECONDS = 5 * 60  # subscription numbers update through the bidding day
@@ -127,6 +130,7 @@ def create_app(
     financials: Callable[[], dict | None] | None = None,
     holders: Callable[[], dict | None] | None = None,
     dividends: Callable[[], dict | None] | None = None,
+    company_headlines: Callable[[str], list[news.Headline]] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -151,6 +155,7 @@ def create_app(
     )
     app.state.market = market or MarketData()
     app.state.headlines = headlines or news.fetch_headlines
+    app.state.company_headlines = company_headlines or news.fetch_company_headlines
     app.state.history = history or chart.history
     app.state.cache = TTLCache()
     app.state.nse = nse
@@ -314,6 +319,25 @@ def create_app(
             raise HTTPException(404, f"No shareholding filings for {symbol.upper()} yet")
         return {"symbol": symbol.upper(), "source": request.app.state.holders()["source"], **entry,
                 "trend_note": own.trend_note(entry), "pledge_warning": own.pledge_warning(entry)}
+
+    @app.get("/stocks/{symbol}/news", response_model=list[schemas.CompanyHeadline], tags=["stocks"])
+    def stock_news(request: Request, symbol: str, limit: int = Query(20, ge=1, le=50)):
+        """Recent headlines that name the company (by its everyday name or NSE symbol), newest first."""
+        stock = market_of(request).stock(symbol)
+        if stock is None:
+            raise HTTPException(404, f"Unknown symbol {symbol.upper()}")
+        name = stock.name or stock.symbol
+
+        def load():
+            try:
+                found = request.app.state.company_headlines(company_news.everyday_name(name) or stock.symbol)
+            except Exception as exc:  # a news hiccup shouldn't break the company page
+                log.warning(f"Company news failed for {stock.symbol}: {exc}")
+                return []
+            return company_news.company_news(found, name, stock.symbol, limit=50)
+
+        rows = request.app.state.cache.get(f"cnews:{stock.symbol}", NEWS_TTL_SECONDS, load)
+        return rows[:limit]
 
     @app.get("/stocks/{symbol}/financials", response_model=schemas.Financials, tags=["stocks"])
     def stock_financials(request: Request, symbol: str):
