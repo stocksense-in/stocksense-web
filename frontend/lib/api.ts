@@ -200,6 +200,18 @@ export interface AnalogueDetail extends AnalogueSummary {
   sectors: AnalogueCell[];
 }
 
+export interface Ipo {
+  symbol: string; name: string; board: 'mainboard' | 'sme' | string; status: string;
+  opens: string | null; closes: string | null; price_low: number | null; price_high: number | null;
+  shares_offered: number | null; size_crore: number | null;
+  subscription: { qib: number | null; nii: number | null; retail: number | null; employees: number | null; total: number | null; updated_at: string | null };
+  demand: { level: 'strong' | 'moderate' | 'weak' | 'early' | string; summary: string };
+}
+
+export interface IpoBoard { updated_at: string; open: Ipo[]; upcoming: Ipo[] }
+
+export interface Listing { symbol: string; name: string; board: string; listed: string; issue_price: number | null; price: number | null; return_pct: number | null }
+
 export interface ScreenPage {
   total: number;
   page: number;
@@ -237,6 +249,8 @@ export const api = {
   indices: (signal?: AbortSignal) => get<IndexQuote[]>('/market/indices', signal),
   overview: (signal?: AbortSignal) => get<Overview>('/market/overview', signal),
   news: (q: { topic?: string; sector?: string; limit?: number } = {}, signal?: AbortSignal) => get<NewsEvent[]>(`/news${qs(q)}`, signal),
+  ipos: (signal?: AbortSignal) => get<IpoBoard>('/ipos', signal),
+  listings: (signal?: AbortSignal) => get<Listing[]>('/ipos/listings', signal),
   analogues: (signal?: AbortSignal) => get<Analogues>('/geopolitics/analogues', signal),
   analogue: (code: string, signal?: AbortSignal) => get<AnalogueDetail>(`/geopolitics/analogues/${encodeURIComponent(code)}`, signal),
   geopolitics: (events = 12, signal?: AbortSignal) => get<Geopolitics>(`/geopolitics?events=${events}`, signal),
