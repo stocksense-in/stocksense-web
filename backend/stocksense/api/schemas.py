@@ -155,6 +155,7 @@ class MarginHistory(BaseModel):
     high: float | None
     since: str
     percentile: int = Field(description="Share of the last five years' trailing margins below today's")
+    includes_excise: bool = Field(False, description="Measured on revenue including excise duty (older years can't be netted)")
 
 
 class ResultReaction(BaseModel):

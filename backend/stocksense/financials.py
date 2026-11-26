@@ -41,7 +41,8 @@ def _fiscal_year(d: date) -> int:
 
 def margin_history(rows: pd.DataFrame, basis: bool) -> dict | None:
     """Trailing-twelve-month margin now vs its own range over the last five years."""
-    ttm = filing_metrics.trailing_twelve_months(rows[rows["consolidated"] == basis])
+    # Reported revenue throughout, so years before excise could be separated compare like with like.
+    ttm = filing_metrics.trailing_twelve_months(rows[rows["consolidated"] == basis], net=False)
     ttm = ttm.dropna(subset=["revenue", "net_profit"])
     ttm = ttm[ttm["revenue"] > 0]
     if not len(ttm):
@@ -52,9 +53,11 @@ def margin_history(rows: pd.DataFrame, basis: bool) -> dict | None:
         return None
     margins = 100 * window["net_profit"] / window["revenue"]
     now = margins.iloc[-1]
+    excise = "excise_duty" in rows and (pd.to_numeric(rows["excise_duty"], errors="coerce") > 0).any()
     return {"now": _num(now), "low": _num(margins.min()), "median": _num(margins.median()), "high": _num(margins.max()),
             "since": window["period_end"].min().date().isoformat(),
-            "percentile": int(round(100 * (margins < now).mean()))}
+            "percentile": int(round(100 * (margins < now).mean())),
+            "includes_excise": bool(excise)}
 
 
 def margin_note(entry: dict | None) -> str | None:
@@ -64,8 +67,12 @@ def margin_note(entry: dict | None) -> str | None:
         return None
     where = ("near the top of" if h["percentile"] >= 75 else "near the bottom of" if h["percentile"] <= 25
              else "in the middle of")
-    return (f"Its trailing margin of {h['now']:.1f}% is {where} its own range since {h['since'][:4]} "
+    text = (f"Its trailing margin of {h['now']:.1f}% is {where} its own range since {h['since'][:4]} "
             f"({h['low']:.1f}%–{h['high']:.1f}%, median {h['median']:.1f}%).")
+    if h.get("includes_excise"):
+        text += (" Measured on revenue including excise duty, the only way older years can be compared, "
+                 "so these figures run lower than a margin on net sales.")
+    return text
 
 
 def company(rows: pd.DataFrame, latest: dict) -> dict:

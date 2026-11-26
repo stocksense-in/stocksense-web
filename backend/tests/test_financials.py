@@ -64,3 +64,10 @@ def test_too_little_history_has_no_range():
     df = results()
     df = df[df["period_end"] >= date(2023, 1, 1)]  # 8 quarters → 5 trailing points
     assert financials.build(df)["companies"]["ACME"]["margin_history"] is None
+
+
+def test_margin_note_says_when_excise_is_included():
+    df = results().assign(excise_duty=None)
+    df.loc[df["period_end"] == date(2024, 12, 31), "excise_duty"] = 5.0
+    acme = financials.build(df)["companies"]["ACME"]
+    assert acme["margin_history"]["includes_excise"] and "including excise duty" in financials.margin_note(acme)

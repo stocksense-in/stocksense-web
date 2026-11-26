@@ -141,3 +141,13 @@ def test_promoter_from_the_latest_shareholding_pattern():
     assert out.at["ITC", "promoter_holding"] == 0.0 and out.at["ITC", "as_of"] == date(2026, 9, 30)
     rows, replaced = fm.overlay([{"symbol": "ITC", "promoter_holding": 29.49, "net_margin": 25.0}], out.reset_index())
     assert rows[0]["promoter_holding"] == 0.0 and rows[0]["net_margin"] == 25.0  # no results: Yahoo's margin kept
+
+
+def test_growth_on_reported_revenue_margin_on_net():
+    df = quarters(growth=0.10, margin=0.10).assign(kind="company")
+    df["net_revenue"] = df["revenue"]
+    recent = df["period_end"] >= date(2024, 1, 1)
+    df.loc[recent, "net_revenue"] = df.loc[recent, "revenue"] * 0.8  # excise netted only lately
+    m = fm.latest(df).iloc[0]
+    assert m["revenue_cagr_3yr"] == pytest.approx(10.0, abs=0.01)  # like with like, not net vs gross
+    assert m["net_margin"] == pytest.approx(12.5)  # profit / net revenue

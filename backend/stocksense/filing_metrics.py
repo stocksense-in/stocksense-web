@@ -33,23 +33,33 @@ COLUMNS = {"net_margin": "net_margin", "cagr": "revenue_cagr_3yr", "roe": "roe",
            "promoter": "promoter_holding"}
 
 
-def _prepare(df: pd.DataFrame) -> pd.DataFrame:
+def _prepare(df: pd.DataFrame, net: bool = True) -> pd.DataFrame:
+    """`net`: revenue net of excise (the current margin). Growth and long histories use
+    reported revenue instead, because the old feed (to Dec 2024) can't separate excise and
+    a net-vs-gross comparison would understate growth (IOC: 1.5% instead of ~5%). Lenders'
+    net revenue is the same in both feeds, so they always use it."""
     df = df.dropna(subset=["period_end"]).copy()
     if "suspect" in df:  # implausible filings count as missing (see ingest_results.suspect)
         df = df[~df["suspect"].fillna(False).astype(bool)]
     df["period_end"] = pd.to_datetime(df["period_end"])
     if "consolidated" not in df:
         df["consolidated"] = True
-    # Banks are measured on net interest + other income (see nse_results._net_revenue).
+    # Banks are measured on net interest + other income (see nse_results.net_revenue).
     if "net_revenue" in df:
-        df["revenue"] = df["net_revenue"]
+        if net:
+            df["revenue"] = df["net_revenue"]
+        elif "kind" in df:
+            lender = df["kind"].isin(["bank", "finance"])
+            df.loc[lender, "revenue"] = df.loc[lender, "net_revenue"]
+        else:
+            df["revenue"] = df["net_revenue"]
     return df
 
 
-def trailing_twelve_months(df: pd.DataFrame) -> pd.DataFrame:
+def trailing_twelve_months(df: pd.DataFrame, net: bool = True) -> pd.DataFrame:
     """Rolling four-quarter revenue and profit per company and basis (standalone/consolidated);
     NaN where the four quarters aren't consecutive."""
-    df = _prepare(df).sort_values(["symbol", "consolidated", "period_end"])
+    df = _prepare(df, net).sort_values(["symbol", "consolidated", "period_end"])
     out = []
     for (symbol, consolidated), g in df.groupby(["symbol", "consolidated"], sort=False):
         g = g.drop_duplicates("period_end").set_index("period_end")
@@ -102,6 +112,8 @@ def latest(df: pd.DataFrame) -> pd.DataFrame:
     Consolidated figures where the four quarters all have them, else standalone — never a mix.
     Growth comes from the same basis, falling back to the other basis at the same date."""
     ttm = trailing_twelve_months(df).dropna(subset=["revenue"])
+    reported = trailing_twelve_months(df, net=False).dropna(subset=["revenue"])
+    reported = {key: g.set_index("period_end").sort_index() for key, g in reported.groupby(["symbol", "consolidated"])}
     prepared = _prepare(df)
     sheets = {}
     if "equity" in prepared:
@@ -117,9 +129,9 @@ def latest(df: pd.DataFrame) -> pd.DataFrame:
         now = bases[basis].loc[end]
         margin = (100 * now["net_profit"] / now["revenue"]
                   if now["revenue"] > 0 and pd.notna(now["net_profit"]) else None)
-        cagr = _cagr(bases[basis], end)
+        cagr = _cagr(reported.get((symbol, basis), bases[basis]), end)
         if cagr is None and (not basis) in bases:
-            cagr = _cagr(bases[not basis], end)
+            cagr = _cagr(reported.get((symbol, not basis), bases[not basis]), end)
         rows.append({"symbol": symbol, "as_of": end.date(), "consolidated": bool(basis),
                      "ttm_revenue": round(float(now["revenue"]), 1),
                      "ttm_net_profit": round(float(now["net_profit"]), 1) if pd.notna(now["net_profit"]) else None,
