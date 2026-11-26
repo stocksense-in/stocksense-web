@@ -5929,52 +5929,52 @@
     },
     {
      "period_end": "2025-03-31",
-     "revenue": 221360.2,
+     "revenue": 195270.3,
      "net_profit": 8123.6,
      "eps": 5.9,
-     "margin_pct": 3.7
+     "margin_pct": 4.2
     },
     {
      "period_end": "2025-06-30",
-     "revenue": 221849.0,
+     "revenue": 192340.6,
      "net_profit": 6813.7,
      "eps": 4.95,
-     "margin_pct": 3.1
+     "margin_pct": 3.5
     },
     {
      "period_end": "2025-09-30",
-     "revenue": 206447.1,
+     "revenue": 178628.1,
      "net_profit": 7817.6,
      "eps": 5.68,
-     "margin_pct": 3.8
+     "margin_pct": 4.4
     },
     {
      "period_end": "2025-12-31",
-     "revenue": 236257.2,
+     "revenue": 205157.4,
      "net_profit": 13006.9,
      "eps": 9.44,
-     "margin_pct": 5.5
+     "margin_pct": 6.3
     },
     {
      "period_end": "2026-03-31",
-     "revenue": 236899.3,
+     "revenue": 208289.3,
      "net_profit": 14458.1,
      "eps": 10.5,
-     "margin_pct": 6.1
+     "margin_pct": 6.9
     },
     {
      "period_end": "2026-06-30",
-     "revenue": 281933.1,
+     "revenue": 266407.3,
      "net_profit": -1630.7,
      "eps": -1.18,
      "margin_pct": -0.6
     },
     {
      "period_end": "2026-09-30",
-     "revenue": 268039.4,
+     "revenue": 253966.9,
      "net_profit": 21407.9,
      "eps": 15.54,
-     "margin_pct": 8.0
+     "margin_pct": 8.4
     }
    ],
    "years": [
@@ -6004,29 +6004,29 @@
     },
     {
      "fiscal_year": 2025,
-     "revenue": 859362.7,
+     "revenue": 833272.8,
      "net_profit": 13597.8,
      "margin_pct": 1.6
     },
     {
      "fiscal_year": 2026,
-     "revenue": 901452.7,
+     "revenue": 784415.4,
      "net_profit": 42096.3,
-     "margin_pct": 4.7
+     "margin_pct": 5.4
     }
    ],
    "margin_history": {
-    "now": 4.6,
+    "now": 5.1,
     "low": 1.2,
-    "median": 3.5,
-    "high": 5.3,
+    "median": 3.7,
+    "high": 5.4,
     "since": "2021-12-31",
-    "percentile": 75
+    "percentile": 81
    },
    "metrics": {
     "as_of": "2026-09-30",
-    "net_margin": 4.62,
-    "revenue_cagr_3yr": 4.61,
+    "net_margin": 5.06,
+    "revenue_cagr_3yr": 1.47,
     "roe": 21.96,
     "debt_equity": 0.6
    },
@@ -6054,7 +6054,7 @@
     {
      "period_end": "2025-03-31",
      "filed": "2025-04-30 19:09:32",
-     "revenue_yoy_pct": -1.02,
+     "revenue_yoy_pct": -12.69,
      "profit_yoy_pct": 57.78,
      "move_1d_pct": 3.93,
      "excess_1d_pct": 3.88,
@@ -6064,7 +6064,7 @@
     {
      "period_end": "2025-06-30",
      "filed": "2025-08-14 17:14:22",
-     "revenue_yoy_pct": 0.9,
+     "revenue_yoy_pct": -12.52,
      "profit_yoy_pct": 93.11,
      "move_1d_pct": 0.13,
      "excess_1d_pct": -0.87,
@@ -6074,7 +6074,7 @@
     {
      "period_end": "2025-09-30",
      "filed": "2025-10-27 19:19:23",
-     "revenue_yoy_pct": 3.94,
+     "revenue_yoy_pct": -10.06,
      "profit_yoy_pct": null,
      "move_1d_pct": -0.44,
      "excess_1d_pct": -0.32,
@@ -6084,7 +6084,7 @@
     {
      "period_end": "2025-12-31",
      "filed": "2026-02-05 15:30:10",
-     "revenue_yoy_pct": 7.62,
+     "revenue_yoy_pct": -6.54,
      "profit_yoy_pct": 514.9,
      "move_1d_pct": -0.32,
      "excess_1d_pct": -0.52,
@@ -6094,7 +6094,7 @@
     {
      "period_end": "2026-06-30",
      "filed": "2026-07-31 18:43:09",
-     "revenue_yoy_pct": 27.08,
+     "revenue_yoy_pct": 38.51,
      "profit_yoy_pct": -123.93,
      "move_1d_pct": 2.52,
      "excess_1d_pct": 0.92,
@@ -6104,7 +6104,7 @@
     {
      "period_end": "2026-09-30",
      "filed": "2026-10-30 18:48:06",
-     "revenue_yoy_pct": 29.83,
+     "revenue_yoy_pct": 42.18,
      "profit_yoy_pct": 173.84,
      "move_1d_pct": 3.41,
      "excess_1d_pct": 1.73,
@@ -6156,52 +6156,52 @@
     },
     {
      "period_end": "2025-03-31",
-     "revenue": 20376.4,
+     "revenue": 18765.0,
      "net_profit": 19727.4,
      "eps": 15.77,
-     "margin_pct": 96.8
+     "margin_pct": 105.1
     },
     {
      "period_end": "2025-06-30",
-     "revenue": 23129.3,
+     "revenue": 21494.8,
      "net_profit": 5244.2,
      "eps": 4.19,
-     "margin_pct": 22.7
+     "margin_pct": 24.4
     },
     {
      "period_end": "2025-09-30",
-     "revenue": 21255.9,
+     "revenue": 19501.6,
      "net_profit": 5126.1,
      "eps": 4.09,
-     "margin_pct": 24.1
+     "margin_pct": 26.3
     },
     {
      "period_end": "2025-12-31",
-     "revenue": 21706.6,
+     "revenue": 20047.3,
      "net_profit": 4931.2,
      "eps": 3.94,
-     "margin_pct": 22.7
+     "margin_pct": 24.6
     },
     {
      "period_end": "2026-03-31",
-     "revenue": 23821.5,
+     "revenue": 17824.7,
      "net_profit": 5388.0,
      "eps": 4.3,
-     "margin_pct": 22.6
+     "margin_pct": 30.2
     },
     {
      "period_end": "2026-06-30",
-     "revenue": 29523.3,
+     "revenue": 19114.4,
      "net_profit": 4394.1,
      "eps": 3.51,
-     "margin_pct": 14.9
+     "margin_pct": 23.0
     },
     {
      "period_end": "2026-09-30",
-     "revenue": 30578.4,
+     "revenue": 20268.6,
      "net_profit": 4168.4,
      "eps": 3.32,
-     "margin_pct": 13.6
+     "margin_pct": 20.6
     }
    ],
    "years": [
@@ -6231,29 +6231,29 @@
     },
     {
      "fiscal_year": 2025,
-     "revenue": 83037.8,
+     "revenue": 81426.4,
      "net_profit": 34746.6,
-     "margin_pct": 41.8
+     "margin_pct": 42.7
     },
     {
      "fiscal_year": 2026,
-     "revenue": 89913.3,
+     "revenue": 78868.4,
      "net_profit": 20689.5,
-     "margin_pct": 23.0
+     "margin_pct": 26.2
     }
    ],
    "margin_history": {
-    "now": 17.9,
-    "low": 17.9,
-    "median": 25.2,
-    "high": 41.8,
+    "now": 24.4,
+    "low": 23.1,
+    "median": 26.0,
+    "high": 43.9,
     "since": "2021-12-31",
-    "percentile": 0
+    "percentile": 25
    },
    "metrics": {
     "as_of": "2026-09-30",
-    "net_margin": 17.88,
-    "revenue_cagr_3yr": 11.6,
+    "net_margin": 24.44,
+    "revenue_cagr_3yr": 0.55,
     "roe": 26.51,
     "debt_equity": 0.003
    },
@@ -6271,7 +6271,7 @@
     {
      "period_end": "2025-03-31",
      "filed": "2025-05-22 18:18:43",
-     "revenue_yoy_pct": 4.78,
+     "revenue_yoy_pct": -3.5,
      "profit_yoy_pct": 285.26,
      "move_1d_pct": 2.39,
      "excess_1d_pct": 1.4,
@@ -6281,7 +6281,7 @@
     {
      "period_end": "2025-06-30",
      "filed": "2025-08-01 17:43:07",
-     "revenue_yoy_pct": 15.48,
+     "revenue_yoy_pct": 7.32,
      "profit_yoy_pct": 3.0,
      "move_1d_pct": 0.1,
      "excess_1d_pct": -0.54,
@@ -6291,7 +6291,7 @@
     {
      "period_end": "2025-09-30",
      "filed": "2025-10-30 18:06:34",
-     "revenue_yoy_pct": -4.6,
+     "revenue_yoy_pct": -12.48,
      "profit_yoy_pct": 2.67,
      "move_1d_pct": 0.38,
      "excess_1d_pct": 0.98,
@@ -6301,7 +6301,7 @@
     {
      "period_end": "2025-12-31",
      "filed": "2026-01-29 18:52:05",
-     "revenue_yoy_pct": 6.67,
+     "revenue_yoy_pct": -1.49,
      "profit_yoy_pct": -0.07,
      "move_1d_pct": 1.11,
      "excess_1d_pct": 1.5,
@@ -6311,7 +6311,7 @@
     {
      "period_end": "2026-03-31",
      "filed": "2026-05-21 18:32:13",
-     "revenue_yoy_pct": 16.91,
+     "revenue_yoy_pct": -5.01,
      "profit_yoy_pct": -72.69,
      "move_1d_pct": -2.06,
      "excess_1d_pct": -2.33,
@@ -6321,7 +6321,7 @@
     {
      "period_end": "2026-06-30",
      "filed": "2026-07-31 17:23:35",
-     "revenue_yoy_pct": 27.64,
+     "revenue_yoy_pct": -11.07,
      "profit_yoy_pct": -16.21,
      "move_1d_pct": 2.14,
      "excess_1d_pct": 0.53,
@@ -6331,7 +6331,7 @@
     {
      "period_end": "2026-09-30",
      "filed": "2026-11-02 18:55:40",
-     "revenue_yoy_pct": 43.86,
+     "revenue_yoy_pct": 3.93,
      "profit_yoy_pct": -18.68,
      "move_1d_pct": 2.82,
      "excess_1d_pct": 1.24,
@@ -8740,49 +8740,49 @@
     },
     {
      "period_end": "2025-03-31",
-     "revenue": 264573.0,
+     "revenue": 261388.0,
      "net_profit": 19407.0,
      "eps": 14.34,
-     "margin_pct": 7.3
+     "margin_pct": 7.4
     },
     {
      "period_end": "2025-06-30",
-     "revenue": 248660.0,
+     "revenue": 243632.0,
      "net_profit": 26994.0,
      "eps": 19.95,
-     "margin_pct": 10.9
+     "margin_pct": 11.1
     },
     {
      "period_end": "2025-09-30",
-     "revenue": 258898.0,
+     "revenue": 254623.0,
      "net_profit": 18165.0,
      "eps": 13.42,
-     "margin_pct": 7.0
+     "margin_pct": 7.1
     },
     {
      "period_end": "2025-12-31",
-     "revenue": 269496.0,
+     "revenue": 264905.0,
      "net_profit": 18645.0,
      "eps": 13.78,
-     "margin_pct": 6.9
+     "margin_pct": 7.0
     },
     {
      "period_end": "2026-03-31",
-     "revenue": 298621.0,
+     "revenue": 294059.0,
      "net_profit": 16971.0,
      "eps": 12.54,
-     "margin_pct": 5.7
+     "margin_pct": 5.8
     },
     {
      "period_end": "2026-06-30",
-     "revenue": 311850.0,
+     "revenue": 309468.0,
      "net_profit": 20946.0,
      "eps": 15.48,
-     "margin_pct": 6.7
+     "margin_pct": 6.8
     },
     {
      "period_end": "2026-09-30",
-     "revenue": 332861.0,
+     "revenue": 330601.0,
      "net_profit": 25548.0,
      "eps": 18.88,
      "margin_pct": 7.7
@@ -8815,20 +8815,20 @@
     },
     {
      "fiscal_year": 2025,
-     "revenue": 980136.0,
+     "revenue": 976951.0,
      "net_profit": 69648.0,
      "margin_pct": 7.1
     },
     {
      "fiscal_year": 2026,
-     "revenue": 1075675.0,
+     "revenue": 1057219.0,
      "net_profit": 80775.0,
-     "margin_pct": 7.5
+     "margin_pct": 7.6
     }
    ],
    "margin_history": {
     "now": 6.8,
-    "low": 6.6,
+    "low": 6.7,
     "median": 7.5,
     "high": 8.7,
     "since": "2021-12-31",
@@ -8836,8 +8836,8 @@
    },
    "metrics": {
     "as_of": "2026-09-30",
-    "net_margin": 6.77,
-    "revenue_cagr_3yr": 11.17,
+    "net_margin": 6.85,
+    "revenue_cagr_3yr": 10.75,
     "roe": 9.01,
     "debt_equity": 0.408
    },
@@ -8855,7 +8855,7 @@
     {
      "period_end": "2025-03-31",
      "filed": "2025-04-25 21:56:50",
-     "revenue_yoy_pct": 9.91,
+     "revenue_yoy_pct": 8.59,
      "profit_yoy_pct": 2.41,
      "move_1d_pct": 5.26,
      "excess_1d_pct": 4.06,
@@ -8865,7 +8865,7 @@
     {
      "period_end": "2025-06-30",
      "filed": "2025-07-18 20:15:17",
-     "revenue_yoy_pct": 5.27,
+     "revenue_yoy_pct": 3.14,
      "profit_yoy_pct": 78.32,
      "move_1d_pct": -3.21,
      "excess_1d_pct": -3.7,
@@ -8875,7 +8875,7 @@
     {
      "period_end": "2025-09-30",
      "filed": "2025-10-17 19:36:07",
-     "revenue_yoy_pct": 9.94,
+     "revenue_yoy_pct": 8.13,
      "profit_yoy_pct": 9.67,
      "move_1d_pct": 3.53,
      "excess_1d_pct": 3.01,
@@ -8885,7 +8885,7 @@
     {
      "period_end": "2025-12-31",
      "filed": "2026-01-16 19:38:13",
-     "revenue_yoy_pct": 10.51,
+     "revenue_yoy_pct": 8.63,
      "profit_yoy_pct": 0.57,
      "move_1d_pct": -3.04,
      "excess_1d_pct": -2.61,
@@ -8895,7 +8895,7 @@
     {
      "period_end": "2026-03-31",
      "filed": "2026-04-24 22:56:47",
-     "revenue_yoy_pct": 12.87,
+     "revenue_yoy_pct": 12.5,
      "profit_yoy_pct": -12.55,
      "move_1d_pct": 2.86,
      "excess_1d_pct": 2.05,
@@ -8905,7 +8905,7 @@
     {
      "period_end": "2026-06-30",
      "filed": "2026-07-17 19:49:04",
-     "revenue_yoy_pct": 25.41,
+     "revenue_yoy_pct": 27.02,
      "profit_yoy_pct": -22.4,
      "move_1d_pct": -0.31,
      "excess_1d_pct": 0.08,
@@ -8915,7 +8915,7 @@
     {
      "period_end": "2026-09-30",
      "filed": "2026-10-30 21:32:05",
-     "revenue_yoy_pct": 28.57,
+     "revenue_yoy_pct": 29.84,
      "profit_yoy_pct": 40.64,
      "move_1d_pct": 11.6,
      "excess_1d_pct": 9.92,
