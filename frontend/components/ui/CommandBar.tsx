@@ -14,7 +14,7 @@ const PAGE_COMMANDS: { codes: string[]; page: Page; label: string }[] = [
   { codes: ['RHP'], page: 'rhp', label: 'Prospectus scanner' },
   { codes: ['PT'], page: 'paper', label: 'Paper trading' },
   { codes: ['ANA', 'STOCK'], page: 'analysis', label: 'Stock analysis' },
-  { codes: ['MF'], page: 'mf', label: 'Mutual funds' },
+  { codes: ['LEARN', 'HELP'], page: 'learn', label: 'Learn the metrics' },
   { codes: ['NICHE'], page: 'premium', label: 'Niche stocks' },
   { codes: ['PROF'], page: 'profile', label: 'Investment profile' },
 ];

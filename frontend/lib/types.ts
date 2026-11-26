@@ -8,7 +8,8 @@ export type Page =
   | 'screener'
   | 'premium'
   | 'profile'
-  | 'mf';
+  | 'mf'
+  | 'learn';
 
 export type Sector = 'it' | 'bank' | 'auto' | 'newage' | 'fmcg' | 'pharma' | 'defence' | 'nbfc' | 'electronics';
 

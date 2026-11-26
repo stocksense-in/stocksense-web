@@ -13,6 +13,7 @@ import { PremiumPage } from '@/components/sections/PremiumPage';
 import { ProfilePage } from '@/components/sections/ProfilePage';
 import { PaperTradingPage } from '@/components/sections/PaperTradingPage';
 import { RHPPage } from '@/components/sections/RHPPage';
+import { LearnPage } from '@/components/sections/LearnPage';
 import { useRouter } from 'next/navigation';
 import { Constellation } from '@/components/landing/Constellation';
 import { CustomCursor } from '@/components/landing/CustomCursor';
@@ -78,7 +79,7 @@ export default function StockSensePage({
     const routeMap: Record<Page, string> = {
       dashboard: '/dashboard', analysis: '/analysis', ipo: '/ipo',
       paper: '/paper-trading', rhp: '/rhp-analyser', geo: '/geopolitics-engine',
-      screener: '/screener', premium: '/premium', profile: '/profile', mf: '/mf',
+      screener: '/screener', premium: '/premium', profile: '/profile', mf: '/mf', learn: '/learn',
     };
     router.push(routeMap[page] + query);
   };
@@ -305,6 +306,7 @@ export default function StockSensePage({
               {activePage === 'profile'    && <ProfilePage onNav={navTo} />}
               {activePage === 'paper'      && <PaperTradingPage />}
               {activePage === 'rhp'        && <RHPPage />}
+              {activePage === 'learn'      && <LearnPage />}
             </div>
           </div>
         </div>

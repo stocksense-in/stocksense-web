@@ -252,6 +252,13 @@ export const ALERT_LABEL: Record<string, string> = {
 
 export interface CompanyHeadline { title: string; link: string; source: string; published: string | null }
 
+export interface LearnMetric {
+  metric: string; label: string; measures: string; higher_is_better: boolean; weight: number;
+  healthy_range: string | null; peers: PeerStanding | null; watch_for: string | null;
+}
+
+export interface LearnMetrics { sector: string; sector_label: string; market_note: string | null; stages: Record<string, string>; metrics: LearnMetric[] }
+
 export interface ScreenPage {
   total: number;
   page: number;
@@ -290,6 +297,7 @@ export const api = {
   indices: (signal?: AbortSignal) => get<IndexQuote[]>('/market/indices', signal),
   overview: (signal?: AbortSignal) => get<Overview>('/market/overview', signal),
   news: (q: { topic?: string; sector?: string; limit?: number } = {}, signal?: AbortSignal) => get<NewsEvent[]>(`/news${qs(q)}`, signal),
+  learn: (sector = 'general', signal?: AbortSignal) => get<LearnMetrics>(`/learn/metrics?sector=${encodeURIComponent(sector)}`, signal),
   prospectusRules: (signal?: AbortSignal) => get<ScanRule[]>('/prospectus/rules', signal),
   ipos: (signal?: AbortSignal) => get<IpoBoard>('/ipos', signal),
   listings: (signal?: AbortSignal) => get<Listing[]>('/ipos/listings', signal),
