@@ -402,6 +402,7 @@ nav.land-nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-i
   .g2,.g3,.split{grid-template-columns:minmax(0,1fr) !important;}
   .g4,.idx-strip{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
   .mc-grid{grid-template-columns:minmax(0,1fr);}
+  .nav-links{display:none;}
 }
 @media (max-width:560px){
   .tb-r .btn-ghost{display:none;}
