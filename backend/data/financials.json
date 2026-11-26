@@ -137,7 +137,8 @@
     "median": 4.0,
     "high": 11.5,
     "since": "2021-12-31",
-    "percentile": 56
+    "percentile": 56,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -364,7 +365,8 @@
     "median": 12.4,
     "high": 15.7,
     "since": "2021-12-31",
-    "percentile": 67
+    "percentile": 67,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -591,7 +593,8 @@
     "median": 32.2,
     "high": 35.7,
     "since": "2021-12-31",
-    "percentile": 45
+    "percentile": 45,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -818,7 +821,8 @@
     "median": 25.0,
     "high": 49.4,
     "since": "2021-12-31",
-    "percentile": 65
+    "percentile": 65,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -1045,7 +1049,8 @@
     "median": 12.4,
     "high": 15.4,
     "since": "2021-12-31",
-    "percentile": 50
+    "percentile": 50,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -1272,7 +1277,8 @@
     "median": 30.9,
     "high": 34.9,
     "since": "2021-12-31",
-    "percentile": 60
+    "percentile": 60,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -1499,7 +1505,8 @@
     "median": 16.7,
     "high": 18.6,
     "since": "2021-12-31",
-    "percentile": 38
+    "percentile": 38,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -1726,7 +1733,8 @@
     "median": 8.4,
     "high": 9.3,
     "since": "2021-12-31",
-    "percentile": 25
+    "percentile": 25,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -1953,7 +1961,8 @@
     "median": 37.3,
     "high": 40.4,
     "since": "2021-12-31",
-    "percentile": 30
+    "percentile": 30,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -2180,7 +2189,8 @@
     "median": 21.1,
     "high": 23.0,
     "since": "2021-12-31",
-    "percentile": 50
+    "percentile": 50,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -2407,7 +2417,8 @@
     "median": 6.3,
     "high": 19.8,
     "since": "2021-12-31",
-    "percentile": 70
+    "percentile": 70,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -2634,7 +2645,8 @@
     "median": 20.9,
     "high": 25.1,
     "since": "2021-09-30",
-    "percentile": 30
+    "percentile": 30,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-06-30",
@@ -2861,7 +2873,8 @@
     "median": 24.0,
     "high": 33.6,
     "since": "2021-12-31",
-    "percentile": 70
+    "percentile": 70,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -3088,7 +3101,8 @@
     "median": 4.9,
     "high": 6.0,
     "since": "2021-12-31",
-    "percentile": 0
+    "percentile": 0,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -3315,7 +3329,8 @@
     "median": 23.3,
     "high": 25.1,
     "since": "2021-12-31",
-    "percentile": 35
+    "percentile": 35,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -3536,7 +3551,8 @@
     "median": 0.6,
     "high": 4.7,
     "since": "2022-03-31",
-    "percentile": 53
+    "percentile": 53,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -3763,7 +3779,8 @@
     "median": 4.1,
     "high": 7.9,
     "since": "2021-12-31",
-    "percentile": 0
+    "percentile": 0,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -3990,7 +4007,8 @@
     "median": 25.7,
     "high": 27.6,
     "since": "2021-12-31",
-    "percentile": 90
+    "percentile": 90,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -4217,7 +4235,8 @@
     "median": 14.5,
     "high": 15.8,
     "since": "2021-12-31",
-    "percentile": 15
+    "percentile": 15,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -4444,7 +4463,8 @@
     "median": 25.4,
     "high": 36.4,
     "since": "2021-12-31",
-    "percentile": 45
+    "percentile": 45,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -4671,7 +4691,8 @@
     "median": 5.8,
     "high": 7.1,
     "since": "2021-12-31",
-    "percentile": 50
+    "percentile": 50,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -4898,7 +4919,8 @@
     "median": 16.9,
     "high": 22.9,
     "since": "2021-12-31",
-    "percentile": 80
+    "percentile": 80,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -5113,7 +5135,8 @@
     "median": 30.4,
     "high": 39.0,
     "since": "2022-09-30",
-    "percentile": 94
+    "percentile": 94,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -5340,7 +5363,8 @@
     "median": 24.9,
     "high": 27.4,
     "since": "2021-12-31",
-    "percentile": 50
+    "percentile": 50,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -5567,7 +5591,8 @@
     "median": 5.0,
     "high": 11.9,
     "since": "2021-12-31",
-    "percentile": 30
+    "percentile": 30,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -5794,7 +5819,8 @@
     "median": 16.6,
     "high": 18.6,
     "since": "2021-12-31",
-    "percentile": 10
+    "percentile": 10,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -6016,17 +6042,18 @@
     }
    ],
    "margin_history": {
-    "now": 5.1,
+    "now": 4.6,
     "low": 1.2,
-    "median": 3.7,
-    "high": 5.4,
+    "median": 3.5,
+    "high": 5.3,
     "since": "2021-12-31",
-    "percentile": 81
+    "percentile": 75,
+    "includes_excise": true
    },
    "metrics": {
     "as_of": "2026-09-30",
     "net_margin": 5.06,
-    "revenue_cagr_3yr": 1.47,
+    "revenue_cagr_3yr": 4.61,
     "roe": 21.96,
     "debt_equity": 0.6
    },
@@ -6243,17 +6270,18 @@
     }
    ],
    "margin_history": {
-    "now": 24.4,
-    "low": 23.1,
-    "median": 26.0,
-    "high": 43.9,
+    "now": 17.9,
+    "low": 17.9,
+    "median": 25.2,
+    "high": 41.8,
     "since": "2021-12-31",
-    "percentile": 25
+    "percentile": 0,
+    "includes_excise": true
    },
    "metrics": {
     "as_of": "2026-09-30",
     "net_margin": 24.44,
-    "revenue_cagr_3yr": 0.55,
+    "revenue_cagr_3yr": 11.6,
     "roe": 26.51,
     "debt_equity": 0.003
    },
@@ -6475,7 +6503,8 @@
     "median": 4.6,
     "high": 17.1,
     "since": "2021-12-31",
-    "percentile": 88
+    "percentile": 88,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -6702,7 +6731,8 @@
     "median": 25.4,
     "high": 29.6,
     "since": "2021-12-31",
-    "percentile": 50
+    "percentile": 50,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -7074,7 +7104,8 @@
     "median": 5.9,
     "high": 6.1,
     "since": "2021-12-31",
-    "percentile": 69
+    "percentile": 69,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -7301,7 +7332,8 @@
     "median": 8.3,
     "high": 9.1,
     "since": "2021-12-31",
-    "percentile": 85
+    "percentile": 85,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -7528,7 +7560,8 @@
     "median": 8.4,
     "high": 10.1,
     "since": "2021-12-31",
-    "percentile": 35
+    "percentile": 35,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -7755,7 +7788,8 @@
     "median": 2.8,
     "high": 3.7,
     "since": "2021-12-31",
-    "percentile": 85
+    "percentile": 85,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -8151,7 +8185,8 @@
     "median": 11.9,
     "high": 14.8,
     "since": "2021-12-31",
-    "percentile": 95
+    "percentile": 95,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -8378,7 +8413,8 @@
     "median": 6.2,
     "high": 9.1,
     "since": "2021-12-31",
-    "percentile": 69
+    "percentile": 69,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -8605,7 +8641,8 @@
     "median": 34.1,
     "high": 40.4,
     "since": "2021-12-31",
-    "percentile": 60
+    "percentile": 60,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -8828,16 +8865,17 @@
    ],
    "margin_history": {
     "now": 6.8,
-    "low": 6.7,
+    "low": 6.6,
     "median": 7.5,
     "high": 8.7,
     "since": "2021-12-31",
-    "percentile": 6
+    "percentile": 6,
+    "includes_excise": true
    },
    "metrics": {
     "as_of": "2026-09-30",
     "net_margin": 6.85,
-    "revenue_cagr_3yr": 10.75,
+    "revenue_cagr_3yr": 11.17,
     "roe": 9.01,
     "debt_equity": 0.408
    },
@@ -9059,7 +9097,8 @@
     "median": 21.2,
     "high": 22.3,
     "since": "2021-12-31",
-    "percentile": 88
+    "percentile": 88,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -9286,7 +9325,8 @@
     "median": 35.8,
     "high": 41.1,
     "since": "2021-12-31",
-    "percentile": 85
+    "percentile": 85,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -9513,7 +9553,8 @@
     "median": 12.5,
     "high": 17.7,
     "since": "2021-12-31",
-    "percentile": 94
+    "percentile": 94,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -9740,7 +9781,8 @@
     "median": 19.3,
     "high": 22.2,
     "since": "2021-12-31",
-    "percentile": 12
+    "percentile": 12,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -9967,7 +10009,8 @@
     "median": 1.8,
     "high": 16.5,
     "since": "2021-12-31",
-    "percentile": 81
+    "percentile": 81,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -10194,7 +10237,8 @@
     "median": 19.0,
     "high": 20.4,
     "since": "2021-12-31",
-    "percentile": 5
+    "percentile": 5,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -10421,7 +10465,8 @@
     "median": 6.9,
     "high": 8.6,
     "since": "2021-12-31",
-    "percentile": 60
+    "percentile": 60,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -10648,7 +10693,8 @@
     "median": 15.3,
     "high": 17.8,
     "since": "2021-12-31",
-    "percentile": 6
+    "percentile": 6,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -10875,7 +10921,8 @@
     "median": 4.6,
     "high": 5.8,
     "since": "2021-12-31",
-    "percentile": 94
+    "percentile": 94,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
@@ -11102,7 +11149,8 @@
     "median": 9.2,
     "high": 14.0,
     "since": "2021-12-31",
-    "percentile": 44
+    "percentile": 44,
+    "includes_excise": false
    },
    "metrics": {
     "as_of": "2026-09-30",
