@@ -41,6 +41,7 @@ MAX_CONCURRENT_SCANS = 2  # PDF text extraction is CPU-heavy; don't let a burst 
 ANALOGUES_PATH = DATA_DIR / "geo_analogues.json"  # written by `python -m stocksense event-study`
 VALUATION_PATH = DATA_DIR / "valuation_context.json"  # written by `python -m stocksense valuation-context`
 FINANCIALS_PATH = DATA_DIR / "financials.json"  # written by `python -m stocksense financials-export`
+ALERTS_PATH = DATA_DIR / "alerts.json"  # written daily by `python -m stocksense alerts-export`
 HOLDERS_PATH = DATA_DIR / "holders.json"  # written by `python -m stocksense holders-export`
 DIVIDENDS_PATH = DATA_DIR / "dividends.json"  # written by `python -m stocksense dividends-export`
 BENCHMARKS_TTL_SECONDS = 5 * 60  # peer quartiles change only when fundamentals do
@@ -108,6 +109,11 @@ def load_holders(path: Path = HOLDERS_PATH) -> dict | None:
     return _load_json(path)
 
 
+def load_alerts(path: Path = ALERTS_PATH) -> dict | None:
+    """Recent alerts for every company (backend/data/alerts.json)."""
+    return _load_json(path)
+
+
 def load_dividends(path: Path = DIVIDENDS_PATH) -> dict | None:
     """Dividends and capital actions (backend/data/dividends.json)."""
     return _load_json(path)
@@ -131,6 +137,7 @@ def create_app(
     holders: Callable[[], dict | None] | None = None,
     dividends: Callable[[], dict | None] | None = None,
     company_headlines: Callable[[str], list[news.Headline]] | None = None,
+    alerts: Callable[[], dict | None] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -156,6 +163,7 @@ def create_app(
     app.state.market = market or MarketData()
     app.state.headlines = headlines or news.fetch_headlines
     app.state.company_headlines = company_headlines or news.fetch_company_headlines
+    app.state.alerts = alerts or load_alerts
     app.state.history = history or chart.history
     app.state.cache = TTLCache()
     app.state.nse = nse
@@ -235,13 +243,20 @@ def create_app(
         order: Literal["asc", "desc"] | None = Query(None, description="Defaults to the natural order for `sort`"),
         page: int = Query(1, ge=1),
         page_size: int = Query(50, ge=1, le=200),
+        symbols: str | None = Query(None, description="Only these comma-separated symbols (a watchlist), up to 100"),
     ):
         """The screener: every NSE stock passing the filters, sorted and paginated."""
         filters = analytics.ScreenFilters(
             sector=sector, cap=cap, min_score=min_score, max_pe=max_pe, min_roe=min_roe, max_de=max_de,
             sort=sort, descending=None if order is None else order == "desc",
         )
-        rows = analytics.screen(market_of(request).fresh_stocks(), filters)
+        stocks = market_of(request).fresh_stocks()
+        if symbols:
+            wanted = {x.strip().upper() for x in symbols.split(",") if x.strip()}
+            if len(wanted) > 100:
+                raise HTTPException(422, "Ask for at most 100 symbols at a time.")
+            stocks = [st for st in market_of(request).stocks() if st.symbol in wanted]
+        rows = analytics.screen(stocks, filters)
         start = (page - 1) * page_size
         return schemas.ScreenPage(
             total=len(rows), page=page, page_size=page_size,
@@ -319,6 +334,23 @@ def create_app(
             raise HTTPException(404, f"No shareholding filings for {symbol.upper()} yet")
         return {"symbol": symbol.upper(), "source": request.app.state.holders()["source"], **entry,
                 "trend_note": own.trend_note(entry), "pledge_warning": own.pledge_warning(entry)}
+
+    @app.get("/alerts", response_model=schemas.Alerts, tags=["stocks"])
+    def recent_alerts(
+        request: Request,
+        symbols: str | None = Query(None, description="Comma-separated NSE symbols, e.g. a watchlist: INFY,TCS"),
+        kind: str | None = Query(None, description="price_move | unusual_volume | results_filed | large_order | promoter_stake | pledge_change"),
+        days: int = Query(10, ge=1, le=30, description="Most recent trading sessions to include"),
+        limit: int = Query(200, ge=1, le=1000),
+    ):
+        """What happened to companies over the last few sessions: big moves, unusual volume, results, orders, stake and pledge changes."""
+        doc = request.app.state.alerts() or {}
+        keep_days = set((doc.get("days") or [])[:days])
+        wanted = {s.strip().upper() for s in symbols.split(",") if s.strip()} if symbols else None
+        rows = [a for a in doc.get("alerts") or []
+                if a.get("date") in keep_days and (wanted is None or a.get("symbol") in wanted) and (kind is None or a.get("kind") == kind)]
+        rows.sort(key=lambda a: a.get("date") or "", reverse=True)  # newest day first; rule order kept within a day
+        return {"generated_at": doc.get("generated_at"), "days": sorted(keep_days, reverse=True), "alerts": rows[:limit]}
 
     @app.get("/stocks/{symbol}/news", response_model=list[schemas.CompanyHeadline], tags=["stocks"])
     def stock_news(request: Request, symbol: str, limit: int = Query(20, ge=1, le=50)):

@@ -283,6 +283,20 @@ class SectorEffect(BaseModel):
     label: str
 
 
+class Alert(BaseModel):
+    date: str
+    symbol: str
+    kind: str = Field(description="price_move | unusual_volume | results_filed | large_order | promoter_stake | pledge_change")
+    value: float | None
+    text: str = Field(description="What happened, written for a beginner")
+
+
+class Alerts(BaseModel):
+    generated_at: str | None
+    days: list[str] = Field(description="Trading sessions covered, newest first")
+    alerts: list[Alert]
+
+
 class CompanyHeadline(BaseModel):
     title: str
     link: str
