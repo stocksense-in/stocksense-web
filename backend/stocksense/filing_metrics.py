@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from datetime import date
 
+import numpy as np
 import pandas as pd
 
 MAX_AGE_DAYS = 200      # a quarter's results are due within 45–60 days; 200 means a missed filing
@@ -144,7 +145,11 @@ def latest(df: pd.DataFrame) -> pd.DataFrame:
 
 def with_promoter(metrics: pd.DataFrame, shareholding: pd.DataFrame) -> pd.DataFrame:
     """Add promoter holding from the latest filed shareholding pattern (M1.3). Companies with
-    a pattern but no results get a row of their own, dated by the pattern's quarter."""
+    a pattern but no results get a row of their own, dated by the pattern's quarter.
+
+    A company whose pattern shows no promoter group at all (banks under RBI's caps, ITC, L&T,
+    platform companies) gets `no_promoter_group` and no promoter value: the metric doesn't
+    apply to it, so the score leaves it out instead of reading 0% as weak."""
     if shareholding is None or not len(shareholding):
         return metrics
     sh = shareholding.copy()
@@ -152,9 +157,17 @@ def with_promoter(metrics: pd.DataFrame, shareholding: pd.DataFrame) -> pd.DataF
     latest = (sh.dropna(subset=["promoter_pct"]).sort_values("quarter_end").groupby("symbol").last()
                 .reset_index()[["symbol", "quarter_end", "promoter_pct"]]
                 .rename(columns={"promoter_pct": "promoter_holding", "quarter_end": "promoter_as_of"}))
+    latest["no_promoter_group"] = latest["promoter_holding"] <= 0
+    latest["promoter_holding"] = latest["promoter_holding"].where(~latest["no_promoter_group"])
     out = metrics.merge(latest, on="symbol", how="outer")
     out["as_of"] = out["as_of"].where(out["as_of"].notna(), out["promoter_as_of"])
+    out["no_promoter_group"] = out["no_promoter_group"].eq(True)  # companies without a pattern: False
     return out.drop(columns="promoter_as_of")
+
+
+def _flag(value) -> bool:
+    """True for True or numpy's True; False for anything else, NaN included."""
+    return isinstance(value, (bool, np.bool_)) and bool(value)
 
 
 def overlay(rows: list[dict], metrics: pd.DataFrame, only: list[str] | None = None) -> tuple[list[dict], int]:
@@ -170,7 +183,9 @@ def overlay(rows: list[dict], metrics: pd.DataFrame, only: list[str] | None = No
             continue
         new = dict(row)
         for column in columns:
-            if m.get(column) is not None and pd.notna(m.get(column)):
+            if column == COLUMNS["promoter"] and _flag(m.get("no_promoter_group")):
+                new[column] = None  # no promoter group: the metric doesn't apply
+            elif m.get(column) is not None and pd.notna(m.get(column)):
                 new[column] = m[column]
         replaced += 1
         out.append(new)

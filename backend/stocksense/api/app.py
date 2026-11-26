@@ -55,17 +55,31 @@ def _stock_out(s: Stock) -> schemas.StockOut:
     return schemas.StockOut(**s.to_dict(), sector_label=SECTOR_LABELS.get(s.sector, "Other"))
 
 
-def _coverage_note(score: int | None, missing: list[str]) -> str | None:
+NO_PROMOTER_NOTE = ("Its filings show no promoter group: it is owned by institutions and the public, which is normal for "
+                    "banks and widely held companies. The score still counts this figure for now.")
+NOT_APPLICABLE_NOTE = ("Promoter holding isn't scored: the company has no promoter group (it is owned by institutions and "
+                       "the public), so the other metrics carry its weight.")
+
+
+def _no_promoter_group(holders: dict | None) -> bool:
+    """The latest filed shareholding pattern shows no promoter group."""
+    quarters = (holders or {}).get("quarters") or []
+    return bool(quarters) and quarters[-1].get("promoter_pct") is not None and quarters[-1]["promoter_pct"] <= 0
+
+
+def _coverage_note(score: int | None, missing: list[str], not_applicable: list[str] | None = None) -> str | None:
     """Plain words for a score built on fewer than six metrics."""
     if not missing:
-        return None
+        return NOT_APPLICABLE_NOTE if not_applicable else None
     names = ", ".join(m[0].lower() + m[1:] if not m.isupper() and not m[:3].isupper() else m for m in missing)
     if score is None:
         return f"Not enough data to score this company (missing: {names})."
-    return (f"This score uses {6 - len(missing)} of 6 metrics — {names} isn't available, so the others carry "
+    total = 6 - len(not_applicable or [])
+    text = (f"This score uses {total - len(missing)} of {total} metrics — {names} isn't available, so the others carry "
             "its weight. Treat it as a rougher guide." if len(missing) == 1 else
-            f"This score uses {6 - len(missing)} of 6 metrics — missing: {names}. The others carry their weight, "
+            f"This score uses {total - len(missing)} of {total} metrics — missing: {names}. The others carry their weight, "
             "so treat it as a rougher guide.")
+    return f"{text} {NOT_APPLICABLE_NOTE}" if not_applicable else text
 
 
 def _verdict(score: int | None) -> str | None:
@@ -391,15 +405,22 @@ def create_app(
         coverage = score_stock(metrics, stock.sector).coverage
         stage = benchmarks.stage(stock)
         financials, holders = _financials_of(request, stock.symbol), _holders_of(request, stock.symbol)
+        no_group = _no_promoter_group(holders)
+        not_applicable = [GUIDE["promoter"]["label"]] if no_group and stock.promoter is None else []
+        missing = [GUIDE[k]["label"] for k, v in metrics.items() if v is None and GUIDE[k]["label"] not in not_applicable]
+        breakdown = analytics.score_breakdown(stock, _benchmarks(request), request.app.state.valuation(), holders, financials)
+        if no_group:
+            for part in breakdown:
+                if part["metric"] == "promoter" and not part.get("note"):
+                    part["note"] = NO_PROMOTER_NOTE
         return schemas.StockDetail(
             stock=_stock_out(stock),
             score=schemas.ScoreDetail(
                 value=stock.score, verdict=_verdict(stock.score), coverage=coverage,
-                missing=(missing := [GUIDE[k]["label"] for k, v in metrics.items() if v is None]),
-                coverage_note=_coverage_note(stock.score, missing),
+                missing=missing, not_applicable=not_applicable,
+                coverage_note=_coverage_note(stock.score, missing, not_applicable),
                 stage=stage, stage_text=benchmarks.STAGE_TEXT.get(stage),
-                breakdown=analytics.score_breakdown(stock, _benchmarks(request), request.app.state.valuation(),
-                                                    holders, financials),
+                breakdown=breakdown,
             ),
             peers=[_stock_out(s) for s in analytics.peers(m.fresh_stocks(), stock, peers)] if peers else [],
             available=schemas.Available(financials=financials is not None, holders=holders is not None,
