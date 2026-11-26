@@ -60,7 +60,7 @@ SHAREHOLDING_RESTS = 6  # NSE throttles long runs; rest and resume up to this ma
 
 
 def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
-    from . import (event_study, ingest_bhavcopy, ingest_corporate_actions, ingest_filings, ingest_fno,
+    from . import (event_study, ingest_bhavcopy, ingest_corporate_actions, ingest_filings, ingest_fno, ingest_india_macro,
                    ingest_gdelt, ingest_market, ingest_results, ingest_shareholding)
 
     start = today - timedelta(days=days)
@@ -74,6 +74,7 @@ def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
         Step("alerts_export", lambda: alerts.write(lake)),
         Step("corporate_actions", lambda: ingest_corporate_actions.run(lake=lake, today=today), weekly=True),
         Step("dividends_export", lambda: dividends.write(lake), weekly=True),
+        Step("india_macro", lambda: ingest_india_macro.run(lake=lake, today=today), weekly=True),
         Step("event_study", lambda: event_study.run(lake=lake), weekly=True),
         Step("valuation_context", lambda: valuation.write(lake), weekly=True),
         # Results arrive quarterly; weekly picks up each filing within days, fetching only new ones.

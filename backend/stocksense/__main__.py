@@ -27,6 +27,7 @@ Jobs
     financials-export  quarterly + yearly results from filings → data/financials.json  (weekly)
     holders-export     promoter holding over time + pledges → data/holders.json  (weekly)
     alerts-export      alerts over the last 10 sessions, every company → data/alerts.json  (daily)
+    ingest-india-macro RBI repo rate, CPI, IIP, forex reserves, 10y yield (with release dates) → lake  (weekly)
     dividends-export   dividends by year + splits/bonuses → data/dividends.json  (weekly)
     alerts         what happened to companies on a day: big moves, volume, results, orders, stakes, pledges
     ingest-results quarterly P&L history since 2005 from NSE filings (default: 20 largest companies)
@@ -150,6 +151,7 @@ def _build_parser() -> argparse.ArgumentParser:
     jobs.add_parser("financials-export", help="company financials from filings, for the API")
     jobs.add_parser("holders-export", help="promoter holding and pledges, for the API")
     jobs.add_parser("alerts-export", help="alerts over the last 10 sessions, for the API")
+    jobs.add_parser("ingest-india-macro", help="RBI repo rate, CPI, IIP, forex reserves, 10y yield, with release dates")
     jobs.add_parser("dividends-export", help="dividends and capital actions, for the API")
     p = jobs.add_parser("alerts", help="alerts for a day (any past day replays)")
     p.add_argument("--date", help="YYYY-MM-DD (default: today)")
@@ -315,6 +317,13 @@ def main() -> None:
 
         doc = dividends.write(Lake.from_settings())
         print(f"Wrote dividends for {len(doc['companies'])} companies to {dividends.OUTPUT}")
+        return
+
+    if args.job == "ingest-india-macro":
+        from .jobs import ingest_india_macro
+
+        df = ingest_india_macro.run()
+        print(df.groupby("series")["period"].agg(["min", "max", "count"]).to_string())
         return
 
     if args.job == "alerts-export":
