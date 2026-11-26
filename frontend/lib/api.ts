@@ -164,6 +164,27 @@ export interface History {
   points: { t: number; close: number }[];
 }
 
+export interface ScreenPage {
+  total: number;
+  page: number;
+  page_size: number;
+  results: StockOut[];
+}
+
+export interface SectorOption { code: string; label: string; stocks: number }
+
+export interface ScreenQuery {
+  sector?: string; cap?: 'large' | 'mid' | 'small'; min_score?: number; max_pe?: number; min_roe?: number; max_de?: number;
+  sort?: 'score' | 'market_cap' | 'change_pct' | 'pe' | 'roe' | 'de' | 'name'; order?: 'asc' | 'desc'; page?: number; page_size?: number;
+}
+
+function qs(params: object): string {
+  const parts = Object.entries(params)
+    .filter(([, v]) => v !== undefined && v !== null && v !== '')
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`);
+  return parts.length ? `?${parts.join('&')}` : '';
+}
+
 async function get<T>(path: string, signal?: AbortSignal): Promise<T | null> {
   try {
     const res = await fetch(`${API_URL}${path}`, { signal, headers: { Accept: 'application/json' } });
@@ -177,6 +198,8 @@ async function get<T>(path: string, signal?: AbortSignal): Promise<T | null> {
 const sym = (s: string) => encodeURIComponent(s.trim().toUpperCase());
 
 export const api = {
+  screen: (q: ScreenQuery, signal?: AbortSignal) => get<ScreenPage>(`/stocks${qs(q)}`, signal),
+  sectors: (signal?: AbortSignal) => get<SectorOption[]>('/sectors', signal),
   search: (q: string, signal?: AbortSignal) => get<StockOut[]>(`/stocks/search?q=${encodeURIComponent(q.trim())}`, signal),
   stock: (s: string, signal?: AbortSignal) => get<StockDetail>(`/stocks/${sym(s)}`, signal),
   financials: (s: string, signal?: AbortSignal) => get<Financials>(`/stocks/${sym(s)}/financials`, signal),
