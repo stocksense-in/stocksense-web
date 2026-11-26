@@ -126,6 +126,7 @@ export const PAGE_TITLES: Record<Page, string> = {
   paper: 'Paper Trading Simulator',
   rhp: 'RHP Scanner',
   mf: 'Mutual Funds',
+  learn: 'Learn the Metrics',
 };
 
 export const NAV_ITEMS: { id: Page; icon: string; label: string; pro?: boolean }[] = [
@@ -136,6 +137,7 @@ export const NAV_ITEMS: { id: Page; icon: string; label: string; pro?: boolean }
   { id: 'geo', icon: '◉', label: 'Geopolitics Engine' },
   { id: 'premium', icon: '★', label: 'Niche Stocks', pro: true },
   { id: 'profile', icon: '⊕', label: 'Investment Profile' },
+  { id: 'learn', icon: '◇', label: 'Learn the Metrics' },
   { id: 'paper', icon: '◎', label: 'Paper Trading' },
   { id: 'rhp', icon: '▣', label: 'RHP Scanner' },
 ];
