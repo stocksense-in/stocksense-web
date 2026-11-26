@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Dividends, Financials, History, Holders, StockDetail, StockOut } from '@/lib/api';
+import { useSearchParams } from 'next/navigation';
+import type { CompanyHeadline, Dividends, Financials, History, Holders, StockDetail, StockOut } from '@/lib/api';
 import { API_URL, api, fmtCrore, fmtPct, fmtRupees, stockScoreColor, verdictPill } from '@/lib/api';
 import { PriceChart } from '@/components/company/PriceChart';
 import { ScoreBreakdown } from '@/components/company/ScoreBreakdown';
@@ -8,18 +9,26 @@ import { FinancialsPanel } from '@/components/company/FinancialsPanel';
 import { HoldersPanel } from '@/components/company/HoldersPanel';
 import { DividendsPanel } from '@/components/company/DividendsPanel';
 import { PeersTable } from '@/components/company/PeersTable';
+import { NewsPanel } from '@/components/company/NewsPanel';
 
 type Status = 'loading' | 'ok' | 'notfound' | 'offline';
-type Tab = 'score' | 'financials' | 'holders' | 'dividends' | 'peers';
+export type CompanyTab = 'score' | 'financials' | 'holders' | 'dividends' | 'peers' | 'news';
+type Tab = CompanyTab;
+const TABS: Tab[] = ['score', 'financials', 'holders', 'dividends', 'peers', 'news'];
 
 const QUICK: [string, string][] = [
   ['INFY', 'IT Services'], ['HDFCBANK', 'Banking'], ['MARUTI', 'Auto'], ['ITC', 'FMCG'], ['SUNPHARMA', 'Pharma'],
 ];
 
-function initialSymbol(): string {
-  if (typeof window === 'undefined') return 'INFY';
-  const s = new URLSearchParams(window.location.search).get('s');
-  return s && /^[A-Za-z0-9&_-]{1,20}$/.test(s) ? s.toUpperCase() : 'INFY';
+const SYMBOL_RE = /^[A-Za-z0-9&_-]{1,20}$/;
+
+/** The company and tab named in the address (?s=INFY&tab=financials). */
+function fromUrl(params: URLSearchParams | null): { symbol: string; tab: Tab; key: string } {
+  const raw = params?.get('s') ?? '';
+  const symbol = SYMBOL_RE.test(raw) ? raw.toUpperCase() : 'INFY';
+  const t = params?.get('tab') as Tab | null;
+  const tab = t && TABS.includes(t) ? t : 'score';
+  return { symbol, tab, key: `${symbol}|${tab}` };
 }
 
 interface Company {
@@ -32,14 +41,26 @@ interface Company {
 }
 
 export function AnalysisPage() {
+  const params = useSearchParams();
+  const url = fromUrl(params);
   const [query, setQuery] = useState('');
   const [found, setFound] = useState<{ q: string; items: StockOut[] }>({ q: '', items: [] });
   const [highlight, setHighlight] = useState(0);
-  const [symbol, setSymbol] = useState<string>(initialSymbol);
+  const [symbol, setSymbol] = useState<string>(url.symbol);
   const [company, setCompany] = useState<Company | null>(null);
   const [history, setHistory] = useState<History | null>(null);
   const [range, setRange] = useState('1y');
-  const [tab, setTab] = useState<Tab>('score');
+  const [tab, setTab] = useState<Tab>(url.tab);
+  const [news, setNews] = useState<{ symbol: string; items: CompanyHeadline[] | null } | null>(null);
+  const [seenUrl, setSeenUrl] = useState(url.key);
+
+  // When the address changes (command bar, links, back/forward), open what it names.
+  // Adjusting state while rendering is React's recommended way to follow a changing input.
+  if (url.key !== seenUrl) {
+    setSeenUrl(url.key);
+    setSymbol(url.symbol);
+    setTab(url.tab);
+  }
   const searchSeq = useRef(0);
 
   // Load the company whenever the symbol changes. State is only set after the network
@@ -57,12 +78,6 @@ export function AnalysisPage() {
         return;
       }
       setCompany({ symbol, status: 'ok', detail: d, fin: null, holders: null, divs: null });
-      setTab('score');
-      try {
-        const url = new URL(window.location.href);
-        url.searchParams.set('s', d.stock.symbol);
-        window.history.replaceState(null, '', url.toString());
-      } catch { /* ignore */ }
       const [fin, holders, divs] = await Promise.all([
         d.available.financials ? api.financials(symbol, signal) : Promise.resolve(null),
         d.available.holders ? api.holders(symbol, signal) : Promise.resolve(null),
@@ -102,6 +117,7 @@ export function AnalysisPage() {
   const open = useCallback((s: string) => {
     setSymbol(s.toUpperCase());
     setQuery('');
+    setTab('score');
   }, []);
 
   const submit = () => {
@@ -123,7 +139,30 @@ export function AnalysisPage() {
     ['holders', 'Holders', !!holders],
     ['dividends', 'Dividends', !!divs],
     ['peers', 'Peers', !!detail?.peers.length],
+    ['news', 'News', !!detail],
   ];
+  // Show the chosen tab once its data is there; until then (or if this company has none), the score.
+  const activeTab: Tab = tabs.some(([k, , ok]) => k === tab && ok) ? tab : 'score';
+
+  // Load headlines the first time the News tab is opened for a company.
+  const newsFor = detail?.stock.symbol;
+  useEffect(() => {
+    if (activeTab !== 'news' || !newsFor || news?.symbol === newsFor) return;
+    const ctl = new AbortController();
+    api.companyNews(newsFor, 20, ctl.signal).then(items => { if (!ctl.signal.aborted) setNews({ symbol: newsFor, items: items ?? [] }); });
+    return () => ctl.abort();
+  }, [activeTab, newsFor, news?.symbol]);
+
+  // Keep the address bar in step, so links and reloads open the same company and tab.
+  useEffect(() => {
+    if (!newsFor) return;
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('s', newsFor);
+      if (tab === 'score') url.searchParams.delete('tab'); else url.searchParams.set('tab', tab);
+      window.history.replaceState(window.history.state, '', url.toString());
+    } catch { /* ignore */ }
+  }, [newsFor, tab]);
 
   return (
     <div>
@@ -236,18 +275,19 @@ export function AnalysisPage() {
           {/* Tabs */}
           <div role="tablist" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '16px 0 12px' }}>
             {tabs.filter(([, , ok]) => ok).map(([key, label]) => (
-              <button key={key} role="tab" aria-selected={tab === key} onClick={() => setTab(key)}
-                style={{ fontSize: 10, padding: '6px 14px', borderRadius: 4, cursor: 'pointer', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--f-body)', fontWeight: 600, background: tab === key ? 'rgba(201,168,76,0.12)' : 'var(--s1)', color: tab === key ? 'var(--gold)' : 'var(--cream-mute)', border: `1px solid ${tab === key ? 'var(--border-bright)' : 'var(--border)'}` }}>
+              <button key={key} role="tab" aria-selected={activeTab === key} onClick={() => setTab(key)}
+                style={{ fontSize: 10, padding: '6px 14px', borderRadius: 4, cursor: 'pointer', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--f-body)', fontWeight: 600, background: activeTab === key ? 'rgba(201,168,76,0.12)' : 'var(--s1)', color: activeTab === key ? 'var(--gold)' : 'var(--cream-mute)', border: `1px solid ${activeTab === key ? 'var(--border-bright)' : 'var(--border)'}` }}>
                 {label}
               </button>
             ))}
           </div>
 
-          {tab === 'score' && <ScoreBreakdown score={sc} />}
-          {tab === 'financials' && fin && <FinancialsPanel fin={fin} />}
-          {tab === 'holders' && holders && <HoldersPanel h={holders} />}
-          {tab === 'dividends' && divs && <DividendsPanel d={divs} />}
-          {tab === 'peers' && <PeersTable stock={s} peers={detail.peers} onOpen={open} />}
+          {activeTab === 'score' && <ScoreBreakdown score={sc} />}
+          {activeTab === 'financials' && fin && <FinancialsPanel fin={fin} />}
+          {activeTab === 'holders' && holders && <HoldersPanel h={holders} />}
+          {activeTab === 'dividends' && divs && <DividendsPanel d={divs} />}
+          {activeTab === 'peers' && <PeersTable stock={s} peers={detail.peers} onOpen={open} />}
+          {activeTab === 'news' && <NewsPanel name={s.name ?? s.symbol} items={news?.symbol === s.symbol ? news.items : null} />}
 
           <div className="geo-alert" style={{ marginTop: 14, padding: '12px 16px' }}>
             <div style={{ fontSize: 10, color: 'var(--cream-dim)', lineHeight: 1.7 }}>

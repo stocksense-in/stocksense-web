@@ -236,6 +236,8 @@ export async function scanProspectus(file: File, signal?: AbortSignal): Promise<
   }
 }
 
+export interface CompanyHeadline { title: string; link: string; source: string; published: string | null }
+
 export interface ScreenPage {
   total: number;
   page: number;
@@ -286,6 +288,7 @@ export const api = {
   financials: (s: string, signal?: AbortSignal) => get<Financials>(`/stocks/${sym(s)}/financials`, signal),
   holders: (s: string, signal?: AbortSignal) => get<Holders>(`/stocks/${sym(s)}/holders`, signal),
   dividends: (s: string, signal?: AbortSignal) => get<Dividends>(`/stocks/${sym(s)}/dividends`, signal),
+  companyNews: (s: string, limit = 20, signal?: AbortSignal) => get<CompanyHeadline[]>(`/stocks/${sym(s)}/news?limit=${limit}`, signal),
   history: (s: string, range = '1y', signal?: AbortSignal) => get<History>(`/stocks/${sym(s)}/history?range=${range}`, signal),
 };
 
