@@ -98,7 +98,9 @@ def facts(xml: str, quarter_end: date) -> tuple[dict, dict]:
 def excise_duty(xml: str, quarter_end: date) -> float | None:
     """Excise duty in the quarter, ₹ crore. Companies list it among "other expenses" with a
     description (IOC: OtherExpenses1Member = "Excise duty"); revenue from operations
-    includes it, and published net revenue figures take it out."""
+    includes it, and published net revenue figures take it out. Only excise: it is a tax
+    passed through in the price. ONGC's "statutory levies" (royalty, cess) are costs of
+    producing oil; netting them overshot published revenue (-4%) and would inflate margins."""
     root = ET.fromstring(xml)
     quarter_members = {}
     for ctx in root.iter():
