@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-25T20:09:44+00:00",
+ "generated_at": "2026-11-26T14:58:47+00:00",
  "source": "NSE daily index closing file (P/E), via the engine's data lake",
  "market_index": "NIFTY_50",
  "sector_index": {
@@ -20,32 +20,32 @@
  },
  "indices": {
   "NIFTY_50": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-04-01",
    "years": 5.7,
-   "pe": 21.0,
+   "pe": 21.1,
    "median_pe": 22.1,
    "p25_pe": 21.0,
    "p75_pe": 22.9,
-   "higher_than_pct_of_days": 26,
+   "higher_than_pct_of_days": 28,
    "reading": "below its usual level"
   },
   "NIFTY_AUTO": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-04-01",
    "years": 5.7,
-   "pe": 31.5,
+   "pe": 31.2,
    "median_pe": 30.2,
    "p25_pe": 25.3,
    "p75_pe": 48.2,
-   "higher_than_pct_of_days": 58,
+   "higher_than_pct_of_days": 56,
    "reading": "around its usual level"
   },
   "NIFTY_BANK": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-04-01",
    "years": 5.7,
-   "pe": 14.1,
+   "pe": 14.0,
    "median_pe": 16.1,
    "p25_pe": 14.7,
    "p75_pe": 17.9,
@@ -53,54 +53,54 @@
    "reading": "cheap by its own history"
   },
   "NIFTY_ENERGY": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-04-01",
    "years": 5.7,
-   "pe": 13.1,
+   "pe": 13.2,
    "median_pe": 13.7,
    "p25_pe": 12.1,
    "p75_pe": 15.1,
-   "higher_than_pct_of_days": 38,
+   "higher_than_pct_of_days": 39,
    "reading": "below its usual level"
   },
   "NIFTY_FINANCIAL_SERVICES": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-04-01",
    "years": 5.7,
    "pe": 16.9,
    "median_pe": 17.8,
    "p25_pe": 16.9,
    "p75_pe": 19.1,
-   "higher_than_pct_of_days": 26,
+   "higher_than_pct_of_days": 25,
    "reading": "below its usual level"
   },
   "NIFTY_FMCG": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-04-01",
    "years": 5.7,
-   "pe": 35.2,
+   "pe": 34.9,
    "median_pe": 41.9,
    "p25_pe": 39.5,
    "p75_pe": 43.8,
-   "higher_than_pct_of_days": 11,
+   "higher_than_pct_of_days": 10,
    "reading": "cheap by its own history"
   },
   "NIFTY_INDIA_CONSUMPTION": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-04-01",
    "years": 5.7,
-   "pe": 40.4,
+   "pe": 40.0,
    "median_pe": 41.1,
    "p25_pe": 38.8,
    "p75_pe": 47.1,
-   "higher_than_pct_of_days": 42,
-   "reading": "around its usual level"
+   "higher_than_pct_of_days": 37,
+   "reading": "below its usual level"
   },
   "NIFTY_INDIA_DEFENCE": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2022-01-19",
-   "years": 4.8,
-   "pe": 54.5,
+   "years": 4.9,
+   "pe": 54.6,
    "median_pe": 47.7,
    "p25_pe": 27.4,
    "p75_pe": 55.4,
@@ -108,7 +108,7 @@
    "reading": "above its usual level"
   },
   "NIFTY_INFRASTRUCTURE": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-04-01",
    "years": 5.7,
    "pe": 22.2,
@@ -119,43 +119,43 @@
    "reading": "above its usual level"
   },
   "NIFTY_IT": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-04-01",
    "years": 5.7,
-   "pe": 19.6,
+   "pe": 20.3,
    "median_pe": 27.4,
    "p25_pe": 25.4,
    "p75_pe": 31.7,
-   "higher_than_pct_of_days": 6,
+   "higher_than_pct_of_days": 10,
    "reading": "cheap by its own history"
   },
   "NIFTY_MEDIA": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-11-15",
    "years": 5.0,
-   "pe": 38.8,
-   "median_pe": 60.4,
-   "p25_pe": 38.8,
+   "pe": 38.6,
+   "median_pe": 60.3,
+   "p25_pe": 38.7,
    "p75_pe": 574.5,
    "higher_than_pct_of_days": 25,
    "reading": "below its usual level"
   },
   "NIFTY_METAL": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-04-01",
    "years": 5.7,
-   "pe": 13.7,
+   "pe": 13.9,
    "median_pe": 18.6,
    "p25_pe": 10.4,
    "p75_pe": 22.5,
-   "higher_than_pct_of_days": 31,
+   "higher_than_pct_of_days": 32,
    "reading": "below its usual level"
   },
   "NIFTY_PHARMA": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-04-01",
    "years": 5.7,
-   "pe": 46.6,
+   "pe": 46.8,
    "median_pe": 33.6,
    "p25_pe": 31.9,
    "p75_pe": 36.7,
@@ -163,14 +163,14 @@
    "reading": "expensive by its own history"
   },
   "NIFTY_REALTY": {
-   "as_of": "2026-11-25",
+   "as_of": "2026-11-26",
    "since": "2021-04-27",
    "years": 5.6,
-   "pe": 39.6,
+   "pe": 40.9,
    "median_pe": 47.9,
    "p25_pe": 40.3,
    "p75_pe": 57.1,
-   "higher_than_pct_of_days": 22,
+   "higher_than_pct_of_days": 28,
    "reading": "below its usual level"
   }
  }

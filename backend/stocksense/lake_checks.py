@@ -11,7 +11,7 @@ Each check returns a dict of findings plus a list of `problems` (strings). An em
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 
 import pandas as pd
 
@@ -202,7 +202,11 @@ def check_shareholding(lake: Lake, today: date | None = None) -> dict:
     today = today or date.today()
     q = lake.query
     dupes = int(q("select count(*) from (select symbol, quarter_end from shareholding group by 1, 2 having count(*) > 1)").iloc[0, 0])
-    off = int(q("select count(*) from shareholding where abs(coalesce(promoter_pct, 0) + coalesce(public_pct, 0) "
+    # Judge each company's latest pattern: old summaries can't be corrected now (BSE Ltd's
+    # 2021–25 rows miss a category; its current ones add up).
+    latest_rows = ("(select * from shareholding qualify row_number() over "
+                   "(partition by symbol order by quarter_end desc) = 1)")
+    off = int(q(f"select count(*) from {latest_rows} where abs(coalesce(promoter_pct, 0) + coalesce(public_pct, 0) "
                 "+ coalesce(employee_trusts_pct, 0) - 100) > 0.1").iloc[0, 0])
     out_of_range = int(q("select count(*) from shareholding where promoter_pct < 0 or promoter_pct > 100").iloc[0, 0])
     columns = set(q("select * from shareholding limit 0").columns)
@@ -214,6 +218,23 @@ def check_shareholding(lake: Lake, today: date | None = None) -> dict:
     latest = q("select symbol, max(quarter_end) as last from shareholding group by symbol")
     latest["last"] = pd.to_datetime(latest["last"]).dt.date
     behind = sorted(latest.loc[latest["last"].map(lambda d: (today - d).days > SHAREHOLDING_DUE_DAYS), "symbol"])
+    non_compliant: list[str] = []
+    if "eod_prices" in set(lake.datasets()):
+        # NSE moves companies that break listing rules (often by not filing) to the BZ series:
+        # known laggards, reported but not a data problem. Suspended ones don't trade at all.
+        recent = q("select symbol, max(series) filter (where series <> 'BZ') as normal, "
+                   "bool_or(series = 'BZ') as bz from eod_adjusted where date >= ? group by symbol",
+                   [today - timedelta(days=15)])
+        normal = set(recent.loc[recent["normal"].notna(), "symbol"])
+        bz = set(recent.loc[recent["bz"] & recent["normal"].isna(), "symbol"])
+        non_compliant = sorted(s for s in latest["symbol"] if s in bz)
+        behind = [s for s in behind if s in normal]
+        if split_off:
+            split_off = int(q("select count(*) from shareholding where fii_pct is not null and abs(promoter_pct + fii_pct "
+                              "+ dii_pct + non_institutions_pct + coalesce(government_pct, 0) "
+                              "+ coalesce(employee_trusts_pct, 0) - 100) > 0.1 "
+                              "and symbol not in (select symbol from bz_list)",
+                              frames={"bz_list": pd.DataFrame({"symbol": sorted(bz) or [""]})}).iloc[0, 0])
     problems = []
     if dupes:
         problems.append(f"{dupes} duplicate (symbol, quarter) rows")
@@ -227,7 +248,7 @@ def check_shareholding(lake: Lake, today: date | None = None) -> dict:
         problems.append(f"{len(behind)} companies with no shareholding pattern for over {SHAREHOLDING_DUE_DAYS} days: "
                         f"{' '.join(behind[:10])}")
     out = {"rows": int(len(q("select 1 from shareholding"))), "companies": int(len(latest)), "duplicates": dupes,
-           "not_100": off, "split_not_100": split_off, "behind": behind}
+           "not_100": off, "split_not_100": split_off, "behind": behind, "non_compliant_bz": non_compliant}
     if "pledges" in set(lake.datasets()):
         out["pledge_snapshots"] = int(q("select count(*) from pledges").iloc[0, 0])
     out["problems"] = problems

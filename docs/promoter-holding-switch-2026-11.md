@@ -1,0 +1,66 @@
+# Promoter holding: switch the score from Yahoo to filed shareholding patterns?
+
+*26 Nov 2026 — decision memo. Nothing has been published; switching is one command.*
+
+## The problem
+
+The StockSense score gives promoter holding a 10% weight. Today the number comes from
+Yahoo's `heldPercentInsiders`, which is not what Indian filings mean by promoter holding
+(the founders or parent company and their group). The filed figure is in every company's
+quarterly shareholding pattern, which StockSense now ingests (M1.3).
+
+## What the comparison shows (full universe: 2,351 scored companies)
+
+| | |
+|---|---|
+| Companies with both figures | 2,242 |
+| Median gap between Yahoo and the filed figure | **5.3 points** |
+| Companies off by more than 5 points | **1,159 (52%)** |
+| Companies off by more than 20 points | **299** |
+| Score change if switched: median | 1 point |
+| Score change: companies moving 5+ points | 140 (largest +12 / −12) |
+
+Examples of the gap: FACT — 90% government-owned, Yahoo 0%. Bharat Rasayan and GKW —
+75% promoter-held, Yahoo 0%. ITC — no promoter group at all, Yahoo 29%. Hindustan Zinc —
+61% filed, Yahoo 89%.
+
+The filed figures are checked: every pattern adds to 100%, and the summary matches the
+filed XBRL pattern exactly for 45 of 45 sampled large caps (`ml/checks/shareholding_spot_check.py`).
+
+## Why switching this one metric now is safe
+
+Scores compare each company with its sector peers, so a metric should switch only when
+peers share one definition. Shareholding patterns now cover the whole listed universe
+(2,371 companies after the first full pass on 26 Nov), unlike quarterly results (50 companies so far). Margin,
+growth, ROE and debt to equity stay on Yahoo until results coverage catches up.
+
+One caveat: the filing records the legal classification. After a change of control the
+new owner can sit in "public" — Asian Hotels (North) has filed 0% promoter / 100% public
+in every pattern since January 2026 while Yahoo shows 85% insiders — so a handful of
+companies will read as having no promoter despite a controlling holder.
+
+Companies whose latest pattern is over 200 days old (suspended or non-filing, mostly NSE's
+BZ series) keep their current value.
+
+## The command
+
+```
+python -m stocksense rescore --fundamentals filings --metrics promoter            # compare (no writes)
+python -m stocksense rescore --fundamentals filings --metrics promoter --apply    # publish
+```
+
+After publishing, the weekly engine run keeps patterns current; re-run the command after it
+(or add it to the weekly steps) so new patterns reach the score.
+
+## It also fills gaps
+
+109 scored companies have no promoter figure from Yahoo but do have a filed pattern, so the
+switch fills them. More broadly, the inputs most often missing are ROE (651 companies), P/E (309) and
+debt to equity (250) — balance-sheet figures that quarterly results provide, which makes
+widening results coverage the next lever for score completeness.
+
+## Recommendation
+
+Switch promoter holding to filed patterns. The universe pass is complete and the numbers
+held up: the earlier 1,345-company sample (49% off by 5+ points) matches the full run (52%). It corrects a
+wrong input for about half the market at the cost of a small, explainable score change.

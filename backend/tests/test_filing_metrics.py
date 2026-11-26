@@ -141,3 +141,50 @@ def test_promoter_from_the_latest_shareholding_pattern():
     assert out.at["ITC", "promoter_holding"] == 0.0 and out.at["ITC", "as_of"] == date(2026, 9, 30)
     rows, replaced = fm.overlay([{"symbol": "ITC", "promoter_holding": 29.49, "net_margin": 25.0}], out.reset_index())
     assert rows[0]["promoter_holding"] == 0.0 and rows[0]["net_margin"] == 25.0  # no results: Yahoo's margin kept
+
+
+def test_growth_on_reported_revenue_margin_on_net():
+    df = quarters(growth=0.10, margin=0.10).assign(kind="company")
+    df["net_revenue"] = df["revenue"]
+    recent = df["period_end"] >= date(2024, 1, 1)
+    df.loc[recent, "net_revenue"] = df.loc[recent, "revenue"] * 0.8  # excise netted only lately
+    m = fm.latest(df).iloc[0]
+    assert m["revenue_cagr_3yr"] == pytest.approx(10.0, abs=0.01)  # like with like, not net vs gross
+    assert m["net_margin"] == pytest.approx(12.5)  # profit / net revenue
+
+
+def test_switch_only_selected_metrics():
+    metrics = pd.DataFrame([{"symbol": "ITC", "as_of": date(2026, 9, 30), "net_margin": 24.4, "promoter_holding": 0.0}])
+    rows = [{"symbol": "ITC", "net_margin": 25.0, "promoter_holding": 29.49}]
+    out, n = fm.overlay(rows, metrics, only=["promoter"])
+    assert n == 1 and out[0] == {"symbol": "ITC", "net_margin": 25.0, "promoter_holding": 0.0}
+
+
+def test_apply_skips_stale_companies_instead_of_refusing(monkeypatch):
+    from stocksense import lake as lake_module
+    from stocksense.jobs import rescore
+
+    rows = [{"symbol": f"S{i}", "sector": "it", "pe_ratio": 20, "roe": 15, "debt_equity": 0.1, "net_margin": 10,
+             "promoter_holding": 50, "revenue_cagr_3yr": 8} for i in range(12)]
+    monkeypatch.setattr(rescore, "load_rows", lambda: rows)
+    fresh_and_stale = pd.DataFrame([{"symbol": "S0", "quarter_end": date.today(), "promoter_pct": 75.0},
+                                    {"symbol": "S1", "quarter_end": date(2023, 3, 31), "promoter_pct": 10.0}])
+
+    class FakeLake:
+        def datasets(self):
+            return ["shareholding"]
+
+        def query(self, sql):
+            return fresh_and_stale
+
+    monkeypatch.setattr(lake_module.Lake, "from_settings", classmethod(lambda cls: FakeLake()))
+
+    class Store:
+        saved = None
+
+        def upsert_stocks(self, changed):
+            Store.saved = {r["symbol"]: r for r in changed}
+
+    rescore.run(Store(), "filings", apply=True, only=["promoter"])
+    assert Store.saved["S0"]["promoter_holding"] == 75.0  # switched
+    assert "S1" not in Store.saved or Store.saved["S1"]["promoter_holding"] == 50  # stale: kept

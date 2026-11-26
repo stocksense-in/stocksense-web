@@ -103,3 +103,22 @@ def test_mis_tagged_profit_split_falls_back_to_total_profit():
 def test_filing_kind_from_file_name():
     assert ni.kind({"xbrl": "…/INTEGRATED_FILING_NBFC_INDAS_1_WEB.xml"}) == "finance"
     assert ni.kind({"xbrl": None}) == "company"
+
+
+def test_excise_duty_comes_out_of_net_revenue():
+    # IOC lists excise among "other expenses" by description (OtherExpenses1Member).
+    ioc = xbrl("""
+ <xbrli:context id="Exc1D"><xbrli:entity><xbrli:segment><xbrldi:explicitMember dimension="d">in-capmkt:OtherExpenses1Member</xbrldi:explicitMember></xbrli:segment></xbrli:entity>
+  <xbrli:period><xbrli:startDate>2026-07-01</xbrli:startDate><xbrli:endDate>2026-09-30</xbrli:endDate></xbrli:period></xbrli:context>
+ <xbrli:context id="Oth2D"><xbrli:entity><xbrli:segment><xbrldi:explicitMember dimension="d">in-capmkt:OtherExpenses2Member</xbrldi:explicitMember></xbrli:segment></xbrli:entity>
+  <xbrli:period><xbrli:startDate>2026-07-01</xbrli:startDate><xbrli:endDate>2026-09-30</xbrli:endDate></xbrli:period></xbrli:context>
+ <in-capmkt:RevenueFromOperations contextRef="OneD">2362570000000</in-capmkt:RevenueFromOperations>
+ <in-capmkt:DescriptionOfOtherExpenses contextRef="Exc1D">Excise duty</in-capmkt:DescriptionOfOtherExpenses>
+ <in-capmkt:OtherExpenses contextRef="Exc1D">280000000000</in-capmkt:OtherExpenses>
+ <in-capmkt:DescriptionOfOtherExpenses contextRef="Oth2D">Freight</in-capmkt:DescriptionOfOtherExpenses>
+ <in-capmkt:OtherExpenses contextRef="Oth2D">10000000000</in-capmkt:OtherExpenses>
+""")
+    r = ni.normalise({**FILING, "symbol": "IOC"}, ioc)
+    assert r["revenue"] == pytest.approx(236257.0) and r["excise_duty"] == pytest.approx(28000.0)
+    assert r["net_revenue"] == pytest.approx(236257.0 - 28000.0)
+    assert ni.normalise(FILING, TCS)["excise_duty"] is None  # nothing described as excise

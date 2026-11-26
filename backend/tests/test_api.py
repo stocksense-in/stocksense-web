@@ -71,3 +71,14 @@ def test_prospectus_scan(client):
     bad = client.post("/prospectus/scan", files={"file": ("d.pdf", b"nope", "application/pdf")})
     assert bad.status_code == 422 and "isn't a PDF" in bad.json()["detail"]
     assert len(client.get("/prospectus/rules").json()) == 12
+
+
+def test_coverage_note_names_missing_metrics():
+    from stocksense.api.app import _coverage_note
+
+    assert _coverage_note(60, []) is None
+    assert _coverage_note(60, ["Promoter holding"]) == ("This score uses 5 of 6 metrics — promoter holding isn't "
+                                                         "available, so the others carry its weight. Treat it as a "
+                                                         "rougher guide.")
+    assert "missing: P/E ratio, debt to equity" in _coverage_note(50, ["P/E ratio", "Debt to equity"])
+    assert _coverage_note(None, ["P/E ratio"]).startswith("Not enough data")

@@ -103,12 +103,27 @@ def top_symbols(n: int) -> list[str]:
 REST_SECONDS = 15 * 60  # NSE throttles long runs for a while, then answers again
 
 
+def recent_filings(filings: list[dict], quarters: int) -> list[dict]:
+    """The last `quarters` quarter-ends, one filing each: consolidated where filed, else standalone."""
+    best: dict = {}
+    for f in filings:
+        end = nse_integrated._d(f.get("qe_Date"))
+        if end is None or not f.get("xbrl"):
+            continue
+        if end not in best or (f.get("consolidated") == "Consolidated" and best[end].get("consolidated") != "Consolidated"):
+            best[end] = f
+    return [best[e] for e in sorted(best, reverse=True)[:quarters]]
+
+
 def fetch(lake: Lake, symbols: Iterable[str], pause: float = PAUSE_SECONDS, rests: int = 0,
-          rest_seconds: float = REST_SECONDS) -> int:
+          rest_seconds: float = REST_SECONDS, recent: int | None = None) -> int:
     """Download filings not already in raw/. Returns how many were fetched.
 
     If NSE fails MAX_FAILURES_IN_A_ROW requests in a row, wait `rest_seconds` and carry on
-    from the same company, up to `rests` times; then stop, keeping what it has."""
+    from the same company, up to `rests` times; then stop, keeping what it has.
+
+    `recent`: only the last N quarters from integrated filings, one basis per quarter — enough
+    for trailing margin, ROE and debt to equity across the whole market in one night."""
     symbols = list(symbols)
     fetched, position = 0, 0
     while True:
@@ -116,7 +131,10 @@ def fetch(lake: Lake, symbols: Iterable[str], pause: float = PAUSE_SECONDS, rest
         try:
             with nse_results.client() as c:
                 while position < len(symbols):
-                    fetched += _fetch_company(c, lake, symbols[position], pause, breaker)
+                    if recent:
+                        fetched += fetch_integrated(c, lake, symbols[position], pause, breaker, recent)
+                    else:
+                        fetched += _fetch_company(c, lake, symbols[position], pause, breaker)
                     position += 1
             return fetched
         except NseUnavailable as exc:
@@ -159,7 +177,8 @@ def _fetch_company(c, lake: Lake, symbol: str, pause: float, breaker: Breaker) -
     return new + fetch_integrated(c, lake, symbol, pause, breaker)
 
 
-def fetch_integrated(c, lake: Lake, symbol: str, pause: float = PAUSE_SECONDS, breaker: Breaker | None = None) -> int:
+def fetch_integrated(c, lake: Lake, symbol: str, pause: float = PAUSE_SECONDS, breaker: Breaker | None = None,
+                     recent: int | None = None) -> int:
     """Integrated filings (Mar 2025 on) not already in raw/: filing metadata + XBRL text."""
     breaker = breaker or Breaker()
     try:
@@ -168,6 +187,8 @@ def fetch_integrated(c, lake: Lake, symbol: str, pause: float = PAUSE_SECONDS, b
     except Exception as exc:
         breaker.fail(f"{INTEGRATED}: {symbol} filing list", exc)
         return 0
+    if recent:
+        filings = recent_filings(filings, recent)
     new = 0
     for f in filings:
         end = nse_integrated._d(f.get("qe_Date"))
@@ -197,8 +218,10 @@ def consistent_kind(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["kind"] = df["symbol"].map(special).fillna(df["kind"])
     df["bank"] = df["kind"] == "bank"
-    df["net_revenue"] = [nse_results.net_revenue(r) for r in df[["kind", "revenue", "finance_cost", "other_income"]]
-                         .to_dict("records")]
+    if "excise_duty" not in df:
+        df["excise_duty"] = None
+    df["net_revenue"] = [nse_results.net_revenue(r) for r in
+                         df[["kind", "revenue", "finance_cost", "other_income", "excise_duty"]].to_dict("records")]
     return df
 
 
@@ -246,9 +269,17 @@ def build(lake: Lake) -> pd.DataFrame:
     return df
 
 
-def run(symbols: list[str] | None = None, top: int = 20, lake: Lake | None = None, rests: int = 0) -> pd.DataFrame:
+def run(symbols: list[str] | None = None, top: int = 20, lake: Lake | None = None, rests: int = 0,
+        everything: bool = False, recent: int | None = None) -> pd.DataFrame:
     lake = lake or Lake.from_settings()
-    targets = [s.upper() for s in symbols] if symbols else top_symbols(top)
-    log.info(f"{SOURCE}: {len(targets)} companies")
-    fetch(lake, targets, rests=rests)
+    if symbols:
+        targets = [s.upper() for s in symbols]
+    elif everything:
+        from ..symbols import select
+
+        targets = [s.symbol for s in select()]
+    else:
+        targets = top_symbols(top)
+    log.info(f"{SOURCE}: {len(targets)} companies" + (f", last {recent} quarters" if recent else ""))
+    fetch(lake, targets, rests=rests, recent=recent)
     return build(lake)

@@ -115,3 +115,22 @@ def test_shareholding_split_must_add_up(tmp_path):
                                    {**base, "symbol": "BAD", "non_institutions_pct": 1.0}]), "shareholding")
     r = lake_checks.check_shareholding(lake, date(2026, 11, 26))
     assert r["split_not_100"] == 1 and any("split" in p for p in r["problems"])
+
+
+def test_shareholding_judges_latest_pattern_and_only_trading_laggards(tmp_path):
+    lake = Lake(tmp_path)
+    lake.write_table(pd.DataFrame([
+        {"symbol": "BSE", "quarter_end": date(2024, 6, 30), "promoter_pct": 0.0, "public_pct": 77.24, "employee_trusts_pct": 0.0},
+        {"symbol": "BSE", "quarter_end": date(2026, 9, 30), "promoter_pct": 0.0, "public_pct": 100.0, "employee_trusts_pct": 0.0},
+        {"symbol": "SUSPENDED", "quarter_end": date(2024, 3, 31), "promoter_pct": 70.0, "public_pct": 30.0, "employee_trusts_pct": 0.0},
+        {"symbol": "LATE", "quarter_end": date(2026, 3, 31), "promoter_pct": 50.0, "public_pct": 50.0, "employee_trusts_pct": 0.0},
+    ]), "shareholding")
+    lake.write_parquet(pd.DataFrame([{"date": date(2026, 11, 25), "symbol": s, "series": series, "close": 10.0,
+                                      "open": 10.0, "high": 10.0, "low": 10.0, "volume": 1.0}
+                                     for s, series in (("LATE", "EQ"), ("SUSPENDED", "BZ"))]),
+                       "eod_prices", day="2026-11-25")
+    lake.execute("create or replace view eod_adjusted as select * from eod_prices")
+    r = lake_checks.check_shareholding(lake, date(2026, 11, 26))
+    assert r["not_100"] == 0  # BSE's old row doesn't count; its latest adds up
+    assert r["behind"] == ["LATE"]  # SUSPENDED trades only in BZ: a known non-filer, listed separately
+    assert r["non_compliant_bz"] == ["SUSPENDED"]

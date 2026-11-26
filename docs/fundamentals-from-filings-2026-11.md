@@ -23,6 +23,13 @@ Yahoo nets it out, and TVS Motor (+20%, consolidated financing arm). Profit agre
 revenue differs one way points to a definition gap, not bad data; a next step is to read
 the excise and other-operating-revenue lines and match Yahoo's net revenue.
 
+Excise is now taken out wherever the filing separates it (integrated filings, Mar 2025 on,
+where companies list it among other expenses by description): IOC FY2026 matches within
+1.3% (was +14%) and ITC within 0.8% (was +13%). Revenue overall: 90 of 151. Years before
+FY2026 can't be netted — the old feed lumps excise into other expenses — and ONGC (+9%,
+probably royalty/levies), TVS Motor (+18%, consolidated finance arm) and Maruti (+3.5%)
+differ for other reasons.
+
 ## Check against published annual results
 
 `ml/checks/results_spot_check.py` sums four quarters per fiscal year (FY2023–FY2026) and

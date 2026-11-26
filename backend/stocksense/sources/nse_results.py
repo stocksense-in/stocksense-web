@@ -127,7 +127,10 @@ def net_revenue(row: dict) -> float | None:
     interest income + other income — gross interest would make every lender look
     low-margin, and it's what Yahoo's margins use; for everyone else, revenue."""
     if row["kind"] not in ("bank", "finance"):
-        return row["revenue"]
+        # Net of excise duty where the filing separates it (integrated filings from Mar 2025).
+        excise = row.get("excise_duty")
+        has_excise = isinstance(excise, (int, float)) and excise == excise and excise > 0  # NaN != NaN
+        return row["revenue"] - excise if row["revenue"] is not None and has_excise else row["revenue"]
     if row["revenue"] is None or row["finance_cost"] is None:
         return None
     return row["revenue"] - row["finance_cost"] + (row["other_income"] or 0)

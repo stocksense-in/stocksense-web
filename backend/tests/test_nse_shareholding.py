@@ -65,3 +65,9 @@ def test_categories_from_pattern_xbrl():
       <in-capmkt:NumberOfShares contextRef="F">123</in-capmkt:NumberOfShares>
     </xbrli:xbrl>"""
     assert sh.categories(xml) == {"fii_pct": 9.01, "dii_pct": 13.57}  # TCS, Sep 2026
+
+
+def test_old_patterns_in_percent_new_in_fractions():
+    assert sh.as_percent({"fii_pct": 0.0901, "dii_pct": 0.1357}) == {"fii_pct": 9.01, "dii_pct": 13.57}
+    assert sh.as_percent({"fii_pct": 0.0, "non_institutions_pct": 28.98}) == {"fii_pct": 0.0, "non_institutions_pct": 28.98}
+    assert sh.as_percent({}) == {}
