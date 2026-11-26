@@ -143,3 +143,12 @@ def test_missing_files_do_not_count_as_nse_refusing():
     b.fail("list", status(403))
     with pytest.raises(ingest_results.NseUnavailable):
         b.fail("list", status(429))
+
+
+def test_missing_excise_in_a_table_is_nan_not_a_number_to_subtract():
+    import pandas as pd
+
+    df = pd.DataFrame({"symbol": ["IOC", "TCS"], "period_end": [date(2026, 9, 30)] * 2, "kind": ["company"] * 2,
+                       "revenue": [100.0, 50.0], "finance_cost": [1.0, 1.0], "other_income": [1.0, 1.0],
+                       "excise_duty": [10.0, float("nan")], "net_revenue": [None, None]})
+    assert ingest_results.consistent_kind(df)["net_revenue"].tolist() == [90.0, 50.0]

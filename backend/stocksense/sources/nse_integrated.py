@@ -95,6 +95,37 @@ def facts(xml: str, quarter_end: date) -> tuple[dict, dict]:
     return flow, stock
 
 
+def excise_duty(xml: str, quarter_end: date) -> float | None:
+    """Excise duty in the quarter, ₹ crore. Companies list it among "other expenses" with a
+    description (IOC: OtherExpenses1Member = "Excise duty"); revenue from operations
+    includes it, and published net revenue figures take it out."""
+    root = ET.fromstring(xml)
+    quarter_members = {}
+    for ctx in root.iter():
+        if not ctx.tag.endswith("}context"):
+            continue
+        members = [m.text.split(":")[-1] for m in ctx.iter() if m.tag.endswith("explicitMember")]
+        period = {x.tag.split("}")[-1]: x.text for x in ctx.iter() if x.tag.split("}")[-1] in ("startDate", "endDate")}
+        try:
+            end, start = date.fromisoformat(period["endDate"]), date.fromisoformat(period["startDate"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if len(members) == 1 and end == quarter_end and 80 <= (end - start).days <= 100:
+            quarter_members[ctx.get("id")] = members[0]
+    excise_members, amounts = set(), {}
+    for el in root:
+        member = quarter_members.get(el.get("contextRef"))
+        if member is None:
+            continue
+        name, text = el.tag.split("}")[-1], (el.text or "").strip()
+        if name == "DescriptionOfOtherExpenses" and "excise" in text.lower():
+            excise_members.add(member)
+        elif name == "OtherExpenses" and _NUMBER.match(text):
+            amounts.setdefault(member, float(text))
+    total = sum(amounts[m] for m in excise_members if m in amounts)
+    return round(total / RUPEES_PER_CRORE, 2) if excise_members & amounts.keys() else None
+
+
 def _cr(fields: dict, *names: str) -> float | None:
     for name in names:
         if name in fields:
@@ -151,6 +182,7 @@ def normalise(filing: dict, xml: str) -> dict:
         "total_assets": _cr(b, "Assets"),
     }
     row["net_profit"] = _owners_profit(f, row["net_profit"])
+    row["excise_duty"] = excise_duty(xml, end) if end and k == "company" else None
     row["net_revenue"] = net_revenue(row)
     return row
 

@@ -197,8 +197,10 @@ def consistent_kind(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["kind"] = df["symbol"].map(special).fillna(df["kind"])
     df["bank"] = df["kind"] == "bank"
-    df["net_revenue"] = [nse_results.net_revenue(r) for r in df[["kind", "revenue", "finance_cost", "other_income"]]
-                         .to_dict("records")]
+    if "excise_duty" not in df:
+        df["excise_duty"] = None
+    df["net_revenue"] = [nse_results.net_revenue(r) for r in
+                         df[["kind", "revenue", "finance_cost", "other_income", "excise_duty"]].to_dict("records")]
     return df
 
 
