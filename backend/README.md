@@ -272,6 +272,15 @@ companies. Amounts in ₹ crore: `revenue` (interest earned for banks), `net_rev
 - **Never mix bases.** Many companies (banks especially) filed consolidated figures only
   some quarters. Annual and trailing sums use consolidated when all four quarters have it,
   else standalone — a 3 + 1 mix is how a first version got HDFC Bank's revenue 40% wrong.
+- **Whole market, recent only:** `ingest-results --all --recent 5 --rests 8` fetches just the
+  last five quarters from integrated filings (one basis per quarter) for every equity —
+  enough for trailing margin, ROE and debt to equity in one night. Full history stays a
+  top-N job (`--top 100`, also the weekly engine step).
+- **Excise:** integrated filings list excise duty among "other expenses" by description;
+  net revenue (and so the margin) takes it out — IOC FY2026 matches published revenue
+  within 1.3% (was +14%). The old feed can't separate it, so growth and the five-year
+  margin range use reported revenue throughout. Royalty-type "statutory levies" are not
+  netted (a production cost, and netting overshot).
 - `check-lake` flags duplicates, negative revenue and companies with no results for
   over 150 days (a missed filing).
 - Verified by `ml/checks/results_spot_check.py`: FY2023–FY2026 sums against
@@ -286,6 +295,10 @@ Each company also gets its margin's place in its own five-year range and the mar
 reaction to its last 8 results (`results_reaction.py`): the move against NIFTY 50 over 1
 and 5 trading days from the last close before the market could react (a filing after
 15:30 counts from that day's close), next to year-on-year revenue and profit growth.
+
+`--metrics promoter` (or any of net_margin, cagr, roe, de) switches only those metrics;
+on `--apply`, companies whose figures are over 200 days old keep their current values.
+The case for switching promoter holding first: [`docs/promoter-holding-switch-2026-11.md`](../docs/promoter-holding-switch-2026-11.md).
 
 **Scoring from filings.** `stocksense/filing_metrics.py` turns the latest four
 consecutive quarters into net margin (trailing profit ÷ trailing net revenue) and 3-year
