@@ -13,6 +13,10 @@ const PAGE_COMMANDS: { codes: string[]; page: Page; label: string }[] = [
   { codes: ['GEO'], page: 'geo', label: 'Geopolitics engine' },
   { codes: ['RHP'], page: 'rhp', label: 'Prospectus scanner' },
   { codes: ['PT'], page: 'paper', label: 'Paper trading' },
+  { codes: ['ANA', 'STOCK'], page: 'analysis', label: 'Stock analysis' },
+  { codes: ['MF'], page: 'mf', label: 'Mutual funds' },
+  { codes: ['NICHE'], page: 'premium', label: 'Niche stocks' },
+  { codes: ['PROF'], page: 'profile', label: 'Investment profile' },
 ];
 
 const FUNCTIONS: { codes: string[]; tab: CompanyTab; label: string }[] = [
