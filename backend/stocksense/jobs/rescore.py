@@ -37,9 +37,9 @@ def load_rows() -> list[dict]:
     return rows
 
 
-def compare(rows: list[dict], metrics: pd.DataFrame) -> pd.DataFrame:
+def compare(rows: list[dict], metrics: pd.DataFrame, only: list[str] | None = None) -> pd.DataFrame:
     """Yahoo-based vs filing-based inputs and scores for the companies the filings cover."""
-    swapped, _ = filing_metrics.overlay(rows, metrics)
+    swapped, _ = filing_metrics.overlay(rows, metrics, only)
     before, after = rescore_rows(rows), rescore_rows(swapped)
     covered = set(metrics["symbol"]) if len(metrics) else set()
     as_of = metrics.set_index("symbol")["as_of"].to_dict() if len(metrics) else {}
@@ -60,18 +60,26 @@ def compare(rows: list[dict], metrics: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def run(store: Store, fundamentals: str = "yahoo", apply: bool = False) -> None:
+def filing_inputs(lake, only: list[str] | None = None) -> pd.DataFrame:
+    """Filing-based inputs per company. Promoter-only reads just the shareholding patterns, so
+    its `as_of` is the pattern's quarter and companies without results are included."""
+    present = set(lake.datasets())
+    empty = pd.DataFrame(columns=["symbol", "as_of"])
+    needs_results = not only or set(only) - {"promoter"}
+    metrics = (filing_metrics.latest(lake.query("select * from financial_results"))
+               if needs_results and "financial_results" in present else empty)
+    if "shareholding" in present and (not only or "promoter" in only):
+        metrics = filing_metrics.with_promoter(metrics, lake.query("select * from shareholding"))
+    return metrics
+
+
+def run(store: Store, fundamentals: str = "yahoo", apply: bool = False, only: list[str] | None = None) -> None:
     rows = load_rows()
     if fundamentals == "filings":
         from ..lake import Lake
 
-        lake = Lake.from_settings()
-        present = set(lake.datasets())
-        metrics = (filing_metrics.latest(lake.query("select * from financial_results"))
-                   if "financial_results" in present else pd.DataFrame(columns=["symbol", "as_of"]))
-        if "shareholding" in present:
-            metrics = filing_metrics.with_promoter(metrics, lake.query("select * from shareholding"))
-        report = compare(rows, metrics)
+        metrics = filing_inputs(Lake.from_settings(), only)
+        report = compare(rows, metrics, only)
         with pd.option_context("display.width", 160, "display.max_rows", 500):
             log.info("Yahoo vs filings:\n" + report.to_string(index=False))
         if len(report):
@@ -80,12 +88,13 @@ def run(store: Store, fundamentals: str = "yahoo", apply: bool = False) -> None:
         if not apply:
             log.info("Comparison only — nothing saved (add --apply to publish these scores).")
             return
-        old = filing_metrics.stale(metrics)
-        if old:
-            log.info(f"Not saved: {len(old)} companies' filing figures are over "
-                     f"{filing_metrics.MAX_AGE_DAYS} days old (latest {metrics['as_of'].max()}).")
-            return
-        rows, _ = filing_metrics.overlay(rows, metrics)
+        old = set(filing_metrics.stale(metrics))
+        if old:  # those keep their current values; everyone else switches
+            log.info(f"{len(old)} companies' filing figures are over {filing_metrics.MAX_AGE_DAYS} days old; "
+                     "they keep their current values.")
+            metrics = metrics[~metrics["symbol"].isin(old)]
+        rows, replaced = filing_metrics.overlay(rows, metrics, only)
+        log.info(f"Using filing-based {', '.join(only or filing_metrics.COLUMNS)} for {replaced} companies")
 
     changed = []
     for row, score in zip(rows, rescore_rows(rows)):

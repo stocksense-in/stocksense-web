@@ -111,6 +111,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--fundamentals", choices=["yahoo", "filings"], default="yahoo",
                    help="where margin, growth, ROE and D/E come from (filings: compare only unless --apply)")
     p.add_argument("--apply", action="store_true", help="with --fundamentals filings: save the scores")
+    p.add_argument("--metrics", nargs="+", choices=["net_margin", "cagr", "roe", "de", "promoter"],
+                   help="with --fundamentals filings: switch only these metrics (e.g. promoter)")
     _add_storage(p)
 
     p = jobs.add_parser("snapshot", help="refresh the frontend's offline data file")
@@ -389,7 +391,7 @@ def main() -> None:
     elif args.job == "rescore":
         from .jobs import rescore
 
-        rescore.run(store, args.fundamentals, args.apply)
+        rescore.run(store, args.fundamentals, args.apply, args.metrics)
     elif args.job == "scheduler":
         from .jobs import scheduler
 

@@ -157,8 +157,10 @@ def with_promoter(metrics: pd.DataFrame, shareholding: pd.DataFrame) -> pd.DataF
     return out.drop(columns="promoter_as_of")
 
 
-def overlay(rows: list[dict], metrics: pd.DataFrame) -> tuple[list[dict], int]:
-    """Copies of `rows` with filing-based margin and growth where a company has them; returns (rows, replaced)."""
+def overlay(rows: list[dict], metrics: pd.DataFrame, only: list[str] | None = None) -> tuple[list[dict], int]:
+    """Copies of `rows` with filing-based values where a company has them; returns (rows, replaced).
+    `only`: metric keys to replace (e.g. ["promoter"]); default all of COLUMNS."""
+    columns = [COLUMNS[k] for k in (only or COLUMNS)]
     by_symbol = metrics.set_index("symbol").to_dict("index") if len(metrics) else {}
     out, replaced = [], 0
     for row in rows:
@@ -167,7 +169,7 @@ def overlay(rows: list[dict], metrics: pd.DataFrame) -> tuple[list[dict], int]:
             out.append(row)
             continue
         new = dict(row)
-        for column in COLUMNS.values():
+        for column in columns:
             if m.get(column) is not None and pd.notna(m.get(column)):
                 new[column] = m[column]
         replaced += 1
