@@ -33,6 +33,11 @@ peers share one definition. Shareholding patterns cover the whole listed univers
 first full pass finishes tonight), unlike quarterly results (50 companies so far). Margin,
 growth, ROE and debt to equity stay on Yahoo until results coverage catches up.
 
+One caveat: the filing records the legal classification. After a change of control the
+new owner can sit in "public" — Asian Hotels (North) has filed 0% promoter / 100% public
+in every pattern since January 2026 while Yahoo shows 85% insiders — so a handful of
+companies will read as having no promoter despite a controlling holder.
+
 Companies whose latest pattern is over 200 days old (suspended or non-filing, mostly NSE's
 BZ series) keep their current value.
 
