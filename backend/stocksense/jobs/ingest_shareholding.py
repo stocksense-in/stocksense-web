@@ -138,6 +138,9 @@ def build(lake: Lake) -> tuple[pd.DataFrame, pd.DataFrame]:
                 continue
             doc.pop("xbrl", None)
             doc["quarter_end"] = date.fromisoformat(doc["quarter_end"])
+            values = {k: v for k, v in doc.items() if k not in ("symbol", "quarter_end") and v is not None}
+            if values and max(values.values()) > 100:  # saved before the unit fix: percentages ×100
+                doc.update({k: round(v / 100, 2) for k, v in values.items()})
             cats.append(doc)
         if cats:
             h = h.merge(pd.DataFrame(cats).drop_duplicates(["symbol", "quarter_end"], keep="last"),

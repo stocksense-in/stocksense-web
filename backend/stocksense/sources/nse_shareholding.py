@@ -73,17 +73,26 @@ def categories(xml: bytes | str) -> dict:
             members = [m.text.split(":")[-1] for m in ctx.iter() if m.tag.endswith("explicitMember")]
             if len(members) == 1:
                 member_of[ctx.get("id")] = members[0]
-    out = {}
+    raw = {}
     for el in root:
         if el.tag.split("}")[-1] != PERCENT_TAG:
             continue
         column = CATEGORIES.get(member_of.get(el.get("contextRef")))
-        if column and column not in out:
+        if column and column not in raw:
             try:
-                out[column] = round(100 * float(el.text), 2)
+                raw[column] = float(el.text)
             except (TypeError, ValueError):
                 continue
-    return out
+    return as_percent(raw)
+
+
+def as_percent(values: dict) -> dict:
+    """Patterns since 2023 give fractions (0.2898); older ones give percentages (28.98).
+    A file is one or the other, so its largest value tells which."""
+    if not values:
+        return {}
+    scale = 1 if max(values.values()) > 1.0 + 1e-9 else 100
+    return {k: round(scale * v, 2) for k, v in values.items()}
 
 
 def _date(value: str | None, fmt: str = "%d-%b-%Y") -> date | None:
