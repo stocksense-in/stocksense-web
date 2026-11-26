@@ -158,6 +158,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--top", type=int, default=20, help="how many of the largest companies")
     p.add_argument("--rests", type=int, default=0,
                    help="when NSE stops answering, rest 15 min and resume, up to this many times")
+    p.add_argument("--all", action="store_true", help="every NSE equity (use with --recent)")
+    p.add_argument("--recent", type=int, metavar="N",
+                   help="only the last N quarters from integrated filings, one basis each (fast, whole market)")
 
     p = jobs.add_parser("ingest-shareholding", help="promoter holding by quarter and promoter pledges")
     p.add_argument("--symbols", nargs="+", metavar="SYM", help="these companies")
@@ -286,7 +289,7 @@ def main() -> None:
     if args.job == "ingest-results":
         from .jobs import ingest_results
 
-        ingest_results.run(args.symbols, args.top, rests=args.rests)
+        ingest_results.run(args.symbols, args.top, rests=args.rests, everything=args.all, recent=args.recent)
         return
 
     if args.job == "alerts":

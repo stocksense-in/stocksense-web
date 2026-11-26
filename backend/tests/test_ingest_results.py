@@ -152,3 +152,23 @@ def test_missing_excise_in_a_table_is_nan_not_a_number_to_subtract():
                        "revenue": [100.0, 50.0], "finance_cost": [1.0, 1.0], "other_income": [1.0, 1.0],
                        "excise_duty": [10.0, float("nan")], "net_revenue": [None, None]})
     assert ingest_results.consistent_kind(df)["net_revenue"].tolist() == [90.0, 50.0]
+
+
+def test_recent_mode_takes_last_quarters_one_basis_each():
+    def f(qe, cons, seq):
+        return {"qe_Date": qe, "consolidated": "Consolidated" if cons else "Standalone", "seq_Id": seq, "xbrl": "x"}
+
+    filings = [f("30-SEP-2026", True, "1"), f("30-SEP-2026", False, "2"), f("30-JUN-2026", False, "3"),
+               f("31-MAR-2026", True, "4"), f("31-MAR-2026", False, "5"), f("31-DEC-2025", True, "6")]
+    picked = ingest_results.recent_filings(filings, 3)
+    assert [p["seq_Id"] for p in picked] == ["1", "3", "4"]  # consolidated where filed, else standalone
+
+
+def test_recent_mode_skips_the_old_feed(tmp_path, monkeypatch):
+    lake = Lake(tmp_path)
+    monkeypatch.setattr(nse_results, "client", lambda: FakeClient())
+    monkeypatch.setattr(nse_results, "fetch_filings", lambda c, s: (_ for _ in ()).throw(AssertionError("old feed")))
+    monkeypatch.setattr(nse_integrated, "fetch_filings", lambda c, s: [
+        {"qe_Date": "30-SEP-2026", "consolidated": "Consolidated", "seq_Id": "1", "xbrl": "x"}])
+    monkeypatch.setattr(nse_integrated, "fetch_xbrl", lambda c, f: "<xml/>")
+    assert ingest_results.fetch(lake, ["TCS"], pause=0, recent=5) == 1
