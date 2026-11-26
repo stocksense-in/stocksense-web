@@ -182,6 +182,24 @@ export interface Exposure { sector: string; code: string | null; sensitivity: nu
 
 export interface Geopolitics { updated_at: string; exposure: Exposure[]; events: NewsEvent[] }
 
+export interface AnalogueSummary { code: string; label: string; rule: string; occurrences: number; first: string | null; last: string | null }
+
+export interface Analogues {
+  generated_at: string; data_from: string; data_through: string; benchmark: string;
+  horizons_days: number[]; method: string; notable_share: Record<string, number>;
+  sector_sources: Record<string, string>; events: AnalogueSummary[];
+}
+
+export interface AnalogueCell {
+  sector: string; horizon_days: number; n: number; mean_excess_pct: number; median_excess_pct: number;
+  hit_rate: number; ci_low_pct: number; ci_high_pct: number; baseline_pct: number; notable: boolean;
+}
+
+export interface AnalogueDetail extends AnalogueSummary {
+  recent: { date: string; evidence: { actors: string; place: string | null; articles: number; url: string }[] }[];
+  sectors: AnalogueCell[];
+}
+
 export interface ScreenPage {
   total: number;
   page: number;
@@ -219,6 +237,8 @@ export const api = {
   indices: (signal?: AbortSignal) => get<IndexQuote[]>('/market/indices', signal),
   overview: (signal?: AbortSignal) => get<Overview>('/market/overview', signal),
   news: (q: { topic?: string; sector?: string; limit?: number } = {}, signal?: AbortSignal) => get<NewsEvent[]>(`/news${qs(q)}`, signal),
+  analogues: (signal?: AbortSignal) => get<Analogues>('/geopolitics/analogues', signal),
+  analogue: (code: string, signal?: AbortSignal) => get<AnalogueDetail>(`/geopolitics/analogues/${encodeURIComponent(code)}`, signal),
   geopolitics: (events = 12, signal?: AbortSignal) => get<Geopolitics>(`/geopolitics?events=${events}`, signal),
   screen: (q: ScreenQuery, signal?: AbortSignal) => get<ScreenPage>(`/stocks${qs(q)}`, signal),
   sectors: (signal?: AbortSignal) => get<SectorOption[]>('/sectors', signal),
