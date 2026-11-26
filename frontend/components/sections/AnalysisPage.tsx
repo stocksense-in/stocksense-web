@@ -13,7 +13,7 @@ type Status = 'loading' | 'ok' | 'notfound' | 'offline';
 type Tab = 'score' | 'financials' | 'holders' | 'dividends' | 'peers';
 
 const QUICK: [string, string][] = [
-  ['INFY', 'IT Services'], ['HDFCBANK', 'Banking'], ['TATAMOTORS', 'Auto'], ['ITC', 'FMCG'], ['SUNPHARMA', 'Pharma'],
+  ['INFY', 'IT Services'], ['HDFCBANK', 'Banking'], ['MARUTI', 'Auto'], ['ITC', 'FMCG'], ['SUNPHARMA', 'Pharma'],
 ];
 
 function initialSymbol(): string {
@@ -140,7 +140,7 @@ export function AnalysisPage() {
               else if (e.key === 'ArrowUp') { e.preventDefault(); setHighlight(h => Math.max(h - 1, 0)); }
               else if (e.key === 'Escape') setQuery('');
             }}
-            placeholder="Search any NSE company — name or symbol (INFY, HDFC Bank, Tata Motors…)"
+            placeholder="Search any NSE company — name or symbol (INFY, HDFC Bank, Maruti…)"
             aria-label="Search companies"
             style={{ flex: 1 }}
           />
@@ -186,7 +186,7 @@ export function AnalysisPage() {
           <div style={{ fontSize: 11, color: 'var(--cream-dim)', lineHeight: 1.8 }}>
             <strong style={{ color: 'var(--gold)' }}>Company data is offline. </strong>
             The StockSense API at <span style={{ fontFamily: 'var(--f-mono)' }}>{API_URL}</span> isn&apos;t reachable.
-            Locally, start it with <span style={{ fontFamily: 'var(--f-mono)' }}>cd backend &amp;&amp; uvicorn stocksense.api.app:app</span>, or set
+            Locally, start it with <span style={{ fontFamily: 'var(--f-mono)' }}>cd backend &amp;&amp; python -m stocksense api</span>, or set
             <span style={{ fontFamily: 'var(--f-mono)' }}> NEXT_PUBLIC_API_URL</span>.
           </div>
         </div>
