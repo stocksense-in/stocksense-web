@@ -269,8 +269,16 @@ def build(lake: Lake) -> pd.DataFrame:
     return df
 
 
+def resume_from(targets: list[str], start: str | None) -> list[str]:
+    """The targets from `start` on (alphabetical, as the universe is), to pick up a run NSE cut short."""
+    if not start:
+        return targets
+    start = start.upper()
+    return [t for t in targets if t >= start]
+
+
 def run(symbols: list[str] | None = None, top: int = 20, lake: Lake | None = None, rests: int = 0,
-        everything: bool = False, recent: int | None = None) -> pd.DataFrame:
+        everything: bool = False, recent: int | None = None, start: str | None = None) -> pd.DataFrame:
     lake = lake or Lake.from_settings()
     if symbols:
         targets = [s.upper() for s in symbols]
@@ -280,6 +288,7 @@ def run(symbols: list[str] | None = None, top: int = 20, lake: Lake | None = Non
         targets = [s.symbol for s in select()]
     else:
         targets = top_symbols(top)
+    targets = resume_from(targets, start)
     log.info(f"{SOURCE}: {len(targets)} companies" + (f", last {recent} quarters" if recent else ""))
     fetch(lake, targets, rests=rests, recent=recent)
     return build(lake)

@@ -138,9 +138,11 @@ def test_promoter_from_the_latest_shareholding_pattern():
                        {"symbol": "ITC", "quarter_end": date(2026, 9, 30), "promoter_pct": 0.0}])
     out = fm.with_promoter(metrics, sh).set_index("symbol")
     assert out.at["TCS", "promoter_holding"] == 71.77 and out.at["TCS", "net_margin"] == 18.2
-    assert out.at["ITC", "promoter_holding"] == 0.0 and out.at["ITC", "as_of"] == date(2026, 9, 30)
+    assert pd.isna(out.at["ITC", "promoter_holding"]) and bool(out.at["ITC", "no_promoter_group"])
+    assert not bool(out.at["TCS", "no_promoter_group"]) and out.at["ITC", "as_of"] == date(2026, 9, 30)
     rows, replaced = fm.overlay([{"symbol": "ITC", "promoter_holding": 29.49, "net_margin": 25.0}], out.reset_index())
-    assert rows[0]["promoter_holding"] == 0.0 and rows[0]["net_margin"] == 25.0  # no results: Yahoo's margin kept
+    # No promoter group: the metric is left out (None), not scored as 0%; no results, so Yahoo's margin stays.
+    assert rows[0]["promoter_holding"] is None and rows[0]["net_margin"] == 25.0
 
 
 def test_growth_on_reported_revenue_margin_on_net():
@@ -154,10 +156,10 @@ def test_growth_on_reported_revenue_margin_on_net():
 
 
 def test_switch_only_selected_metrics():
-    metrics = pd.DataFrame([{"symbol": "ITC", "as_of": date(2026, 9, 30), "net_margin": 24.4, "promoter_holding": 0.0}])
-    rows = [{"symbol": "ITC", "net_margin": 25.0, "promoter_holding": 29.49}]
+    metrics = pd.DataFrame([{"symbol": "TCS", "as_of": date(2026, 9, 30), "net_margin": 18.0, "promoter_holding": 71.77}])
+    rows = [{"symbol": "TCS", "net_margin": 19.0, "promoter_holding": 72.3}]
     out, n = fm.overlay(rows, metrics, only=["promoter"])
-    assert n == 1 and out[0] == {"symbol": "ITC", "net_margin": 25.0, "promoter_holding": 0.0}
+    assert n == 1 and out[0] == {"symbol": "TCS", "net_margin": 19.0, "promoter_holding": 71.77}
 
 
 def test_apply_skips_stale_companies_instead_of_refusing(monkeypatch):

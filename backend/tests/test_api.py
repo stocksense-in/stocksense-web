@@ -131,3 +131,37 @@ def test_screen_by_symbols_for_a_watchlist(client):
     assert sorted(r["symbol"] for r in body["results"]) == ["INFY", "TCS"]
     too_many = ",".join(f"S{i}" for i in range(101))
     assert client.get("/stocks", params={"symbols": too_many}).status_code == 422
+
+
+def test_no_promoter_group_is_not_applicable_not_missing():
+    from stocksense.api.app import NOT_APPLICABLE_NOTE, _coverage_note, _no_promoter_group
+    assert _no_promoter_group({"quarters": [{"promoter_pct": 45.0}, {"promoter_pct": 0.0}]})
+    assert not _no_promoter_group({"quarters": [{"promoter_pct": 0.0}, {"promoter_pct": 12.0}]})
+    assert not _no_promoter_group(None) and not _no_promoter_group({"quarters": []})
+    assert _coverage_note(66, [], ["Promoter holding"]) == NOT_APPLICABLE_NOTE
+    both = _coverage_note(60, ["Debt to equity"], ["Promoter holding"])
+    assert both.startswith("This score uses 4 of 5 metrics — debt to equity isn't available") and both.endswith(NOT_APPLICABLE_NOTE)
+
+
+def test_stock_detail_marks_promoter_not_applicable(market):
+    holders = {"source": "test", "companies": {"TCS": {"quarters": [{"quarter_end": "2026-09-30", "promoter_pct": 0.0}],
+                                                       "pledge": None}}}
+    c = TestClient(create_app(market=market, headlines=lambda: [], holders=lambda: holders))
+    score = c.get("/stocks/TCS").json()["score"]
+    (promoter,) = [p for p in score["breakdown"] if p["metric"] == "promoter"]
+    # The fixture still carries a promoter figure (as Yahoo does), so it is scored, with the caveat shown.
+    assert promoter["note"].startswith("Its filings show no promoter group")
+    assert score["not_applicable"] == [] and "Promoter holding" not in score["missing"]
+
+
+def test_after_the_switch_promoter_is_not_applicable(market):
+    from stocksense.api.app import NOT_APPLICABLE_NOTE
+    from stocksense.market import MarketData
+    from tests.conftest import ROWS
+    rows = [dict(r, promoter_holding=None) if r["symbol"] == "TCS" else r for r in ROWS]
+    holders = {"source": "test", "companies": {"TCS": {"quarters": [{"quarter_end": "2026-09-30", "promoter_pct": 0.0}],
+                                                       "pledge": None}}}
+    c = TestClient(create_app(market=MarketData(rows=rows), headlines=lambda: [], holders=lambda: holders))
+    score = c.get("/stocks/TCS").json()["score"]
+    assert score["not_applicable"] == ["Promoter holding"] and score["missing"] == []
+    assert score["coverage_note"] == NOT_APPLICABLE_NOTE

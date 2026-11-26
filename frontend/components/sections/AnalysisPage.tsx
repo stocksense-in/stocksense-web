@@ -278,7 +278,7 @@ export function AnalysisPage() {
                 <div style={{ textAlign: 'center' }}>
                   <div className="ct" style={{ marginBottom: 4 }}>StockSense score</div>
                   <div style={{ fontSize: 20, fontWeight: 500, fontFamily: 'var(--f-mono)', color: stockScoreColor(sc.value), letterSpacing: '-2px', lineHeight: 1 }}>{sc.value ?? '—'}</div>
-                  <div style={{ fontSize: 9, color: 'var(--cream-mute)', marginTop: 4, fontWeight: 500, letterSpacing: '0.5px', fontFamily: 'var(--f-mono)' }}>OUT OF 100 · {sc.coverage}/6 METRICS</div>
+                  <div style={{ fontSize: 9, color: 'var(--cream-mute)', marginTop: 4, fontWeight: 500, letterSpacing: '0.5px', fontFamily: 'var(--f-mono)' }}>OUT OF 100 · {sc.coverage}/{6 - (sc.not_applicable?.length ?? 0)} METRICS</div>
                 </div>
               </div>
             </div>

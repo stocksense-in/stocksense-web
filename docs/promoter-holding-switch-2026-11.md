@@ -13,12 +13,12 @@ quarterly shareholding pattern, which StockSense now ingests (M1.3).
 
 | | |
 |---|---|
-| Companies with both figures | 2,242 |
-| Median gap between Yahoo and the filed figure | **5.3 points** |
-| Companies off by more than 5 points | **1,159 (52%)** |
-| Companies off by more than 20 points | **299** |
+| Companies with both figures | 2,199 |
+| Median gap between Yahoo and the filed figure | **5.2 points** |
+| Companies off by more than 5 points | **1,127 (51%)** |
+| Companies off by more than 20 points | **278** |
 | Score change if switched: median | 1 point |
-| Score change: companies moving 5+ points | 140 (largest +12 / −12) |
+| Score change: companies moving 5+ points | 141 (largest +11 / −9) |
 
 Examples of the gap: FACT — 90% government-owned, Yahoo 0%. Bharat Rasayan and GKW —
 75% promoter-held, Yahoo 0%. ITC — no promoter group at all, Yahoo 29%. Hindustan Zinc —
@@ -26,6 +26,19 @@ Examples of the gap: FACT — 90% government-owned, Yahoo 0%. Bharat Rasayan and
 
 The filed figures are checked: every pattern adds to 100%, and the summary matches the
 filed XBRL pattern exactly for 45 of 45 sampled large caps (`ml/checks/shareholding_spot_check.py`).
+
+## Companies with no promoter group: not applicable, not weak
+
+47 scored companies file no promoter group at all — 12 banks (HDFC Bank, ICICI Bank, Federal Bank,
+IDFC First, Yes Bank…), ITC, L&T, platform companies (Eternal, Swiggy, Paytm, PB Fintech, Delhivery)
+and market infrastructure (BSE, CAMS, IEX). Read literally, 0% would put them at the bottom of the
+promoter curve, which contradicts what StockSense teaches ("professionally managed companies have no
+promoter at all — that is not a weakness").
+
+So the switch treats the metric as **not applicable** for them: it is left out and the other five
+metrics carry its weight, exactly as for a missing figure, and the company page says why. Most of
+these companies gain a few points (HDFC Bank 38 → 43, ITC 64 → 70, ICICI Bank 50 → 56, BSE 67 → 74);
+a handful lose a little where Yahoo counted a large "insider" stake that filings classify as public.
 
 ## Why switching this one metric now is safe
 
@@ -54,13 +67,14 @@ After publishing, the weekly engine run keeps patterns current; re-run the comma
 
 ## It also fills gaps
 
-109 scored companies have no promoter figure from Yahoo but do have a filed pattern, so the
+101 scored companies have no promoter figure from Yahoo but do have a filed pattern, so the
 switch fills them. More broadly, the inputs most often missing are ROE (651 companies), P/E (309) and
 debt to equity (250) — balance-sheet figures that quarterly results provide, which makes
 widening results coverage the next lever for score completeness.
 
 ## Recommendation
 
-Switch promoter holding to filed patterns. The universe pass is complete and the numbers
-held up: the earlier 1,345-company sample (49% off by 5+ points) matches the full run (52%). It corrects a
+Switch promoter holding to filed patterns, with "no promoter group" treated as not applicable. The
+universe pass is complete and the numbers held up: the earlier 1,345-company sample (49% off by 5+
+points) matches the full run (51%). It corrects a
 wrong input for about half the market at the cost of a small, explainable score change.

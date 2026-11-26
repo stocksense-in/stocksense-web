@@ -67,6 +67,7 @@ export interface ScoreDetail {
   coverage: number;
   missing: string[];
   coverage_note: string | null;
+  not_applicable?: string[];
   stage: string | null;
   stage_text: string | null;
   breakdown: ScorePart[];

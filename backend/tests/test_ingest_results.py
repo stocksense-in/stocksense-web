@@ -172,3 +172,9 @@ def test_recent_mode_skips_the_old_feed(tmp_path, monkeypatch):
         {"qe_Date": "30-SEP-2026", "consolidated": "Consolidated", "seq_Id": "1", "xbrl": "x"}])
     monkeypatch.setattr(nse_integrated, "fetch_xbrl", lambda c, f: "<xml/>")
     assert ingest_results.fetch(lake, ["TCS"], pause=0, recent=5) == 1
+
+
+def test_resume_from_a_symbol():
+    from stocksense.jobs.ingest_results import resume_from
+    assert resume_from(["ABB", "INDIACEM", "INDIAMART", "ZOMATO"], "indiamart") == ["INDIAMART", "ZOMATO"]
+    assert resume_from(["ABB", "ZOMATO"], None) == ["ABB", "ZOMATO"]
