@@ -385,3 +385,25 @@ nav.land-nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-i
 /* ══ TOAST ══ */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--s3);border:1px solid var(--border-bright);border-radius:8px;padding:12px 18px;font-size:11.5px;color:var(--cream);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;transform:translateY(8px);z-index:999;max-width:320px;}
 .toast.show{opacity:1;transform:translateY(0);}
+
+/* ── Phones and narrow windows: sidebar becomes a drawer, side-by-side panels stack ── */
+.tb-menu{display:none;background:none;border:1px solid var(--border);color:var(--gold);border-radius:4px;width:30px;height:30px;font-size:14px;cursor:pointer;flex-shrink:0;}
+.sb-backdrop{display:none;}
+@media (max-width:900px){
+  .sidebar{transform:translateX(-100%);transition:transform .2s ease;z-index:40;box-shadow:none;}
+  .sidebar.open{transform:translateX(0);box-shadow:8px 0 30px rgba(0,0,0,0.5);}
+  .sb-backdrop{display:block;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:39;}
+  .main-area{margin-left:0;}
+  .tb-menu{display:inline-flex;align-items:center;justify-content:center;}
+  .topbar{padding:0 12px;gap:10px;}
+  .tb-title{font-size:13px;white-space:nowrap;}
+  .tb-date,.live-badge{display:none;}
+  .content{padding:12px;}
+  .g2,.g3,.split{grid-template-columns:minmax(0,1fr) !important;}
+  .g4,.idx-strip{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
+  .mc-grid{grid-template-columns:minmax(0,1fr);}
+}
+@media (max-width:560px){
+  .tb-r .btn-ghost{display:none;}
+  .tb-title{display:none;}
+}

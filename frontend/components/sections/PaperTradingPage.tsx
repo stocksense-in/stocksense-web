@@ -233,7 +233,7 @@ export function PaperTradingPage() {
       </div>
 
       <div className="ct" style={{ marginBottom: 10 }}>Learning Missions</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+      <div className="split" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
         {missions.map(m => {
           const done = completedMissions.has(m.id);
           return (

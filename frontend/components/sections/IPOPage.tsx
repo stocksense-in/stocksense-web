@@ -141,7 +141,7 @@ export function IPOPage() {
         <div className="card" style={{ fontSize: 11, color: 'var(--cream-mute)', marginBottom: 14 }}>IPO data isn&apos;t reachable right now.</div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '340px minmax(0,1fr)', gap: 12 }}>
+      <div className="split" style={{ display: 'grid', gridTemplateColumns: '340px minmax(0,1fr)', gap: 12 }}>
         <div>
           {open.length > 0 && <div className="ct" style={{ margin: '0 0 8px' }}>Open now · {open.length}</div>}
           {open.map(i => <IpoCard key={i.symbol} ipo={i} selected={sel?.symbol === i.symbol} onSelect={() => setSelected(i.symbol)} />)}
