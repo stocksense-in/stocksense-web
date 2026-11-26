@@ -127,7 +127,7 @@ Without Docker: `pip install -r requirements.txt` then
 | `python -m stocksense ingest-macro` | Full daily history of crude, gold, copper, gas, USD/INR, dollar index, US 10-year, S&P 500, VIX | Daily |
 | `python -m stocksense ingest-gdelt` | GDELT world news events since Apr 2013 → daily aggregates + widely covered events, into the lake (`--workers N` for the build) | Daily |
 | `python -m stocksense event-study` | Historical sector reactions to each event type → lake tables + `data/geo_analogues.json` (what the API serves) | Weekly, after the ingests |
-| `python -m stocksense engine-daily` | Every lake source for the last 10 days (`--days N`), then the data checks; `--weekly` adds corporate actions, the event study, sector valuation and new quarterly results (20 largest companies). Logs to `<lake>/runs.jsonl`; non-zero exit on failures | Daily, after ~19:00 IST |
+| `python -m stocksense engine-daily` | Every lake source for the last 10 days (`--days N`), then the data checks; `--weekly` adds corporate actions, the event study, sector valuation and new quarterly results (100 largest companies). Logs to `<lake>/runs.jsonl`; non-zero exit on failures | Daily, after ~19:00 IST |
 | `python -m stocksense check-lake` | Data checks on the index, macro, GDELT and F&O datasets (gaps, duplicates, impossible values, staleness) | After each ingest |
 | `python -m stocksense ingest-fno` | NSE futures & options end-of-day file, 2010 → today: every contract plus a per-underlying summary (OI, put/call ratios, max-OI strikes) | Daily, after ~19:00 IST |
 | `python -m stocksense ingest-filings` | NSE corporate announcements and insider trades since 2015 (monthly windows; the latest two months refetched), plus today's FII/DII cash flows | Daily |

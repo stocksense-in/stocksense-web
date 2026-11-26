@@ -54,7 +54,8 @@ class RunReport:
         return all(s["ok"] for s in self.steps) and not any(self.problems.values())
 
 
-RESULTS_TOP = 20  # companies whose quarterly results the weekly run keeps current
+RESULTS_TOP = 100  # companies whose quarterly results the weekly run keeps current (only new filings are fetched)
+RESULTS_RESTS = 4  # NSE throttles long runs; rest 15 min and resume up to this many times
 SHAREHOLDING_RESTS = 6  # NSE throttles long runs; rest and resume up to this many times
 
 
@@ -75,7 +76,7 @@ def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
         Step("event_study", lambda: event_study.run(lake=lake), weekly=True),
         Step("valuation_context", lambda: valuation.write(lake), weekly=True),
         # Results arrive quarterly; weekly picks up each filing within days, fetching only new ones.
-        Step("results", lambda: ingest_results.run(top=RESULTS_TOP, lake=lake), weekly=True),
+        Step("results", lambda: ingest_results.run(top=RESULTS_TOP, lake=lake, rests=RESULTS_RESTS), weekly=True),
         Step("financials_export", lambda: financials.write(lake), weekly=True),
         # Two requests per company, every NSE equity (~2 h); pledge history builds from these snapshots.
         Step("shareholding", lambda: ingest_shareholding.run(everything=True, lake=lake, rests=SHAREHOLDING_RESTS),
