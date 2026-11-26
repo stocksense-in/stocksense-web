@@ -109,6 +109,8 @@ class ScoreDetail(BaseModel):
     value: int | None
     verdict: str | None = Field(description="Strong (65+), Fair (45–64) or Weak")
     coverage: int = Field(description="How many of the six metrics were available")
+    missing: list[str] = Field(default_factory=list, description="Metrics with no data, by label")
+    coverage_note: str | None = Field(None, description="What the missing metrics mean for this score")
     stage: str | None = Field(None, description="loss-making | high growth | steady | unknown — how to read the metrics")
     stage_text: str | None = None
     breakdown: list[ScorePart]

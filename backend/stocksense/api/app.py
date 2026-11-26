@@ -51,6 +51,19 @@ def _stock_out(s: Stock) -> schemas.StockOut:
     return schemas.StockOut(**s.to_dict(), sector_label=SECTOR_LABELS.get(s.sector, "Other"))
 
 
+def _coverage_note(score: int | None, missing: list[str]) -> str | None:
+    """Plain words for a score built on fewer than six metrics."""
+    if not missing:
+        return None
+    names = ", ".join(m[0].lower() + m[1:] if not m.isupper() and not m[:3].isupper() else m for m in missing)
+    if score is None:
+        return f"Not enough data to score this company (missing: {names})."
+    return (f"This score uses {6 - len(missing)} of 6 metrics — {names} isn't available, so the others carry "
+            "its weight. Treat it as a rougher guide." if len(missing) == 1 else
+            f"This score uses {6 - len(missing)} of 6 metrics — missing: {names}. The others carry their weight, "
+            "so treat it as a rougher guide.")
+
+
 def _verdict(score: int | None) -> str | None:
     if score is None:
         return None
@@ -326,6 +339,8 @@ def create_app(
             stock=_stock_out(stock),
             score=schemas.ScoreDetail(
                 value=stock.score, verdict=_verdict(stock.score), coverage=coverage,
+                missing=(missing := [GUIDE[k]["label"] for k, v in metrics.items() if v is None]),
+                coverage_note=_coverage_note(stock.score, missing),
                 stage=stage, stage_text=benchmarks.STAGE_TEXT.get(stage),
                 breakdown=analytics.score_breakdown(stock, _benchmarks(request), request.app.state.valuation(),
                                                     holders, financials),
