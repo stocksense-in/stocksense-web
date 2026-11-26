@@ -147,6 +147,15 @@ def build_issue(raw: dict, subscription: Subscription | None = None, today: date
     )
 
 
+# Debt issues (NCD tranches) sometimes arrive labelled as equity. Their symbols are digits,
+# the issuer's letters and a two-digit maturity year (11MGEL29, 13DCCL29A); equity symbols
+# that start with digits never end in a year (20MICRONS, 360ONE, 63MOONS).
+# NSE's past-issues feed labels mainboard IPOs "Equity" (older records "EQ"/"BE") and SME
+# issues "SME"; DEBT, InvIT and REIT issues are skipped.
+EQUITY_TYPES = {"EQ", "EQUITY", "BE", "SME"}
+_DEBT_SYMBOL = re.compile(r"^\d+[A-Z]+\d{2}[A-Z]?$")
+
+
 def recent_listings(past: list[dict], prices: dict[str, float], days: int = 90, today: date | None = None) -> list[dict]:
     """
     Equity IPOs that listed in the last `days` days, with the return from the issue
@@ -155,7 +164,9 @@ def recent_listings(past: list[dict], prices: dict[str, float], days: int = 90, 
     today = today or today_ist()
     rows = []
     for p in past:
-        if (p.get("securityType") or "").upper() not in {"EQ", "BE", "SME"}:
+        if (p.get("securityType") or "").strip().upper() not in EQUITY_TYPES:
+            continue
+        if _DEBT_SYMBOL.match((p.get("symbol") or "").strip().upper()):
             continue
         listed = parse_date(p.get("listingDate"))
         if not listed or (today - listed).days > days or listed > today:
@@ -169,7 +180,7 @@ def recent_listings(past: list[dict], prices: dict[str, float], days: int = 90, 
             {
                 "symbol": (p.get("symbol") or "").strip().upper(),
                 "name": p.get("company", ""),
-                "board": "sme" if (p.get("securityType") or "").upper() == "SME" else "mainboard",
+                "board": "sme" if (p.get("securityType") or "").strip().upper() == "SME" else "mainboard",
                 "listed": listed.isoformat(),
                 "issue_price": issue_price,
                 "price": current,
