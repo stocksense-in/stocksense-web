@@ -7,7 +7,7 @@ import type { CompanyTab } from '@/components/sections/AnalysisPage';
 
 // Terminal-style commands. Company functions follow a symbol: "INFY FA".
 const PAGE_COMMANDS: { codes: string[]; page: Page; label: string }[] = [
-  { codes: ['DASH', 'HOME'], page: 'dashboard', label: 'Market dashboard' },
+  { codes: ['DASH', 'HOME', 'WL'], page: 'dashboard', label: 'Market dashboard and your watchlist' },
   { codes: ['EQS', 'SCR'], page: 'screener', label: 'Screener' },
   { codes: ['IPO'], page: 'ipo', label: 'IPOs open and coming up' },
   { codes: ['GEO'], page: 'geo', label: 'Geopolitics engine' },

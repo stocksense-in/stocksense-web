@@ -236,6 +236,19 @@ export async function scanProspectus(file: File, signal?: AbortSignal): Promise<
   }
 }
 
+export interface Alert {
+  date: string; symbol: string;
+  kind: 'price_move' | 'unusual_volume' | 'results_filed' | 'large_order' | 'promoter_stake' | 'pledge_change' | string;
+  value: number | null; text: string;
+}
+
+export interface Alerts { generated_at: string | null; days: string[]; alerts: Alert[] }
+
+export const ALERT_LABEL: Record<string, string> = {
+  price_move: 'Big move', unusual_volume: 'Heavy trading', results_filed: 'Results',
+  large_order: 'Order win', promoter_stake: 'Promoter stake', pledge_change: 'Pledges',
+};
+
 export interface CompanyHeadline { title: string; link: string; source: string; published: string | null }
 
 export interface ScreenPage {
@@ -250,6 +263,7 @@ export interface SectorOption { code: string; label: string; stocks: number }
 export interface ScreenQuery {
   sector?: string; cap?: 'large' | 'mid' | 'small'; min_score?: number; max_pe?: number; min_roe?: number; max_de?: number;
   sort?: 'score' | 'market_cap' | 'change_pct' | 'pe' | 'roe' | 'de' | 'name'; order?: 'asc' | 'desc'; page?: number; page_size?: number;
+  symbols?: string;
 }
 
 function qs(params: object): string {
@@ -288,6 +302,7 @@ export const api = {
   financials: (s: string, signal?: AbortSignal) => get<Financials>(`/stocks/${sym(s)}/financials`, signal),
   holders: (s: string, signal?: AbortSignal) => get<Holders>(`/stocks/${sym(s)}/holders`, signal),
   dividends: (s: string, signal?: AbortSignal) => get<Dividends>(`/stocks/${sym(s)}/dividends`, signal),
+  alerts: (q: { symbols?: string; kind?: string; days?: number; limit?: number } = {}, signal?: AbortSignal) => get<Alerts>(`/alerts${qs(q)}`, signal),
   companyNews: (s: string, limit = 20, signal?: AbortSignal) => get<CompanyHeadline[]>(`/stocks/${sym(s)}/news?limit=${limit}`, signal),
   history: (s: string, range = '1y', signal?: AbortSignal) => get<History>(`/stocks/${sym(s)}/history?range=${range}`, signal),
 };
