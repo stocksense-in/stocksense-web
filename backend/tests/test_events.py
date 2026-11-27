@@ -122,7 +122,7 @@ def test_deals_join_the_company_events():
     doc = ev.build(ANNOUNCEMENTS, INSIDERS, TODAY, DEALS)
     assert doc["deals_since"] == "2026-11-27"
     igil = doc["companies"]["IGIL"]  # a company with deals only still gets an entry
-    assert [(d["kind"], d["client"]) for d in igil["deals"]] == [("block", "OLD BRIDGE MUTUAL FUND"), ("bulk", "SMALL FUND")]
+    assert [(d["kind"], d["client"]) for d in igil["deals"]] == [("block", "Old Bridge Mutual Fund"), ("bulk", "Small Fund")]
     assert igil["announcements"] == [] and igil["insiders"] is None
     assert doc["companies"]["TCS"]["deals"][0]["value_cr"] == 15.0
     assert "deals" not in doc["companies"]["ABC"]

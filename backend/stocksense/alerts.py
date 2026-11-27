@@ -8,6 +8,7 @@ know, computed from the lake:
   • large_order      an order/contract-win announcement
   • promoter_stake   a new shareholding pattern with the promoters' stake up or down 1+ point
   • pledge_change    promoters' pledged share of their stake moved 2+ points between snapshots
+  • big_deal         a bulk or block deal of ₹10 crore or more (the largest of the day, by who)
 
     python -m stocksense alerts --date 2023-01-27 --symbols ADANIENT ADANIPORTS
 
@@ -25,6 +26,7 @@ from pathlib import Path
 import pandas as pd
 
 from .config import DATA_DIR
+from .events import client_name, money
 from .lake import Lake
 from .results_reaction import filed_time
 
@@ -34,6 +36,7 @@ VOLUME_LOOKBACK = 20    # sessions
 MIN_HISTORY = 10        # sessions needed before volume is judged
 STAKE_MOVE = 1.0        # percentage points, quarter on quarter
 PLEDGE_MOVE = 2.0       # percentage points of the promoters' stake
+BIG_DEAL_CR = 10.0      # ₹ crore: a bulk/block deal this size is worth a line
 EXPORT_SESSIONS = 10   # trading days kept in data/alerts.json
 OUTPUT = DATA_DIR / "alerts.json"
 ORDER_CATEGORIES = ("Bagging/Receiving of orders/contracts", "Awarding of order(s)/contract(s)")
@@ -138,6 +141,39 @@ def pledge_change(pledges: pd.DataFrame, day: date) -> list[dict]:
     return out
 
 
+def shares(n: float) -> str:
+    """Share counts as an Indian reader says them: 24 lakh, 1.2 crore, 15,000."""
+    if n >= 1e7:
+        return f"{n / 1e7:.1f} crore".replace(".0 ", " ")
+    if n >= 1e5:
+        return f"{n / 1e5:.1f} lakh".replace(".0 ", " ")
+    return f"{int(n):,}"
+
+
+def big_deals(deals: pd.DataFrame, day: date) -> list[dict]:
+    """The day's largest bulk/block deal per company, if ₹10 crore or more; value is signed
+    (positive bought, negative sold). A block trade also reported as a bulk deal counts once."""
+    if deals is None or not len(deals):
+        return []
+    d = deals[pd.to_datetime(deals["date"]).dt.date == day].copy()
+    d["_block"] = d["kind"] == "block"
+    d = (d.sort_values("_block", ascending=False)
+          .drop_duplicates(["symbol", "client", "side", "quantity", "price"])
+          .sort_values("value_cr", ascending=False))
+    out = []
+    for symbol, g in d.groupby("symbol", sort=False):
+        top = g.iloc[0]
+        if top["value_cr"] < BIG_DEAL_CR:
+            continue
+        verb = "bought" if top["side"] == "buy" else "sold"
+        more = len(g) - 1
+        out.append(_alert(day, symbol, "big_deal", top["value_cr"] if top["side"] == "buy" else -top["value_cr"],
+                          f"{client_name(top['client'])} {verb} {money(top['value_cr'])} of {symbol} in a {top['kind']} "
+                          f"deal ({shares(top['quantity'])} shares at ₹{top['price']:,.2f})"
+                          + (f"; {more} other deal{'s' if more > 1 else ''} that day." if more else ".")))
+    return out
+
+
 def for_day(lake: Lake, day: date, symbols: list[str] | None = None) -> list[dict]:
     """Every alert for `day`, optionally only for `symbols` (a watchlist)."""
     present = set(lake.datasets())
@@ -163,8 +199,10 @@ def for_day(lake: Lake, day: date, symbols: list[str] | None = None) -> list[dic
         alerts += promoter_stake(lake.query(f"select * from shareholding where 1=1{where}", frames=frames), day)
     if "pledges" in present:
         alerts += pledge_change(lake.query(f"select * from pledges where 1=1{where}", frames=frames), day)
+    if "deals" in present:
+        alerts += big_deals(lake.query(f"select * from deals where date = ?{where}", [day], frames=frames), day)
     order = {"price_move": 0, "unusual_volume": 1, "results_filed": 2, "promoter_stake": 3, "pledge_change": 4,
-             "large_order": 5}
+             "big_deal": 5, "large_order": 6}
     return sorted(alerts, key=lambda a: (a["symbol"], order.get(a["kind"], 9)))
 
 

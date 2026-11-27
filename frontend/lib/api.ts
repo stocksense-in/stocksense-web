@@ -299,7 +299,7 @@ export async function scanProspectus(file: File, signal?: AbortSignal): Promise<
 
 export interface Alert {
   date: string; symbol: string;
-  kind: 'price_move' | 'unusual_volume' | 'results_filed' | 'large_order' | 'promoter_stake' | 'pledge_change' | string;
+  kind: 'price_move' | 'unusual_volume' | 'results_filed' | 'large_order' | 'promoter_stake' | 'pledge_change' | 'big_deal' | string;
   value: number | null; text: string;
 }
 
@@ -307,7 +307,7 @@ export interface Alerts { generated_at: string | null; days: string[]; alerts: A
 
 export const ALERT_LABEL: Record<string, string> = {
   price_move: 'Big move', unusual_volume: 'Heavy trading', results_filed: 'Results',
-  large_order: 'Order win', promoter_stake: 'Promoter stake', pledge_change: 'Pledges',
+  large_order: 'Order win', promoter_stake: 'Promoter stake', pledge_change: 'Pledges', big_deal: 'Big deal',
 };
 
 export interface CompanyHeadline { title: string; link: string; source: string; published: string | null }

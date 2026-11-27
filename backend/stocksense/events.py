@@ -188,6 +188,23 @@ def insider_trades(df: pd.DataFrame) -> tuple[dict[str, dict], str | None]:
     return out, last.date().isoformat()
 
 
+INITIALISMS = {"HUF", "LIC", "SBI", "UTI", "ICICI", "IIFL", "AIF", "FPI", "NPS", "PPFAS", "BNP", "JM", "UBS", "BOFA",
+               "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII"}
+ABBREVIATIONS = {"LTD", "PVT", "CO", "MFG", "SVCS"}  # no vowels, but words: Ltd., Pvt.
+
+
+def client_name(raw: str) -> str:
+    """NSE's upper-case client name, readable: OLD BRIDGE MUTUAL FUND -> Old Bridge Mutual Fund,
+    keeping initialisms (BCP, HDFC, LLC: no vowels; HUF, SBI, II…: known) as they are."""
+    words = []
+    for w in str(raw).split():
+        core = w.strip(".,()&-")
+        up = core.upper()
+        initialism = core.isalpha() and up not in ABBREVIATIONS and (up in INITIALISMS or not set(up) & set("AEIOUY"))
+        words.append(w if initialism or not core.isalpha() else w.replace(core, core.capitalize()))
+    return " ".join(words)
+
+
 def deals_by_company(df: pd.DataFrame | None) -> tuple[dict[str, list[dict]], str | None]:
     """symbol -> the latest bulk/block deals, and the first day of deals in the data. A block
     trade over 0.5% of the company is reported in both files: it's listed once, as a block deal."""
@@ -202,7 +219,7 @@ def deals_by_company(df: pd.DataFrame | None) -> tuple[dict[str, list[dict]], st
             .sort_values(["day", "value_cr"], ascending=[False, False]))
     out = {}
     for symbol, g in df.groupby("symbol", sort=False):
-        out[symbol] = [{"date": r.day.date().isoformat(), "kind": r.kind, "client": r.client, "side": r.side,
+        out[symbol] = [{"date": r.day.date().isoformat(), "kind": r.kind, "client": client_name(r.client), "side": r.side,
                         "quantity": int(r.quantity), "price": round(float(r.price), 2),
                         "value_cr": round(float(r.value_cr), 2)}
                        for r in g.head(DEALS).itertuples()]

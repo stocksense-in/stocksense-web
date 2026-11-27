@@ -3,7 +3,7 @@ import type { Alert } from '@/lib/api';
 import { ALERT_LABEL } from '@/lib/api';
 
 const tone = (a: Alert) =>
-  a.kind === 'price_move' || a.kind === 'promoter_stake' || a.kind === 'pledge_change'
+  a.kind === 'price_move' || a.kind === 'promoter_stake' || a.kind === 'pledge_change' || a.kind === 'big_deal'
     ? (a.value ?? 0) >= 0 ? (a.kind === 'pledge_change' ? 'pill pill-r' : 'pill pill-g') : (a.kind === 'pledge_change' ? 'pill pill-g' : 'pill pill-r')
     : 'pill pill-gold';
 
