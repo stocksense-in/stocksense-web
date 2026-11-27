@@ -35,6 +35,54 @@ function PromoterTrend({ h }: { h: Holders }) {
   );
 }
 
+const INSTITUTIONS: [keyof Holders['quarters'][number], string, string][] = [
+  ['fii_pct', 'Foreign', '#E8C96A'],
+  ['mutual_funds_pct', 'Mutual funds', '#00E676'],
+  ['dii_pct', 'All domestic', '#5BC08A'],
+];
+
+/** Foreign and domestic institutions' stakes by quarter, once a year or more of the full pattern is in. */
+function InstitutionsTrend({ h }: { h: Holders }) {
+  const qs = h.quarters.filter(q => q.fii_pct !== null && q.fii_pct !== undefined);
+  if (qs.length < 4) return null;
+  const W = 300, H = 70;
+  const all = INSTITUTIONS.flatMap(([k]) => qs.map(q => q[k] as number | null).filter((v): v is number => v !== null && v !== undefined));
+  const lo = Math.min(...all), hi = Math.max(...all), span = Math.max(hi - lo, 2);
+  const y = (v: number) => H - 4 - ((v - lo) / span) * (H - 8);
+  const x = (i: number) => (i / (qs.length - 1)) * W;
+  return (
+    <div className="card" style={{ marginTop: 12 }}>
+      <div className="ct">Institutions over time</div>
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height: 70, display: 'block' }} role="img" aria-label="Institutional holdings by quarter">
+        {INSTITUTIONS.map(([k, , color]) => {
+          const pts = qs.map((q, i) => [i, q[k] as number | null] as const).filter(([, v]) => v !== null && v !== undefined);
+          if (pts.length < 2) return null;
+          const d = pts.map(([i, v], n) => `${n ? 'L' : 'M'}${x(i).toFixed(1)},${y(v as number).toFixed(1)}`).join(' ');
+          return <path key={k} d={d} fill="none" stroke={color} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />;
+        })}
+      </svg>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--cream-mute)', fontFamily: 'var(--f-mono)', marginTop: 4 }}>
+        <span>{fmtQuarter(qs[0].quarter_end)}</span>
+        <span>{fmtQuarter(qs[qs.length - 1].quarter_end)}</span>
+      </div>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 8 }}>
+        {INSTITUTIONS.map(([k, label, color]) => {
+          const first = qs.find(q => q[k] !== null && q[k] !== undefined)?.[k] as number | undefined;
+          const last = qs[qs.length - 1][k] as number | null;
+          if (first === undefined || last === null || last === undefined) return null;
+          return (
+            <span key={k} style={{ fontSize: 10, color: 'var(--cream-dim)' }}>
+              <span style={{ display: 'inline-block', width: 8, height: 2, background: color, verticalAlign: 'middle', marginRight: 5 }} />
+              {label} {fmtPct(first)} → <span style={{ color: 'var(--cream)' }}>{fmtPct(last)}</span>
+            </span>
+          );
+        })}
+      </div>
+      {h.institutions_note && <p className="mc-plain" style={{ marginTop: 10, color: 'var(--cream)' }}>{h.institutions_note}</p>}
+    </div>
+  );
+}
+
 export function HoldersPanel({ h }: { h: Holders }) {
   const latest = [...h.quarters].reverse().find(q => q.fii_pct !== null || q.dii_pct !== null) ?? h.quarters[h.quarters.length - 1];
   const rows = SPLIT.filter(([k]) => latest && latest[k] !== null && latest[k] !== undefined);
@@ -70,6 +118,7 @@ export function HoldersPanel({ h }: { h: Holders }) {
           {h.trend_note && <p className="mc-plain" style={{ marginTop: 10, color: 'var(--cream)' }}>{h.trend_note}</p>}
           <p className="mc-plain" style={{ marginTop: 6 }}>A steady or rising stake is usually read as confidence; a falling one is worth a look at why (sales, dilution or a share issue).</p>
         </div>
+        <InstitutionsTrend h={h} />
         {h.pledge && (
           <div className={h.pledge_warning ? 'card card-alert' : 'card'} style={{ marginTop: 12 }}>
             <div className="ct">Pledged shares · {fmtQuarter(h.pledge.as_of)}</div>

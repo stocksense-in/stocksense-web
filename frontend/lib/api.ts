@@ -204,6 +204,7 @@ export interface Holders {
   pledge: { as_of: string; pledged_pct_of_promoter: number | null; pledged_pct_of_total: number | null; all_pledges_pct_of_total: number | null } | null;
   trend_note: string | null;
   pledge_warning: string | null;
+  institutions_note?: string | null;
 }
 
 export interface Dividends {

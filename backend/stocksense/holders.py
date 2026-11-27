@@ -95,6 +95,43 @@ def trend_note(entry: dict | None) -> str | None:
                                      "to institutions), but a steady decline is worth understanding."))
 
 
+INSTITUTIONS = (("fii_pct", "Foreign investors"), ("mutual_funds_pct", "Mutual funds"),
+                ("dii_pct", "Domestic institutions"))
+INSTITUTION_MOVE = 1.0  # percentage points over a year: worth a line
+
+
+def _year_before(quarter_end: str) -> str:
+    d = date.fromisoformat(quarter_end)
+    return d.replace(year=d.year - 1).isoformat()
+
+
+def institutions_note(entry: dict | None) -> str | None:
+    """How foreign investors, mutual funds and domestic institutions moved their stakes over the past
+    year (latest full pattern vs the latest one at least a year older); None without a year of the split."""
+    quarters = [q for q in (entry or {}).get("quarters", []) if q.get("fii_pct") is not None]
+    if len(quarters) < 2:
+        return None
+    now = quarters[-1]
+    year_ago = [q for q in quarters if q["quarter_end"] <= _year_before(now["quarter_end"])]
+    if not year_ago:
+        return None
+    then = year_ago[-1]
+    moves = []
+    for key, who in INSTITUTIONS:
+        if now.get(key) is None or then.get(key) is None:
+            continue
+        move = now[key] - then[key]
+        if abs(move) >= INSTITUTION_MOVE:
+            moves.append(f"{who if not moves else who.lower()} {'raised' if move > 0 else 'cut'} their stake from {then[key]:.1f}% to {now[key]:.1f}%")
+    if not moves:
+        if now.get("dii_pct") is None:
+            return None
+        return (f"Institutions' stakes barely moved over the past year (foreign investors {now['fii_pct']:.1f}%, "
+                f"domestic institutions {now['dii_pct']:.1f}%).")
+    return ("; ".join(moves) + " over the past year. Big funds building a stake over several quarters is a vote of "
+            "confidence; a steady exit is worth understanding.")
+
+
 def write(lake, output: Path = OUTPUT) -> dict:
     present = set(lake.datasets())
     doc = build(lake.query("select * from shareholding"),
