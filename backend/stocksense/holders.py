@@ -105,24 +105,45 @@ def _year_before(quarter_end: str) -> str:
     return d.replace(year=d.year - 1).isoformat()
 
 
-def institutions_note(entry: dict | None) -> str | None:
-    """How foreign investors, mutual funds and domestic institutions moved their stakes over the past
-    year (latest full pattern vs the latest one at least a year older); None without a year of the split."""
+def _year_of_split(entry: dict | None) -> tuple[dict, dict] | None:
+    """(latest full pattern, the latest one at least a year older), or None without a year of the split."""
     quarters = [q for q in (entry or {}).get("quarters", []) if q.get("fii_pct") is not None]
     if len(quarters) < 2:
         return None
     now = quarters[-1]
     year_ago = [q for q in quarters if q["quarter_end"] <= _year_before(now["quarter_end"])]
-    if not year_ago:
+    return (now, year_ago[-1]) if year_ago else None
+
+
+def _moves(now: dict, then: dict) -> dict[str, float]:
+    return {key: now[key] - then[key] for key, _ in INSTITUTIONS if now.get(key) is not None and then.get(key) is not None}
+
+
+def funds_buying(entry: dict | None) -> bool:
+    """Foreign investors or mutual funds raised their stake by a point or more over the past year,
+    and the two together didn't shrink."""
+    pair = _year_of_split(entry)
+    if not pair:
+        return False
+    moves = _moves(*pair)
+    fii, mf = moves.get("fii_pct", 0.0), moves.get("mutual_funds_pct", 0.0)
+    return (fii >= INSTITUTION_MOVE or mf >= INSTITUTION_MOVE) and fii + mf > 0
+
+
+def institutions_note(entry: dict | None) -> str | None:
+    """How foreign investors, mutual funds and domestic institutions moved their stakes over the past
+    year (latest full pattern vs the latest one at least a year older); None without a year of the split."""
+    pair = _year_of_split(entry)
+    if not pair:
         return None
-    then = year_ago[-1]
+    now, then = pair
+    moved = _moves(now, then)
     moves = []
     for key, who in INSTITUTIONS:
-        if now.get(key) is None or then.get(key) is None:
-            continue
-        move = now[key] - then[key]
-        if abs(move) >= INSTITUTION_MOVE:
-            moves.append(f"{who if not moves else who.lower()} {'raised' if move > 0 else 'cut'} their stake from {then[key]:.1f}% to {now[key]:.1f}%")
+        move = moved.get(key)
+        if move is not None and abs(move) >= INSTITUTION_MOVE:
+            moves.append(f"{who if not moves else who.lower()} {'raised' if move > 0 else 'cut'} their stake "
+                         f"from {then[key]:.1f}% to {now[key]:.1f}%")
     if not moves:
         if now.get("dii_pct") is None:
             return None

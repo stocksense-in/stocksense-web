@@ -278,6 +278,8 @@ def create_app(
         insiders: Literal["buying"] | None = Query(None, description="buying: promoters and directors bought more than "
                                                    "they sold on the market (two years to the end of NSE's feed)"),
         red_flags: Literal["none"] | None = Query(None, description="none: no red-flag filings in the past year"),
+        funds: Literal["buying"] | None = Query(None, description="buying: foreign investors or mutual funds raised "
+                                                "their stake by a point or more over the past year"),
     ):
         """The screener: every NSE stock passing the filters, sorted and paginated."""
         filters = analytics.ScreenFilters(
@@ -296,6 +298,9 @@ def create_app(
                 stocks = [st for st in stocks if events_mod.insiders_buying(companies.get(st.symbol))]
             if red_flags == "none":
                 stocks = [st for st in stocks if not events_mod.red_flags(companies.get(st.symbol))]
+        if funds == "buying":
+            owners = (request.app.state.holders() or {}).get("companies") or {}
+            stocks = [st for st in stocks if own.funds_buying(owners.get(st.symbol))]
         rows = analytics.screen(stocks, filters)
         start = (page - 1) * page_size
         return schemas.ScreenPage(
