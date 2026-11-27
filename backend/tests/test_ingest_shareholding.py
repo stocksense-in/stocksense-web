@@ -48,3 +48,27 @@ def test_a_failed_request_keeps_the_other(tmp_path, monkeypatch):
     assert job.fetch(lake, ["TCS"], today=date(2026, 11, 26), pause=0) == 1
     holdings, pledges = job.build(lake)
     assert len(holdings) == 2 and pledges.empty
+
+
+def test_history_reads_past_quarters_from_the_saved_list(tmp_path, monkeypatch):
+    lake = Lake(tmp_path)
+    # every listed quarter has its full pattern on NSE (the shared fixture links only the latest)
+    master = [{**r, "xbrl": r.get("xbrl") or f"https://nsearchives.nseindia.in/corporate/xbrl/SHP_{i}.xml"}
+              for i, r in enumerate(MASTER)]
+    monkeypatch.setattr(nse_shareholding, "client", lambda: FakeClient())
+    monkeypatch.setattr(nse_shareholding, "fetch_master", lambda c, s: master)
+    monkeypatch.setattr(nse_shareholding, "fetch_pledges", lambda c, s: PLEDGE)
+    xbrl_calls = []
+    monkeypatch.setattr(nse_shareholding, "fetch_xbrl", lambda c, url: xbrl_calls.append(url) or b"x")
+    monkeypatch.setattr(nse_shareholding, "categories", lambda xml: {"fii_pct": 9.0, "dii_pct": 13.5})
+    job.fetch(lake, ["TCS"], today=date(2026, 11, 26), pause=0)  # saves the list + the latest pattern
+    assert len(xbrl_calls) == 1
+
+    def no_lists(c, s):
+        raise AssertionError("history must not request the list again")
+
+    monkeypatch.setattr(nse_shareholding, "fetch_master", no_lists)
+    assert job.fetch_history(lake, ["TCS", "NOLIST"], quarters=8, pause=0) == 1  # only the older quarter was missing
+    assert job.fetch_history(lake, ["TCS"], quarters=8, pause=0) == 0  # nothing left to read
+    holdings, _ = job.build(lake)
+    assert holdings["fii_pct"].notna().all()  # both quarters now carry the split
