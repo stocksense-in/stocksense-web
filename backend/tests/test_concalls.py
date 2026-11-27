@@ -147,3 +147,18 @@ def test_export_and_api(tmp_path, market):
     assert body["source"] == "https://x/call.pdf" and any("15% to 17%" in q["text"] for q in body["guidance"])
     assert client.get(f"/stocks/{symbol}").json()["available"]["concall"] is True
     assert client.get("/stocks/NOPE/concall").status_code == 404
+
+
+def test_dash_labels_bullets_and_unmarked_questions():
+    pages = [" Mr. C.S. Setty – Chairman, State Bank of India:\nWe stick to our guidance of 14% to 15% credit growth "
+             "next year. We expect NIM to be at least 3% for the year. Our ROA target of 1% will be maintained next year.\n"
+             " Shri Mohit Kumar – ICICI Securities:\nSir, just trying to understand if credit growth will reach 20% "
+             "next year. We think margins will be 3.5% next year.\nMr. C.S. Setty – Chairman, State Bank of India: "
+             "We will deliver 14% growth next year, as guided."]
+    sents = cc.sentences(pages)
+    assert {s.speaker for s in sents} == {"Mr. C.S. Setty", "Shri Mohit Kumar (ICICI Securities)"}
+    assert cc.management(sents) == {"Mr. C.S. Setty"}
+    texts = [q.text for q in cc.guidance(pages, DAY)]
+    assert texts and not any("20%" in t or "3.5%" in t for t in texts)  # the analyst's figures
+    assert cc.BULLETS.sub("", "• Revenue grew 18%.") == "Revenue grew 18%."
+    assert cc.ASKING.search("Sir, given the repo hike, what is the sensitivity of our cost of funds.")
