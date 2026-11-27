@@ -192,6 +192,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-download", action="store_true", help="rescan the prospectuses already on disk")
     p.add_argument("--workers", type=int, default=6, help="parallel text extraction")
 
+    p = jobs.add_parser("ask", help="the prospectus pages that answer a question about a company (M3.5)")
+    p.add_argument("symbol", help="NSE symbol of a company whose prospectus `ingest-rhp` has read")
+    p.add_argument("question", help="the question, in quotes")
+    p.add_argument("-k", type=int, default=5, help="how many pages to show")
+
     p = jobs.add_parser("backup", help="copy what's new in the lake to a backup folder, then test a restore")
     p.add_argument("--dest", help="backup folder (default: STOCKSENSE_BACKUP_DIR)")
     p.add_argument("--no-check", action="store_true", help="skip the restore test after copying")
@@ -425,6 +430,20 @@ def main() -> None:
         from .jobs import ingest_rhp
 
         ingest_rhp.run(since=date.fromisoformat(args.since), download_new=not args.no_download, workers=args.workers)
+        return
+
+    if args.job == "ask":
+        from . import filings_qa
+        from .lake import Lake
+
+        try:
+            hits = filings_qa.ask(Lake.from_settings(), args.symbol, args.question, k=args.k)
+        except LookupError as exc:
+            raise SystemExit(str(exc)) from None
+        for h in hits:
+            print(f"page {h.page}  (score {h.score:g})\n  {h.snippet}\n")
+        if not hits:
+            print("No page mentions those words.")
         return
 
     if args.job == "backup":

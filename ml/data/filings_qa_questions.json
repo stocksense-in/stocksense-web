@@ -1,0 +1,981 @@
+[
+ {
+  "id": "ZAGGLE-brlm",
+  "symbol": "ZAGGLE",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Zaggle Prepaid Ocean Services' IPO?",
+  "phrasing": "prospectus words",
+  "answer": "ICICI Securities Limited",
+  "pattern": "I\\s*C\\s*I\\s*C\\s*I\\s*S\\s*e\\s*c\\s*u\\s*r\\s*i\\s*t\\s*i\\s*e\\s*s\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   11,
+   51,
+   82,
+   109,
+   296,
+   301,
+   302,
+   306
+  ]
+ },
+ {
+  "id": "ZAGGLE-registrar",
+  "symbol": "ZAGGLE",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Zaggle Prepaid Ocean Services' IPO?",
+  "phrasing": "plain English",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   2,
+   3,
+   13,
+   84,
+   301,
+   303
+  ]
+ },
+ {
+  "id": "ZAGGLE-auditor",
+  "symbol": "ZAGGLE",
+  "kind": "auditor",
+  "question": "Who are Zaggle Prepaid Ocean Services' statutory auditors?",
+  "phrasing": "prospectus words",
+  "answer": "P R S V & Co.",
+  "pattern": "P\\s*R\\s*S\\s*V\\s*\\&\\s*C\\s*o\\s*\\.",
+  "gold_pages": [
+   1,
+   6,
+   25,
+   26,
+   27,
+   28,
+   60,
+   79,
+   83,
+   86,
+   99,
+   116,
+   117,
+   119,
+   120,
+   154,
+   200,
+   201,
+   202,
+   203,
+   204,
+   205,
+   206,
+   207,
+   218,
+   242,
+   247,
+   300,
+   347
+  ]
+ },
+ {
+  "id": "ZAGGLE-net_worth",
+  "symbol": "ZAGGLE",
+  "kind": "net_worth",
+  "question": "How much is Zaggle Prepaid Ocean Services' net worth?",
+  "phrasing": "plain English",
+  "answer": "487.51",
+  "pattern": "4\\s*8\\s*7\\s*\\.\\s*5\\s*1",
+  "gold_pages": [
+   22,
+   45,
+   75,
+   204,
+   235,
+   239,
+   240,
+   246,
+   252,
+   253,
+   278
+  ]
+ },
+ {
+  "id": "ZAGGLE-criminal",
+  "symbol": "ZAGGLE",
+  "kind": "criminal",
+  "question": "How many criminal cases are pending against Zaggle Prepaid Ocean Services?",
+  "phrasing": "prospectus words",
+  "answer": "0",
+  "gold_pages": [
+   22,
+   53,
+   285
+  ]
+ },
+ {
+  "id": "DHARMAJ-incorporated",
+  "symbol": "DHARMAJ",
+  "kind": "incorporated",
+  "question": "When was Dharmaj Crop Guard incorporated?",
+  "phrasing": "prospectus words",
+  "answer": "January 19, 2015",
+  "pattern": "J\\s*a\\s*n\\s*u\\s*a\\s*r\\s*y\\s*1\\s*9\\s*,\\s*2\\s*0\\s*1\\s*5",
+  "gold_pages": [
+   2,
+   77,
+   87,
+   90,
+   91,
+   188,
+   192,
+   230,
+   395
+  ]
+ },
+ {
+  "id": "DHARMAJ-brlm",
+  "symbol": "DHARMAJ",
+  "kind": "brlm",
+  "question": "Which investment banks are running Dharmaj Crop Guard's share sale?",
+  "phrasing": "plain English",
+  "answer": "Elara Capital (India) Private Limited",
+  "pattern": "E\\s*l\\s*a\\s*r\\s*a\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*\\(\\s*I\\s*n\\s*d\\s*i\\s*a\\s*\\)\\s*P\\s*r\\s*i\\s*v\\s*a\\s*t\\s*e\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   1,
+   2,
+   8,
+   9,
+   78,
+   321,
+   327,
+   329
+  ]
+ },
+ {
+  "id": "DHARMAJ-registrar",
+  "symbol": "DHARMAJ",
+  "kind": "registrar",
+  "question": "Who is the registrar to Dharmaj Crop Guard's offer?",
+  "phrasing": "prospectus words",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   1,
+   2,
+   13,
+   80
+  ]
+ },
+ {
+  "id": "DHARMAJ-auditor",
+  "symbol": "DHARMAJ",
+  "kind": "auditor",
+  "question": "Which audit firm signs off Dharmaj Crop Guard's accounts?",
+  "phrasing": "plain English",
+  "answer": "K A R M A & Co.",
+  "pattern": "K\\s*A\\s*R\\s*M\\s*A\\s*\\&\\s*C\\s*o\\s*\\.",
+  "gold_pages": [
+   4,
+   82,
+   83,
+   104,
+   225
+  ]
+ },
+ {
+  "id": "DHARMAJ-net_worth",
+  "symbol": "DHARMAJ",
+  "kind": "net_worth",
+  "question": "How much is Dharmaj Crop Guard's net worth?",
+  "phrasing": "plain English",
+  "answer": "1,011.67",
+  "pattern": "1\\s*,\\s*0\\s*1\\s*1\\s*\\.\\s*6\\s*7",
+  "gold_pages": [
+   27,
+   269,
+   274
+  ]
+ },
+ {
+  "id": "DHARMAJ-criminal",
+  "symbol": "DHARMAJ",
+  "kind": "criminal",
+  "question": "How many criminal cases are pending against Dharmaj Crop Guard?",
+  "phrasing": "prospectus words",
+  "answer": "1",
+  "gold_pages": [
+   28,
+   43
+  ]
+ },
+ {
+  "id": "MUTHOOTMF-incorporated",
+  "symbol": "MUTHOOTMF",
+  "kind": "incorporated",
+  "question": "When was Muthoot Microfin incorporated?",
+  "phrasing": "prospectus words",
+  "answer": "April 6, 1992",
+  "pattern": "A\\s*p\\s*r\\s*i\\s*l\\s*6\\s*,\\s*1\\s*9\\s*9\\s*2",
+  "gold_pages": [
+   3,
+   89,
+   226,
+   445,
+   500
+  ]
+ },
+ {
+  "id": "MUTHOOTMF-brlm",
+  "symbol": "MUTHOOTMF",
+  "kind": "brlm",
+  "question": "Which investment banks are running Muthoot Microfin's share sale?",
+  "phrasing": "plain English",
+  "answer": "ICICI Securities Limited",
+  "pattern": "I\\s*C\\s*I\\s*C\\s*I\\s*S\\s*e\\s*c\\s*u\\s*r\\s*i\\s*t\\s*i\\s*e\\s*s\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   10,
+   13,
+   81,
+   132,
+   453
+  ]
+ },
+ {
+  "id": "MUTHOOTMF-registrar",
+  "symbol": "MUTHOOTMF",
+  "kind": "registrar",
+  "question": "Who is the registrar to Muthoot Microfin's offer?",
+  "phrasing": "prospectus words",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   2,
+   3,
+   15,
+   16,
+   81
+  ]
+ },
+ {
+  "id": "MUTHOOTMF-auditor",
+  "symbol": "MUTHOOTMF",
+  "kind": "auditor",
+  "question": "Which audit firm signs off Muthoot Microfin's accounts?",
+  "phrasing": "plain English",
+  "answer": "Sharp & Tannan Associates",
+  "pattern": "S\\s*h\\s*a\\s*r\\s*p\\s*\\&\\s*T\\s*a\\s*n\\s*n\\s*a\\s*n\\s*A\\s*s\\s*s\\s*o\\s*c\\s*i\\s*a\\s*t\\s*e\\s*s",
+  "gold_pages": [
+   8,
+   80,
+   85,
+   102,
+   105,
+   112,
+   132,
+   134,
+   137,
+   287,
+   288,
+   289,
+   290,
+   293,
+   391,
+   422,
+   423,
+   430,
+   456,
+   502
+  ]
+ },
+ {
+  "id": "MUTHOOTMF-net_worth",
+  "symbol": "MUTHOOTMF",
+  "kind": "net_worth",
+  "question": "How much is Muthoot Microfin's net worth?",
+  "phrasing": "plain English",
+  "answer": "18,420.95",
+  "pattern": "1\\s*8\\s*,\\s*4\\s*2\\s*0\\s*\\.\\s*9\\s*5",
+  "gold_pages": [
+   27,
+   73,
+   77,
+   117,
+   189,
+   262,
+   288,
+   363,
+   390,
+   395,
+   414,
+   416,
+   422
+  ]
+ },
+ {
+  "id": "SURAKSHA-criminal",
+  "symbol": "SURAKSHA",
+  "kind": "criminal",
+  "question": "Is Suraksha Diagnostic facing any criminal proceedings?",
+  "phrasing": "plain English",
+  "answer": "0",
+  "gold_pages": [
+   26,
+   43,
+   382
+  ]
+ },
+ {
+  "id": "GANDHAR-incorporated",
+  "symbol": "GANDHAR",
+  "kind": "incorporated",
+  "question": "When was Gandhar Oil Refinery (India) incorporated?",
+  "phrasing": "prospectus words",
+  "answer": "October 7, 1992",
+  "pattern": "O\\s*c\\s*t\\s*o\\s*b\\s*e\\s*r\\s*7\\s*,\\s*1\\s*9\\s*9\\s*2",
+  "gold_pages": [
+   3,
+   247,
+   300,
+   422,
+   545,
+   548,
+   627
+  ]
+ },
+ {
+  "id": "SAIPARENT-brlm",
+  "symbol": "SAIPARENT",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Sai Parenteral's IPO?",
+  "phrasing": "prospectus words",
+  "answer": "Arihant Capital Markets Limited",
+  "pattern": "A\\s*r\\s*i\\s*h\\s*a\\s*n\\s*t\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*M\\s*a\\s*r\\s*k\\s*e\\s*t\\s*s\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   11,
+   16,
+   84,
+   102,
+   103,
+   129,
+   429,
+   434,
+   435
+  ]
+ },
+ {
+  "id": "SURAKSHA-registrar",
+  "symbol": "SURAKSHA",
+  "kind": "registrar",
+  "question": "Who is the registrar to Suraksha Diagnostic's offer?",
+  "phrasing": "prospectus words",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   1,
+   2,
+   11,
+   93
+  ]
+ },
+ {
+  "id": "SURAKSHA-auditor",
+  "symbol": "SURAKSHA",
+  "kind": "auditor",
+  "question": "Which audit firm signs off Suraksha Diagnostic's accounts?",
+  "phrasing": "plain English",
+  "answer": "M S K A & Associates",
+  "pattern": "M\\s*S\\s*K\\s*A\\s*\\&\\s*A\\s*s\\s*s\\s*o\\s*c\\s*i\\s*a\\s*t\\s*e\\s*s",
+  "gold_pages": [
+   4,
+   89,
+   90,
+   95,
+   139,
+   140,
+   292,
+   295,
+   296,
+   299,
+   300,
+   301,
+   303,
+   304,
+   314,
+   315,
+   340,
+   400,
+   460
+  ]
+ },
+ {
+  "id": "SURAKSHA-net_worth",
+  "symbol": "SURAKSHA",
+  "kind": "net_worth",
+  "question": "What is Suraksha Diagnostic's net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "1,870.50",
+  "pattern": "1\\s*,\\s*8\\s*7\\s*0\\s*\\.\\s*5\\s*0",
+  "gold_pages": [
+   23,
+   83,
+   300,
+   342,
+   377
+  ]
+ },
+ {
+  "id": "SAIPARENT-criminal",
+  "symbol": "SAIPARENT",
+  "kind": "criminal",
+  "question": "How many criminal cases are pending against Sai Parenteral's?",
+  "phrasing": "prospectus words",
+  "answer": "0",
+  "gold_pages": [
+   34,
+   49,
+   50
+  ]
+ },
+ {
+  "id": "GSLSU-incorporated",
+  "symbol": "GSLSU",
+  "kind": "incorporated",
+  "question": "When was Global Surfaces incorporated?",
+  "phrasing": "prospectus words",
+  "answer": "August 23, 1991",
+  "pattern": "A\\s*u\\s*g\\s*u\\s*s\\s*t\\s*2\\s*3\\s*,\\s*1\\s*9\\s*9\\s*1",
+  "gold_pages": [
+   2,
+   84,
+   213,
+   258,
+   331,
+   400
+  ]
+ },
+ {
+  "id": "GANDHAR-brlm",
+  "symbol": "GANDHAR",
+  "kind": "brlm",
+  "question": "Which investment banks are running Gandhar Oil Refinery (India)'s share sale?",
+  "phrasing": "plain English",
+  "answer": "Nuvama Wealth Management Limited",
+  "pattern": "N\\s*u\\s*v\\s*a\\s*m\\s*a\\s*W\\s*e\\s*a\\s*l\\s*t\\s*h\\s*M\\s*a\\s*n\\s*a\\s*g\\s*e\\s*m\\s*e\\s*n\\s*t\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   11,
+   14,
+   97,
+   154,
+   552,
+   557,
+   558,
+   561
+  ]
+ },
+ {
+  "id": "SAIPARENT-registrar",
+  "symbol": "SAIPARENT",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Sai Parenteral's IPO?",
+  "phrasing": "plain English",
+  "answer": "Bigshare Services",
+  "pattern": "B\\s*i\\s*g\\s*s\\s*h\\s*a\\s*r\\s*e\\s*S\\s*e\\s*r\\s*v\\s*i\\s*c\\s*e\\s*s",
+  "gold_pages": [
+   2,
+   3,
+   15,
+   16,
+   103
+  ]
+ },
+ {
+  "id": "SAIPARENT-auditor",
+  "symbol": "SAIPARENT",
+  "kind": "auditor",
+  "question": "Who are Sai Parenteral's statutory auditors?",
+  "phrasing": "prospectus words",
+  "answer": "R Kabra & Co.",
+  "pattern": "R\\s*K\\s*a\\s*b\\s*r\\s*a\\s*\\&\\s*C\\s*o\\s*\\.",
+  "gold_pages": [
+   2,
+   5,
+   38,
+   39,
+   73,
+   74,
+   77,
+   104,
+   105,
+   150,
+   158,
+   171,
+   176,
+   179,
+   259,
+   355,
+   364,
+   366,
+   367,
+   395,
+   396,
+   397,
+   405,
+   406,
+   415,
+   428,
+   433,
+   500,
+   501,
+   502
+  ]
+ },
+ {
+  "id": "SAIPARENT-net_worth",
+  "symbol": "SAIPARENT",
+  "kind": "net_worth",
+  "question": "How much is Sai Parenteral's net worth?",
+  "phrasing": "plain English",
+  "answer": "2,093.71",
+  "pattern": "2\\s*,\\s*0\\s*9\\s*3\\s*\\.\\s*7\\s*1",
+  "gold_pages": [
+   33,
+   95,
+   171,
+   173,
+   231,
+   312,
+   356,
+   366,
+   391
+  ]
+ },
+ {
+  "id": "JNKINDIA-criminal",
+  "symbol": "JNKINDIA",
+  "kind": "criminal",
+  "question": "How many criminal cases are pending against JNK India?",
+  "phrasing": "prospectus words",
+  "answer": "0",
+  "gold_pages": [
+   25,
+   62,
+   63,
+   354
+  ]
+ },
+ {
+  "id": "SAMBHV-incorporated",
+  "symbol": "SAMBHV",
+  "kind": "incorporated",
+  "question": "What is the date of incorporation of Sambhv Steel Tubes?",
+  "phrasing": "plain English",
+  "answer": "April 24, 2017",
+  "pattern": "A\\s*p\\s*r\\s*i\\s*l\\s*2\\s*4\\s*,\\s*2\\s*0\\s*1\\s*7",
+  "gold_pages": [
+   3,
+   143,
+   147,
+   316,
+   323
+  ]
+ },
+ {
+  "id": "GSLSU-brlm",
+  "symbol": "GSLSU",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Global Surfaces' IPO?",
+  "phrasing": "prospectus words",
+  "answer": "UNISTONE CAPITAL PRIVATE LIMITED",
+  "pattern": "U\\s*N\\s*I\\s*S\\s*T\\s*O\\s*N\\s*E\\s*C\\s*A\\s*P\\s*I\\s*T\\s*A\\s*L\\s*P\\s*R\\s*I\\s*V\\s*A\\s*T\\s*E\\s*L\\s*I\\s*M\\s*I\\s*T\\s*E\\s*D",
+  "gold_pages": [
+   1,
+   2,
+   8,
+   85,
+   88,
+   143,
+   336,
+   343,
+   344
+  ]
+ },
+ {
+  "id": "JNKINDIA-registrar",
+  "symbol": "JNKINDIA",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for JNK India's IPO?",
+  "phrasing": "plain English",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   1,
+   2,
+   12,
+   89
+  ]
+ },
+ {
+  "id": "JNKINDIA-auditor",
+  "symbol": "JNKINDIA",
+  "kind": "auditor",
+  "question": "Who are JNK India's statutory auditors?",
+  "phrasing": "prospectus words",
+  "answer": "CVK & Associates",
+  "pattern": "C\\s*V\\s*K\\s*\\&\\s*A\\s*s\\s*s\\s*o\\s*c\\s*i\\s*a\\s*t\\s*e\\s*s",
+  "gold_pages": [
+   5,
+   81,
+   82,
+   83,
+   91,
+   117,
+   122,
+   128,
+   130,
+   254,
+   256,
+   257,
+   259,
+   260,
+   308,
+   450
+  ]
+ },
+ {
+  "id": "JNKINDIA-net_worth",
+  "symbol": "JNKINDIA",
+  "kind": "net_worth",
+  "question": "How much is JNK India's net worth?",
+  "phrasing": "plain English",
+  "answer": "1,685.61",
+  "pattern": "1\\s*,\\s*6\\s*8\\s*5\\s*\\.\\s*6\\s*1",
+  "gold_pages": [
+   24,
+   81,
+   256,
+   306,
+   308,
+   310
+  ]
+ },
+ {
+  "id": "GSLSU-criminal",
+  "symbol": "GSLSU",
+  "kind": "criminal",
+  "question": "How many criminal cases are pending against Global Surfaces?",
+  "phrasing": "prospectus words",
+  "answer": "0",
+  "gold_pages": [
+   29,
+   48,
+   326
+  ]
+ },
+ {
+  "id": "BANSALWIRE-incorporated",
+  "symbol": "BANSALWIRE",
+  "kind": "incorporated",
+  "question": "What is the date of incorporation of Bansal Wire Industries?",
+  "phrasing": "plain English",
+  "answer": "December 11, 1985",
+  "pattern": "D\\s*e\\s*c\\s*e\\s*m\\s*b\\s*e\\s*r\\s*1\\s*1\\s*,\\s*1\\s*9\\s*8\\s*5",
+  "gold_pages": [
+   3,
+   63,
+   92,
+   236,
+   244,
+   399,
+   402,
+   477
+  ]
+ },
+ {
+  "id": "SAMBHV-brlm",
+  "symbol": "SAMBHV",
+  "kind": "brlm",
+  "question": "Which investment banks are running Sambhv Steel Tubes' share sale?",
+  "phrasing": "plain English",
+  "answer": "Nuvama Wealth Management Limited",
+  "pattern": "N\\s*u\\s*v\\s*a\\s*m\\s*a\\s*W\\s*e\\s*a\\s*l\\s*t\\s*h\\s*M\\s*a\\s*n\\s*a\\s*g\\s*e\\s*m\\s*e\\s*n\\s*t\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   13,
+   16,
+   128,
+   508,
+   514,
+   517
+  ]
+ },
+ {
+  "id": "GANDHAR-registrar",
+  "symbol": "GANDHAR",
+  "kind": "registrar",
+  "question": "Who is the registrar to Gandhar Oil Refinery (India)'s offer?",
+  "phrasing": "prospectus words",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   2,
+   3,
+   13,
+   14,
+   98
+  ]
+ },
+ {
+  "id": "GANDHAR-auditor",
+  "symbol": "GANDHAR",
+  "kind": "auditor",
+  "question": "Which audit firm signs off Gandhar Oil Refinery (India)'s accounts?",
+  "phrasing": "plain English",
+  "answer": "Kailash Chand Jain & Co",
+  "pattern": "K\\s*a\\s*i\\s*l\\s*a\\s*s\\s*h\\s*C\\s*h\\s*a\\s*n\\s*d\\s*J\\s*a\\s*i\\s*n\\s*\\&\\s*C\\s*o",
+  "gold_pages": [
+   1,
+   6,
+   31,
+   32,
+   98,
+   101,
+   131,
+   136,
+   139,
+   148,
+   156,
+   256,
+   284,
+   287,
+   289,
+   291,
+   292,
+   296,
+   416,
+   418,
+   420,
+   421,
+   462,
+   466,
+   556,
+   628,
+   629
+  ]
+ },
+ {
+  "id": "GANDHAR-net_worth",
+  "symbol": "GANDHAR",
+  "kind": "net_worth",
+  "question": "How much is Gandhar Oil Refinery (India)'s net worth?",
+  "phrasing": "plain English",
+  "answer": "8,107.93",
+  "pattern": "8\\s*,\\s*1\\s*0\\s*7\\s*\\.\\s*9\\s*3",
+  "gold_pages": [
+   21,
+   22,
+   89,
+   95,
+   288,
+   362,
+   363,
+   402,
+   407,
+   417,
+   465
+  ]
+ },
+ {
+  "id": "SAMBHV-criminal",
+  "symbol": "SAMBHV",
+  "kind": "criminal",
+  "question": "Is Sambhv Steel Tubes facing any criminal proceedings?",
+  "phrasing": "plain English",
+  "answer": "0",
+  "gold_pages": [
+   27,
+   91,
+   491,
+   492
+  ]
+ },
+ {
+  "id": "WEWORK-incorporated",
+  "symbol": "WEWORK",
+  "kind": "incorporated",
+  "question": "What is the date of incorporation of WeWork India Management?",
+  "phrasing": "plain English",
+  "answer": "May 13, 2016",
+  "pattern": "M\\s*a\\s*y\\s*1\\s*3\\s*,\\s*2\\s*0\\s*1\\s*6",
+  "gold_pages": [
+   3,
+   137,
+   313,
+   362,
+   500,
+   621
+  ]
+ },
+ {
+  "id": "BANSALWIRE-brlm",
+  "symbol": "BANSALWIRE",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Bansal Wire Industries' IPO?",
+  "phrasing": "prospectus words",
+  "answer": "SBI Capital Markets Limited",
+  "pattern": "S\\s*B\\s*I\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*M\\s*a\\s*r\\s*k\\s*e\\s*t\\s*s\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   1,
+   3,
+   10,
+   93,
+   412,
+   417,
+   421
+  ]
+ },
+ {
+  "id": "GSLSU-registrar",
+  "symbol": "GSLSU",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Global Surfaces' IPO?",
+  "phrasing": "plain English",
+  "answer": "Bigshare Services",
+  "pattern": "B\\s*i\\s*g\\s*s\\s*h\\s*a\\s*r\\s*e\\s*S\\s*e\\s*r\\s*v\\s*i\\s*c\\s*e\\s*s",
+  "gold_pages": [
+   1,
+   2,
+   13,
+   14,
+   85,
+   86
+  ]
+ },
+ {
+  "id": "BANSALWIRE-auditor",
+  "symbol": "BANSALWIRE",
+  "kind": "auditor",
+  "question": "Who are Bansal Wire Industries' statutory auditors?",
+  "phrasing": "prospectus words",
+  "answer": "Prateek Gupta & Co",
+  "pattern": "P\\s*r\\s*a\\s*t\\s*e\\s*e\\s*k\\s*G\\s*u\\s*p\\s*t\\s*a\\s*\\&\\s*C\\s*o",
+  "gold_pages": [
+   8,
+   36,
+   37,
+   49,
+   58,
+   59,
+   93,
+   98,
+   130,
+   132,
+   134,
+   142,
+   148,
+   150,
+   152,
+   268,
+   272,
+   274,
+   276,
+   278,
+   280,
+   352,
+   380,
+   386,
+   415,
+   478
+  ]
+ },
+ {
+  "id": "GSLSU-net_worth",
+  "symbol": "GSLSU",
+  "kind": "net_worth",
+  "question": "How much is Global Surfaces' net worth?",
+  "phrasing": "plain English",
+  "answer": "1,489.30",
+  "pattern": "1\\s*,\\s*4\\s*8\\s*9\\s*\\.\\s*3\\s*0",
+  "gold_pages": [
+   28,
+   81,
+   254,
+   299,
+   302
+  ]
+ },
+ {
+  "id": "BANSALWIRE-criminal",
+  "symbol": "BANSALWIRE",
+  "kind": "criminal",
+  "question": "How many criminal cases are pending against Bansal Wire Industries?",
+  "phrasing": "prospectus words",
+  "answer": "0",
+  "gold_pages": [
+   29,
+   55
+  ]
+ },
+ {
+  "id": "AHL-incorporated",
+  "symbol": "AHL",
+  "kind": "incorporated",
+  "question": "When was Abans Holdings incorporated?",
+  "phrasing": "prospectus words",
+  "answer": "September 24, 2009",
+  "pattern": "S\\s*e\\s*p\\s*t\\s*e\\s*m\\s*b\\s*e\\s*r\\s*2\\s*4\\s*,\\s*2\\s*0\\s*0\\s*9",
+  "gold_pages": [
+   2,
+   75,
+   142,
+   144,
+   164,
+   177,
+   198,
+   308,
+   368
+  ]
+ },
+ {
+  "id": "WEWORK-brlm",
+  "symbol": "WEWORK",
+  "kind": "brlm",
+  "question": "Which investment banks are running WeWork India Management's share sale?",
+  "phrasing": "plain English",
+  "answer": "JM Financial Limited",
+  "pattern": "J\\s*M\\s*F\\s*i\\s*n\\s*a\\s*n\\s*c\\s*i\\s*a\\s*l\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   9,
+   11,
+   127,
+   508,
+   517,
+   518,
+   522
+  ]
+ },
+ {
+  "id": "SAMBHV-registrar",
+  "symbol": "SAMBHV",
+  "kind": "registrar",
+  "question": "Who is the registrar to Sambhv Steel Tubes' offer?",
+  "phrasing": "prospectus words",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   2,
+   3,
+   15,
+   16,
+   129
+  ]
+ }
+]
