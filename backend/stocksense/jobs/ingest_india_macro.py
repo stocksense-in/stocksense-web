@@ -4,17 +4,19 @@ the date it became public -> lake table `india_macro` (series, period, value, un
 
     python -m stocksense ingest-india-macro            # refresh everything (a few dozen requests)
 
-Runs weekly in the engine. A source that fails is skipped and the others are still saved.
+Also writes data/economy.json (the dashboard card). Runs weekly in the engine. A source that fails is skipped and the others are still saved.
 """
 from __future__ import annotations
 
 import json
 import time
 from datetime import date
+from pathlib import Path
 
 import httpx
 import pandas as pd
 
+from .. import economy
 from ..lake import Lake
 from ..log import get_logger
 from ..sources import india_macro as im
@@ -67,7 +69,8 @@ def as_of(df: pd.DataFrame, series: str, day: date) -> float | None:
     return float(known.sort_values("period")["value"].iloc[-1])
 
 
-def run(lake: Lake | None = None, today: date | None = None, transport: httpx.BaseTransport | None = None) -> pd.DataFrame:
+def run(lake: Lake | None = None, today: date | None = None, transport: httpx.BaseTransport | None = None,
+        economy_output: Path = economy.OUTPUT) -> pd.DataFrame:
     lake = lake or Lake.from_settings()
     today = today or date.today()
     with httpx.Client(headers=im.HEADERS, timeout=60, follow_redirects=True, transport=transport) as client:
@@ -78,6 +81,7 @@ def run(lake: Lake | None = None, today: date | None = None, transport: httpx.Ba
     folder = lake.raw_dir(SOURCE, today)
     (folder / "rows.json").write_text(json.dumps(rows, default=str), encoding="utf-8")
     lake.write_table(df, DATASET)
+    economy.write(df, economy_output, today=today)
     summary = df.groupby("series")["period"].agg(["min", "max", "count"])
     log.info(f"{SOURCE}: {len(df)} rows\n{summary.to_string()}" + (f"\nfailed: {', '.join(failed)}" if failed else ""))
     return df

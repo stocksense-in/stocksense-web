@@ -68,11 +68,36 @@ def test_job_saves_what_it_can_and_answers_as_of_questions(tmp_path):
         return httpx.Response(503)  # the bond yield feed is down: skipped, the rest saved
 
     lake = Lake(tmp_path)
-    df = job.run(lake=lake, today=date(2026, 11, 27), transport=httpx.MockTransport(handler))
+    df = job.run(lake=lake, today=date(2026, 11, 27), transport=httpx.MockTransport(handler),
+                 economy_output=tmp_path / "economy.json")
     assert set(df["series"]) == {"repo_rate", "cpi", "cpi_inflation", "iip", "iip_growth", "fx_reserves"}
     saved = pd.read_parquet(tmp_path / "clean" / "india_macro" / "data.parquet")
     assert len(saved) == len(df)
+    assert (tmp_path / "economy.json").exists()
     assert job.as_of(df, "repo_rate", date(2025, 6, 5)) == 6.0
     assert job.as_of(df, "repo_rate", date(2025, 7, 1)) == 5.5
     assert job.as_of(df, "cpi_inflation", date(2026, 1, 11)) is None  # December CPI not out yet
     assert job.as_of(df, "cpi_inflation", date(2026, 1, 12)) == 1.33
+
+
+def test_economy_card_uses_only_published_values(market):
+    from fastapi.testclient import TestClient
+
+    from stocksense import economy
+    from stocksense.api import create_app
+
+    rows = (im.parse_policy_csv(BIS) + im.parse_cpi(CPI["data"]) + im.parse_iip(IIP["data"])
+            + im.parse_fred_csv(FRED, "fx_reserves", "US$ million", 45, "TRESEGINM052N"))
+    df = job.frame(rows)
+    early = {s["series"]: s for s in economy.build(df, date(2026, 1, 11))["series"]}
+    assert "cpi_inflation" not in early  # December's CPI comes out on 12 January
+    doc = economy.build(df, date(2026, 11, 27))
+    by = {s["series"]: s for s in doc["series"]}
+    assert by["repo_rate"]["value"] == 5.5 and "cut it on 06 Jun 2025, from 6% to 5.5%" in by["repo_rate"]["note"]
+    assert by["cpi_inflation"]["note"].startswith("Prices rose 1.33% over the year, below the RBI's band")
+    assert by["fx_reserves"]["value"] == 630.0 and by["fx_reserves"]["unit"] == "US$ bn"
+    assert by["iip_growth"]["history"] == [["2026-09-30", 6.7]]
+    body = TestClient(create_app(market=market, headlines=lambda: [], economy=lambda: doc)).get("/economy").json()
+    assert [s["series"] for s in body["series"]] == ["repo_rate", "cpi_inflation", "iip_growth", "fx_reserves"]
+    empty = TestClient(create_app(market=market, headlines=lambda: [], economy=lambda: None)).get("/economy").json()
+    assert empty == {"as_of": None, "series": []}

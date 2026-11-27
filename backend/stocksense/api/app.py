@@ -46,6 +46,7 @@ ALERTS_PATH = DATA_DIR / "alerts.json"  # written daily by `python -m stocksense
 HOLDERS_PATH = DATA_DIR / "holders.json"  # written by `python -m stocksense holders-export`
 DIVIDENDS_PATH = DATA_DIR / "dividends.json"  # written by `python -m stocksense dividends-export`
 EVENTS_PATH = DATA_DIR / "events.json"  # written daily by `python -m stocksense events-export`
+ECONOMY_PATH = DATA_DIR / "economy.json"  # written weekly by `python -m stocksense ingest-india-macro`
 BENCHMARKS_TTL_SECONDS = 5 * 60  # peer quartiles change only when fundamentals do
 
 Range = Literal["1d", "5d", "1mo", "6mo", "1y", "5y"]
@@ -135,6 +136,11 @@ def load_dividends(path: Path = DIVIDENDS_PATH) -> dict | None:
     return _load_json(path)
 
 
+def load_economy(path: Path = ECONOMY_PATH) -> dict | None:
+    """India's macro series at a glance (backend/data/economy.json)."""
+    return _load_json(path)
+
+
 def load_events(path: Path = EVENTS_PATH) -> dict | None:
     """Notable announcements and insider trades per company (backend/data/events.json)."""
     return _load_json(path)
@@ -160,6 +166,7 @@ def create_app(
     company_headlines: Callable[[str], list[news.Headline]] | None = None,
     alerts: Callable[[], dict | None] | None = None,
     events: Callable[[], dict | None] | None = None,
+    economy: Callable[[], dict | None] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -195,6 +202,7 @@ def create_app(
     app.state.holders = holders or load_holders
     app.state.dividends = dividends or load_dividends
     app.state.events = events or load_events
+    app.state.economy = economy or load_economy
     app.state.scan_slots = threading.BoundedSemaphore(MAX_CONCURRENT_SCANS)
 
     def market_of(request: Request) -> MarketData:
@@ -374,6 +382,15 @@ def create_app(
                 "announcements": [{**a, "link": events_mod.full_link(a.get("link"))} for a in entry.get("announcements", [])],
                 "insiders": entry.get("insiders"),
                 "insider_note": events_mod.insider_note(entry, doc.get("insiders_until"))}
+
+    @app.get("/economy", response_model=schemas.Economy, tags=["market"])
+    def economy(request: Request):
+        """India's economy at a glance: repo rate, inflation, industrial output, forex reserves and the 10-year
+        bond yield, each as last published, with a year's comparison and why it matters for shares."""
+        doc = request.app.state.economy()
+        if not doc:
+            return {"as_of": None, "series": []}
+        return doc
 
     @app.get("/alerts", response_model=schemas.Alerts, tags=["stocks"])
     def recent_alerts(
