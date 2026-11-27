@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import type { Geopolitics, IndexQuote, NewsEvent, Overview, StockOut } from '@/lib/api';
 import { api, effectPill, fmtNum, fmtPct, fmtRupees, stockScoreColor, timeAgo } from '@/lib/api';
 import { WatchlistCard } from '@/components/cards/WatchlistCard';
+import { BigDealsCard } from '@/components/cards/BigDealsCard';
 import { EconomyCard } from '@/components/cards/EconomyCard';
 
 const INDEX_ORDER = ['NIFTY50', 'SENSEX', 'BANKNIFTY', 'INDIAVIX'];
@@ -180,6 +181,8 @@ export function DashboardPage({ onNav }: { onNav: (p: Page) => void }) {
           </div>
 
           <EconomyCard />
+
+          <BigDealsCard />
 
           <div className="card" style={{ flex: 1 }}>
             <div className="ct">Intelligence feed</div>

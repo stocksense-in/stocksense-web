@@ -82,5 +82,7 @@ def test_client_names_and_share_counts_read_naturally():
     assert alerts.client_name("OLD BRIDGE MUTUAL FUND") == "Old Bridge Mutual Fund"
     assert alerts.client_name("THAKKAR NILESHKUMAR FARSHURAM HUF") == "Thakkar Nileshkumar Farshuram HUF"
     assert alerts.client_name("GOLDMAN SACHS (SINGAPORE) PTE") == "Goldman Sachs (Singapore) Pte"
+    assert alerts.client_name("QE SECURITIES LLP") == "QE Securities LLP"
+    assert alerts.client_name("BANK OF INDIA") == "Bank of India"
     assert alerts.shares(2400000) == "24 lakh" and alerts.shares(12_500_000) == "1.2 crore"
     assert alerts.shares(15000) == "15,000"
