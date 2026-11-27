@@ -29,17 +29,28 @@ SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z\"'(₹$])")
 _NAME = r"(?:(?:Sh|Smt|Shri|Mr|Ms|Mrs|Dr)\.?\s+)?([A-Z][\w.'\-]*(?:\s+[A-Z][\w.'\-]*){0,4})"
 SPEAKER_COLON = re.compile(rf"^{_NAME}\s*:\s*(.*)$")
 SPEAKER_ROLE = re.compile(r"^(?:Company Speaker|Speaker|Management)\s*\(([^)]{3,40})\)\s*(.*)$")  # Reliance's Q&A
+# Bullets PDFs put before lines, including private-use glyphs (Power Grid's U+F02D)
+BULLETS = re.compile(r"^[\s\ue000-\uf8ff\u2022\u25aa\u25cf\u25e6\u2023\u2013\-]+(?=\S)")
 COPYRIGHT = re.compile(r"(?:External Document\s*)?©\s*\d{4}\s+[^.]{0,60}?(?:Limited|Ltd\.?)\s*\d*\s*")
 SPEAKER_LINE = re.compile(rf"^{_NAME}(?:\s+\d{{1,2}}:\d{{2}}(?::\d{{2}})?\b.*)?$")
 NOT_NAMES = re.compile(r"^(sub|subject|ref|encl|copy to|regd|scrip code|trading symbol|dear|date|page|note|"
                        r"corporate participants|call participants|transcript|presentation|disclaimer|q\d|fy)\b", re.I)
 HOSTS = re.compile(r"^(moderator|operator|coordinator|host)$", re.I)
+# An analyst's turn, often mid-line: "Shri Mohit Kumar – ICICI Securities:" or "Anand – Nuvama:"
+ANALYST_LABEL = re.compile(r"(?:^|(?<=[.?!]\s))((?:Shri|Mr\.?|Ms\.?)?\s?[A-Z][\w.']*(?:\s+[A-Z][\w.']*){0,3})\s+[–-]\s+"
+                           r"([A-Z][\w&.,' ]{1,70}?)\s*:(?:\s|$)")
+# ...and the same style for the company's own people: "Mr. C.S. Setty – Chairman, State Bank of India:"
+COMPANY_ROLE = re.compile(r"\b(chairman|chairperson|managing director|\bmd\b|ceo|cfo|coo|chief|director|president|"
+                          r"head|officer|founder|executive|whole[- ]time|general manager|treasurer|secretary)\b", re.I)
+# Questions that don't end with a question mark
+ASKING = re.compile(r"^(sir|madam|ma'am)\b|\b(just trying to understand|wanted to understand|want to understand|"
+                    r"can you (please )?(help|share|give|tell|throw)|could you|would you|if you could|any colou?r on)\b", re.I)
 # The moderator names each questioner: "the next question is from the line of Vibhor Singhal from Nuvama"
 ANALYST_INTRO = re.compile(r"(?:line of|question (?:is |comes )?from)\s+(?:Mr\.?|Ms\.?|Mrs\.?)?\s*"
                            r"([A-Z][\w.'\-]*(?:\s+[A-Z][\w.'\-]*){0,3})")
 # Letterheads and cover letters: lines that look like names but aren't people
 NOT_PEOPLE = re.compile(r"\b(limited|ltd|exchange|email|e-mail|website|secretary|officer|membership|tel|fax|"
-                        r"conference|call|india|bank|company|participants?|management|speaker|duration|audio)\b", re.I)
+                        r"conference|call|india|bank|company|participants?|management|speaker|duration|audio|scrip|code|nse|bse|office|plays)\b", re.I)
 QA_START = re.compile(r"\b(first question|question[- ]and[- ]answer session|q\s?&\s?a session|"
                       r"open the (floor|line) for questions|begin the question)\b", re.I)
 
@@ -51,7 +62,7 @@ FORWARD = re.compile(
     r"\b(expect(?:s|ed|ing)?|guidance|guid(?:e|ing)|outlook|target(?:s|ing)?|aim(?:s|ing)?|anticipat\w+|"
     r"plan(?:s|ning)? to|going forward|in the coming|next (?:year|quarter|few|financial year|fiscal)|over the next|"
     r"will (?:be|grow|continue|remain|reach|deliver|add|invest|spend)|should (?:be|grow|remain|see)|"
-    r"likely to|on track|we see .{0,40}(?:growth|margin)|trajectory|by the end of)\b", re.I)
+    r"likely to|on track|by the end of)\b", re.I)
 FISCAL = re.compile(r"\bFY\s?'?(\d{2}|\d{4})\b", re.I)
 PAST = re.compile(r"\b(was|were|grew|rose|fell|declined|reported|stood at|came in|delivered|registered|increased|"
                   r"decreased|improved|recorded|achieved)\b", re.I)
@@ -95,10 +106,10 @@ def fiscal_year(day: date) -> int:
 
 def _clean_lines(pages: list[str]) -> list[list[str]]:
     """Each page's lines without running headers and footers (on a third or more of pages) or page numbers."""
-    lines = [[ln.strip() for ln in p.splitlines()] for p in pages]
+    lines = [[BULLETS.sub("", ln).strip() for ln in p.splitlines()] for p in pages]
     counts = Counter(ln for page in lines for ln in set(page) if ln)
     repeated = {ln for ln, n in counts.items() if len(pages) >= 4 and n >= max(3, len(pages) / 3)
-                and _speaker(ln)[0] is None}  # a CEO who answers on every page is not a running header
+                and _speaker(ln)[0] is None and not ANALYST_LABEL.search(ln + " ")}  # people who speak on many pages aren't running headers
     return [[ln for ln in page if ln and ln not in repeated and not PAGE_LINE.match(ln)] for page in lines]
 
 
@@ -136,17 +147,28 @@ def sentences(pages: list[str]) -> list[Line]:
     """Every sentence with its page (from 1) and speaker (None before the first name)."""
     chunks: list[Line] = []
     speaker = None
+
+    def add(n: int, who: str | None, text: str) -> None:
+        if not text:
+            return
+        if chunks and chunks[-1].page == n and chunks[-1].speaker == who:
+            chunks[-1].text += " " + text
+        else:
+            chunks.append(Line(n, who, text))
+
     for n, page in enumerate(_clean_lines(pages), 1):
         for line in page:
             who, rest = _speaker(line)
             if who:
                 speaker = who
-            if not rest:
-                continue
-            if chunks and chunks[-1].page == n and chunks[-1].speaker == speaker:
-                chunks[-1].text += " " + rest
-            else:
-                chunks.append(Line(n, speaker, rest))
+            # an analyst's label inside the line: what follows is theirs
+            while m := ANALYST_LABEL.search(rest):
+                add(n, speaker, rest[:m.start()].strip())
+                name, affiliation = m.group(1).strip(), m.group(2).strip()
+                # the company's people keep their name; anyone else is marked by their firm
+                speaker = name if COMPANY_ROLE.search(affiliation) else f"{name} ({affiliation})"
+                rest = rest[m.end():]
+            add(n, speaker, rest)
     out = []
     for c in chunks:
         text = re.sub(r"\s+", " ", re.sub(r"(\w)- (\w)", r"\1-\2", COPYRIGHT.sub(" ", c.text)))
@@ -157,9 +179,23 @@ def sentences(pages: list[str]) -> list[Line]:
     return out
 
 
+# The agenda mentions Q&A before it starts: "…an overview, followed by a Q&A session"
+AGENDA = re.compile(r"followed by|will (?:then )?(?:open|begin|have|take)|after (?:the|this|their|our)|post the|"
+                    r"overview|opening remarks|later in the call|\d{1,2}:\d{2}:\d{2}", re.I)  # or a timed contents list
+REMARKS_BEFORE_QA = 3  # sentences from the company before a Q&A marker counts (the host's welcome mentions Q&A too)
+
+
 def qa_start(sents: list[Line]) -> int:
-    """Index where the questions begin; the end when the call has no Q&A marker."""
-    return next((i for i, s in enumerate(sents) if QA_START.search(s.text)), len(sents))
+    """Index where the questions begin; the end when the call has no Q&A marker. The host's opening
+    ("…a chance to ask questions after the presentation") doesn't count: management must have spoken."""
+    spoken = 0
+    floor = max(REMARKS_BEFORE_QA, len(sents) // 20)
+    for i, s in enumerate(sents):
+        if s.speaker and not HOSTS.match(s.speaker):
+            spoken += 1
+        if QA_START.search(s.text) and not AGENDA.search(s.text) and (spoken >= REMARKS_BEFORE_QA or (spoken == 0 and i >= floor)):
+            return i
+    return len(sents)
 
 
 def management(sents: list[Line]) -> set[str] | None:
@@ -168,6 +204,7 @@ def management(sents: list[Line]) -> set[str] | None:
     named = [s for s in sents if s.speaker and not HOSTS.match(s.speaker)]
     if not named:
         return None
+    analysts = {s.speaker for s in named if s.speaker.endswith(")") and "(" in s.speaker}
     start = qa_start(sents)
     asked, said = Counter(), Counter()
     for s in named:
@@ -178,7 +215,8 @@ def management(sents: list[Line]) -> set[str] | None:
     # in the prepared remarks and not asking (a press conference before the call has journalists' questions)
     team = {s.speaker for s in sents[:start] if s.speaker in said and asked[s.speaker] / said[s.speaker] < 0.3}
     team |= {who for who, n in said.items() if n >= 15 and asked[who] / n < 0.1}
-    return {who for who in team if said[who] >= 3 and not any(_same_person(who, a) for a in introduced)}
+    return {who for who in team if said[who] >= 3 and who not in analysts
+            and not any(_same_person(who, a) for a in introduced)}
 
 
 def _same_person(a: str, b: str) -> bool:
@@ -211,13 +249,15 @@ def _forward_score(text: str, call_day: date) -> float:
 
 def _from_company(sents: list[Line]) -> list[tuple[int, Line]]:
     """(index, sentence) for what the company's people said: named management where the transcript
-    names speakers, else every statement that isn't a question."""
+    names speakers (plus unlabelled prepared remarks: SBI's chairman reads his without a name), else
+    every statement that isn't a question."""
     team = management(sents)
+    start = qa_start(sents)
     out = []
     for i, s in enumerate(sents):
-        if s.text.endswith("?") or SMALL_TALK.search(s.text):
+        if s.text.endswith("?") or SMALL_TALK.search(s.text) or ASKING.search(s.text):
             continue
-        if team is not None and s.speaker not in team:
+        if team is not None and s.speaker not in team and not (s.speaker is None and i < start):
             continue
         out.append((i, s))
     return out
