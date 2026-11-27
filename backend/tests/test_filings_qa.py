@@ -66,3 +66,21 @@ def test_ask_reads_the_extracted_prospectus_and_the_company_name(tmp_path):
     assert [h.page for h in hits][0] == 1 and len(hits) <= 2
     with pytest.raises(LookupError, match="ingest-rhp"):
         fq.ask(lake, "NOPE", "anything")
+
+
+def test_ask_calls_searches_the_latest_transcripts_and_says_which_call(tmp_path):
+    lake = Lake(tmp_path).ensure()
+    calls = {date(2026, 7, 20): ["Welcome to the call.", "Loan growth should be about 12% next year, we expect."],
+             date(2026, 10, 20): ["Welcome to the call.", "Deposits grew well.", "Credit costs stayed low this quarter."]}
+    rows = []
+    for filed, pages in calls.items():
+        folder = lake.raw_dir("nse_transcripts", filed)
+        (folder / f"ACME_{filed:%m}.pages.json.gz").write_bytes(gzip.compress(json.dumps(pages).encode()))
+        rows.append({"symbol": "ACME", "filed": filed, "file": f"{filed.isoformat()}/ACME_{filed:%m}.pages.json.gz",
+                     "is_call": True, "attachment": f"https://x/{filed:%m}.pdf"})
+    lake.write_table(pd.DataFrame(rows), "transcripts")
+    hit = fq.ask_calls(lake, "acme", "What is the outlook for loan growth?", k=1)[0]
+    assert (hit.document, hit.page, hit.link) == ("2026-07-20", 2, "https://x/07.pdf")
+    assert fq.ask_calls(lake, "ACME", "credit costs", k=1)[0].document == "2026-10-20"
+    with pytest.raises(LookupError, match="ingest-transcripts"):
+        fq.ask_calls(lake, "NOPE", "anything")
