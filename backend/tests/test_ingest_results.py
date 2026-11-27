@@ -178,3 +178,13 @@ def test_resume_from_a_symbol():
     from stocksense.jobs.ingest_results import resume_from
     assert resume_from(["ABB", "INDIACEM", "INDIAMART", "ZOMATO"], "indiamart") == ["INDIAMART", "ZOMATO"]
     assert resume_from(["ABB", "ZOMATO"], None) == ["ABB", "ZOMATO"]
+    # a symbol no longer listed: everything after it alphabetically
+    assert resume_from(["ABB", "INDIACEM", "ZOMATO"], "INDIAMART") == ["ZOMATO"]
+
+
+def test_largest_first_then_resume_by_position():
+    from stocksense.jobs.ingest_results import largest_first, resume_from
+    order = largest_first(["ABB", "INFY", "TINYCO", "TCS", "ZZZ"], {"TCS": 12e5, "INFY": 6e5, "ABB": 1e5, "ZZZ": 0})
+    assert order == ["TCS", "INFY", "ABB", "TINYCO", "ZZZ"]  # no market cap: last, in list order
+    # resuming a size-ordered run picks up at that company's place, not alphabetically
+    assert resume_from(order, "infy") == ["INFY", "ABB", "TINYCO", "ZZZ"]

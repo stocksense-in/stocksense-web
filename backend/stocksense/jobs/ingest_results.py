@@ -270,15 +270,32 @@ def build(lake: Lake) -> pd.DataFrame:
 
 
 def resume_from(targets: list[str], start: str | None) -> list[str]:
-    """The targets from `start` on (alphabetical, as the universe is), to pick up a run NSE cut short."""
+    """The targets from `start` on, to pick up a run NSE cut short: from that symbol's place in
+    the list if it's there (any order), else every symbol after it alphabetically."""
     if not start:
         return targets
     start = start.upper()
+    if start in targets:
+        return targets[targets.index(start):]
     return [t for t in targets if t >= start]
 
 
+def largest_first(targets: list[str], caps: dict[str, float]) -> list[str]:
+    """Largest market cap first, companies without one after them in their original order —
+    so a multi-night backfill NSE cuts short has already covered the companies that matter most."""
+    known = sorted((t for t in targets if caps.get(t)), key=lambda t: caps[t], reverse=True)
+    return known + [t for t in targets if not caps.get(t)]
+
+
+def market_caps() -> dict[str, float]:
+    from ..market import MarketData
+
+    return {s.symbol: s.market_cap for s in MarketData().stocks() if s.market_cap}
+
+
 def run(symbols: list[str] | None = None, top: int = 20, lake: Lake | None = None, rests: int = 0,
-        everything: bool = False, recent: int | None = None, start: str | None = None) -> pd.DataFrame:
+        everything: bool = False, recent: int | None = None, start: str | None = None,
+        by_size: bool = False) -> pd.DataFrame:
     lake = lake or Lake.from_settings()
     if symbols:
         targets = [s.upper() for s in symbols]
@@ -288,6 +305,8 @@ def run(symbols: list[str] | None = None, top: int = 20, lake: Lake | None = Non
         targets = [s.symbol for s in select()]
     else:
         targets = top_symbols(top)
+    if by_size:
+        targets = largest_first(targets, market_caps())
     targets = resume_from(targets, start)
     log.info(f"{SOURCE}: {len(targets)} companies" + (f", last {recent} quarters" if recent else ""))
     fetch(lake, targets, rests=rests, recent=recent)
