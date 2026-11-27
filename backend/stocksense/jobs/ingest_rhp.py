@@ -51,10 +51,21 @@ PAUSE_SECONDS = 2.0       # between requests to SEBI
 _NOT_A_NEW_LISTING = re.compile(r"\bFPO\b|follow.?on|rights", re.I)
 
 
+def _listing_page(c, page: int, pause: float, tries: int = 3):
+    """One page of SEBI's register, trying again after a network blip (a DNS failure ended a run on 27 Nov)."""
+    for attempt in range(1, tries + 1):
+        try:
+            return sebi_offers.listing_page(c, page)
+        except httpx.TransportError:
+            if attempt == tries:
+                raise
+            time.sleep(max(pause, 1.0) * 5 * attempt)
+
+
 def fetch_listing(c, since: date = SINCE, pause: float = PAUSE_SECONDS) -> list[dict]:
     rows, page, total = [], 0, None
     while True:
-        got, t = sebi_offers.listing_page(c, page)
+        got, t = _listing_page(c, page, pause)
         total = total or t
         rows += got
         if not got or (total and len(rows) >= total) or got[-1]["date"] < since.isoformat():

@@ -152,8 +152,11 @@ def model(df: pd.DataFrame) -> dict:
 
     d = df.dropna(subset=["excess_6m", "listing_gain", "nifty_3m_before"]).copy()
     # litigation summary as numbers: amount at stake against net worth (capped), any criminal case
-    d["lit_share_f"] = pd.to_numeric(d.get("lit_share"), errors="coerce").fillna(0).clip(upper=1.0)
-    d["lit_criminal_f"] = (pd.to_numeric(d.get("lit_criminal"), errors="coerce").fillna(0) > 0).astype(int)
+    def col(name: str) -> pd.Series:
+        return pd.to_numeric(d[name], errors="coerce") if name in d else pd.Series(np.nan, index=d.index)
+
+    d["lit_share_f"] = col("lit_share").fillna(0).clip(upper=1.0)
+    d["lit_criminal_f"] = (col("lit_criminal").fillna(0) > 0).astype(int)
     train, test = d[d["listing_date"] < SPLIT], d[d["listing_date"] >= SPLIT]
     flags = [f"is_{r.id}" for r in rhp.RULES]
     rng = np.random.default_rng(SEED)
