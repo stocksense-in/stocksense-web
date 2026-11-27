@@ -191,16 +191,21 @@ def insider_trades(df: pd.DataFrame) -> tuple[dict[str, dict], str | None]:
 INITIALISMS = {"HUF", "LIC", "SBI", "UTI", "ICICI", "IIFL", "AIF", "FPI", "NPS", "PPFAS", "BNP", "JM", "UBS", "BOFA",
                "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII"}
 ABBREVIATIONS = {"LTD", "PVT", "CO", "MFG", "SVCS"}  # no vowels, but words: Ltd., Pvt.
+SHORT_WORDS = {"OF", "IN", "TO", "BY", "AT", "ON", "AN", "OR", "AS"}  # two letters but ordinary words
 
 
 def client_name(raw: str) -> str:
     """NSE's upper-case client name, readable: OLD BRIDGE MUTUAL FUND -> Old Bridge Mutual Fund,
-    keeping initialisms (BCP, HDFC, LLC: no vowels; HUF, SBI, II…: known) as they are."""
+    keeping initialisms (BCP, HDFC, LLC: no vowels; HUF, SBI, II…: known; QE, JM: two letters) as they are."""
     words = []
     for w in str(raw).split():
         core = w.strip(".,()&-")
         up = core.upper()
-        initialism = core.isalpha() and up not in ABBREVIATIONS and (up in INITIALISMS or not set(up) & set("AEIOUY"))
+        if words and up in SHORT_WORDS:
+            words.append(w.replace(core, core.lower()))
+            continue
+        initialism = core.isalpha() and up not in ABBREVIATIONS and (
+            up in INITIALISMS or not set(up) & set("AEIOUY") or (len(up) == 2 and up not in SHORT_WORDS))
         words.append(w if initialism or not core.isalpha() else w.replace(core, core.capitalize()))
     return " ".join(words)
 
