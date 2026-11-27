@@ -23,6 +23,10 @@ tagged with a group:
 
 Insider trades: market purchases and sales by promoters, directors and key managers over
 the two years to the end of NSE's insider feed in the lake.
+
+Bulk and block deals: the past year's largest-holder-sized trades (over 0.5% of the company in
+a day, or ₹10 crore+ in the block window), with who bought or sold. Collected daily from
+27 Nov 2026, so the history is short at first.
 """
 
 from __future__ import annotations
@@ -45,6 +49,7 @@ TITLE_CHARS = 160
 RUPEES_PER_CRORE = 1e7
 INSIDERS = ("Promoters", "Promoter Group", "Director", "Key Managerial Personnel")
 SIDES = {"Market Purchase": "buy", "Market Sale": "sell"}
+DEALS = 6                # most recent bulk/block deals listed
 
 # First match wins, so the red flags and exchange queries are tested before the broad groups.
 GROUPS: list[tuple[str, re.Pattern]] = [(g, re.compile(p, re.I)) for g, p in [
@@ -183,18 +188,41 @@ def insider_trades(df: pd.DataFrame) -> tuple[dict[str, dict], str | None]:
     return out, last.date().isoformat()
 
 
-def build(ann: pd.DataFrame, insiders: pd.DataFrame, today: date | None = None) -> dict:
+def deals_by_company(df: pd.DataFrame | None) -> tuple[dict[str, list[dict]], str | None]:
+    """symbol -> the latest bulk/block deals, and the first day of deals in the data. A block
+    trade over 0.5% of the company is reported in both files: it's listed once, as a block deal."""
+    if df is None or not len(df):
+        return {}, None
+    df = df.copy()
+    df["day"] = pd.to_datetime(df["date"])
+    first = df["day"].min()
+    df["_block"] = df["kind"] == "block"
+    df = (df.sort_values("_block", ascending=False)
+            .drop_duplicates(["day", "symbol", "client", "side", "quantity", "price"])
+            .sort_values(["day", "value_cr"], ascending=[False, False]))
+    out = {}
+    for symbol, g in df.groupby("symbol", sort=False):
+        out[symbol] = [{"date": r.day.date().isoformat(), "kind": r.kind, "client": r.client, "side": r.side,
+                        "quantity": int(r.quantity), "price": round(float(r.price), 2),
+                        "value_cr": round(float(r.value_cr), 2)}
+                       for r in g.head(DEALS).itertuples()]
+    return out, first.date().isoformat()
+
+
+def build(ann: pd.DataFrame, insiders: pd.DataFrame, today: date | None = None,
+          deals: pd.DataFrame | None = None) -> dict:
     today = today or date.today()
     notices = announcements(ann, today)
     trades, insider_until = insider_trades(insiders)
+    big, deals_since = deals_by_company(deals)
     companies = {s: {"announcements": notices.get(s, {}).get("items", []),
                      "counts": notices.get(s, {}).get("counts", {}),
-                     "insiders": trades.get(s)}
-                 for s in sorted(set(notices) | set(trades))}
+                     "insiders": trades.get(s), **({"deals": big[s]} if s in big else {})}
+                 for s in sorted(set(notices) | set(trades) | set(big))}
     return {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "source": "NSE corporate announcements and insider-trading disclosures (SEBI PIT)",
+            "source": "NSE corporate announcements, insider-trading disclosures (SEBI PIT) and bulk/block deals",
             "since": (today - timedelta(days=WINDOW_DAYS)).isoformat(),
-            "insiders_until": insider_until, "companies": companies}
+            "insiders_until": insider_until, "deals_since": deals_since, "companies": companies}
 
 
 def insiders_buying(entry: dict | None) -> bool:
@@ -232,7 +260,9 @@ def write(lake, output: Path = OUTPUT, today: date | None = None) -> dict:
     ins = (lake.query("select symbol, person, person_category, mode, value, pct_after, date from insider_trades "
                       f"where date >= (select max(date) from insider_trades) - interval {INSIDER_DAYS} day")
            if "insider_trades" in present else pd.DataFrame())
-    doc = build(ann, ins, today)
+    deals = (lake.query("select date, kind, symbol, client, side, quantity, price, value_cr from deals "
+                        "where date >= ?", [since]) if "deals" in present else None)
+    doc = build(ann, ins, today, deals)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(doc, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
     return doc

@@ -24,6 +24,7 @@ export function EventsPanel({ e, name }: { e: CompanyEvents; name: string }) {
   const counts = ORDER.filter(g => e.counts[g]);
   const flags = (e.counts.warning ?? 0) + (e.counts.legal ?? 0);
   const ins = e.insiders;
+  const deals = e.deals ?? [];
   return (
     <div className="g2" style={{ alignItems: 'start' }}>
       <div className="card">
@@ -67,7 +68,7 @@ export function EventsPanel({ e, name }: { e: CompanyEvents; name: string }) {
           </p>
         </div>
 
-        <div className="card">
+        <div className="card" style={{ marginBottom: e.deals_since ? 14 : 0 }}>
           <div className="ct">Insiders&apos; own trades</div>
           {!ins && (
             <p className="mc-plain">
@@ -97,6 +98,29 @@ export function EventsPanel({ e, name }: { e: CompanyEvents; name: string }) {
             From disclosures under SEBI&apos;s insider-trading rules{e.insiders_until ? `; NSE's feed in our data runs to ${day(e.insiders_until)}` : ''}. Gifts, pledges and transfers within the family are left out.
           </p>
         </div>
+
+        {e.deals_since && (
+          <div className="card">
+            <div className="ct">Bulk &amp; block deals</div>
+            {!deals.length && <p className="mc-plain">No bulk or block deals since {day(e.deals_since)}.</p>}
+            {deals.map((d, i) => (
+              <div key={d.date + d.client + i} className="stat-r" style={{ alignItems: 'baseline', gap: 8 }}>
+                <span className="sl" style={{ minWidth: 0 }}>
+                  <span style={{ color: 'var(--cream-dim)' }}>{d.client}</span>
+                  <span style={{ display: 'block', fontSize: 9, color: 'var(--cream-mute)' }}>
+                    {d.kind === 'block' ? 'Block' : 'Bulk'} · {day(d.date)} · {d.quantity.toLocaleString('en-IN')} at ₹{d.price.toLocaleString('en-IN')}
+                  </span>
+                </span>
+                <span className="sv" style={{ fontFamily: 'var(--f-mono)', whiteSpace: 'nowrap', color: d.side === 'buy' ? 'var(--green)' : 'var(--red)' }}>
+                  {d.side === 'buy' ? 'Bought' : 'Sold'} {fmtCrore(d.value_cr)}
+                </span>
+              </div>
+            ))}
+            <p style={{ fontSize: 9.5, color: 'var(--cream-mute)', marginTop: 12, lineHeight: 1.6 }}>
+              Big trades the exchange names publicly: a bulk deal is one investor trading over 0.5% of the company in a day, a block deal a single trade of ₹10 crore or more. They show which funds and large investors are building or cutting a stake. Collected daily since {day(e.deals_since)}.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

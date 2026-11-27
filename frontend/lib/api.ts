@@ -182,6 +182,19 @@ export interface CompanyEvents {
   announcements: Announcement[];
   insiders: { bought_cr: number | null; sold_cr: number | null; buys: number; sells: number; trades: InsiderTrade[] } | null;
   insider_note: string | null;
+  deals?: Deal[];
+  deals_since?: string | null;
+}
+
+/** A bulk deal (over 0.5% of the company in a day) or block deal (₹10 crore+ in the block window). */
+export interface Deal {
+  date: string;
+  kind: 'bulk' | 'block';
+  client: string;
+  side: 'buy' | 'sell';
+  quantity: number;
+  price: number;
+  value_cr: number;
 }
 
 export interface Holders {
