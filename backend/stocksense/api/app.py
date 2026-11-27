@@ -275,6 +275,9 @@ def create_app(
         page: int = Query(1, ge=1),
         page_size: int = Query(50, ge=1, le=200),
         symbols: str | None = Query(None, description="Only these comma-separated symbols (a watchlist), up to 100"),
+        insiders: Literal["buying"] | None = Query(None, description="buying: promoters and directors bought more than "
+                                                   "they sold on the market (two years to the end of NSE's feed)"),
+        red_flags: Literal["none"] | None = Query(None, description="none: no red-flag filings in the past year"),
     ):
         """The screener: every NSE stock passing the filters, sorted and paginated."""
         filters = analytics.ScreenFilters(
@@ -287,6 +290,12 @@ def create_app(
             if len(wanted) > 100:
                 raise HTTPException(422, "Ask for at most 100 symbols at a time.")
             stocks = [st for st in market_of(request).stocks() if st.symbol in wanted]
+        if insiders or red_flags:
+            companies = (request.app.state.events() or {}).get("companies") or {}
+            if insiders == "buying":
+                stocks = [st for st in stocks if events_mod.insiders_buying(companies.get(st.symbol))]
+            if red_flags == "none":
+                stocks = [st for st in stocks if not events_mod.red_flags(companies.get(st.symbol))]
         rows = analytics.screen(stocks, filters)
         start = (page - 1) * page_size
         return schemas.ScreenPage(

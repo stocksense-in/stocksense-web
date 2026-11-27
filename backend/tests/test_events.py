@@ -90,3 +90,17 @@ def test_events_endpoint(market):
 def test_money_reads_in_lakh_under_a_crore():
     assert ev.money(0.25) == "₹25 lakh" and ev.money(0.031) == "₹3.1 lakh"
     assert ev.money(0) == "₹0 cr" and ev.money(1343.21) == "₹1,343.2 cr"
+
+
+def test_screener_filters_on_insiders_and_red_flags(market):
+    doc = {"companies": {
+        "TCS": {"announcements": [], "counts": {"warning": 1}, "insiders": None},
+        "INFY": {"announcements": [], "counts": {"results": 4},
+                 "insiders": {"bought_cr": 5.0, "sold_cr": 1.0, "buys": 2, "sells": 1, "trades": []}},
+    }}
+    c = TestClient(create_app(market=market, headlines=lambda: [], events=lambda: doc))
+    total = c.get("/stocks").json()["total"]
+    assert [s["symbol"] for s in c.get("/stocks", params={"insiders": "buying"}).json()["results"]] == ["INFY"]
+    without = c.get("/stocks", params={"red_flags": "none", "page_size": 200}).json()
+    assert without["total"] == total - 1 and "TCS" not in {s["symbol"] for s in without["results"]}
+    assert c.get("/stocks", params={"insiders": "selling"}).status_code == 422

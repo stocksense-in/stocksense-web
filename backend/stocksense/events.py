@@ -197,6 +197,17 @@ def build(ann: pd.DataFrame, insiders: pd.DataFrame, today: date | None = None) 
             "insiders_until": insider_until, "companies": companies}
 
 
+def insiders_buying(entry: dict | None) -> bool:
+    """Promoters and directors put more of their own money in than they took out."""
+    ins = (entry or {}).get("insiders")
+    return bool(ins and ins["buys"] and (ins["bought_cr"] or 0) > (ins["sold_cr"] or 0))
+
+
+def red_flags(entry: dict | None) -> int:
+    """Red-flag filings (defaults, insolvency, forensic audits, an auditor resigning…) in the past year."""
+    return int(((entry or {}).get("counts") or {}).get("warning", 0))
+
+
 def insider_note(entry: dict | None, until: str | None) -> str | None:
     """One plain sentence on what the promoters and directors did, with the usual caution."""
     ins = (entry or {}).get("insiders")

@@ -13,9 +13,11 @@ interface Filters {
   max_pe: string;
   min_roe: string;
   max_de: string;
+  insiders: '' | 'buying';
+  red_flags: '' | 'none';
 }
 
-const EMPTY: Filters = { sector: '', cap: '', min_score: '', max_pe: '', min_roe: '', max_de: '' };
+const EMPTY: Filters = { sector: '', cap: '', min_score: '', max_pe: '', min_roe: '', max_de: '', insiders: '', red_flags: '' };
 const PAGE_SIZE = 25;
 
 // Ready-made screens that teach a way of looking at companies, not a pick list.
@@ -24,6 +26,7 @@ const PRESETS: { label: string; hint: string; f: Partial<Filters> }[] = [
   { label: 'Value', hint: 'Low P/E with healthy returns', f: { max_pe: '15', min_roe: '12' } },
   { label: 'Strong fundamentals', hint: 'Score 65 or more', f: { min_score: '65' } },
   { label: 'Large caps', hint: 'Market cap above ₹1 lakh crore', f: { cap: 'large' } },
+  { label: 'Insiders buying', hint: 'Promoters and directors buying their own shares', f: { insiders: 'buying', red_flags: 'none' } },
 ];
 
 const num = (v: string) => (v.trim() === '' || Number.isNaN(Number(v)) ? undefined : Number(v));
@@ -51,6 +54,8 @@ export function ScreenerPage() {
     max_pe: num(applied.max_pe),
     min_roe: num(applied.min_roe),
     max_de: num(applied.max_de),
+    insiders: applied.insiders || undefined,
+    red_flags: applied.red_flags || undefined,
     sort, order, page, page_size: PAGE_SIZE,
   };
   const key = JSON.stringify(query);
@@ -133,6 +138,18 @@ export function ScreenerPage() {
           {field('max_pe', 'Maximum P/E', 'e.g. 25', 'Price to earnings: lower means cheaper per rupee of profit')}
           {field('min_roe', 'Minimum ROE %', 'e.g. 15', 'Return on equity: profit on every ₹100 of shareholders’ money')}
           {field('max_de', 'Maximum debt / equity', 'e.g. 1', 'Borrowing for every rupee shareholders own')}
+        </div>
+        <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', marginBottom: 16 }}>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 11, color: 'var(--cream-dim)', cursor: 'pointer' }}
+            title="Promoters and directors bought more of their own company's shares on the market than they sold (two years to the end of NSE's insider feed)">
+            <input type="checkbox" checked={draft.insiders === 'buying'} onChange={e => setDraft(d => ({ ...d, insiders: e.target.checked ? 'buying' : '' }))} />
+            Insiders buying
+          </label>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 11, color: 'var(--cream-dim)', cursor: 'pointer' }}
+            title="Leave out companies that filed a red flag in the past year: a default, insolvency, a forensic audit, an auditor resigning, operations stopped or results delayed">
+            <input type="checkbox" checked={draft.red_flags === 'none'} onChange={e => setDraft(d => ({ ...d, red_flags: e.target.checked ? 'none' : '' }))} />
+            No red flags in the past year
+          </label>
         </div>
 
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
