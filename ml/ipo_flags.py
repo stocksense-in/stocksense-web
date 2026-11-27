@@ -86,6 +86,15 @@ def load(lake: Lake) -> pd.DataFrame:
             n = nifty.reindex([d0, d1], method="ffill")
             values.append(s.iloc[sessions] / s.iloc[0] - (n.iloc[1] / n.iloc[0]))
         df[name] = values
+    # market mood at listing: NIFTY 50 over the 63 sessions before the first trading day
+    before = []
+    for r in df.itertuples():
+        if pd.isna(r.first_day):
+            before.append(np.nan)
+            continue
+        past = nifty[nifty.index < pd.Timestamp(r.first_day)]
+        before.append(past.iloc[-1] / past.iloc[-64] - 1 if len(past) > 64 else np.nan)
+    df["nifty_3m_before"] = before
     df["weak"] = df["excess_6m"] < WEAK
     for rule in rhp.RULES:
         df[f"lvl_{rule.id}"] = df[rule.id].map(LEVEL).fillna(0).astype(int)
@@ -141,7 +150,7 @@ def auc_ci(y: np.ndarray, score: np.ndarray, rng: np.random.Generator) -> tuple[
 def model(df: pd.DataFrame) -> dict:
     from sklearn.linear_model import LogisticRegression
 
-    d = df.dropna(subset=["excess_6m", "listing_gain"])
+    d = df.dropna(subset=["excess_6m", "listing_gain", "nifty_3m_before"])
     train, test = d[d["listing_date"] < SPLIT], d[d["listing_date"] >= SPLIT]
     flags = [f"is_{r.id}" for r in rhp.RULES]
     rng = np.random.default_rng(SEED)
@@ -156,7 +165,9 @@ def model(df: pd.DataFrame) -> dict:
     add("Checker's current score (high + medium findings)", test["shown_score"].to_numpy().astype(float))
     for name, cols in [("Rules together (logistic regression)", flags),
                        ("Listing-day gain alone", ["listing_gain"]),
-                       ("Rules + listing-day gain", flags + ["listing_gain"])]:
+                       ("Rules + listing-day gain", flags + ["listing_gain"]),
+                       ("Market mood alone (NIFTY 3 months before listing)", ["nifty_3m_before"]),
+                       ("Rules + listing-day gain + market mood", flags + ["listing_gain", "nifty_3m_before"])]:
         m = LogisticRegression(C=0.5, max_iter=2000).fit(train[cols], train["weak"].astype(int))
         add(name, m.predict_proba(test[cols])[:, 1])
         if name == "Rules together (logistic regression)":
