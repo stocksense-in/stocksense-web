@@ -29,7 +29,9 @@ PAGE_SIZE = 25
 _ROW = re.compile(r"<td>([A-Z][a-z]{2} \d{1,2}, \d{4})</td>\s*<td><a href=['\"]([^'\"]+)['\"][^>]*?title=\"([^\"]*)\"",
                   re.S)
 _TOTAL = re.compile(r"of (\d+) records")
-_FULL_PDF = re.compile(r"file=(https://www\.sebi\.gov\.in/sebi_data/attachdocs/[^'\"&]+?\.pdf)", re.I)
+# the viewer's file= link: absolute on recent pages, relative ("/sebi_data/...") on pages before ~2022
+_FULL_PDF = re.compile(r"file=((?:https://www\.sebi\.gov\.in)?/sebi_data/attachdocs/[^'\"&]+?\.pdf)", re.I)
+PDF_FINDER = 2  # bump when pdf_url learns a new page layout, so pages marked "no PDF" are tried again
 _ANY_PDF = re.compile(r"(https://www\.sebi\.gov\.in/sebi_data/[^'\"]+?\.pdf)", re.I)
 _NOT_THE_RHP = re.compile(r"addendum|corrigend|abridged|price band|notice|advert|erratum|clarification", re.I)
 _SUFFIX = re.compile(r"\s*[-–:]?\s*(?:updated\s+)?(?:rhp|red herring prospectus|pdf|prospectus)\s*$", re.I)
@@ -78,7 +80,8 @@ def pdf_url(html: str) -> str | None:
     isn't the abridged prospectus."""
     full = _FULL_PDF.search(html)
     if full:
-        return full.group(1)
+        url = full.group(1)
+        return url if url.startswith("http") else BASE + url
     for url in _ANY_PDF.findall(html):
         if "prospectus_p.pdf" not in url.lower():
             return url

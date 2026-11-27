@@ -36,6 +36,8 @@ def test_company_names_and_pdf_links():
             "<iframe src='../../../web/?file=https://www.sebi.gov.in/sebi_data/attachdocs/nov-2026/1795410085057.pdf'>")
     assert sebi_offers.pdf_url(page) == "https://www.sebi.gov.in/sebi_data/attachdocs/nov-2026/1795410085057.pdf"
     assert sebi_offers.pdf_url("<p>no document</p>") is None
+    old = "<iframe src='../../../web/?file=/sebi_data/attachdocs/1453973753746.pdf' width='100%'>"
+    assert sebi_offers.pdf_url(old) == "https://www.sebi.gov.in/sebi_data/attachdocs/1453973753746.pdf"  # older pages
 
 
 ISSUES = [

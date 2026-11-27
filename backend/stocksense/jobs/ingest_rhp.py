@@ -128,7 +128,8 @@ def download(c, lake: Lake, ipos: list[dict], pause: float = PAUSE_SECONDS) -> i
     got = 0
     for n, ipo in enumerate(ipos, 1):
         path = pdf_path(lake, ipo)
-        if path.exists() or path.with_suffix(".missing").exists():
+        missing = path.with_suffix(".missing")
+        if path.exists() or (missing.exists() and missing.read_text(encoding="utf-8").startswith(f"v{sebi_offers.PDF_FINDER} ")):
             continue
         try:
             page = c.get(ipo["url"])
@@ -136,7 +137,7 @@ def download(c, lake: Lake, ipos: list[dict], pause: float = PAUSE_SECONDS) -> i
             url = sebi_offers.pdf_url(page.text)
             time.sleep(pause)
             if not url:
-                path.with_suffix(".missing").write_text(ipo["url"], encoding="utf-8")
+                missing.write_text(f"v{sebi_offers.PDF_FINDER} {ipo['url']}", encoding="utf-8")
                 log.warning(f"{SOURCE}: {ipo['symbol']}: no PDF on {ipo['url']}")
                 continue
             resp = _get_whole(c, url, pause)
