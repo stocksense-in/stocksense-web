@@ -296,6 +296,9 @@ def create_app(
         red_flags: Literal["none"] | None = Query(None, description="none: no red-flag filings in the past year"),
         funds: Literal["buying"] | None = Query(None, description="buying: foreign investors or mutual funds raised "
                                                 "their stake by a point or more over the past year"),
+        pledges: Literal["none", "rising"] | None = Query(
+            None, description="none: promoters have pledged none of their stake (or there's no promoter group); "
+                              "rising: promoters pledged or tied up 5+ points more of their stake over the past year"),
     ):
         """The screener: every NSE stock passing the filters, sorted and paginated."""
         filters = analytics.ScreenFilters(
@@ -314,9 +317,14 @@ def create_app(
                 stocks = [st for st in stocks if events_mod.insiders_buying(companies.get(st.symbol))]
             if red_flags == "none":
                 stocks = [st for st in stocks if not events_mod.red_flags(companies.get(st.symbol))]
-        if funds == "buying":
+        if funds or pledges:
             owners = (request.app.state.holders() or {}).get("companies") or {}
-            stocks = [st for st in stocks if own.funds_buying(owners.get(st.symbol))]
+            if funds == "buying":
+                stocks = [st for st in stocks if own.funds_buying(owners.get(st.symbol))]
+            if pledges == "none":
+                stocks = [st for st in stocks if own.pledged_now(owners.get(st.symbol)) == 0]
+            if pledges == "rising":
+                stocks = [st for st in stocks if own.pledges_rising(owners.get(st.symbol))]
         rows = analytics.screen(stocks, filters)
         start = (page - 1) * page_size
         return schemas.ScreenPage(

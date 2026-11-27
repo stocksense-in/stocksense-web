@@ -16,9 +16,10 @@ interface Filters {
   insiders: '' | 'buying';
   red_flags: '' | 'none';
   funds: '' | 'buying';
+  pledges: '' | 'none' | 'rising';
 }
 
-const EMPTY: Filters = { sector: '', cap: '', min_score: '', max_pe: '', min_roe: '', max_de: '', insiders: '', red_flags: '', funds: '' };
+const EMPTY: Filters = { sector: '', cap: '', min_score: '', max_pe: '', min_roe: '', max_de: '', insiders: '', red_flags: '', funds: '', pledges: '' };
 const PAGE_SIZE = 25;
 
 // Ready-made screens that teach a way of looking at companies, not a pick list.
@@ -58,6 +59,7 @@ export function ScreenerPage() {
     insiders: applied.insiders || undefined,
     red_flags: applied.red_flags || undefined,
     funds: applied.funds || undefined,
+    pledges: applied.pledges || undefined,
     sort, order, page, page_size: PAGE_SIZE,
   };
   const key = JSON.stringify(query);
@@ -156,6 +158,16 @@ export function ScreenerPage() {
             title="Foreign investors or mutual funds raised their stake by a point or more over the past year (from shareholding filings)">
             <input type="checkbox" checked={draft.funds === 'buying'} onChange={e => setDraft(d => ({ ...d, funds: e.target.checked ? 'buying' : '' }))} />
             Funds buying
+          </label>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 11, color: 'var(--cream-dim)', cursor: 'pointer' }}
+            title="Promoters have pledged none of their shares as loan security (or the company has no promoter group), from pledge disclosures and shareholding filings">
+            <input type="checkbox" checked={draft.pledges === 'none'} onChange={e => setDraft(d => ({ ...d, pledges: e.target.checked ? 'none' : '' }))} />
+            No promoter pledges
+          </label>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 11, color: 'var(--cream-dim)', cursor: 'pointer' }}
+            title="Promoters pledged or tied up 5+ percentage points more of their stake over the past year: worth understanding why (from shareholding filings)">
+            <input type="checkbox" checked={draft.pledges === 'rising'} onChange={e => setDraft(d => ({ ...d, pledges: e.target.checked ? 'rising' : '' }))} />
+            Pledges rising (warning)
           </label>
         </div>
 
