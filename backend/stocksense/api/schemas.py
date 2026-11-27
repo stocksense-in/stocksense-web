@@ -200,6 +200,9 @@ class HolderQuarter(BaseModel):
     insurance_pct: float | None = None
     small_retail_pct: float | None = Field(None, description="Individuals holding up to ₹2 lakh of share capital")
     government_pct: float | None = None
+    promoter_pledged_pct: float | None = Field(None, description="Share of the promoters' stake pledged (patterns from 2024)")
+    promoter_encumbered_pct: float | None = Field(
+        None, description="Share of the promoters' stake pledged or otherwise encumbered (non-disposal undertakings etc.)")
 
 
 class Pledge(BaseModel):
@@ -217,6 +220,7 @@ class Holders(BaseModel):
     trend_note: str | None
     pledge_warning: str | None
     institutions_note: str | None = Field(None, description="How foreign and domestic institutions moved their stakes over the past year")
+    pledge_note: str | None = Field(None, description="How much of the promoters' stake is pledged, and how that moved over the past year")
 
 
 class LearnMetrics(BaseModel):

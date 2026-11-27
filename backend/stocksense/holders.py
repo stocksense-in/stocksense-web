@@ -25,6 +25,10 @@ QUARTERS = 12
 PLEDGE_WARN = 10.0   # % of the promoters' stake pledged: worth knowing
 PLEDGE_HIGH = 25.0   # a real risk in a falling market
 SPLIT = ("fii_pct", "dii_pct", "mutual_funds_pct", "insurance_pct", "small_retail_pct", "government_pct")
+# From each quarter's pattern, as % of the promoters' own holding: pledges alone (patterns from 2024 on),
+# and pledges plus non-disposal undertakings and other encumbrances (every pattern).
+PLEDGE_HISTORY = ("promoter_pledged_pct", "promoter_encumbered_pct")
+PLEDGE_MOVE = 5.0    # percentage points of the promoters' stake over a year that count as a change
 STAKE_MOVE = 2.0     # percentage points over a year that count as a change
 LONG_DRIFT = 3.0     # percentage points over the whole history shown that count as a slow trend
 
@@ -45,7 +49,7 @@ def build(shareholding: pd.DataFrame, pledges: pd.DataFrame | None = None, today
     for symbol, g in sh.sort_values("quarter_end").groupby("symbol"):
         quarters = [{"quarter_end": r["quarter_end"].isoformat(), "promoter_pct": _num(r["promoter_pct"]),
                      "public_pct": _num(r["public_pct"]), "employee_trusts_pct": _num(r["employee_trusts_pct"]),
-                     **{c: _num(r.get(c)) for c in SPLIT}}
+                     **{c: _num(r.get(c)) for c in SPLIT + PLEDGE_HISTORY}}
                     for r in g.tail(QUARTERS).to_dict("records")]
         entry = {"quarters": quarters, "pledge": None}
         pl = latest_pledge.get(symbol)
@@ -60,8 +64,12 @@ def build(shareholding: pd.DataFrame, pledges: pd.DataFrame | None = None, today
 
 
 def pledge_warning(entry: dict | None) -> str | None:
-    """A guardrail for the promoter metric when promoters have pledged much of their stake."""
+    """A guardrail for the promoter metric when promoters have pledged much of their stake: the latest
+    pledge position, else the latest quarterly pattern's pledges."""
     pledged = ((entry or {}).get("pledge") or {}).get("pledged_pct_of_promoter")
+    if pledged is None:
+        quarters = (entry or {}).get("quarters") or []
+        pledged = quarters[-1].get("promoter_pledged_pct") if quarters else None
     if pledged is None or pledged < PLEDGE_WARN:
         return None
     if pledged >= PLEDGE_HIGH:
@@ -93,6 +101,43 @@ def trend_note(entry: dict | None) -> str | None:
     return (f"Promoters {direction} their stake from {then['promoter_pct']:.1f}% to {now['promoter_pct']:.1f}% "
             "over the past year." + ("" if move > 0 else " Selling can be routine (funding, estate, a stake sale "
                                      "to institutions), but a steady decline is worth understanding."))
+
+
+def _pct(value: float) -> str:
+    return f"{value:.1f}%" if 0 < value < 1 else f"{value:.0f}%"
+
+
+def _quarter(quarter_end: str) -> str:
+    return date.fromisoformat(quarter_end).strftime("%b %Y")
+
+
+def pledge_note(entry: dict | None) -> str | None:
+    """How much of the promoters' stake is pledged or otherwise tied up (the pattern's "pledged or
+    otherwise encumbered"), and how that moved over the past year. None without the history."""
+    quarters = [q for q in (entry or {}).get("quarters", [])
+                if q.get("promoter_encumbered_pct") is not None and (q.get("promoter_pct") or 0) >= 1]
+    if len(quarters) < 2:
+        return None
+    now = quarters[-1]
+    if max(q["promoter_encumbered_pct"] for q in quarters) == 0:
+        return (f"Promoters haven't pledged or otherwise tied up any of their shares in any quarter since "
+                f"{_quarter(quarters[0]['quarter_end'])}.")
+    year_ago = [q for q in quarters if q["quarter_end"] <= _year_before(now["quarter_end"])]
+    if not year_ago:
+        return None
+    before, after = year_ago[-1]["promoter_encumbered_pct"], now["promoter_encumbered_pct"]
+    move = after - before
+    if move >= PLEDGE_MOVE:
+        return (f"Promoters pledged or otherwise tied up more of their stake over the past year: {_pct(before)} → "
+                f"{_pct(after)}. Rising pledges usually mean promoters are borrowing more against their shares.")
+    if move <= -PLEDGE_MOVE:
+        return (f"Promoters freed up shares over the past year: pledged or otherwise tied up {_pct(before)} → "
+                f"{_pct(after)} of their stake." + (" None are pledged now." if after == 0 else ""))
+    if after >= PLEDGE_WARN:
+        return f"About {_pct(after)} of the promoters' stake has stayed pledged or otherwise tied up over the past year."
+    if after == 0:
+        return "None of the promoters' stake is pledged now, as a year ago."
+    return f"Only {_pct(after)} of the promoters' stake is pledged or otherwise tied up, much as a year ago."
 
 
 INSTITUTIONS = (("fii_pct", "Foreign investors"), ("mutual_funds_pct", "Mutual funds"),

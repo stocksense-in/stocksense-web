@@ -83,10 +83,36 @@ function InstitutionsTrend({ h }: { h: Holders }) {
   );
 }
 
+/** The share of the promoters' stake pledged or otherwise tied up, by quarter (from each pattern). */
+function PledgeTrend({ h }: { h: Holders }) {
+  const qs = h.quarters.filter(q => q.promoter_encumbered_pct !== null && q.promoter_encumbered_pct !== undefined);
+  if (qs.length < 2) return null;
+  const vals = qs.map(q => q.promoter_encumbered_pct as number);
+  if (Math.max(...vals) === 0) return null;
+  const W = 300, H = 50;
+  const y = (v: number) => H - 3 - (Math.min(100, v) / 100) * (H - 6);
+  const x = (i: number) => (i / (qs.length - 1)) * W;
+  const d = vals.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  return (
+    <div style={{ marginTop: 10 }}>
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height: 50, display: 'block' }} role="img" aria-label="Share of the promoters' stake pledged, by quarter">
+        <line x1="0" x2={W} y1={y(0)} y2={y(0)} stroke="var(--line, #2a2a2a)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+        <path d={d} fill="none" stroke="#E57373" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+      </svg>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--cream-mute)', fontFamily: 'var(--f-mono)', marginTop: 4 }}>
+        <span>{fmtQuarter(qs[0].quarter_end)} · {fmtPct(vals[0])}</span>
+        <span>{fmtQuarter(qs[qs.length - 1].quarter_end)} · {fmtPct(vals[vals.length - 1])}</span>
+      </div>
+    </div>
+  );
+}
+
 export function HoldersPanel({ h }: { h: Holders }) {
   const latest = [...h.quarters].reverse().find(q => q.fii_pct !== null || q.dii_pct !== null) ?? h.quarters[h.quarters.length - 1];
   const rows = SPLIT.filter(([k]) => latest && latest[k] !== null && latest[k] !== undefined);
   const promoterPledged = h.pledge?.pledged_pct_of_promoter;
+  const pledgeQuarters = h.quarters.filter(q => q.promoter_encumbered_pct !== null && q.promoter_encumbered_pct !== undefined);
+  const lastPattern = pledgeQuarters[pledgeQuarters.length - 1];
   return (
     <div className="g2" style={{ alignItems: 'start' }}>
       <div className="card">
@@ -119,11 +145,19 @@ export function HoldersPanel({ h }: { h: Holders }) {
           <p className="mc-plain" style={{ marginTop: 6 }}>A steady or rising stake is usually read as confidence; a falling one is worth a look at why (sales, dilution or a share issue).</p>
         </div>
         <InstitutionsTrend h={h} />
-        {h.pledge && (
+        {(h.pledge || lastPattern) && (
           <div className={h.pledge_warning ? 'card card-alert' : 'card'} style={{ marginTop: 12 }}>
-            <div className="ct">Pledged shares · {fmtQuarter(h.pledge.as_of)}</div>
-            <div className="stat-r"><span className="sl">Promoter shares pledged</span><span className="sv" style={{ fontFamily: 'var(--f-mono)' }}>{fmtPct(promoterPledged)}</span></div>
-            <div className="stat-r"><span className="sl">As a share of the whole company</span><span className="sv" style={{ fontFamily: 'var(--f-mono)' }}>{fmtPct(h.pledge.pledged_pct_of_total, 2)}</span></div>
+            <div className="ct">Pledged shares · {fmtQuarter(h.pledge?.as_of ?? lastPattern.quarter_end)}</div>
+            {h.pledge ? (
+              <>
+                <div className="stat-r"><span className="sl">Promoter shares pledged</span><span className="sv" style={{ fontFamily: 'var(--f-mono)' }}>{fmtPct(promoterPledged)}</span></div>
+                <div className="stat-r"><span className="sl">As a share of the whole company</span><span className="sv" style={{ fontFamily: 'var(--f-mono)' }}>{fmtPct(h.pledge.pledged_pct_of_total, 2)}</span></div>
+              </>
+            ) : (
+              <div className="stat-r"><span className="sl">Promoter shares pledged or tied up</span><span className="sv" style={{ fontFamily: 'var(--f-mono)' }}>{fmtPct(lastPattern.promoter_encumbered_pct)}</span></div>
+            )}
+            <PledgeTrend h={h} />
+            {h.pledge_note && <p className="mc-plain" style={{ marginTop: 8, color: 'var(--cream)' }}>{h.pledge_note}</p>}
             {h.pledge_warning
               ? <p className="mc-plain" style={{ marginTop: 8, color: 'var(--red)' }}>{h.pledge_warning}</p>
               : <p className="mc-plain" style={{ marginTop: 8 }}>Promoters who pledge shares have borrowed against them; if the price falls far, lenders can sell, which pushes it lower still.</p>}

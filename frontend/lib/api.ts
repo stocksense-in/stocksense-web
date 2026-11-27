@@ -135,6 +135,8 @@ export interface HolderQuarter {
   insurance_pct: number | null;
   small_retail_pct: number | null;
   government_pct: number | null;
+  promoter_pledged_pct?: number | null;
+  promoter_encumbered_pct?: number | null;
 }
 
 export interface EconomySeries {
@@ -205,6 +207,7 @@ export interface Holders {
   trend_note: string | null;
   pledge_warning: string | null;
   institutions_note?: string | null;
+  pledge_note?: string | null;
 }
 
 export interface Dividends {
