@@ -90,3 +90,17 @@ def test_cut_off_downloads_are_tried_again():
 
     resp = ingest_rhp._get_whole(Flaky(), "https://www.sebi.gov.in/x.pdf", pause=0)
     assert resp.content == b"%PDF-1.7" and len(calls) == 2
+
+
+def test_export_keeps_medium_and_high_findings(tmp_path):
+    import pandas as pd
+
+    df = pd.DataFrame([{"symbol": "AAA", "company": "AAA Ltd", "filed": pd.Timestamp("2023-12-10"), "url": "u1", "pages": 400,
+                        "losses": "high", "litigation": "low", "customer-concentration": "medium",
+                        "summaries": json.dumps({"losses": "Losses in all three years.", "litigation": "x",
+                                                 "customer-concentration": "Top 10 customers: 85%."})},
+                       {"symbol": "BBB", "company": "BBB Ltd", "filed": pd.Timestamp("2024-01-02"), "url": "u2", "pages": 0}])
+    doc = ingest_rhp.export(df, tmp_path / "ipo_prospectus.json")
+    assert list(doc["ipos"]) == ["AAA"]  # BBB wasn't scanned
+    assert [(f["id"], f["severity"]) for f in doc["ipos"]["AAA"]["flags"]] == [("losses", "high"), ("customer-concentration", "medium")]
+    assert json.loads((tmp_path / "ipo_prospectus.json").read_text(encoding="utf-8"))["ipos"]["AAA"]["filed"] == "2023-12-10"

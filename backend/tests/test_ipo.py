@@ -143,3 +143,25 @@ def test_recent_listings_reads_current_nse_labels():
     rows = ipo.recent_listings(past, {"CRYSTALCP": 300.0}, days=60, today=date(2026, 11, 27))
     assert [(r["symbol"], r["board"]) for r in rows] == [("CRYSTALCP", "mainboard"), ("VPFL", "sme")]
     assert rows[0]["issue_price"] == 272 and rows[0]["return_pct"] == 10.29
+
+
+def test_recent_listings_carry_their_prospectus_flags(market):
+    from datetime import timedelta
+
+    from stocksense.ipo import today_ist
+
+    listed = (today_ist() - timedelta(days=5)).strftime("%d-%b-%Y")
+
+    class Listed(FakeNse):
+        def past_issues(self):
+            return [{"symbol": "NEWCO", "company": "New Co Ltd", "securityType": "Equity", "listingDate": listed,
+                     "issuePrice": "100", "priceRange": "Rs.95 to Rs.100"},
+                    {"symbol": "OTHER", "company": "Other Ltd", "securityType": "Equity", "listingDate": listed,
+                     "issuePrice": "50", "priceRange": "Rs.48 to Rs.50"}]
+
+    scanned = {"ipos": {"NEWCO": {"url": "https://www.sebi.gov.in/filings/public-issues/x.html", "flags": [
+        {"id": "losses", "title": "Has been making losses", "severity": "high", "summary": "Losses in all three years."}]}}}
+    body = TestClient(create_app(market=market, nse=Listed(), ipo_prospectus=lambda: scanned)).get("/ipos/listings").json()
+    rows = {r["symbol"]: r for r in body}
+    assert rows["NEWCO"]["prospectus"]["flags"][0]["severity"] == "high"
+    assert rows["OTHER"]["prospectus"] is None

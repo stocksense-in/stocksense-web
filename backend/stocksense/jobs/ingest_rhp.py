@@ -33,6 +33,7 @@ import httpx
 import pandas as pd
 
 from .. import rhp
+from ..config import DATA_DIR
 from ..lake import Lake
 from ..log import get_logger
 from ..sources import nse_ipo, sebi_offers
@@ -42,6 +43,7 @@ log = get_logger(__name__)
 SOURCE = "sebi_rhp"
 LISTING_SOURCE = "sebi_offers"
 DATASET = "ipo_prospectus"
+EXPORT = DATA_DIR / "ipo_prospectus.json"  # served with the IPO page's recent listings
 SINCE = date(2015, 6, 1)
 FILED_BEFORE_DAYS = 120   # an RHP is filed with the ROC days to weeks before the issue opens
 CLOSE_SPELLING = 0.88     # difflib ratio for a fuzzy name match
@@ -229,6 +231,24 @@ def scan(lake: Lake, ipos: list[dict]) -> pd.DataFrame:
     return df
 
 
+def export(df: pd.DataFrame, output: Path = EXPORT) -> dict:
+    """Per IPO: the prospectus link and its medium and high findings, for the IPO page."""
+    titles = {r.id: r.title for r in rhp.RULES}
+    ipos = {}
+    for r in df[df["pages"] > 0].to_dict("records"):
+        summaries = json.loads(r.get("summaries") or "{}")
+        flags = [{"id": rule.id, "title": titles[rule.id], "severity": r[rule.id], "summary": summaries.get(rule.id, "")}
+                 for rule in rhp.RULES if r.get(rule.id) in (rhp.HIGH, rhp.MEDIUM)]
+        flags.sort(key=lambda f: rhp._ORDER[f["severity"]])
+        ipos[r["symbol"]] = {"company": r["company"], "filed": pd.Timestamp(r["filed"]).date().isoformat(),
+                             "url": r["url"], "pages": int(r["pages"]), "flags": flags}
+    doc = {"generated": date.today().isoformat(), "source": "Red herring prospectuses filed with SEBI, scanned with "
+           "StockSense's prospectus checker", "ipos": ipos}
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(doc, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
+    return doc
+
+
 def run(lake: Lake | None = None, since: date = SINCE, download_new: bool = True, workers: int = 6) -> pd.DataFrame:
     lake = lake or Lake.from_settings()
     today = date.today()
@@ -249,4 +269,6 @@ def run(lake: Lake | None = None, since: date = SINCE, download_new: bool = True
         issues = json.loads((latest / "nse_past_issues.json").read_text(encoding="utf-8"))
         ipos = match(listing, issues)
     extract(lake, workers)
-    return scan(lake, ipos)
+    df = scan(lake, ipos)
+    export(df)
+    return df

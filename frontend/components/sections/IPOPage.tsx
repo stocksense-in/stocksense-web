@@ -174,6 +174,17 @@ export function IPOPage() {
                         <td>
                           <div style={{ fontSize: 11.5, color: 'var(--cream)' }}>{l.name}</div>
                           <div style={{ fontSize: 9, color: 'var(--cream-mute)', fontFamily: 'var(--f-mono)', marginTop: 2 }}>{l.symbol} · {l.board === 'sme' ? 'SME' : 'Mainboard'}</div>
+                          {l.prospectus && (
+                            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center', marginTop: 4 }}>
+                              {l.prospectus.flags.slice(0, 3).map(f => (
+                                <span key={f.id} className={f.severity === 'high' ? 'pill pill-r' : 'pill pill-gold'} style={{ fontSize: 7.5 }} title={f.summary}>{f.title}</span>
+                              ))}
+                              {l.prospectus.flags.length > 3 && <span style={{ fontSize: 8.5, color: 'var(--cream-mute)' }}>+{l.prospectus.flags.length - 3}</span>}
+                              {!l.prospectus.flags.length && <span style={{ fontSize: 8.5, color: 'var(--cream-mute)' }}>No serious prospectus flags</span>}
+                              <a href={l.prospectus.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                                style={{ fontSize: 8.5, color: 'var(--gold)', textDecoration: 'none' }} title="The red herring prospectus on SEBI's site">Prospectus ↗</a>
+                            </div>
+                          )}
                         </td>
                         <td style={{ fontFamily: 'var(--f-mono)', fontSize: 11 }}>{date(l.listed)}</td>
                         <td style={{ textAlign: 'right', fontFamily: 'var(--f-mono)', fontSize: 11 }}>{fmtRupees(l.issue_price)}</td>
