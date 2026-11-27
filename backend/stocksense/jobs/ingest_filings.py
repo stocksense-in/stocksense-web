@@ -11,6 +11,7 @@ months are fetched again each run (late filings). Clean datasets, one partition 
   • announcements   by broadcast date (IST)
   • insider_trades  by disclosure date (IST) — the day the market could know
   • fii_dii         provisional FII/DII cash flows, ₹ crore (history starts when this job first ran)
+  • deals           bulk and block deals by trading day (history starts 27 Nov 2026; raw/nse_deals/<day>/)
 """
 
 from __future__ import annotations
@@ -90,6 +91,28 @@ def run_fii_dii(lake: Lake, today: date | None = None) -> pd.DataFrame:
     return df
 
 
+def run_deals(lake: Lake, fetch=nse_filings.fetch_deals) -> pd.DataFrame:
+    """The latest trading day's bulk and block deals. Raw CSVs are kept under the deals' own
+    date (on a holiday NSE still serves the last trading day's files), and that day's
+    partition of `deals` is replaced with both kinds together."""
+    frames, texts = [], {}
+    with nse_filings.client() as c:
+        for kind in nse_filings.DEAL_KINDS:
+            texts[kind] = fetch(c, kind)
+            frames.append(nse_filings.deals_frame(texts[kind], kind))
+            time.sleep(PAUSE_SECONDS)
+    df = pd.concat(frames, ignore_index=True)
+    if df.empty:
+        return df
+    day = df["date"].max().date()
+    folder = lake.raw_dir("nse_deals", day)
+    for kind, text in texts.items():
+        (folder / f"{kind}.csv").write_text(text, encoding="utf-8")
+    df = df[df["date"].dt.date == day]
+    lake.write_parquet(df, "deals", day=day)
+    return df
+
+
 def run(start: date | None = None, end: date | None = None, lake: Lake | None = None) -> None:
     lake = lake or Lake.from_settings()
     start, end = start or START, end or date.today()
@@ -97,6 +120,11 @@ def run(start: date | None = None, end: date | None = None, lake: Lake | None = 
     log.info(f"insider trades: {run_insider(lake, start, end)} rows written")
     df = run_fii_dii(lake)
     log.info(f"FII/DII: {len(df)} rows for {', '.join(sorted({str(d.date()) for d in df['date']}))}")
+    try:  # a missing deals file shouldn't fail the announcements already saved
+        deals = run_deals(lake)
+        log.info(f"deals: {len(deals)} bulk/block deals" + (f" on {deals['date'].max():%Y-%m-%d}" if len(deals) else ""))
+    except Exception as exc:
+        log.warning(f"deals: not fetched ({exc}); the next run tries again, but that day's deals are lost")
 
 
 def show(symbol: str, since: date | None = None, limit: int = 20, lake: Lake | None = None) -> None:
@@ -117,3 +145,9 @@ def show(symbol: str, since: date | None = None, limit: int = 20, lake: Lake | N
                              [symbol, since, limit])
             print(f"\n{symbol} — insider trades since {since} ({len(ins)} shown)")
             print(ins.to_string(index=False) if len(ins) else "  none")
+        if "deals" in present:
+            deals = lake.query("select date, kind, client, side, quantity, price, value_cr from deals "
+                               "where symbol = ? and date >= ? order by date desc, value_cr desc limit ?",
+                               [symbol, since, limit])
+            print(f"\n{symbol} — bulk/block deals since {since} ({len(deals)} shown)")
+            print(deals.to_string(index=False) if len(deals) else "  none")

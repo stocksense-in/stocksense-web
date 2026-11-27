@@ -81,3 +81,38 @@ class _Null:
 
     def __exit__(self, *a):
         return False
+
+
+BULK = """Date,Symbol,Security Name,Client Name,Buy/Sell,Quantity Traded,Trade Price / Wght. Avg. Price,Remarks
+27-NOV-2026,AGIIL,Agi Infra Limited,THAKKAR NILESHKUMAR FARSHURAM HUF,BUY,1150000,307.77,-
+27-NOV-2026,AKG,AKG Exim Limited,SHRI MUKTA SHARES,SELL,"1,67,495",8.30,-
+"""
+BLOCK = """Date,Symbol,Security Name,Client Name,Buy/Sell,Quantity Traded,Trade Price / Wght. Avg. Price
+27-NOV-2026,IGIL,Intl Gemological Inst Ltd,OLD BRIDGE MUTUAL FUND,BUY,2400000,417.00
+"""
+
+
+def test_deals_frame():
+    df = nse_filings.deals_frame(BULK, "bulk")
+    assert list(df["symbol"]) == ["AGIIL", "AKG"] and list(df["side"]) == ["buy", "sell"]
+    assert df["quantity"].iloc[1] == 167495 and df["remarks"].iloc[0] == ""
+    assert df["value_cr"].iloc[0] == round(1150000 * 307.77 / 1e7, 2)  # ₹35.39 crore
+    block = nse_filings.deals_frame(BLOCK, "block")  # no Remarks column
+    assert block["kind"].iloc[0] == "block" and block["value_cr"].iloc[0] == 100.08
+    # a day without deals: header only, or nothing at all
+    assert nse_filings.deals_frame(BULK.splitlines()[0] + "\n", "bulk").empty
+    assert nse_filings.deals_frame("", "bulk").empty
+
+
+def test_run_deals_keeps_the_trading_day(tmp_path, monkeypatch):
+    lake = Lake(tmp_path)
+    monkeypatch.setattr(ingest_filings, "PAUSE_SECONDS", 0)
+    monkeypatch.setattr(nse_filings, "client", lambda: _Null())
+    df = ingest_filings.run_deals(lake, fetch=lambda c, kind: BULK if kind == "bulk" else BLOCK)
+    assert len(df) == 3
+    assert (tmp_path / "raw" / "nse_deals" / "2026-11-27" / "block.csv").read_text().startswith("Date,")
+    got = lake.query("select kind, symbol, value_cr from deals order by value_cr desc")
+    assert list(got["symbol"]) == ["IGIL", "AGIIL", "AKG"]
+    # rerun the same day: the partition is replaced, not doubled
+    ingest_filings.run_deals(lake, fetch=lambda c, kind: BULK if kind == "bulk" else BLOCK)
+    assert lake.query("select count(*) from deals").iloc[0, 0] == 3
