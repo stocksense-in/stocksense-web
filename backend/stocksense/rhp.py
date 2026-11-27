@@ -200,16 +200,17 @@ def _stated(pages: list[str], pattern: str) -> list[_Hit]:
     """Hits in sentences that say something happened, not that it didn't ("there are no qualifications")."""
     out = []
     for h in _find(pages, pattern):
-        page = re.sub(r"\s+", " ", pages[h.page - 1])
-        at = page.find(h.match.group(0))
-        if at < 0:
-            continue
-        start = page.rfind(". ", 0, at) + 2 if page.rfind(". ", 0, at) >= 0 else 0
-        end = page.find(". ", at)
-        sentence = page[start: end + 1 if end >= 0 else len(page)]
+        # the sentence around this match's own position in the raw page (matches can span line breaks)
+        text = pages[h.page - 1]
+        before = [m.end() for m in _SENTENCE_END.finditer(text, 0, h.match.start())]
+        after = _SENTENCE_END.search(text, h.match.end())
+        sentence = text[(before[-1] if before else 0): (after.start() + 1 if after else len(text))]
         if not _NEGATION.search(sentence):
             out.append(h)
     return out
+
+
+_SENTENCE_END = re.compile(r"\.\s")
 
 
 # ── Rules ────────────────────────────────────────────────────────────────────

@@ -104,3 +104,10 @@ def test_auditor_qualification_outranks_emphasis():
     assert {f.id: f.severity for f in q.findings}["auditor-remarks"] == rhp.HIGH
     e = rhp.scan_pages(["Our Statutory Auditors have included an emphasis of matter paragraph in their Examination Report."])
     assert {f.id: f.severity for f in e.findings}["auditor-remarks"] == rhp.LOW
+
+
+def test_stated_judges_each_match_in_its_own_sentence():
+    page = ("There is no emphasis of\nmatter in the audit report for Fiscal 2024. Our Statutory Auditors have included an "
+            "emphasis of matter paragraph for Fiscal 2023.")
+    hits = rhp._stated([page], r"emphasis\s+of\s+matters?")
+    assert len(hits) == 1 and "2023" in hits[0].quote  # the first (across a line break) is negated, the second stands
