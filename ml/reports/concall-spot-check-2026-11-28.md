@@ -2,11 +2,11 @@
 
 The latest call of the 50 largest companies with a transcript, quoted by `stocksense.concalls` (rules, no language model).
 
-- **Citations:** 312 of 312 quotes appear on the page they cite (100%).
+- **Citations:** 310 of 310 quotes appear on the page they cite (100%).
 - **Speakers named:** 49 of 50 transcripts name their speakers, so quotes come only from the company's people; the rest fall back to every statement that isn't a question.
-- **Read and judged, reported results:** 78 of 86 right (91%).
-- **Read and judged, guidance:** 65 of 76 right (86%).
-- **No forward-looking figures found:** 15 companies (BHARTIARTL, HDFCBANK, ICICIBANK, TCS, SUNPHARMA, NTPC, ETERNAL, BEL, NESTLEIND, EICHERMOT, SBILIFE, VBL, JIOFIN, BRITANNIA, NYKAA).
+- **Read and judged, reported results:** 80 of 86 right (93%).
+- **Read and judged, guidance:** 65 of 74 right (88%).
+- **No forward-looking figures found:** 16 companies (BHARTIARTL, HDFCBANK, ICICIBANK, TCS, SUNPHARMA, NTPC, ETERNAL, BEL, NESTLEIND, EICHERMOT, SBILIFE, VBL, JIOFIN, POLYCAB, BRITANNIA, NYKAA).
 
 ## Quotes judged wrong
 
@@ -23,11 +23,7 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 | DMART | guidance | 6 | You should be able to make, some margin, which in our case we believe should be at least 20% more than the benchmark, and you should have a right to at least ge | a pricing principle, not guidance |
 | TATASTEEL | guidance | 7 | Despite taking out almost £400 million of fixed costs, we are still a business with reasonably high fixed costs, which cannot afford volumes to be at two -third | a statement of fact, not forward-looking |
 | TATASTEEL | guidance | 12 | But if you are spending Rs. 20,000 crore s on capex, I don't think that is our target. | says what isn't the target; no figure guided |
-| HINDALCO | highlight | 5 | Looking at the global alumin ium market in Q3 calendar year 2026, Chinese alumin ium production grew about 3% year -on-year to nearly 11 million tons, supported | global market data, not a result |
-| HINDALCO | guidance | 11 | If the Middle East supplies get normalized and if the expected Indonesian volumes come, and there's a big if in that 1.5 million tons additional will come or no | metal-market commentary, not the company's guidance |
 | JIOFIN | highlight | 11 | To drive profitable growth, actively pursuing high-margin segments, including small medium businesses well exporters. direct result prudent mix portfolio ration | garbled text with no result in it |
-| POLYCAB | highlight | 4 | In July, August, government capital expenditure remained significantly at higher levels, and bank credit growth continues to trend close to 15% to 20%. | macro data, not a result |
-| POLYCAB | guidance | 11 | And with that, the kind of capex that UltraTech has put into this industry, the kind of revenue guidance that they have given close to around potential of aroun | another company's guidance (UltraTech) |
 | DRREDDY | guidance | 9 | So, the productivity measures will be primarily that the sales that's associated, obviously, with this S&M, will grow much faster than the expenses. 52% now of  | the figure is today's business mix, not guidance |
 | HEROMOTOCO | highlight | 5 | And we are investing over INR700 crores in setting up a complete new automated parts center and double our parts handling capacity from what it is right now. | an investment plan, not a result |
 | TATACONSUM | guidance | 5 | Dry fruits and cold -pressed oil now combined ARR of INR1,000 crores plus, and we will continue to expand the portfolio with margin expansion as we go forward. | the figure is current revenue; the outlook has none |
@@ -40,7 +36,7 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p5 [revenue] Revenue from operations of Rs.40,475 Crores, EBITDA 21,879 Crores, and EBITDA less capex is Rs.32,130 Crores. — *not judged*
 - highlight p5 [margins] That was a 10.8% growth year-on-year and EBITDA of Rs.20,505 Crores. — *not judged*
 - highlight p7 [costs] Depreciation and finance costs were higher because of the increase in asset base and increases in debt, which is reflecting in the higher profit after tax decline of 24%. — *not judged*
-- highlight p19 [capex] MEG 12.8 million tonnes, again 30% of the global capacity and PTA 32 million tonnes, which is about 25% of the global capacity was impacted in this oil turmoil. — *not judged*
+- highlight p22 [capex] So today when we talk about 5 million, we talk about the ones which are yet to come up in the Middle East and Russia, where maybe 40% of the capacity is concerned. — *not judged*
 - guidance p16 [margins] Refinery outages have been about 11.8, currently standing at about 4 million to 5 million barrels a day, which actually is likely to support the margin going into the future that is what all the commentators and analysts are saying and global refinery runs also a little lower at 79 because of the frequent disruptions and outages that we are seeing and product inventories again diesel and gasoline they are down as compared to the five year average. — *industry figures (refinery outages), not the company's guidance*
 
 ### BHARTIARTL (filed 2026-11-12)
@@ -181,12 +177,12 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p10 [revenue] So therefore, the rate for the second half is expected to remain at this maximum level. which is essentially the rate at which we have exited quarter 2, which is the 16% base rate and the 2% booster, so 18% on electric vehicle revenues for the second half. — *ok*
 
 ### BAJAJFINSV (filed 2026-11-10)
-- highlight p4 [margins] I'll start with Bajaj General: GWP for Bajaj General grew at 10% for the quarter to about INR 7,056 crores, which is marginally lower than the industry growth of about 12%. — *ok*
 - highlight p5 [capex] The VNB for the quarter grew at 40% to INR 512 crores and the NBM was up at 21.6% for the quarter as against 17.1% for the same quarter last year , an expansion of healthy 4.5%. — *ok*
-- highlight p5 [payout] And there is also an impact of about INR 50 crores due to the capital reduction we've done through buyback and dividend in the last 6 months. — *not judged*
+- highlight p5 [payout] And there is also an impact of about INR 50 crores due to the capital reduction we've done through buyback and dividend in the last 6 months. — *ok*
 - highlight p6 [loans] The growth was very well distributed across all business segments, including home loans, which grew at 22%, loan against property grew at 26%, LRD at 39% and developer finance at 13%. — *not judged*
 - highlight p6 [asset quality] Accordingly, the gross and the net NPAs stood at 1.06% and 0.42%, respectively, much lower than the same period last year. — *not judged*
 - highlight p7 [revenue] The operating revenue for the Company has increased to INR 120 crores in Q2 with a healthy growth of 45%. — *not judged*
+- highlight p7 [loans] I'll now move to Bajaj Markets: The total disbursements for the quarter stood at INR 2,535 crores as against INR 2,269 crores in Q1 and INR 1,549 crores for the same quarter last year. — *not judged*
 - guidance p17 [payout] This INR 4,700 crores plus the dividend should be sufficient to fund these investments going forward. — *ok*
 
 ### BEL (filed 2026-11-06)
@@ -266,13 +262,12 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p12 [debt] We have always said our debt should be less than 3x. — *ok*
 
 ### HINDALCO (filed 2026-11-12)
-- highlight p5 [capex] Looking at the global alumin ium market in Q3 calendar year 2026, Chinese alumin ium production grew about 3% year -on-year to nearly 11 million tons, supported by capacity additions in Yunnan, partially offset by capacity rationalization in Shandong. — *global market data, not a result*
+- highlight p4 [capex] As of the end of Q2, we have 643 MW of renewable energy capacity across Solar, Wind, and Hydel resources, along with 35 MW of pump storage tie -ups under our round -the-clock renewable energy program. — *ok*
 - highlight p6 [margins] Coming to slide 14, our consolidated business EBITDA was up 52% year -on-year at INR13,869 crores this quarter, and the consolidated profit after tax was up 59% on a year -on-year basis at INR7,533 crores. — *ok*
 - highlight p6 [revenue] Coming to our business -wise performance this quarter on Slide 1 8, the India upstream aluminium shipments were up 1% year -on-year and revenues were up 33% year -on-year. — *not judged*
 - highlight p6 [margins] At Hindalco India business, our business segment EBITDA was up 66% year-on-year at INR9,011 crores this quarter, whereas the quarterly profit after tax was at INR5,852 crores, up 91% on a year-on-year basis this quarter. — *not judged*
 - highlight p6 [margins] Our quarterly EBITDA stood at INR7,009 crore s, up 55% year -on-year, backed by favorable macros and our strong performance across the value chain. — *not judged*
 - highlight p7 [volumes] Overall metal shipments were at 116 KT, up 2% year -on-year, while CCR volumes were stable at 96 KT. — *not judged*
-- guidance p11 [volumes] If the Middle East supplies get normalized and if the expected Indonesian volumes come, and there's a big if in that 1.5 million tons additional will come or not, then the LME Week, the consensus was, in some ways, the LME next year could be between $2,600 and $2,800. — *metal-market commentary, not the company's guidance*
 - guidance p7 [margins] Copper is expected to deliver an underlying quarterly EBITDA of around INR1,200 crores on a normalized basis, underscoring the strength and resilience of this business. — *ok*
 - guidance p7 [margins] Importantly, our long -term EBITDA per ton guidance of $600 remains unchanged. — *ok*
 
@@ -352,13 +347,12 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p12 [margins] We reiterate that we remain on tr ack to achieve our full-year FY27 EBIT margin target of 15%. — *ok*
 
 ### POLYCAB (filed 2026-10-19)
-- highlight p4 [capex] In July, August, government capital expenditure remained significantly at higher levels, and bank credit growth continues to trend close to 15% to 20%. — *macro data, not a result*
 - highlight p6 [margins] EBITDA increased by 39% year -on-year, while EBITDA margins expanded by more than 50 basis points sequentially to 14.4%, supported by a favourable business mix and continued focus on operational efficiencies. — *ok*
-- highlight p6 [debt] Net cash stood at INR 45.2 billion as of September 30th, 2026, compared to INR 29.4 billion a year ago. — *not judged*
+- highlight p6 [debt] Net cash stood at INR 45.2 billion as of September 30th, 2026, compared to INR 29.4 billion a year ago. — *ok*
 - highlight p6 [revenue] Revenue grew by 46% year-on-year, crossing a significant milestone of INR180 billion. — *not judged*
+- highlight p6 [capex] During the first half of the year, we incurred capital expenditures of INR 6.1 billion, reflecting our ongoing investments in capacity expansion, supply chain capabilities and future growth platforms. — *not judged*
 - highlight p6 [margins] EBITDA increased by 36% year-on-year, with margins remaining healthy at 14.1%, while profit after tax grew by 38% year-on-year, translating into PAT margins of 9.9%. — *not judged*
 - highlight p6 [revenue] Despite challenging geopolitical environment, exports picked up strongly during the quarter as sales grew 17% year-on-year and grew 85% quarter-on-quarter. — *not judged*
-- guidance p11 [capex] And with that, the kind of capex that UltraTech has put into this industry, the kind of revenue guidance that they have given close to around potential of around 6x to 7x, it looks elusive at the moment. — *another company's guidance (UltraTech)*
 
 ### HDFCLIFE (filed 2026-10-23)
 - highlight p4 [margins] New busine ss margin was 24.7%, compared with 24.5% in H1 FY2026. — *ok*
@@ -404,8 +398,8 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 ### DRREDDY (filed 2026-07-28)
 - highlight p3 [revenue] The business reported a revenue decline of 5.6% and an EBITDA margin of 12.5% for the quarter, reflecting the impact of lower lenalidomide revenues, which contributed to the corresponding period last year, as well as a provision of ₹240 crores for inventor y and other costs associated with the recent semaglutide API related challenges. — *ok*
 - highlight p4 [margins] Consolidated gross profit margin was 46.5%, a decrease of 1,039 basis points YoY and an increase of 169 basis points sequentially. — *ok*
-- highlight p4 [asset quality] Excluding the semaglutide API related provision mentioned earlier, the overall margin was 49.4%, while that for Global Generics was 53.8% and for PSAI was 12.9%. — *not judged*
 - highlight p4 [tax] Effective tax rate for the quarter was 21.3%, compared to 26% in the corresponding period last year. — *not judged*
+- highlight p4 [asset quality] Excluding the semaglutide API related provision, the margin was at 15.4%. — *not judged*
 - highlight p5 [capex] Capex cash outflow for the quarter stood at ₹307 crores, which is US$32 million. — *not judged*
 - highlight p5 [payout] Cash flow during the quarter before acquisition related payout was negative ₹216 crores, which is negative US$23 million. — *not judged*
 - guidance p9 [revenue] So, the productivity measures will be primarily that the sales that's associated, obviously, with this S&M, will grow much faster than the expenses. 52% now of our business is branded markets. — *the figure is today's business mix, not guidance*

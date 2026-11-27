@@ -198,3 +198,13 @@ def test_changes_moved_ranges_revisions_and_reaffirmed_outlooks():
     assert out == {"costs": "changed", "revenue": "changed", "margins": "repeated", "capex": "repeated"}
     assert cc._values(q("capex", "INR200 crores-225 crores")) == {200.0, 225.0}
     assert cc.sentences(["The capex is 4. 9% of revenue this quarter, below guidance."])[0].text.startswith("The capex is 4.9%")
+
+
+def test_market_figures_are_not_the_companys():
+    pages = ["Ravi Kumar: Global refinery runs fell to 79% and outages are likely to support margins next year.\n"
+             "Government capital expenditure will grow 15% next year.\n"
+             "We expect our EBITDA margin to be 20% next year, as the industry recovers.\n"
+             "Ravi Kumar: Revenue grew 18% this quarter."] * 2
+    texts = [q.text for q in cc.guidance(pages, DAY)]
+    assert any("our EBITDA margin to be 20%" in t for t in texts)  # names the industry, but it's about us
+    assert not any("refinery" in t or "Government" in t for t in texts)
