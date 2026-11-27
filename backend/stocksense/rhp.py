@@ -359,11 +359,12 @@ def _related_party(pages: list[str]) -> RuleResult:
 
 
 def _auditor_remarks(pages: list[str]) -> RuleResult:
-    # not the bare words "audit qualifications": restatement tables print them as a row label
-    qualified = _stated(pages, r"qualified\s+opinion|adverse\s+opinion|disclaimer\s+of\s+opinion|"
+    # not the bare words "audit qualifications": restatement tables print them as a row label;
+    # and not "unqualified opinion", which is the clean sign-off
+    qualified = _stated(pages, r"(?<![a-z])qualified\s+opinion|adverse\s+opinion|disclaimer\s+of\s+opinion|"
                                r"auditors?\s+(?:have\s+)?(?:included|given|made)[^.]{0,60}?qualifications?")
     if qualified:
-        return HIGH, f"The auditors qualified their opinion {_places(qualified)}: they couldn't fully sign off on the accounts.", qualified
+        return HIGH, f"The auditors qualified or disclaimed part of their reports {_places(qualified)}. Check what about: the accounts themselves, or internal controls and CARO compliance.", qualified
     emphasis = _stated(pages, r"emphasis\s+of\s+matters?")
     if emphasis:
         return LOW, f"The auditors added emphasis-of-matter notes {_places(emphasis)}: points they want read, not a qualification.", emphasis

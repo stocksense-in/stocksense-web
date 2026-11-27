@@ -179,11 +179,11 @@
    "lo": -0.1797,
    "hi": 0.1177,
    "listing": {
-    "flagged": 25,
+    "flagged": 24,
     "verdict": "no clear difference",
-    "diff": -0.005,
-    "lo": -0.0946,
-    "hi": 0.171
+    "diff": 0.0076,
+    "lo": -0.0865,
+    "hi": 0.1761
    }
   },
   "regulatory-action": {

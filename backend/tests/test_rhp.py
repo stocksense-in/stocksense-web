@@ -136,3 +136,10 @@ def test_related_party_small_share_is_low_and_threshold_boilerplate_ignored():
     boiler = ["Related party transactions which, individually or in the aggregate, exceed 10% of the total restated "
               "consolidated revenue of our Company are disclosed below."]
     assert rhp._related_party(boiler) is None
+
+
+def test_unqualified_opinion_is_not_an_auditor_flag():
+    pages = ["The audit was conducted by the predecessor statutory auditor of the company, who had expressed "
+             "unqualified opinion on those financial statements. We did not audit four subsidiaries."]
+    assert rhp._auditor_remarks(pages) is None
+    assert rhp._auditor_remarks(["Our auditor's report includes a qualified opinion against our Company."])[0] == rhp.HIGH
