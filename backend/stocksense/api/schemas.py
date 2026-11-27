@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -228,6 +230,7 @@ class Available(BaseModel):
     financials: bool = Field(description="GET /stocks/{symbol}/financials has filed results for this company")
     holders: bool = Field(description="GET /stocks/{symbol}/holders has shareholding filings for this company")
     dividends: bool = Field(False, description="GET /stocks/{symbol}/dividends has corporate actions for this company")
+    events: bool = Field(False, description="GET /stocks/{symbol}/events has announcements or insider trades")
 
 
 class DividendYear(BaseModel):
@@ -458,3 +461,39 @@ class Listing(BaseModel):
     issue_price: float | None
     price: float | None = Field(description="Latest price, when StockSense tracks the stock")
     return_pct: float | None = Field(description="Return from issue price to latest price, %")
+
+
+class Announcement(BaseModel):
+    at: str = Field(description="When NSE published it (IST)")
+    group: str = Field(description="warning | exchange | legal | results | orders | deals | capital | rating | management | business")
+    category: str = Field(description="NSE's category")
+    title: str
+    link: str | None = Field(description="The filing (PDF) on NSE's archive")
+
+
+class InsiderTrade(BaseModel):
+    date: str
+    person: str
+    role: str = Field(description="Promoters | Promoter Group | Director | Key Managerial Personnel")
+    side: Literal["buy", "sell"]
+    value_cr: float | None
+    pct_after: float | None = Field(description="The person's holding afterwards, % of the company")
+
+
+class Insiders(BaseModel):
+    bought_cr: float | None
+    sold_cr: float | None
+    buys: int
+    sells: int
+    trades: list[InsiderTrade]
+
+
+class Events(BaseModel):
+    symbol: str
+    source: str
+    since: str | None = Field(description="Announcements from this day on")
+    insiders_until: str | None = Field(description="Last day of NSE's insider-trading feed in the data")
+    counts: dict[str, int] = Field(description="Notable announcements in the past year, by group")
+    announcements: list[Announcement]
+    insiders: Insiders | None
+    insider_note: str | None

@@ -27,6 +27,7 @@ Jobs
     financials-export  quarterly + yearly results from filings → data/financials.json  (weekly)
     holders-export     promoter holding over time + pledges → data/holders.json  (weekly)
     alerts-export      alerts over the last 10 sessions, every company → data/alerts.json  (daily)
+    events-export      each company's notable announcements + insider trades → data/events.json  (daily)
     ingest-india-macro RBI repo rate, CPI, IIP, forex reserves, 10y yield (with release dates) → lake  (weekly)
     dividends-export   dividends by year + splits/bonuses → data/dividends.json  (weekly)
     alerts         what happened to companies on a day: big moves, volume, results, orders, stakes, pledges
@@ -151,6 +152,7 @@ def _build_parser() -> argparse.ArgumentParser:
     jobs.add_parser("financials-export", help="company financials from filings, for the API")
     jobs.add_parser("holders-export", help="promoter holding and pledges, for the API")
     jobs.add_parser("alerts-export", help="alerts over the last 10 sessions, for the API")
+    jobs.add_parser("events-export", help="notable announcements and insider trades per company, for the API")
     jobs.add_parser("ingest-india-macro", help="RBI repo rate, CPI, IIP, forex reserves, 10y yield, with release dates")
     jobs.add_parser("dividends-export", help="dividends and capital actions, for the API")
     p = jobs.add_parser("alerts", help="alerts for a day (any past day replays)")
@@ -332,6 +334,14 @@ def main() -> None:
 
         doc = alerts.write(Lake.from_settings())
         print(f"Wrote {len(doc['alerts'])} alerts over {len(doc['days'])} sessions to {alerts.OUTPUT}")
+        return
+
+    if args.job == "events-export":
+        from . import events
+        from .lake import Lake
+
+        doc = events.write(Lake.from_settings())
+        print(f"Wrote events for {len(doc['companies'])} companies to {events.OUTPUT}")
         return
 
     if args.job == "holders-export":

@@ -67,5 +67,6 @@ def test_stock_detail_says_which_panels_exist(market):
     symbol = ROWS[0]["symbol"]
     doc = holders.build(shareholding(symbol, [60] * 7))
     client = TestClient(create_app(market=market, headlines=lambda: [], history=lambda s, r: [],
-                                   holders=lambda: doc, financials=lambda: None, dividends=lambda: None))
-    assert client.get(f"/stocks/{symbol}").json()["available"] == {"financials": False, "holders": True, "dividends": False}
+                                   holders=lambda: doc, financials=lambda: None, dividends=lambda: None, events=lambda: None))
+    assert client.get(f"/stocks/{symbol}").json()["available"] == {"financials": False, "holders": True, "dividends": False,
+                                                                  "events": False}

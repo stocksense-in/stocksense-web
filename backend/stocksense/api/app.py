@@ -20,6 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .. import analytics, benchmarks, company_news, geo, ipo, rhp
 from .. import dividends as dividends_mod
+from .. import events as events_mod
 from .. import holders as own
 from .. import valuation as valuation_mod
 from ..config import DATA_DIR, get_settings
@@ -44,6 +45,7 @@ FINANCIALS_PATH = DATA_DIR / "financials.json"  # written by `python -m stocksen
 ALERTS_PATH = DATA_DIR / "alerts.json"  # written daily by `python -m stocksense alerts-export`
 HOLDERS_PATH = DATA_DIR / "holders.json"  # written by `python -m stocksense holders-export`
 DIVIDENDS_PATH = DATA_DIR / "dividends.json"  # written by `python -m stocksense dividends-export`
+EVENTS_PATH = DATA_DIR / "events.json"  # written daily by `python -m stocksense events-export`
 BENCHMARKS_TTL_SECONDS = 5 * 60  # peer quartiles change only when fundamentals do
 
 Range = Literal["1d", "5d", "1mo", "6mo", "1y", "5y"]
@@ -133,6 +135,11 @@ def load_dividends(path: Path = DIVIDENDS_PATH) -> dict | None:
     return _load_json(path)
 
 
+def load_events(path: Path = EVENTS_PATH) -> dict | None:
+    """Notable announcements and insider trades per company (backend/data/events.json)."""
+    return _load_json(path)
+
+
 def _warm(app: FastAPI) -> None:
     try:
         app.state.market.stocks()
@@ -152,6 +159,7 @@ def create_app(
     dividends: Callable[[], dict | None] | None = None,
     company_headlines: Callable[[str], list[news.Headline]] | None = None,
     alerts: Callable[[], dict | None] | None = None,
+    events: Callable[[], dict | None] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -186,6 +194,7 @@ def create_app(
     app.state.financials = financials or load_financials
     app.state.holders = holders or load_holders
     app.state.dividends = dividends or load_dividends
+    app.state.events = events or load_events
     app.state.scan_slots = threading.BoundedSemaphore(MAX_CONCURRENT_SCANS)
 
     def market_of(request: Request) -> MarketData:
@@ -349,6 +358,23 @@ def create_app(
         return {"symbol": symbol.upper(), "source": request.app.state.holders()["source"], **entry,
                 "trend_note": own.trend_note(entry), "pledge_warning": own.pledge_warning(entry)}
 
+    def _events_of(request: Request, symbol: str) -> dict | None:
+        return ((request.app.state.events() or {}).get("companies") or {}).get(symbol.upper())
+
+    @app.get("/stocks/{symbol}/events", response_model=schemas.Events, tags=["stocks"])
+    def stock_events(request: Request, symbol: str):
+        """What the company told the exchange over the past year (results, orders, deals, ratings, management
+        changes, red flags) and what its promoters and directors bought or sold on the market."""
+        entry = _events_of(request, symbol)
+        if entry is None:
+            raise HTTPException(404, f"No notable announcements or insider trades for {symbol.upper()}")
+        doc = request.app.state.events()
+        return {"symbol": symbol.upper(), "source": doc.get("source", ""), "since": doc.get("since"),
+                "insiders_until": doc.get("insiders_until"), "counts": entry.get("counts", {}),
+                "announcements": [{**a, "link": events_mod.full_link(a.get("link"))} for a in entry.get("announcements", [])],
+                "insiders": entry.get("insiders"),
+                "insider_note": events_mod.insider_note(entry, doc.get("insiders_until"))}
+
     @app.get("/alerts", response_model=schemas.Alerts, tags=["stocks"])
     def recent_alerts(
         request: Request,
@@ -424,7 +450,8 @@ def create_app(
             ),
             peers=[_stock_out(s) for s in analytics.peers(m.fresh_stocks(), stock, peers)] if peers else [],
             available=schemas.Available(financials=financials is not None, holders=holders is not None,
-                                        dividends=_dividends_of(request, stock.symbol) is not None),
+                                        dividends=_dividends_of(request, stock.symbol) is not None,
+                                        events=_events_of(request, stock.symbol) is not None),
         )
 
     @app.get("/stocks/{symbol}/history", response_model=schemas.History, tags=["stocks"])
