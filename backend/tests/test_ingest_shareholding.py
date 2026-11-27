@@ -80,10 +80,13 @@ def test_patterns_from_an_older_parser_are_read_again(tmp_path, monkeypatch):
     lake = Lake(tmp_path)
     old = lake.raw_dir(job.CATEGORIES, date(2022, 6, 30)) / "TCS.json"
     old.write_text(json.dumps({"symbol": "TCS", "quarter_end": "2022-06-30", "insurance_pct": 0.7}), encoding="utf-8")
+    split = lake.raw_dir(job.CATEGORIES, date(2025, 9, 30)) / "TCS.json"  # has the split, not the pledges
+    split.write_text(json.dumps({"symbol": "TCS", "quarter_end": "2025-09-30", "parser": 2, "fii_pct": 9.0,
+                                 "mutual_funds_pct": 5.0}), encoding="utf-8")
     done = lake.raw_dir(job.CATEGORIES, date(2026, 9, 30)) / "TCS.json"
-    done.write_text(json.dumps({"symbol": "TCS", "quarter_end": "2026-09-30", "fii_pct": 9.0, "mutual_funds_pct": 5.0}),
-                    encoding="utf-8")
-    assert not job._complete(old) and job._complete(done)
+    done.write_text(json.dumps({"symbol": "TCS", "quarter_end": "2026-09-30", "parser": nse_shareholding.PARSER_VERSION,
+                                "fii_pct": 9.0, "mutual_funds_pct": 5.0}), encoding="utf-8")
+    assert not job._complete(old) and not job._complete(split) and job._complete(done)
     monkeypatch.setattr(nse_shareholding, "fetch_xbrl", lambda c, url: b"x")
     monkeypatch.setattr(nse_shareholding, "categories", lambda xml: {"fii_pct": 32.3, "dii_pct": 27.1})
     row = {"quarter_end": date(2022, 6, 30), "xbrl": "https://nsearchives.nseindia.in/corporate/xbrl/SHP_1.xml"}
