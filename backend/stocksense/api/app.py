@@ -390,7 +390,8 @@ def create_app(
                 "insiders_until": doc.get("insiders_until"), "counts": entry.get("counts", {}),
                 "announcements": [{**a, "link": events_mod.full_link(a.get("link"))} for a in entry.get("announcements", [])],
                 "insiders": entry.get("insiders"),
-                "insider_note": events_mod.insider_note(entry, doc.get("insiders_until"))}
+                "insider_note": events_mod.insider_note(entry, doc.get("insiders_until")),
+                "deals": entry.get("deals", []), "deals_since": doc.get("deals_since")}
 
     @app.get("/economy", response_model=schemas.Economy, tags=["market"])
     def economy(request: Request):

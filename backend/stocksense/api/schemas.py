@@ -480,6 +480,16 @@ class InsiderTrade(BaseModel):
     pct_after: float | None = Field(description="The person's holding afterwards, % of the company")
 
 
+class Deal(BaseModel):
+    date: str
+    kind: str = Field(description="bulk (over 0.5% of the company in a day) | block (₹10 crore+ in the block window)")
+    client: str = Field(description="Who bought or sold, as NSE reports it")
+    side: str = Field(description="buy | sell")
+    quantity: int
+    price: float
+    value_cr: float
+
+
 class Insiders(BaseModel):
     bought_cr: float | None
     sold_cr: float | None
@@ -497,6 +507,8 @@ class Events(BaseModel):
     announcements: list[Announcement]
     insiders: Insiders | None
     insider_note: str | None
+    deals: list[Deal] = Field(default_factory=list, description="Latest bulk/block deals, newest first")
+    deals_since: str | None = Field(None, description="First day of bulk/block deals in the data (collected daily)")
 
 
 class EconomySeries(BaseModel):

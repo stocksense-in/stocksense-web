@@ -182,6 +182,19 @@ export interface CompanyEvents {
   announcements: Announcement[];
   insiders: { bought_cr: number | null; sold_cr: number | null; buys: number; sells: number; trades: InsiderTrade[] } | null;
   insider_note: string | null;
+  deals?: Deal[];
+  deals_since?: string | null;
+}
+
+/** A bulk deal (over 0.5% of the company in a day) or block deal (₹10 crore+ in the block window). */
+export interface Deal {
+  date: string;
+  kind: 'bulk' | 'block';
+  client: string;
+  side: 'buy' | 'sell';
+  quantity: number;
+  price: number;
+  value_cr: number;
 }
 
 export interface Holders {
@@ -286,7 +299,7 @@ export async function scanProspectus(file: File, signal?: AbortSignal): Promise<
 
 export interface Alert {
   date: string; symbol: string;
-  kind: 'price_move' | 'unusual_volume' | 'results_filed' | 'large_order' | 'promoter_stake' | 'pledge_change' | string;
+  kind: 'price_move' | 'unusual_volume' | 'results_filed' | 'large_order' | 'promoter_stake' | 'pledge_change' | 'big_deal' | string;
   value: number | null; text: string;
 }
 
@@ -294,7 +307,7 @@ export interface Alerts { generated_at: string | null; days: string[]; alerts: A
 
 export const ALERT_LABEL: Record<string, string> = {
   price_move: 'Big move', unusual_volume: 'Heavy trading', results_filed: 'Results',
-  large_order: 'Order win', promoter_stake: 'Promoter stake', pledge_change: 'Pledges',
+  large_order: 'Order win', promoter_stake: 'Promoter stake', pledge_change: 'Pledges', big_deal: 'Big deal',
 };
 
 export interface CompanyHeadline { title: string; link: string; source: string; published: string | null }

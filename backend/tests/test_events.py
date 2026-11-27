@@ -104,3 +104,29 @@ def test_screener_filters_on_insiders_and_red_flags(market):
     without = c.get("/stocks", params={"red_flags": "none", "page_size": 200}).json()
     assert without["total"] == total - 1 and "TCS" not in {s["symbol"] for s in without["results"]}
     assert c.get("/stocks", params={"insiders": "selling"}).status_code == 422
+
+
+DEALS = pd.DataFrame([
+    {"date": date(2026, 11, 27), "kind": "bulk", "symbol": "IGIL", "client": "OLD BRIDGE MUTUAL FUND", "side": "buy",
+     "quantity": 2400000.0, "price": 417.0, "value_cr": 100.08},
+    {"date": date(2026, 11, 27), "kind": "block", "symbol": "IGIL", "client": "OLD BRIDGE MUTUAL FUND", "side": "buy",
+     "quantity": 2400000.0, "price": 417.0, "value_cr": 100.08},  # the same trade in both files: listed once
+    {"date": date(2026, 11, 27), "kind": "bulk", "symbol": "IGIL", "client": "SMALL FUND", "side": "sell",
+     "quantity": 10000.0, "price": 417.0, "value_cr": 0.42},
+    {"date": date(2026, 11, 28), "kind": "bulk", "symbol": "TCS", "client": "A FUND", "side": "sell",
+     "quantity": 50000.0, "price": 3000.0, "value_cr": 15.0},
+])
+
+
+def test_deals_join_the_company_events():
+    doc = ev.build(ANNOUNCEMENTS, INSIDERS, TODAY, DEALS)
+    assert doc["deals_since"] == "2026-11-27"
+    igil = doc["companies"]["IGIL"]  # a company with deals only still gets an entry
+    assert [(d["kind"], d["client"]) for d in igil["deals"]] == [("block", "Old Bridge Mutual Fund"), ("bulk", "Small Fund")]
+    assert igil["announcements"] == [] and igil["insiders"] is None
+    assert doc["companies"]["TCS"]["deals"][0]["value_cr"] == 15.0
+    assert "deals" not in doc["companies"]["ABC"]
+    c = TestClient(create_app(market=None, headlines=lambda: [], events=lambda: doc))
+    body = c.get("/stocks/igil/events").json()
+    assert body["deals"][0]["quantity"] == 2400000 and body["deals_since"] == "2026-11-27"
+    assert ev.build(ANNOUNCEMENTS, INSIDERS, TODAY)["deals_since"] is None  # no deals data yet

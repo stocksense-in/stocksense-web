@@ -57,3 +57,30 @@ def test_export_covers_recent_sessions_newest_first(tmp_path, monkeypatch):
     assert doc["days"] == ["2026-11-26", "2026-11-25"]
     assert [a["date"] for a in doc["alerts"]] == ["2026-11-26", "2026-11-25"]
     assert json.loads(out.read_text(encoding="utf-8"))["alerts"][0]["text"] == "moved on 2026-11-26"
+
+
+def test_big_deals_one_line_per_company():
+    day = date(2026, 11, 27)
+    deals = pd.DataFrame([
+        {"date": day, "kind": "bulk", "symbol": "IGIL", "client": "OLD BRIDGE MUTUAL FUND", "side": "buy",
+         "quantity": 2400000.0, "price": 417.0, "value_cr": 100.08},
+        {"date": day, "kind": "block", "symbol": "IGIL", "client": "OLD BRIDGE MUTUAL FUND", "side": "buy",
+         "quantity": 2400000.0, "price": 417.0, "value_cr": 100.08},  # same trade, both files
+        {"date": day, "kind": "block", "symbol": "IGIL", "client": "BCP ASIA II TOPCO PTE. LTD.", "side": "sell",
+         "quantity": 3358000.0, "price": 417.0, "value_cr": 140.03},
+        {"date": day, "kind": "bulk", "symbol": "AKG", "client": "SHRI MUKTA SHARES", "side": "buy",
+         "quantity": 167495.0, "price": 8.3, "value_cr": 0.14},  # too small to alert
+    ])
+    got = alerts.big_deals(deals, day)
+    assert len(got) == 1 and got[0]["symbol"] == "IGIL" and got[0]["value"] == -140.03
+    assert got[0]["text"].startswith("BCP Asia II Topco Pte. Ltd. sold ₹140 cr of IGIL in a block deal (33.6 lakh shares at ₹417.00)")
+    assert got[0]["text"].endswith("; 1 other deal that day.")
+    assert alerts.big_deals(deals, date(2026, 11, 26)) == []
+
+
+def test_client_names_and_share_counts_read_naturally():
+    assert alerts.client_name("OLD BRIDGE MUTUAL FUND") == "Old Bridge Mutual Fund"
+    assert alerts.client_name("THAKKAR NILESHKUMAR FARSHURAM HUF") == "Thakkar Nileshkumar Farshuram HUF"
+    assert alerts.client_name("GOLDMAN SACHS (SINGAPORE) PTE") == "Goldman Sachs (Singapore) Pte"
+    assert alerts.shares(2400000) == "24 lakh" and alerts.shares(12_500_000) == "1.2 crore"
+    assert alerts.shares(15000) == "15,000"

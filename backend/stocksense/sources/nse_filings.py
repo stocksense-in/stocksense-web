@@ -12,12 +12,17 @@ foreign and domestic institutions bought and sold.
   • FII/DII cash-market flows (…/api/fiidiiTradeReact): today's provisional buy/sell/net
     in ₹ crore. NSE serves only the latest day, so history builds up day by day.
 
-Bulk and block deals are not here: NSE's historical deals API answers 503 to anything
-but a browser session (bot protection, PLAN.md §1.5).
+  • Bulk and block deals (nsearchives…/content/equities/bulk.csv, block.csv): the latest
+    trading day's deals, each with the client, buy/sell, quantity and price. A bulk deal is
+    a trade of over 0.5% of a company's shares in a day; a block deal is one of ₹10 crore or
+    more in the special block window. These public files hold only the latest day, so
+    history builds up day by day; NSE's historical deals API answers 503 to anything but a
+    browser session (bot protection, PLAN.md §1.5), so it isn't used.
 """
 
 from __future__ import annotations
 
+import io
 from datetime import date, datetime
 
 import httpx
@@ -54,6 +59,47 @@ def fetch_insider_trades(c: httpx.Client, start: date, end: date) -> list[dict]:
 
 def fetch_fii_dii(c: httpx.Client) -> list[dict]:
     return _get(c, "fiidiiTradeReact")
+
+
+ARCHIVE = "https://nsearchives.nseindia.com/content/equities"
+DEAL_KINDS = ("bulk", "block")
+DEAL_COLUMNS = ["date", "kind", "symbol", "security", "client", "side", "quantity", "price", "value_cr", "remarks"]
+
+
+def fetch_deals(c: httpx.Client, kind: str) -> str:
+    """The latest trading day's bulk or block deals, as NSE's CSV text."""
+    resp = c.get(f"{ARCHIVE}/{kind}.csv")
+    resp.raise_for_status()
+    return resp.text
+
+
+def deals_frame(text: str, kind: str) -> pd.DataFrame:
+    """One row per deal; value in ₹ crore (quantity × price). Empty if the file has no deals."""
+    try:
+        raw = pd.read_csv(io.StringIO(text), dtype=str, skipinitialspace=True)
+    except (pd.errors.EmptyDataError, pd.errors.ParserError):
+        return pd.DataFrame(columns=DEAL_COLUMNS)
+    cols = {c.strip().lower(): c for c in raw.columns}
+
+    def col(prefix: str) -> pd.Series:
+        name = next((c for k, c in cols.items() if k.startswith(prefix)), None)
+        return raw[name] if name else pd.Series([None] * len(raw), index=raw.index)
+
+    df = pd.DataFrame({
+        "date": [_dt(v, ("%d-%b-%Y",)) for v in col("date")],
+        "kind": kind,
+        "symbol": col("symbol").fillna("").str.strip().str.upper(),
+        "security": col("security").fillna("").str.strip(),
+        "client": col("client").fillna("").str.strip(),
+        "side": col("buy").fillna("").str.strip().str.lower(),
+        "quantity": [_num(v) for v in col("quantity")],
+        "price": [_num(v) for v in col("trade price")],
+        "remarks": col("remarks").fillna("").str.strip().replace("-", ""),
+    })
+    df = df.dropna(subset=["date", "quantity", "price"])
+    df = df[(df["symbol"] != "") & df["side"].isin(["buy", "sell"])]
+    df["value_cr"] = (df["quantity"] * df["price"] / 1e7).round(2)
+    return df[DEAL_COLUMNS].drop_duplicates().reset_index(drop=True)
 
 
 def _dt(value, fmts) -> datetime | None:
