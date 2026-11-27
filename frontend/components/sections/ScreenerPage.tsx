@@ -15,9 +15,10 @@ interface Filters {
   max_de: string;
   insiders: '' | 'buying';
   red_flags: '' | 'none';
+  funds: '' | 'buying';
 }
 
-const EMPTY: Filters = { sector: '', cap: '', min_score: '', max_pe: '', min_roe: '', max_de: '', insiders: '', red_flags: '' };
+const EMPTY: Filters = { sector: '', cap: '', min_score: '', max_pe: '', min_roe: '', max_de: '', insiders: '', red_flags: '', funds: '' };
 const PAGE_SIZE = 25;
 
 // Ready-made screens that teach a way of looking at companies, not a pick list.
@@ -56,6 +57,7 @@ export function ScreenerPage() {
     max_de: num(applied.max_de),
     insiders: applied.insiders || undefined,
     red_flags: applied.red_flags || undefined,
+    funds: applied.funds || undefined,
     sort, order, page, page_size: PAGE_SIZE,
   };
   const key = JSON.stringify(query);
@@ -149,6 +151,11 @@ export function ScreenerPage() {
             title="Leave out companies that filed a red flag in the past year: a default, insolvency, a forensic audit, an auditor resigning, operations stopped or results delayed">
             <input type="checkbox" checked={draft.red_flags === 'none'} onChange={e => setDraft(d => ({ ...d, red_flags: e.target.checked ? 'none' : '' }))} />
             No red flags in the past year
+          </label>
+          <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 11, color: 'var(--cream-dim)', cursor: 'pointer' }}
+            title="Foreign investors or mutual funds raised their stake by a point or more over the past year (from shareholding filings)">
+            <input type="checkbox" checked={draft.funds === 'buying'} onChange={e => setDraft(d => ({ ...d, funds: e.target.checked ? 'buying' : '' }))} />
+            Funds buying
           </label>
         </div>
 

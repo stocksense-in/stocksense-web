@@ -216,6 +216,7 @@ class Holders(BaseModel):
     pledge: Pledge | None
     trend_note: str | None
     pledge_warning: str | None
+    institutions_note: str | None = Field(None, description="How foreign and domestic institutions moved their stakes over the past year")
 
 
 class LearnMetrics(BaseModel):

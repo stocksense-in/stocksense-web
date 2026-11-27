@@ -70,3 +70,35 @@ def test_stock_detail_says_which_panels_exist(market):
                                    holders=lambda: doc, financials=lambda: None, dividends=lambda: None, events=lambda: None))
     assert client.get(f"/stocks/{symbol}").json()["available"] == {"financials": False, "holders": True, "dividends": False,
                                                                   "events": False}
+
+
+def test_institutions_note_compares_a_year_of_the_split():
+    sh = shareholding("BUYINGCO", [50.0] * 7)
+    sh["fii_pct"] = [None, None, 12.0, 12.4, 13.1, 14.0, 15.5]
+    sh["mutual_funds_pct"] = [None, None, 8.0, 8.0, 8.2, 8.1, 8.3]
+    sh["dii_pct"] = [None, None, 20.0, 19.5, 19.0, 18.6, 18.2]
+    entry = holders.build(sh)["companies"]["BUYINGCO"]
+    note = holders.institutions_note(entry)  # Sep 2026 against Sep 2025
+    assert note.startswith("Foreign investors raised their stake from 12.0% to 15.5%; "
+                           "domestic institutions cut their stake from 20.0% to 18.2% over the past year.")
+    assert "Mutual funds" not in note  # moved under a point
+    assert holders.institutions_note({"quarters": entry["quarters"][-2:]}) is None  # under a year of the split
+    flat = shareholding("FLAT", [50.0] * 7)
+    flat["fii_pct"], flat["dii_pct"] = [10.0] * 7, [20.0] * 7
+    assert "barely moved" in holders.institutions_note(holders.build(flat)["companies"]["FLAT"])
+
+
+def test_funds_buying_and_the_screener_filter(market):
+    symbol = ROWS[0]["symbol"]
+    sh = shareholding(symbol, [50.0] * 7)
+    sh["fii_pct"] = [None, None, 12.0, 12.4, 13.1, 14.0, 15.5]
+    sh["mutual_funds_pct"] = [None, None, 8.0, 8.0, 8.2, 8.1, 7.9]
+    doc = holders.build(sh)
+    assert holders.funds_buying(doc["companies"][symbol])
+    selling = {"quarters": [{"quarter_end": "2025-09-30", "fii_pct": 15.0, "mutual_funds_pct": 9.0},
+                            {"quarter_end": "2026-09-30", "fii_pct": 16.2, "mutual_funds_pct": 6.0}]}
+    assert not holders.funds_buying(selling)  # foreign up a point, mutual funds down three: not buying overall
+    assert not holders.funds_buying({"quarters": []})
+    client = TestClient(create_app(market=market, headlines=lambda: [], history=lambda s, r: [], holders=lambda: doc))
+    found = client.get("/stocks", params={"funds": "buying", "page_size": 200}).json()["results"]
+    assert [r["symbol"] for r in found] == [symbol]

@@ -204,6 +204,7 @@ export interface Holders {
   pledge: { as_of: string; pledged_pct_of_promoter: number | null; pledged_pct_of_total: number | null; all_pledges_pct_of_total: number | null } | null;
   trend_note: string | null;
   pledge_warning: string | null;
+  institutions_note?: string | null;
 }
 
 export interface Dividends {
@@ -339,7 +340,7 @@ export interface ScreenQuery {
   sector?: string; cap?: 'large' | 'mid' | 'small'; min_score?: number; max_pe?: number; min_roe?: number; max_de?: number;
   sort?: 'score' | 'market_cap' | 'change_pct' | 'pe' | 'roe' | 'de' | 'name'; order?: 'asc' | 'desc'; page?: number; page_size?: number;
   symbols?: string;
-  insiders?: 'buying'; red_flags?: 'none';
+  insiders?: 'buying'; red_flags?: 'none'; funds?: 'buying';
 }
 
 function qs(params: object): string {

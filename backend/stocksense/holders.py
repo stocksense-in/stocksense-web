@@ -95,6 +95,64 @@ def trend_note(entry: dict | None) -> str | None:
                                      "to institutions), but a steady decline is worth understanding."))
 
 
+INSTITUTIONS = (("fii_pct", "Foreign investors"), ("mutual_funds_pct", "Mutual funds"),
+                ("dii_pct", "Domestic institutions"))
+INSTITUTION_MOVE = 1.0  # percentage points over a year: worth a line
+
+
+def _year_before(quarter_end: str) -> str:
+    d = date.fromisoformat(quarter_end)
+    return d.replace(year=d.year - 1).isoformat()
+
+
+def _year_of_split(entry: dict | None) -> tuple[dict, dict] | None:
+    """(latest full pattern, the latest one at least a year older), or None without a year of the split."""
+    quarters = [q for q in (entry or {}).get("quarters", []) if q.get("fii_pct") is not None]
+    if len(quarters) < 2:
+        return None
+    now = quarters[-1]
+    year_ago = [q for q in quarters if q["quarter_end"] <= _year_before(now["quarter_end"])]
+    return (now, year_ago[-1]) if year_ago else None
+
+
+def _moves(now: dict, then: dict) -> dict[str, float]:
+    return {key: now[key] - then[key] for key, _ in INSTITUTIONS if now.get(key) is not None and then.get(key) is not None}
+
+
+def funds_buying(entry: dict | None) -> bool:
+    """Foreign investors or mutual funds raised their stake by a point or more over the past year,
+    and the two together didn't shrink."""
+    pair = _year_of_split(entry)
+    if not pair:
+        return False
+    moves = _moves(*pair)
+    fii, mf = moves.get("fii_pct", 0.0), moves.get("mutual_funds_pct", 0.0)
+    return (fii >= INSTITUTION_MOVE or mf >= INSTITUTION_MOVE) and fii + mf > 0
+
+
+def institutions_note(entry: dict | None) -> str | None:
+    """How foreign investors, mutual funds and domestic institutions moved their stakes over the past
+    year (latest full pattern vs the latest one at least a year older); None without a year of the split."""
+    pair = _year_of_split(entry)
+    if not pair:
+        return None
+    now, then = pair
+    moved = _moves(now, then)
+    moves = []
+    for key, who in INSTITUTIONS:
+        move = moved.get(key)
+        if move is not None and abs(move) >= INSTITUTION_MOVE:
+            moves.append(f"{who if not moves else who.lower()} {'raised' if move > 0 else 'cut'} their stake "
+                         f"from {then[key]:.1f}% to {now[key]:.1f}%")
+    if not moves:
+        if now.get("dii_pct") is None:
+            return None
+        return (f"Institutions' stakes barely moved over the past year (foreign investors {now['fii_pct']:.1f}%, "
+                f"domestic institutions {now['dii_pct']:.1f}%).")
+    return ("; ".join(moves) + " over the past year. Big funds building a stake over several quarters is a vote of "
+            "confidence; a steady exit is worth understanding.")
+
+
 def write(lake, output: Path = OUTPUT) -> dict:
     present = set(lake.datasets())
     doc = build(lake.query("select * from shareholding"),
