@@ -185,6 +185,13 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--weekly", action="store_true", help="also corporate actions and the event study")
     jobs.add_parser("check-lake", help="data checks on the index, macro and GDELT datasets")
 
+    p = jobs.add_parser("backup", help="copy what's new in the lake to a backup folder, then test a restore")
+    p.add_argument("--dest", help="backup folder (default: STOCKSENSE_BACKUP_DIR)")
+    p.add_argument("--no-check", action="store_true", help="skip the restore test after copying")
+    p.add_argument("--check", action="store_true", help="only the restore test (sampled datasets)")
+    p.add_argument("--datasets", nargs="+", metavar="NAME", help="with --check: these datasets instead of a sample")
+    p.add_argument("--restore-to", metavar="DIR", help="rebuild a whole lake from the backup in this folder")
+
     p = jobs.add_parser("ingest-fno", help="NSE F&O end-of-day prices and OI into the lake")
     _add_range(p)
     p.add_argument("--download-only", action="store_true", help="only fill raw/, don't build clean/")
@@ -406,6 +413,25 @@ def main() -> None:
         from .jobs import engine_daily
 
         raise SystemExit(engine_daily.run(days=args.days, weekly=args.weekly))
+
+    if args.job == "backup":
+        from pathlib import Path
+
+        from .jobs import backup
+        from .lake import Lake
+
+        dest = backup.backup_dir(args.dest)
+        if args.restore_to:
+            backup.restore(dest, Path(args.restore_to))
+        elif args.check:
+            results = backup.check(Lake.from_settings(), dest, args.datasets)
+            if not all(r["match"] for r in results):
+                raise SystemExit("Restore check failed: see the lines marked DIFFERENT")
+        else:
+            manifest = backup.run(str(dest), check_after=not args.no_check)
+            if manifest["failed_count"] or not all(r["match"] for r in manifest.get("check", [])):
+                raise SystemExit("Backup incomplete or restore check failed: see the log")
+        return
 
     if args.job == "check-lake":
         import json
