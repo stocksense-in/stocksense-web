@@ -72,3 +72,21 @@ def test_history_reads_past_quarters_from_the_saved_list(tmp_path, monkeypatch):
     assert job.fetch_history(lake, ["TCS"], quarters=8, pause=0) == 0  # nothing left to read
     holdings, _ = job.build(lake)
     assert holdings["fii_pct"].notna().all()  # both quarters now carry the split
+
+
+def test_patterns_from_an_older_parser_are_read_again(tmp_path, monkeypatch):
+    import json
+
+    lake = Lake(tmp_path)
+    old = lake.raw_dir(job.CATEGORIES, date(2022, 6, 30)) / "TCS.json"
+    old.write_text(json.dumps({"symbol": "TCS", "quarter_end": "2022-06-30", "insurance_pct": 0.7}), encoding="utf-8")
+    done = lake.raw_dir(job.CATEGORIES, date(2026, 9, 30)) / "TCS.json"
+    done.write_text(json.dumps({"symbol": "TCS", "quarter_end": "2026-09-30", "fii_pct": 9.0, "mutual_funds_pct": 5.0}),
+                    encoding="utf-8")
+    assert not job._complete(old) and job._complete(done)
+    monkeypatch.setattr(nse_shareholding, "fetch_xbrl", lambda c, url: b"x")
+    monkeypatch.setattr(nse_shareholding, "categories", lambda xml: {"fii_pct": 32.3, "dii_pct": 27.1})
+    row = {"quarter_end": date(2022, 6, 30), "xbrl": "https://nsearchives.nseindia.in/corporate/xbrl/SHP_1.xml"}
+    assert job._save_categories(None, lake, "TCS", row, 0, job.Breaker()) is True
+    assert json.loads(old.read_text(encoding="utf-8"))["parser"] == nse_shareholding.PARSER_VERSION
+    assert job._save_categories(None, lake, "TCS", row, 0, job.Breaker()) is False  # now complete

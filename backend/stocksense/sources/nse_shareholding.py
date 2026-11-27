@@ -53,7 +53,15 @@ CATEGORIES = {
     "NonInstitutionsMember": "non_institutions_pct",
     "GovernmentsMember": "government_pct",
     "ShareholdingOfPromoterAndPromoterGroupMember": "promoter_pct_pattern",  # cross-check with the summary
+    # 2023–24 filings: the same categories under older spellings
+    "MutualFundsOrUtiMember": "mutual_funds_pct",
+    "GovermentsMember": "government_pct",  # sic: the taxonomy's own spelling
+    # pre-2023 filings: foreign portfolio investors sat inside a single "Institutions" total
+    "IndividualShareholdersHoldingNominalShareCapitalUpToRsTwoLakhMember": "small_retail_pct",
+    "InstitutionsForeignPortfolioInvestorMember": "_fpi",
+    "InstitutionsMember": "_institutions",
 }
+PARSER_VERSION = 2  # saved with each parsed pattern; files from older parsers missing the split are read again
 PERCENT_TAG = "ShareholdingAsAPercentageOfTotalNumberOfShares"
 
 
@@ -83,7 +91,13 @@ def categories(xml: bytes | str) -> dict:
                 raw[column] = float(el.text)
             except (TypeError, ValueError):
                 continue
-    return as_percent(raw)
+    out = as_percent(raw)
+    fpi, institutions = out.pop("_fpi", None), out.pop("_institutions", None)
+    if "fii_pct" not in out and fpi is not None:
+        out["fii_pct"] = fpi
+    if "dii_pct" not in out and institutions is not None and out.get("fii_pct") is not None:
+        out["dii_pct"] = round(institutions - out["fii_pct"], 2)  # the rest of the institutions are domestic
+    return out
 
 
 def as_percent(values: dict) -> dict:
