@@ -29,6 +29,7 @@ from concurrent.futures import ProcessPoolExecutor
 from datetime import date, timedelta
 from pathlib import Path
 
+import httpx
 import pandas as pd
 
 from .. import rhp
@@ -105,6 +106,22 @@ def pdf_path(lake: Lake, ipo: dict) -> Path:
     return lake.raw_dir(SOURCE, date.fromisoformat(ipo["filed"])) / f"{ipo['symbol']}.pdf"
 
 
+DOWNLOAD_TRIES = 3  # SEBI cuts ~1 in 10 large transfers short (27 Nov); a second try usually completes
+
+
+def _get_whole(c, url: str, pause: float, tries: int = DOWNLOAD_TRIES):
+    """GET a PDF, trying again when the server closes the connection mid-file."""
+    for attempt in range(1, tries + 1):
+        try:
+            resp = c.get(url)
+            resp.raise_for_status()
+            return resp
+        except httpx.TransportError:
+            if attempt == tries:
+                raise
+            time.sleep(pause * attempt)
+
+
 def download(c, lake: Lake, ipos: list[dict], pause: float = PAUSE_SECONDS) -> int:
     got = 0
     for n, ipo in enumerate(ipos, 1):
@@ -120,8 +137,7 @@ def download(c, lake: Lake, ipos: list[dict], pause: float = PAUSE_SECONDS) -> i
                 path.with_suffix(".missing").write_text(ipo["url"], encoding="utf-8")
                 log.warning(f"{SOURCE}: {ipo['symbol']}: no PDF on {ipo['url']}")
                 continue
-            resp = c.get(url)
-            resp.raise_for_status()
+            resp = _get_whole(c, url, pause)
         except Exception as exc:  # SEBI hiccup: skip, the next run retries
             log.warning(f"{SOURCE}: {ipo['symbol']}: {exc}")
             time.sleep(pause)

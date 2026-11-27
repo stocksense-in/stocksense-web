@@ -74,3 +74,19 @@ def test_scan_writes_one_row_per_ipo_with_rule_severities(tmp_path):
     assert df.loc["AAA", "losses"] in ("high", "medium", "low")
     assert lake.query("select count(*) from ipo_prospectus").iloc[0, 0] == 2
     assert df.loc["AAA", "ipo_start"].date() == date(2023, 12, 19)
+
+
+def test_cut_off_downloads_are_tried_again():
+    import httpx
+
+    calls = []
+
+    class Flaky:
+        def get(self, url):
+            calls.append(url)
+            if len(calls) < 2:
+                raise httpx.RemoteProtocolError("peer closed connection without sending complete message body")
+            return httpx.Response(200, content=b"%PDF-1.7", request=httpx.Request("GET", url))
+
+    resp = ingest_rhp._get_whole(Flaky(), "https://www.sebi.gov.in/x.pdf", pause=0)
+    assert resp.content == b"%PDF-1.7" and len(calls) == 2
