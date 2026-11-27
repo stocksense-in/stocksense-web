@@ -53,3 +53,54 @@ def test_track_record_reads_the_study():
     assert "within what chance would give" in rhp.track_record("litigation", EVIDENCE)
     assert rhp.track_record("promoter-pledge", EVIDENCE) is None  # too few cases
     assert rhp.track_record("losses", {}) is None  # no study yet
+
+
+# A synthetic offer-document summary in the SEBI ICDR layout, as text extraction lays it out.
+LITIGATION_PAGE = """Summary of Outstanding Litigation (in Rs. million, unless otherwise specified)
+Name of the Entity Criminal Proceedings Tax Proceedings Statutory or Regulatory Proceedings Disciplinary
+actions by the SEBI or Stock Exchanges against our Promoter Material Civil Litigations Aggregate Amount Involved*
+Company By our Company 2 - - - - 11.93
+Against our
+Company
+- 9 2 - 1 2,155.40
+Directors By our Directors - - - - - -
+Against our Directors 1# Nil Nil N.A Nil Nil
+Promoters By our Promoters - - - - - -
+Against our Promoters - 1 - - - 0.15
+* To the extent quantifiable"""
+FINANCIALS_PAGE = """Summary of Restated Consolidated Financial Information (in Rs. million, unless otherwise stated)
+Particulars June 30, 2024 March 31, 2024 Equity Share capital 247.93 247.93 Net Worth(1) 11,406.53 10,758.68"""
+FOOTNOTED_NET_WORTH = "Summary of restated financial information (in Rs. million) Return on Net Worth (%) 9.39 Net Worth1 1,870.50 1,794.08"
+
+
+def test_litigation_table_reads_cases_against_each():
+    table = rhp.litigation_table(["Cover page", LITIGATION_PAGE])
+    assert table["page"] == 2
+    company = table["rows"]["company"]
+    assert (company["criminal"], company["tax"], company["regulatory"], company["civil"]) == (0, 9, 2, 1)
+    assert company["amount_cr"] == pytest.approx(215.54)  # ₹2,155.40 million
+    assert table["rows"]["directors"]["criminal"] == 1  # footnote mark ignored
+    assert rhp.net_worth_crore([FINANCIALS_PAGE]) == pytest.approx(1140.653)
+    assert rhp.net_worth_crore([FOOTNOTED_NET_WORTH]) == pytest.approx(187.05)  # not the return on net worth
+
+
+def test_rules_use_the_table_not_boilerplate():
+    boilerplate = ("Criminal proceedings against our Company, if any, could harm our reputation. "
+                   "There are no qualifications, reservations and adverse remarks by our Statutory Auditors.")
+    found = {f.id: f for f in rhp.scan_pages([boilerplate, LITIGATION_PAGE, FINANCIALS_PAGE]).findings}
+    assert found["criminal-proceedings"].severity == rhp.MEDIUM  # none against the company or promoters; one against a director
+    assert "against its directors" in found["criminal-proceedings"].summary
+    assert found["litigation"].severity == rhp.HIGH  # ₹215.6 crore is 18.9% of a ₹1,141 crore net worth
+    assert "18.9% of its net worth" in found["litigation"].summary
+    assert found["regulatory-action"].severity == rhp.LOW  # two regulatory proceedings
+    assert "auditor-remarks" not in found  # "no qualifications" is a negation
+    clean = LITIGATION_PAGE.replace("- 9 2 - 1 2,155.40", "- - - - - -").replace("1# Nil", "Nil Nil").replace("- 1 - - - 0.15", "- - - - - -")
+    assert {f.id for f in rhp.scan_pages([boilerplate, clean]).findings}.isdisjoint(
+        {"criminal-proceedings", "litigation", "regulatory-action"})
+
+
+def test_auditor_qualification_outranks_emphasis():
+    q = rhp.scan_pages(["Our Statutory Auditors have included certain emphasis of matters, and audit qualifications in the report."])
+    assert {f.id: f.severity for f in q.findings}["auditor-remarks"] == rhp.HIGH
+    e = rhp.scan_pages(["Our Statutory Auditors have included an emphasis of matter paragraph in their Examination Report."])
+    assert {f.id: f.severity for f in e.findings}["auditor-remarks"] == rhp.LOW

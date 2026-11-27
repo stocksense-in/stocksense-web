@@ -120,6 +120,98 @@ def _inr(crore: float) -> str:
     return f"₹{round(crore):,} crore"
 
 
+# ── The offer document's litigation summary table ───────────────────────────
+# SEBI's ICDR format: for the company, its directors, promoters and subsidiaries, cases filed
+# BY and AGAINST each, by type — criminal, tax, statutory/regulatory, SEBI or exchange
+# disciplinary action against promoters, material civil — and the aggregate amount involved.
+# Facts, unlike the words "criminal proceedings", which every prospectus prints somewhere.
+
+LIT_COLUMNS = ("criminal", "tax", "regulatory", "sebi", "civil", "amount")
+_CELL = r"(?:[\d,]+(?:\.\d+)?|Nil|N\.?\s?A\.?|-|–|—)(?:\(\d+\)|[#*^@$]+)?"
+_CELLS = re.compile(_CELL, re.I)  # "Nil", "NIL", "N.A.", "2(2)", "1**"
+_FOOTNOTE = r"(?:\(\d+\)|[#*^@$]+)?"  # "Against the Company**", "Promoters$"
+_LIT_ROW = re.compile(
+    rf"Against\s+(?:our|the)\s+(Company|Directors?|Promoters?|Subsidiar(?:y|ies)){_FOOTNOTE}\s+((?:{_CELL}\s+){{5}}{_CELL})(?=\s|$)",
+    re.I)
+_UNIT = re.compile(r"(?:₹|rs\.?|inr)?\s*in\s+(?:₹|rs\.?|inr)?\s*(million|lakhs?|crores?|billion)", re.I)
+# "Net Worth 3449.79", "Net Worth**** 13,771.05", "Net worth (4) (in ₹ million) 59,237.40"; not "Return on Net Worth"
+_NET_WORTH = re.compile(r"(?<!on )Net\s*Worth(?:\d{1,2}(?=\s))?(?:\s*\([^)]{0,30}\)){0,2}[^\d(]{0,20}?(\d[\d,]*\.\d+)", re.I)
+_WHO = {"company": "company", "director": "directors", "directors": "directors", "promoter": "promoters",
+        "promoters": "promoters", "subsidiary": "subsidiaries", "subsidiaries": "subsidiaries"}
+
+
+def _cell_value(cell: str) -> float:
+    m = re.match(r"[\d,]+(?:\.\d+)?", cell)
+    return float(m.group(0).replace(",", "")) if m else 0.0
+
+
+def _unit_crore(text: str) -> float:
+    """₹ crore per unit of the table's amounts; prospectuses mostly state ₹ million."""
+    m = None
+    for m in _UNIT.finditer(text):
+        pass  # the last unit stated before the amounts
+    return _crore("1", m.group(1)) if m else 0.1
+
+
+def litigation_table(pages: list[str], search: int = 150) -> dict | None:
+    """{page, rows: {company|directors|promoters|subsidiaries: {criminal, tax, regulatory, sebi, civil,
+    amount_cr}}, hits} from the summary table of cases against each, or None if it isn't found."""
+    for i, page in enumerate(pages[:search]):
+        text = re.sub(r"\s+", " ", page)
+        if "riminal" not in text or "ggregate" not in text:
+            continue
+        rows, hits = {}, []
+        for m in _LIT_ROW.finditer(text):
+            who = _WHO[m.group(1).lower()]
+            if who in rows:
+                continue
+            values = [_cell_value(c) for c in _CELLS.findall(m.group(2))][:6]
+            if len(values) < 6:
+                continue
+            row = dict(zip(LIT_COLUMNS, values))
+            row["amount_cr"] = row.pop("amount") * _unit_crore(text[: m.start()][-1500:] or text)
+            rows[who] = row
+            hits.append(_Hit(i + 1, m, m.group(0)))
+        if "company" in rows:
+            return {"page": i + 1, "rows": rows, "hits": hits}
+    return None
+
+
+def net_worth_crore(pages: list[str], search: int = 150) -> float | None:
+    """The latest net worth in the offer document's summary of restated financial information."""
+    for page in pages[:search]:
+        text = re.sub(r"\s+", " ", page)
+        if not (re.search(r"\bsummary\b", text, re.I) and re.search(r"restated|financial information", text, re.I)):
+            continue
+        m = _NET_WORTH.search(text)
+        if m:
+            # the unit may sit in the row label ("Net worth (4) (in ₹ million)") or the table heading
+            value = float(m.group(1).replace(",", "")) * _unit_crore(text[: m.end()][-2500:] or text)
+            if value > 0:
+                return value
+    return None
+
+
+# negations, and hypotheticals ("adjusted for the audit qualifications, if any"; "may issue a qualified opinion")
+_NEGATION = re.compile(r"\b(?:no|not|nil|neither|nor|without|none|if any|may|could|might|would)\b", re.I)
+
+
+def _stated(pages: list[str], pattern: str) -> list[_Hit]:
+    """Hits in sentences that say something happened, not that it didn't ("there are no qualifications")."""
+    out = []
+    for h in _find(pages, pattern):
+        page = re.sub(r"\s+", " ", pages[h.page - 1])
+        at = page.find(h.match.group(0))
+        if at < 0:
+            continue
+        start = page.rfind(". ", 0, at) + 2 if page.rfind(". ", 0, at) >= 0 else 0
+        end = page.find(". ", at)
+        sentence = page[start: end + 1 if end >= 0 else len(page)]
+        if not _NEGATION.search(sentence):
+            out.append(h)
+    return out
+
+
 # ── Rules ────────────────────────────────────────────────────────────────────
 # Each rule returns (severity, summary, hits) or None.
 
@@ -148,11 +240,41 @@ def _supplier_concentration(pages: list[str]) -> RuleResult:
 
 
 def _criminal_proceedings(pages: list[str]) -> RuleResult:
+    table = litigation_table(pages)
+    if table:
+        rows = table["rows"]
+        top = int(rows["company"]["criminal"] + rows.get("promoters", {}).get("criminal", 0))
+        directors = int(rows.get("directors", {}).get("criminal", 0))
+        if top:
+            return HIGH, (f"{top} criminal case{'s are' if top > 1 else ' is'} pending against the company or its "
+                          f"promoters (litigation summary, page {table['page']})."), table["hits"]
+        if directors:
+            return MEDIUM, (f"{directors} criminal case{'s are' if directors > 1 else ' is'} pending against its "
+                            f"directors (litigation summary, page {table['page']})."), table["hits"]
+        return None  # the table lists none against the company, its promoters or directors
     hits = _find(pages, r"criminal\s+(?:proceedings?|cases?|complaints?)[^.]{0,160}?(?:against|involving)\s+(?:our\s+)?(?:company|promoters?|directors?)")
-    return (HIGH, f"Criminal proceedings are disclosed {_places(hits)}.", hits) if hits else None
+    return (LOW, f"Criminal proceedings are mentioned {_places(hits)}; the litigation summary table wasn't found, "
+                 "so check the litigation chapter.", hits) if hits else None
 
 
 def _litigation(pages: list[str]) -> RuleResult:
+    table = litigation_table(pages)
+    if table:
+        rows = table["rows"].values()
+        amount = sum(r["amount_cr"] for r in rows)
+        cases = int(sum(r["tax"] + r["civil"] + r["regulatory"] + r["criminal"] for r in rows))
+        if not cases and amount <= 0:
+            return None
+        worth = net_worth_crore(pages)
+        share = amount / worth if worth else None
+        if share is not None:
+            severity = HIGH if share >= 0.10 else MEDIUM if share >= 0.02 else LOW
+            size = f"about {_inr(amount)}, {100 * share:.1f}% of its net worth of {_inr(worth)}"
+        else:
+            severity = HIGH if amount > 100 else MEDIUM if amount > 10 else LOW
+            size = f"about {_inr(amount)}"
+        return severity, (f"{cases} case{'s' if cases != 1 else ''} pending against the company, its promoters, "
+                          f"directors or subsidiaries, involving {size} (litigation summary, page {table['page']})."), table["hits"]
     hits = _find(pages, r"(?:outstanding|pending)\s+(?:legal\s+)?(?:litigations?|proceedings|tax\s+proceedings)")
     if not hits:
         return None
@@ -160,7 +282,8 @@ def _litigation(pages: list[str]) -> RuleResult:
     total = sum(_crore(h.match.group(1), h.match.group(2)) for h in amounts)
     if total > 0:
         return (HIGH if total > 100 else MEDIUM), f"Pending cases are disclosed, with amounts adding up to about {_inr(total)}.", amounts
-    return MEDIUM, f"Pending legal or tax proceedings are disclosed {_places(hits)}.", hits
+    return LOW, (f"Pending legal or tax proceedings are mentioned {_places(hits)}; the litigation summary table "
+                 "wasn't found, so check the litigation chapter for amounts."), hits
 
 
 def _offer_for_sale(pages: list[str]) -> RuleResult:
@@ -216,13 +339,33 @@ def _related_party(pages: list[str]) -> RuleResult:
 
 
 def _auditor_remarks(pages: list[str]) -> RuleResult:
-    hits = _find(pages, r"qualified\s+opinion|emphasis\s+of\s+matter|adverse\s+(?:remarks?|opinion)")
-    return (MEDIUM, "The auditors added qualifications or emphasis-of-matter remarks.", hits) if hits else None
+    # not the bare words "audit qualifications": restatement tables print them as a row label
+    qualified = _stated(pages, r"qualified\s+opinion|adverse\s+opinion|disclaimer\s+of\s+opinion|"
+                               r"auditors?\s+(?:have\s+)?(?:included|given|made)[^.]{0,60}?qualifications?")
+    if qualified:
+        return HIGH, f"The auditors qualified their opinion {_places(qualified)}: they couldn't fully sign off on the accounts.", qualified
+    emphasis = _stated(pages, r"emphasis\s+of\s+matters?")
+    if emphasis:
+        return LOW, f"The auditors added emphasis-of-matter notes {_places(emphasis)}: points they want read, not a qualification.", emphasis
+    return None
 
 
 def _regulatory_action(pages: list[str]) -> RuleResult:
+    table = litigation_table(pages)
+    if table:
+        rows = table["rows"]
+        sebi = int(rows.get("promoters", {}).get("sebi", 0))
+        regulatory = int(sum(r["regulatory"] for r in rows.values()))
+        if sebi:
+            return HIGH, (f"SEBI or the stock exchanges have taken {sebi} disciplinary action{'s' if sebi > 1 else ''} "
+                          f"against the promoters (litigation summary, page {table['page']})."), table["hits"]
+        if regulatory:
+            return (MEDIUM if regulatory >= 3 else LOW), (
+                f"{regulatory} statutory or regulatory proceeding{'s are' if regulatory > 1 else ' is'} pending against the "
+                f"company, its promoters, directors or subsidiaries (litigation summary, page {table['page']})."), table["hits"]
+        return None
     hits = _find(pages, r"show[\s-]cause\s+notices?|(?:penalty|penalties)\s+(?:was|were|has\s+been|have\s+been)\s+(?:imposed|levied)")
-    return (MEDIUM, f"Regulatory notices or penalties are mentioned {_places(hits)}.", hits) if hits else None
+    return (LOW, f"Regulatory notices or penalties are mentioned {_places(hits)}.", hits) if hits else None
 
 
 @dataclass(frozen=True)

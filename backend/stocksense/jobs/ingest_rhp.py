@@ -182,6 +182,22 @@ def extract(lake: Lake, workers: int = 6) -> int:
     return done
 
 
+def litigation_numbers(pages: list[str]) -> dict:
+    """The litigation summary table as numbers: cases and amounts against the company, its promoters,
+    directors and subsidiaries, and the amount as a share of net worth (None where not found)."""
+    table, worth = rhp.litigation_table(pages), rhp.net_worth_crore(pages)
+    out = {"lit_table": table is not None, "net_worth_cr": worth, "lit_cases": None, "lit_criminal": None,
+           "lit_amount_cr": None, "lit_share": None}
+    if table:
+        rows = table["rows"]
+        out["lit_cases"] = int(sum(r["tax"] + r["civil"] + r["regulatory"] + r["criminal"] for r in rows.values()))
+        out["lit_criminal"] = int(rows["company"]["criminal"] + rows.get("promoters", {}).get("criminal", 0))
+        out["lit_amount_cr"] = round(sum(r["amount_cr"] for r in rows.values()), 2)
+        if worth:
+            out["lit_share"] = round(out["lit_amount_cr"] / worth, 4)
+    return out
+
+
 def scan(lake: Lake, ipos: list[dict]) -> pd.DataFrame:
     rows = []
     for ipo in ipos:
@@ -203,6 +219,7 @@ def scan(lake: Lake, ipos: list[dict]) -> pd.DataFrame:
         for finding in result.findings:
             row[finding.id] = finding.severity
         row["summaries"] = json.dumps({f.id: f.summary for f in result.findings}, ensure_ascii=False)
+        row.update(litigation_numbers(pages))
         rows.append(row)
     df = pd.DataFrame(rows)
     for col in ("ipo_start", "listing_date", "filed"):
