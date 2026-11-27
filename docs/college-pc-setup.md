@@ -195,5 +195,33 @@ replaced, not appended). The lake is 320 KB so far.
    Both milestones install background services, so they need your approval.
 3. AnyDesk and TeamViewer both run on this PC and it now holds a database write key:
    protect both with a strong password and 2FA.
-4. The lake has no backup yet (that's M0.4). A lab machine can be reimaged without
-   notice; until then, treat `E:\stocksense\lake` as rebuildable, not precious.
+4. The lake has no backup destination yet (that's M0.4). The job is ready; it needs a folder
+   off this machine (see "Backups" below). A lab machine can be reimaged without notice;
+   until then, treat `E:\stocksense\lake` as rebuildable, not precious.
+
+## Backups
+
+`python -m stocksense backup` copies the lake (`raw/`, `clean/`, `features/`, `models/`) to
+`STOCKSENSE_BACKUP_DIR` (or `--dest`).
+
+- **Incremental.** Only files new or changed since the last run are copied (by size and
+  modified time), so after the first full copy a night's run copies one day.
+- **Never deletes.** Files removed from the lake stay in the backup, so a bad run can't
+  take the good copy with it. `catalog.duckdb` isn't copied, because it's rebuilt from
+  `clean/`.
+- **Restore test.** After copying, five sampled datasets are restored into a temporary lake
+  on the backup drive and compared with the live lake, row for row (count plus a hash of
+  every row). A difference, or a file that failed to copy, makes the command exit with an
+  error, which the scheduled run reports.
+- **Other modes.** `--check` runs only the restore test (`--datasets NAME…` picks which).
+  `--restore-to DIR` rebuilds a whole lake from the backup.
+- **Manifests.** Each run writes `manifests/<date>-<time>.json` in the backup folder.
+
+Tried 27 Nov on three real datasets (india_macro, fii_dii, shareholding: 44,583 rows), all
+identical after restore. The clean data is 5.5 GB; raw adds the downloaded files.
+
+To switch it on, choose a destination: an external drive, or a cloud-synced folder
+(Google Drive for desktop or OneDrive; installing a sync client is your call on a shared
+PC). Set `STOCKSENSE_BACKUP_DIR` in `backend/.env`, run the job once by hand (the first
+copy is the whole lake), then add `backup` to the nightly scheduled script after the
+engine run.
