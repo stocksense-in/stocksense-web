@@ -1,0 +1,1605 @@
+[
+ {
+  "id": "GPTHEALTH-brlm",
+  "symbol": "GPTHEALTH",
+  "kind": "brlm",
+  "question": "Which investment banks are running GPT Healthcare's share sale?",
+  "phrasing": "plain English",
+  "answer": "JM Financial Limited",
+  "pattern": "J\\s*M\\s*F\\s*i\\s*n\\s*a\\s*n\\s*c\\s*i\\s*a\\s*l\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   4,
+   11,
+   98,
+   451,
+   454,
+   455,
+   456
+  ]
+ },
+ {
+  "id": "GPTHEALTH-registrar",
+  "symbol": "GPTHEALTH",
+  "kind": "registrar",
+  "question": "Who is the registrar to GPT Healthcare's offer?",
+  "phrasing": "prospectus words",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   2,
+   4,
+   15,
+   96
+  ]
+ },
+ {
+  "id": "GPTHEALTH-incorporated",
+  "symbol": "GPTHEALTH",
+  "kind": "incorporated",
+  "question": "What is the date of incorporation of GPT Healthcare?",
+  "phrasing": "plain English",
+  "answer": "August 17, 1989",
+  "pattern": "A\\s*u\\s*g\\s*u\\s*s\\s*t\\s*1\\s*7\\s*,\\s*1\\s*9\\s*8\\s*9",
+  "gold_pages": [
+   3,
+   94,
+   101,
+   238,
+   286,
+   351,
+   441,
+   492
+  ]
+ },
+ {
+  "id": "GPTHEALTH-net_worth",
+  "symbol": "GPTHEALTH",
+  "kind": "net_worth",
+  "question": "What is GPT Healthcare's net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "1,714.27",
+  "pattern": "1\\s*,\\s*7\\s*1\\s*4\\s*\\.\\s*2\\s*7",
+  "gold_pages": [
+   28,
+   135,
+   212,
+   420
+  ]
+ },
+ {
+  "id": "GPTHEALTH-criminal",
+  "symbol": "GPTHEALTH",
+  "kind": "criminal",
+  "question": "Is GPT Healthcare facing any criminal proceedings?",
+  "phrasing": "plain English",
+  "answer": "1",
+  "gold_pages": [
+   29,
+   45,
+   434
+  ]
+ },
+ {
+  "id": "GANESHCP-brlm",
+  "symbol": "GANESHCP",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Ganesh Consumer Products' IPO?",
+  "phrasing": "prospectus words",
+  "answer": "DAM Capital Advisors Limited",
+  "pattern": "D\\s*A\\s*M\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*A\\s*d\\s*v\\s*i\\s*s\\s*o\\s*r\\s*s\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   10,
+   11,
+   86,
+   442,
+   449,
+   454
+  ]
+ },
+ {
+  "id": "GANESHCP-registrar",
+  "symbol": "GANESHCP",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Ganesh Consumer Products' IPO?",
+  "phrasing": "plain English",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   2,
+   3,
+   14,
+   15,
+   85
+  ]
+ },
+ {
+  "id": "GANESHCP-net_worth",
+  "symbol": "GANESHCP",
+  "kind": "net_worth",
+  "question": "What is Ganesh Consumer Products' net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "2,241.33",
+  "pattern": "2\\s*,\\s*2\\s*4\\s*1\\s*\\.\\s*3\\s*3",
+  "gold_pages": [
+   29,
+   31,
+   45,
+   55,
+   385,
+   386,
+   413,
+   417,
+   441
+  ]
+ },
+ {
+  "id": "GANESHCP-criminal",
+  "symbol": "GANESHCP",
+  "kind": "criminal",
+  "question": "Is Ganesh Consumer Products facing any criminal proceedings?",
+  "phrasing": "plain English",
+  "answer": "8",
+  "gold_pages": [
+   30,
+   62,
+   422,
+   426,
+   428,
+   431
+  ]
+ },
+ {
+  "id": "EASEMYTRIP-brlm",
+  "symbol": "EASEMYTRIP",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Easy Trip Planners' IPO?",
+  "phrasing": "prospectus words",
+  "answer": "Axis Capital Limited",
+  "pattern": "A\\s*x\\s*i\\s*s\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   1,
+   5,
+   6,
+   79,
+   410,
+   414,
+   417
+  ]
+ },
+ {
+  "id": "EASEMYTRIP-registrar",
+  "symbol": "EASEMYTRIP",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Easy Trip Planners' IPO?",
+  "phrasing": "plain English",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   1,
+   7,
+   8,
+   80
+  ]
+ },
+ {
+  "id": "EASEMYTRIP-auditor",
+  "symbol": "EASEMYTRIP",
+  "kind": "auditor",
+  "question": "Who are Easy Trip Planners' statutory auditors?",
+  "phrasing": "prospectus words",
+  "answer": "S. R. Batliboi & Associates",
+  "pattern": "S\\s*\\.\\s*R\\s*\\.\\s*B\\s*a\\s*t\\s*l\\s*i\\s*b\\s*o\\s*i\\s*\\&\\s*A\\s*s\\s*s\\s*o\\s*c\\s*i\\s*a\\s*t\\s*e\\s*s",
+  "gold_pages": [
+   3,
+   80,
+   83,
+   100,
+   200,
+   202,
+   203,
+   205,
+   207,
+   278,
+   282,
+   284,
+   285,
+   287,
+   288,
+   340,
+   413,
+   466
+  ]
+ },
+ {
+  "id": "EASEMYTRIP-net_worth",
+  "symbol": "EASEMYTRIP",
+  "kind": "net_worth",
+  "question": "How much is Easy Trip Planners' net worth?",
+  "phrasing": "plain English",
+  "answer": "1,321.36",
+  "pattern": "1\\s*,\\s*3\\s*2\\s*1\\s*\\.\\s*3\\s*6",
+  "gold_pages": [
+   15,
+   283,
+   335,
+   343,
+   346
+  ]
+ },
+ {
+  "id": "SAILIFE-brlm",
+  "symbol": "SAILIFE",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Sai Life Sciences' IPO?",
+  "phrasing": "prospectus words",
+  "answer": "Kotak Mahindra Capital Company Limited",
+  "pattern": "K\\s*o\\s*t\\s*a\\s*k\\s*M\\s*a\\s*h\\s*i\\s*n\\s*d\\s*r\\s*a\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*C\\s*o\\s*m\\s*p\\s*a\\s*n\\s*y\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   10,
+   63,
+   77,
+   137,
+   374,
+   381,
+   382,
+   386
+  ]
+ },
+ {
+  "id": "SAILIFE-registrar",
+  "symbol": "SAILIFE",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Sai Life Sciences' IPO?",
+  "phrasing": "plain English",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   2,
+   3,
+   11,
+   77,
+   383
+  ]
+ },
+ {
+  "id": "SAILIFE-net_worth",
+  "symbol": "SAILIFE",
+  "kind": "net_worth",
+  "question": "What is Sai Life Sciences' net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "10,447.51",
+  "pattern": "1\\s*0\\s*,\\s*4\\s*4\\s*7\\s*\\.\\s*5\\s*1",
+  "gold_pages": [
+   23
+  ]
+ },
+ {
+  "id": "SAILIFE-criminal",
+  "symbol": "SAILIFE",
+  "kind": "criminal",
+  "question": "Is Sai Life Sciences facing any criminal proceedings?",
+  "phrasing": "plain English",
+  "answer": "0",
+  "gold_pages": [
+   24,
+   54,
+   359
+  ]
+ },
+ {
+  "id": "RRKABEL-registrar",
+  "symbol": "RRKABEL",
+  "kind": "registrar",
+  "question": "Who is the registrar to R R Kabel's offer?",
+  "phrasing": "prospectus words",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   2,
+   3,
+   13,
+   14,
+   79,
+   433,
+   469,
+   470
+  ]
+ },
+ {
+  "id": "RRKABEL-net_worth",
+  "symbol": "RRKABEL",
+  "kind": "net_worth",
+  "question": "How much is R R Kabel's net worth?",
+  "phrasing": "plain English",
+  "answer": "14,946.87",
+  "pattern": "1\\s*4\\s*,\\s*9\\s*4\\s*6\\s*\\.\\s*8\\s*7",
+  "gold_pages": [
+   22,
+   378
+  ]
+ },
+ {
+  "id": "RRKABEL-criminal",
+  "symbol": "RRKABEL",
+  "kind": "criminal",
+  "question": "How many criminal cases are pending against R R Kabel?",
+  "phrasing": "prospectus words",
+  "answer": "0",
+  "gold_pages": [
+   23,
+   53
+  ]
+ },
+ {
+  "id": "FRACTAL-registrar",
+  "symbol": "FRACTAL",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Fractal Analytics' IPO?",
+  "phrasing": "plain English",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   2,
+   3,
+   15,
+   99
+  ]
+ },
+ {
+  "id": "FRACTAL-auditor",
+  "symbol": "FRACTAL",
+  "kind": "auditor",
+  "question": "Who are Fractal Analytics' statutory auditors?",
+  "phrasing": "prospectus words",
+  "answer": "B S R & Co.",
+  "pattern": "B\\s*S\\s*R\\s*\\&\\s*C\\s*o\\s*\\.",
+  "gold_pages": [
+   9,
+   97,
+   102,
+   237,
+   414,
+   418,
+   423,
+   424,
+   426,
+   427,
+   503,
+   560,
+   635
+  ]
+ },
+ {
+  "id": "FRACTAL-criminal",
+  "symbol": "FRACTAL",
+  "kind": "criminal",
+  "question": "Is Fractal Analytics facing any criminal proceedings?",
+  "phrasing": "plain English",
+  "answer": "0",
+  "gold_pages": [
+   25,
+   45,
+   543
+  ]
+ },
+ {
+  "id": "VMSTMT-brlm",
+  "symbol": "VMSTMT",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Vms Tmt's IPO?",
+  "phrasing": "prospectus words",
+  "answer": "Arihant Capital Markets Limited",
+  "pattern": "A\\s*r\\s*i\\s*h\\s*a\\s*n\\s*t\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*M\\s*a\\s*r\\s*k\\s*e\\s*t\\s*s\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   1,
+   4,
+   9,
+   14,
+   99,
+   373
+  ]
+ },
+ {
+  "id": "VMSTMT-registrar",
+  "symbol": "VMSTMT",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Vms Tmt's IPO?",
+  "phrasing": "plain English",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   2,
+   4,
+   13,
+   100
+  ]
+ },
+ {
+  "id": "VMSTMT-net_worth",
+  "symbol": "VMSTMT",
+  "kind": "net_worth",
+  "question": "What is Vms Tmt's net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "8,177.47",
+  "pattern": "8\\s*,\\s*1\\s*7\\s*7\\s*\\.\\s*4\\s*7",
+  "gold_pages": [
+   26,
+   92,
+   121,
+   133,
+   197,
+   201,
+   274,
+   289,
+   311,
+   314,
+   320,
+   325,
+   354
+  ]
+ },
+ {
+  "id": "VMSTMT-criminal",
+  "symbol": "VMSTMT",
+  "kind": "criminal",
+  "question": "Is Vms Tmt facing any criminal proceedings?",
+  "phrasing": "plain English",
+  "answer": "0",
+  "gold_pages": [
+   27,
+   66,
+   359,
+   361
+  ]
+ },
+ {
+  "id": "HONASA-brlm",
+  "symbol": "HONASA",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Honasa Consumer's IPO?",
+  "phrasing": "prospectus words",
+  "answer": "Kotak Mahindra Capital Company Limited",
+  "pattern": "K\\s*o\\s*t\\s*a\\s*k\\s*M\\s*a\\s*h\\s*i\\s*n\\s*d\\s*r\\s*a\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*C\\s*o\\s*m\\s*p\\s*a\\s*n\\s*y\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   15,
+   85,
+   370
+  ]
+ },
+ {
+  "id": "HONASA-registrar",
+  "symbol": "HONASA",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Honasa Consumer's IPO?",
+  "phrasing": "plain English",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   2,
+   3,
+   16,
+   17,
+   86,
+   375,
+   378
+  ]
+ },
+ {
+  "id": "HONASA-auditor",
+  "symbol": "HONASA",
+  "kind": "auditor",
+  "question": "Who are Honasa Consumer's statutory auditors?",
+  "phrasing": "prospectus words",
+  "answer": "S.R. Batliboi & Associates",
+  "pattern": "S\\s*\\.\\s*R\\s*\\.\\s*B\\s*a\\s*t\\s*l\\s*i\\s*b\\s*o\\s*i\\s*\\&\\s*A\\s*s\\s*s\\s*o\\s*c\\s*i\\s*a\\s*t\\s*e\\s*s",
+  "gold_pages": [
+   10,
+   85,
+   88,
+   136,
+   232,
+   234,
+   235,
+   237,
+   240,
+   313,
+   314,
+   373,
+   414
+  ]
+ },
+ {
+  "id": "HONASA-net_worth",
+  "symbol": "HONASA",
+  "kind": "net_worth",
+  "question": "How much is Honasa Consumer's net worth?",
+  "phrasing": "plain English",
+  "answer": "6,382.63",
+  "pattern": "6\\s*,\\s*3\\s*8\\s*2\\s*\\.\\s*6\\s*3",
+  "gold_pages": [
+   32,
+   80,
+   234,
+   304,
+   308,
+   314,
+   315,
+   316,
+   323,
+   355
+  ]
+ },
+ {
+  "id": "SMARTWORKS-brlm",
+  "symbol": "SMARTWORKS",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Smartworks Coworking Spaces' IPO?",
+  "phrasing": "prospectus words",
+  "answer": "JM Financial Limited",
+  "pattern": "J\\s*M\\s*F\\s*i\\s*n\\s*a\\s*n\\s*c\\s*i\\s*a\\s*l\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   1,
+   2,
+   9,
+   11,
+   90,
+   122,
+   464,
+   469,
+   470,
+   476,
+   572
+  ]
+ },
+ {
+  "id": "SMARTWORKS-registrar",
+  "symbol": "SMARTWORKS",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Smartworks Coworking Spaces' IPO?",
+  "phrasing": "plain English",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   1,
+   2,
+   13,
+   14,
+   124
+  ]
+ },
+ {
+  "id": "SMARTWORKS-net_worth",
+  "symbol": "SMARTWORKS",
+  "kind": "net_worth",
+  "question": "What is Smartworks Coworking Spaces' net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "1,075.13",
+  "pattern": "1\\s*,\\s*0\\s*7\\s*5\\s*\\.\\s*1\\s*3",
+  "gold_pages": [
+   34,
+   399,
+   463
+  ]
+ },
+ {
+  "id": "SMARTWORKS-criminal",
+  "symbol": "SMARTWORKS",
+  "kind": "criminal",
+  "question": "Is Smartworks Coworking Spaces facing any criminal proceedings?",
+  "phrasing": "plain English",
+  "answer": "0",
+  "gold_pages": [
+   34,
+   73,
+   446,
+   451,
+   453
+  ]
+ },
+ {
+  "id": "HILINFRA-registrar",
+  "symbol": "HILINFRA",
+  "kind": "registrar",
+  "question": "Who is the registrar to Highway Infrastructure's offer?",
+  "phrasing": "prospectus words",
+  "answer": "Bigshare Services",
+  "pattern": "B\\s*i\\s*g\\s*s\\s*h\\s*a\\s*r\\s*e\\s*S\\s*e\\s*r\\s*v\\s*i\\s*c\\s*e\\s*s",
+  "gold_pages": [
+   2,
+   4,
+   15,
+   90
+  ]
+ },
+ {
+  "id": "HILINFRA-net_worth",
+  "symbol": "HILINFRA",
+  "kind": "net_worth",
+  "question": "How much is Highway Infrastructure's net worth?",
+  "phrasing": "plain English",
+  "answer": "1,177.22",
+  "pattern": "1\\s*,\\s*1\\s*7\\s*7\\s*\\.\\s*2\\s*2",
+  "gold_pages": [
+   24,
+   81,
+   267,
+   302,
+   375,
+   376,
+   386,
+   392,
+   433,
+   458
+  ]
+ },
+ {
+  "id": "HILINFRA-criminal",
+  "symbol": "HILINFRA",
+  "kind": "criminal",
+  "question": "How many criminal cases are pending against Highway Infrastructure?",
+  "phrasing": "prospectus words",
+  "answer": "0",
+  "gold_pages": [
+   25,
+   61,
+   439,
+   440
+  ]
+ },
+ {
+  "id": "AHCL-registrar",
+  "symbol": "AHCL",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Anlon Healthcare's IPO?",
+  "phrasing": "plain English",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   1,
+   2,
+   13,
+   97
+  ]
+ },
+ {
+  "id": "AHCL-auditor",
+  "symbol": "AHCL",
+  "kind": "auditor",
+  "question": "Who are Anlon Healthcare's statutory auditors?",
+  "phrasing": "prospectus words",
+  "answer": "Kaushal Dave & Associates",
+  "pattern": "K\\s*a\\s*u\\s*s\\s*h\\s*a\\s*l\\s*D\\s*a\\s*v\\s*e\\s*\\&\\s*A\\s*s\\s*s\\s*o\\s*c\\s*i\\s*a\\s*t\\s*e\\s*s",
+  "gold_pages": [
+   4,
+   97,
+   99,
+   139,
+   156,
+   262,
+   263,
+   264,
+   266,
+   328,
+   401
+  ]
+ },
+ {
+  "id": "AHCL-net_worth",
+  "symbol": "AHCL",
+  "kind": "net_worth",
+  "question": "How much is Anlon Healthcare's net worth?",
+  "phrasing": "plain English",
+  "answer": "8,042.17",
+  "pattern": "8\\s*,\\s*0\\s*4\\s*2\\s*\\.\\s*1\\s*7",
+  "gold_pages": [
+   31,
+   89,
+   263,
+   289,
+   290,
+   293,
+   294,
+   295
+  ]
+ },
+ {
+  "id": "CRAMC-brlm",
+  "symbol": "CRAMC",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Canara Robeco Asset Management Company's IPO?",
+  "phrasing": "prospectus words",
+  "answer": "SBI Capital Markets Limited",
+  "pattern": "S\\s*B\\s*I\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*M\\s*a\\s*r\\s*k\\s*e\\s*t\\s*s\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   8,
+   92,
+   448,
+   454,
+   455
+  ]
+ },
+ {
+  "id": "CRAMC-registrar",
+  "symbol": "CRAMC",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Canara Robeco Asset Management Company's IPO?",
+  "phrasing": "plain English",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   2,
+   3,
+   12,
+   94
+  ]
+ },
+ {
+  "id": "CRAMC-net_worth",
+  "symbol": "CRAMC",
+  "kind": "net_worth",
+  "question": "What is Canara Robeco Asset Management Company's net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "6,606.04",
+  "pattern": "6\\s*,\\s*6\\s*0\\s*6\\s*\\.\\s*0\\s*4",
+  "gold_pages": [
+   23,
+   88,
+   337,
+   370,
+   392,
+   414
+  ]
+ },
+ {
+  "id": "CRAMC-criminal",
+  "symbol": "CRAMC",
+  "kind": "criminal",
+  "question": "Is Canara Robeco Asset Management Company facing any criminal proceedings?",
+  "phrasing": "plain English",
+  "answer": "0",
+  "gold_pages": [
+   24,
+   62,
+   425
+  ]
+ },
+ {
+  "id": "NSDL-brlm",
+  "symbol": "NSDL",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for National Securities Depository's IPO?",
+  "phrasing": "prospectus words",
+  "answer": "Motilal Oswal Investment Advisors Limited",
+  "pattern": "M\\s*o\\s*t\\s*i\\s*l\\s*a\\s*l\\s*O\\s*s\\s*w\\s*a\\s*l\\s*I\\s*n\\s*v\\s*e\\s*s\\s*t\\s*m\\s*e\\s*n\\s*t\\s*A\\s*d\\s*v\\s*i\\s*s\\s*o\\s*r\\s*s\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   9,
+   11,
+   119,
+   402,
+   414,
+   415,
+   417
+  ]
+ },
+ {
+  "id": "NSDL-registrar",
+  "symbol": "NSDL",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for National Securities Depository's IPO?",
+  "phrasing": "plain English",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   2,
+   3,
+   12,
+   13,
+   122,
+   203,
+   204,
+   205
+  ]
+ },
+ {
+  "id": "NSDL-incorporated",
+  "symbol": "NSDL",
+  "kind": "incorporated",
+  "question": "When was National Securities Depository incorporated?",
+  "phrasing": "prospectus words",
+  "answer": "April 27, 2012",
+  "pattern": "A\\s*p\\s*r\\s*i\\s*l\\s*2\\s*7\\s*,\\s*2\\s*0\\s*1\\s*2",
+  "gold_pages": [
+   3,
+   49,
+   130,
+   131,
+   251,
+   464
+  ]
+ },
+ {
+  "id": "NSDL-net_worth",
+  "symbol": "NSDL",
+  "kind": "net_worth",
+  "question": "How much is National Securities Depository's net worth?",
+  "phrasing": "plain English",
+  "answer": "20,053.41",
+  "pattern": "2\\s*0\\s*,\\s*0\\s*5\\s*3\\s*\\.\\s*4\\s*1",
+  "gold_pages": [
+   27,
+   115,
+   144,
+   146,
+   148,
+   218,
+   292,
+   337,
+   348,
+   353,
+   401
+  ]
+ },
+ {
+  "id": "KROSS-registrar",
+  "symbol": "KROSS",
+  "kind": "registrar",
+  "question": "Who is the registrar to Kross' offer?",
+  "phrasing": "prospectus words",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   2,
+   3,
+   13,
+   85
+  ]
+ },
+ {
+  "id": "KROSS-auditor",
+  "symbol": "KROSS",
+  "kind": "auditor",
+  "question": "Which audit firm signs off Kross' accounts?",
+  "phrasing": "plain English",
+  "answer": "S.K. Naredi & Co.",
+  "pattern": "S\\s*\\.\\s*K\\s*\\.\\s*N\\s*a\\s*r\\s*e\\s*d\\s*i\\s*\\&\\s*C\\s*o\\s*\\.",
+  "gold_pages": [
+   1,
+   6,
+   30,
+   31,
+   56,
+   85,
+   88,
+   89,
+   136,
+   137,
+   140,
+   141,
+   143,
+   144,
+   261,
+   262,
+   263,
+   264,
+   265,
+   297,
+   301,
+   307,
+   343,
+   357,
+   423,
+   424
+  ]
+ },
+ {
+  "id": "KROSS-net_worth",
+  "symbol": "KROSS",
+  "kind": "net_worth",
+  "question": "What is Kross' net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "1,468.05",
+  "pattern": "1\\s*,\\s*4\\s*6\\s*8\\s*\\.\\s*0\\s*5",
+  "gold_pages": [
+   26,
+   79,
+   262,
+   299,
+   300,
+   328,
+   329,
+   352
+  ]
+ },
+ {
+  "id": "KROSS-criminal",
+  "symbol": "KROSS",
+  "kind": "criminal",
+  "question": "Is Kross facing any criminal proceedings?",
+  "phrasing": "plain English",
+  "answer": "0",
+  "gold_pages": [
+   26,
+   61,
+   340
+  ]
+ },
+ {
+  "id": "VERANDA-registrar",
+  "symbol": "VERANDA",
+  "kind": "registrar",
+  "question": "Who is the registrar to Veranda Learning Solutions' offer?",
+  "phrasing": "prospectus words",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   1,
+   2,
+   14,
+   72
+  ]
+ },
+ {
+  "id": "VERANDA-incorporated",
+  "symbol": "VERANDA",
+  "kind": "incorporated",
+  "question": "What is the date of incorporation of Veranda Learning Solutions?",
+  "phrasing": "plain English",
+  "answer": "November 20, 2018",
+  "pattern": "N\\s*o\\s*v\\s*e\\s*m\\s*b\\s*e\\s*r\\s*2\\s*0\\s*,\\s*2\\s*0\\s*1\\s*8",
+  "gold_pages": [
+   2,
+   7,
+   22,
+   28,
+   29,
+   30,
+   31,
+   32,
+   34,
+   45,
+   46,
+   49,
+   67,
+   68,
+   69,
+   70,
+   110,
+   111,
+   156,
+   173,
+   189,
+   209,
+   210,
+   215,
+   219,
+   220,
+   234,
+   235,
+   279,
+   280,
+   288,
+   298,
+   299,
+   300,
+   309,
+   407
+  ]
+ },
+ {
+  "id": "VERANDA-net_worth",
+  "symbol": "VERANDA",
+  "kind": "net_worth",
+  "question": "What is Veranda Learning Solutions' net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "227.06",
+  "pattern": "2\\s*2\\s*7\\s*\\.\\s*0\\s*6",
+  "gold_pages": [
+   28,
+   65,
+   212,
+   250,
+   252,
+   263,
+   271
+  ]
+ },
+ {
+  "id": "PARASHLTH-brlm",
+  "symbol": "PARASHLTH",
+  "kind": "brlm",
+  "question": "Which investment banks are running Paras Healthcare's share sale?",
+  "phrasing": "plain English",
+  "answer": "JM Financial Limited",
+  "pattern": "J\\s*M\\s*F\\s*i\\s*n\\s*a\\s*n\\s*c\\s*i\\s*a\\s*l\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   10,
+   11,
+   98,
+   517,
+   524,
+   525,
+   530
+  ]
+ },
+ {
+  "id": "PARASHLTH-registrar",
+  "symbol": "PARASHLTH",
+  "kind": "registrar",
+  "question": "Who is the registrar to Paras Healthcare's offer?",
+  "phrasing": "prospectus words",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   2,
+   3,
+   13,
+   14,
+   99
+  ]
+ },
+ {
+  "id": "PARASHLTH-criminal",
+  "symbol": "PARASHLTH",
+  "kind": "criminal",
+  "question": "Is Paras Healthcare facing any criminal proceedings?",
+  "phrasing": "plain English",
+  "answer": "4",
+  "gold_pages": [
+   38
+  ]
+ },
+ {
+  "id": "AWHCL-brlm",
+  "symbol": "AWHCL",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Antony Waste Handling Cell's IPO?",
+  "phrasing": "prospectus words",
+  "answer": "Equirus Capital Private Limited",
+  "pattern": "E\\s*q\\s*u\\s*i\\s*r\\s*u\\s*s\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*P\\s*r\\s*i\\s*v\\s*a\\s*t\\s*e\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   1,
+   7,
+   8,
+   55,
+   326
+  ]
+ },
+ {
+  "id": "AWHCL-registrar",
+  "symbol": "AWHCL",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Antony Waste Handling Cell's IPO?",
+  "phrasing": "plain English",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   1,
+   10,
+   11,
+   56
+  ]
+ },
+ {
+  "id": "AWHCL-net_worth",
+  "symbol": "AWHCL",
+  "kind": "net_worth",
+  "question": "What is Antony Waste Handling Cell's net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "2,299.63",
+  "pattern": "2\\s*,\\s*2\\s*9\\s*9\\s*\\.\\s*6\\s*3",
+  "gold_pages": [
+   22,
+   48,
+   191,
+   249,
+   276,
+   278
+  ]
+ },
+ {
+  "id": "SHIPROCKET-brlm",
+  "symbol": "SHIPROCKET",
+  "kind": "brlm",
+  "question": "Which investment banks are running Shiprocket's share sale?",
+  "phrasing": "plain English",
+  "answer": "Axis Capital Limited",
+  "pattern": "A\\s*x\\s*i\\s*s\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   11,
+   95,
+   426,
+   429,
+   433
+  ]
+ },
+ {
+  "id": "SHIPROCKET-registrar",
+  "symbol": "SHIPROCKET",
+  "kind": "registrar",
+  "question": "Who is the registrar to Shiprocket's offer?",
+  "phrasing": "prospectus words",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   2,
+   3,
+   16,
+   96
+  ]
+ },
+ {
+  "id": "SHIPROCKET-auditor",
+  "symbol": "SHIPROCKET",
+  "kind": "auditor",
+  "question": "Which audit firm signs off Shiprocket's accounts?",
+  "phrasing": "plain English",
+  "answer": "S.R. Batliboi & Associates",
+  "pattern": "S\\s*\\.\\s*R\\s*\\.\\s*B\\s*a\\s*t\\s*l\\s*i\\s*b\\s*o\\s*i\\s*\\&\\s*A\\s*s\\s*s\\s*o\\s*c\\s*i\\s*a\\s*t\\s*e\\s*s",
+  "gold_pages": [
+   9,
+   95,
+   97,
+   181,
+   297,
+   300,
+   303,
+   304,
+   306,
+   310,
+   378,
+   428,
+   496
+  ]
+ },
+ {
+  "id": "MTARTECH-brlm",
+  "symbol": "MTARTECH",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for MTAR Technologies' IPO?",
+  "phrasing": "prospectus words",
+  "answer": "JM Financial Limited",
+  "pattern": "J\\s*M\\s*F\\s*i\\s*n\\s*a\\s*n\\s*c\\s*i\\s*a\\s*l\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   1,
+   7,
+   70,
+   446,
+   451,
+   452,
+   454
+  ]
+ },
+ {
+  "id": "MTARTECH-registrar",
+  "symbol": "MTARTECH",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for MTAR Technologies' IPO?",
+  "phrasing": "plain English",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   1,
+   11,
+   70
+  ]
+ },
+ {
+  "id": "MTARTECH-net_worth",
+  "symbol": "MTARTECH",
+  "kind": "net_worth",
+  "question": "What is MTAR Technologies' net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "2,055.24",
+  "pattern": "2\\s*,\\s*0\\s*5\\s*5\\s*\\.\\s*2\\s*4",
+  "gold_pages": [
+   24,
+   93,
+   283,
+   284,
+   292,
+   296,
+   320,
+   445
+  ]
+ },
+ {
+  "id": "LATENTVIEW-brlm",
+  "symbol": "LATENTVIEW",
+  "kind": "brlm",
+  "question": "Which investment banks are running Latent View Analytics' share sale?",
+  "phrasing": "plain English",
+  "answer": "Axis Capital Limited",
+  "pattern": "A\\s*x\\s*i\\s*s\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   1,
+   6,
+   7,
+   65,
+   285,
+   292,
+   294,
+   316
+  ]
+ },
+ {
+  "id": "LATENTVIEW-registrar",
+  "symbol": "LATENTVIEW",
+  "kind": "registrar",
+  "question": "Who is the registrar to Latent View Analytics' offer?",
+  "phrasing": "prospectus words",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   1,
+   8,
+   10,
+   66,
+   285,
+   297
+  ]
+ },
+ {
+  "id": "LATENTVIEW-incorporated",
+  "symbol": "LATENTVIEW",
+  "kind": "incorporated",
+  "question": "What is the date of incorporation of Latent View Analytics?",
+  "phrasing": "plain English",
+  "answer": "January 3, 2006",
+  "pattern": "J\\s*a\\s*n\\s*u\\s*a\\s*r\\s*y\\s*3\\s*,\\s*2\\s*0\\s*0\\s*6",
+  "gold_pages": [
+   1,
+   71,
+   74,
+   75,
+   160,
+   166,
+   169,
+   282,
+   339
+  ]
+ },
+ {
+  "id": "MEDPLUS-brlm",
+  "symbol": "MEDPLUS",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for MedPlus Health Services' IPO?",
+  "phrasing": "prospectus words",
+  "answer": "Axis Capital Limited",
+  "pattern": "A\\s*x\\s*i\\s*s\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   1,
+   7,
+   8,
+   70,
+   319,
+   324,
+   329
+  ]
+ },
+ {
+  "id": "MEDPLUS-registrar",
+  "symbol": "MEDPLUS",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for MedPlus Health Services' IPO?",
+  "phrasing": "plain English",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   1,
+   11,
+   12,
+   71
+  ]
+ },
+ {
+  "id": "MEDPLUS-net_worth",
+  "symbol": "MEDPLUS",
+  "kind": "net_worth",
+  "question": "What is MedPlus Health Services' net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "8,009.77",
+  "pattern": "8\\s*,\\s*0\\s*0\\s*9\\s*\\.\\s*7\\s*7",
+  "gold_pages": [
+   17,
+   27,
+   64,
+   217,
+   235,
+   274,
+   281,
+   282,
+   303
+  ]
+ },
+ {
+  "id": "ICICIAMC-registrar",
+  "symbol": "ICICIAMC",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for ICICI Prudential Asset Management Company's IPO?",
+  "phrasing": "plain English",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   2,
+   4,
+   13,
+   81
+  ]
+ },
+ {
+  "id": "ICICIAMC-net_worth",
+  "symbol": "ICICIAMC",
+  "kind": "net_worth",
+  "question": "What is ICICI Prudential Asset Management Company's net worth as per the restated financial information?",
+  "phrasing": "prospectus words",
+  "answer": "39,215.6",
+  "pattern": "3\\s*9\\s*,\\s*2\\s*1\\s*5\\s*\\.\\s*6",
+  "gold_pages": [
+   21,
+   336,
+   345,
+   349,
+   350,
+   373,
+   374,
+   380
+  ]
+ },
+ {
+  "id": "CLEANMAX-brlm",
+  "symbol": "CLEANMAX",
+  "kind": "brlm",
+  "question": "Which investment banks are running Clean Max Enviro Energy Solutions' share sale?",
+  "phrasing": "plain English",
+  "answer": "BOB Capital Markets Limited",
+  "pattern": "B\\s*O\\s*B\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*M\\s*a\\s*r\\s*k\\s*e\\s*t\\s*s\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   10,
+   114,
+   224,
+   229,
+   230,
+   899,
+   916,
+   918
+  ]
+ },
+ {
+  "id": "CLEANMAX-registrar",
+  "symbol": "CLEANMAX",
+  "kind": "registrar",
+  "question": "Who is the registrar to Clean Max Enviro Energy Solutions' offer?",
+  "phrasing": "prospectus words",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   2,
+   3,
+   15,
+   115
+  ]
+ },
+ {
+  "id": "CLEANMAX-net_worth",
+  "symbol": "CLEANMAX",
+  "kind": "net_worth",
+  "question": "How much is Clean Max Enviro Energy Solutions' net worth?",
+  "phrasing": "plain English",
+  "answer": "25,983.38",
+  "pattern": "2\\s*5\\s*,\\s*9\\s*8\\s*3\\s*\\.\\s*3\\s*8",
+  "gold_pages": [
+   28,
+   93,
+   825,
+   847
+  ]
+ },
+ {
+  "id": "FUSIONCX-brlm",
+  "symbol": "FUSIONCX",
+  "kind": "brlm",
+  "question": "Who are the book running lead managers for Fusion CX's IPO?",
+  "phrasing": "prospectus words",
+  "answer": "Nuvama Wealth Management Limited",
+  "pattern": "N\\s*u\\s*v\\s*a\\s*m\\s*a\\s*W\\s*e\\s*a\\s*l\\s*t\\s*h\\s*M\\s*a\\s*n\\s*a\\s*g\\s*e\\s*m\\s*e\\s*n\\s*t\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   2,
+   3,
+   11,
+   13,
+   15,
+   80,
+   487,
+   493,
+   497
+  ]
+ },
+ {
+  "id": "FUSIONCX-registrar",
+  "symbol": "FUSIONCX",
+  "kind": "registrar",
+  "question": "Which firm handles share allotment and refunds for Fusion CX's IPO?",
+  "phrasing": "plain English",
+  "answer": "KFin Technologies",
+  "pattern": "K\\s*F\\s*i\\s*n\\s*T\\s*e\\s*c\\s*h\\s*n\\s*o\\s*l\\s*o\\s*g\\s*i\\s*e\\s*s",
+  "gold_pages": [
+   2,
+   3,
+   14,
+   15,
+   82
+  ]
+ },
+ {
+  "id": "FUSIONCX-auditor",
+  "symbol": "FUSIONCX",
+  "kind": "auditor",
+  "question": "Who are Fusion CX's statutory auditors?",
+  "phrasing": "prospectus words",
+  "answer": "M S K C & Associates",
+  "pattern": "M\\s*S\\s*K\\s*C\\s*\\&\\s*A\\s*s\\s*s\\s*o\\s*c\\s*i\\s*a\\s*t\\s*e\\s*s",
+  "gold_pages": [
+   7,
+   40,
+   79,
+   84,
+   310,
+   313,
+   316,
+   317,
+   318,
+   320,
+   321,
+   331,
+   411,
+   413,
+   414,
+   417,
+   418,
+   419,
+   420,
+   421,
+   424,
+   463,
+   491,
+   545,
+   546
+  ]
+ },
+ {
+  "id": "SRTL-brlm",
+  "symbol": "SRTL",
+  "kind": "brlm",
+  "question": "Which investment banks are running Shree Ram Twistex's share sale?",
+  "phrasing": "plain English",
+  "answer": "Interactive Financial Services Limited",
+  "pattern": "I\\s*n\\s*t\\s*e\\s*r\\s*a\\s*c\\s*t\\s*i\\s*v\\s*e\\s*F\\s*i\\s*n\\s*a\\s*n\\s*c\\s*i\\s*a\\s*l\\s*S\\s*e\\s*r\\s*v\\s*i\\s*c\\s*e\\s*s\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   1,
+   2,
+   88,
+   343,
+   348,
+   349
+  ]
+ },
+ {
+  "id": "SRTL-registrar",
+  "symbol": "SRTL",
+  "kind": "registrar",
+  "question": "Who is the registrar to Shree Ram Twistex's offer?",
+  "phrasing": "prospectus words",
+  "answer": "Bigshare Services",
+  "pattern": "B\\s*i\\s*g\\s*s\\s*h\\s*a\\s*r\\s*e\\s*S\\s*e\\s*r\\s*v\\s*i\\s*c\\s*e\\s*s",
+  "gold_pages": [
+   1,
+   2,
+   14,
+   89
+  ]
+ },
+ {
+  "id": "SRTL-net_worth",
+  "symbol": "SRTL",
+  "kind": "net_worth",
+  "question": "How much is Shree Ram Twistex's net worth?",
+  "phrasing": "plain English",
+  "answer": "8070.11",
+  "pattern": "8\\s*0\\s*7\\s*0\\s*\\.\\s*1\\s*1",
+  "gold_pages": [
+   32,
+   298
+  ]
+ },
+ {
+  "id": "LENSKART-registrar",
+  "symbol": "LENSKART",
+  "kind": "registrar",
+  "question": "Who is the registrar to Lenskart Solutions' offer?",
+  "phrasing": "prospectus words",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   2,
+   3,
+   16,
+   130
+  ]
+ },
+ {
+  "id": "LENSKART-net_worth",
+  "symbol": "LENSKART",
+  "kind": "net_worth",
+  "question": "How much is Lenskart Solutions' net worth?",
+  "phrasing": "plain English",
+  "answer": "61,768.66",
+  "pattern": "6\\s*1\\s*,\\s*7\\s*6\\s*8\\s*\\.\\s*6\\s*6",
+  "gold_pages": [
+   35,
+   903,
+   905,
+   907
+  ]
+ },
+ {
+  "id": "LENSKART-criminal",
+  "symbol": "LENSKART",
+  "kind": "criminal",
+  "question": "How many criminal cases are pending against Lenskart Solutions?",
+  "phrasing": "prospectus words",
+  "answer": "1",
+  "gold_pages": [
+   36,
+   101
+  ]
+ },
+ {
+  "id": "MAPMYINDIA-brlm",
+  "symbol": "MAPMYINDIA",
+  "kind": "brlm",
+  "question": "Which investment banks are running C.E. Info Systems' share sale?",
+  "phrasing": "plain English",
+  "answer": "Axis Capital Limited",
+  "pattern": "A\\s*x\\s*i\\s*s\\s*C\\s*a\\s*p\\s*i\\s*t\\s*a\\s*l\\s*L\\s*i\\s*m\\s*i\\s*t\\s*e\\s*d",
+  "gold_pages": [
+   1,
+   7,
+   65,
+   282,
+   286,
+   291
+  ]
+ },
+ {
+  "id": "MAPMYINDIA-registrar",
+  "symbol": "MAPMYINDIA",
+  "kind": "registrar",
+  "question": "Who is the registrar to C.E. Info Systems' offer?",
+  "phrasing": "prospectus words",
+  "answer": "Link Intime India",
+  "pattern": "L\\s*i\\s*n\\s*k\\s*I\\s*n\\s*t\\s*i\\s*m\\s*e\\s*I\\s*n\\s*d\\s*i\\s*a",
+  "gold_pages": [
+   1,
+   10,
+   11,
+   66
+  ]
+ }
+]
