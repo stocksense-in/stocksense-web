@@ -184,7 +184,7 @@ def model(df: pd.DataFrame) -> dict:
     return out
 
 
-def evidence(rules: pd.DataFrame, n_ipos: int, since: str, until: str) -> dict:
+def evidence(rules: pd.DataFrame, n_ipos: int, since: str, until: str, listing: pd.DataFrame | None = None) -> dict:
     out = {"as_of": date.today().isoformat(), "ipos": n_ipos, "listed_from": since, "listed_to": until,
            "outcome": "return over the six months after listing, minus NIFTY 50's", "rules": {}}
     for r in rules.itertuples():
@@ -194,6 +194,10 @@ def evidence(rules: pd.DataFrame, n_ipos: int, since: str, until: str) -> dict:
                           "weak_flagged": round(float(r.weak_flagged), 3), "weak_clear": round(float(r.weak_clear), 3),
                           "diff": round(float(r.diff), 4), "lo": round(float(r.lo), 4), "hi": round(float(r.hi), 4)})
         out["rules"][r.rule] = entry
+    for r in (listing.itertuples() if listing is not None else ()):
+        if r.rule in out["rules"] and r.verdict != "too few to judge":
+            out["rules"][r.rule]["listing"] = {"flagged": int(r.flagged), "verdict": r.verdict, "diff": round(float(r.diff), 4),
+                                               "lo": round(float(r.lo), 4), "hi": round(float(r.hi), 4)}
     return out
 
 
@@ -248,7 +252,7 @@ def main() -> None:
     out.write_text(report(df, rules, listing, fit), encoding="utf-8")
     judged = df.dropna(subset=["excess_6m"])
     EVIDENCE.write_text(json.dumps(evidence(rules, len(judged), f"{judged['listing_date'].min():%Y-%m}",
-                                            f"{judged['listing_date'].max():%Y-%m}"), indent=1), encoding="utf-8")
+                                            f"{judged['listing_date'].max():%Y-%m}", listing), indent=1), encoding="utf-8")
     print(out.read_text(encoding="utf-8"))
 
 
