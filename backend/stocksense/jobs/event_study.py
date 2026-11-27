@@ -117,6 +117,9 @@ def load_closes(lake: Lake) -> tuple[pd.DataFrame, pd.Series, dict[str, str]]:
 def load_inputs(lake: Lake) -> dict[str, pd.Series]:
     macro = _pivot(lake.query("select date, series, close from macro_prices"), "series")
     inputs = {c: macro[c].dropna() for c in macro.columns}
+    if "india_macro" in lake.datasets():  # the repo rate at each change (M1.6)
+        repo = lake.query("select period, value from india_macro where series = 'repo_rate' order by period")
+        inputs["repo_rate"] = pd.Series(repo["value"].to_numpy(), index=pd.to_datetime(repo["period"]))
     if "gdelt_daily" in lake.datasets():
         g = lake.query(f"""
             select date,

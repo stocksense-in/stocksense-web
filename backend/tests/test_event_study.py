@@ -99,3 +99,12 @@ def test_notable_share_per_horizon():
     rows = [{"horizon_days": 1, "notable": True}, {"horizon_days": 1, "notable": False},
             {"horizon_days": 3, "notable": False}]
     assert notable_share(rows) == {"1": 0.5, "3": 0.0}
+
+
+def test_rbi_decisions_are_measured_from_the_close_before():
+    repo = pd.Series([6.5, 6.25, 6.0, 6.25], index=pd.to_datetime(["2023-02-08", "2025-02-07", "2025-04-09", "2026-10-07"]))
+    cuts = es.policy_dates(repo, -1)
+    assert list(cuts) == list(pd.to_datetime(["2025-02-06", "2025-04-08"]))
+    assert list(es.policy_dates(repo, +1)) == [pd.Timestamp("2026-10-06")]
+    calendar = pd.bdate_range("2025-02-03", "2025-02-14")
+    assert es.to_base_dates(cuts[:1], calendar)[0] == pd.Timestamp("2025-02-06")  # window includes decision day

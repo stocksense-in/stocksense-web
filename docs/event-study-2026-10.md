@@ -55,6 +55,28 @@ The US-yield results rest on 12–14 episodes, so treat them as tentative.
   with an Indian actor") caught only Pulwama, because domestic police and protest news
   swamped it.
 
+## Update, 27 Nov 2026: RBI rate decisions
+
+Two event types use the repo rate from M1.6 (`india_macro`, every change since 2005, from BIS):
+`rbi_cut` (22 cuts, Apr 2012 – Dec 2025) and `rbi_hike` (12 rises, Sep 2013 – Oct 2026). The RBI
+announces in the morning, so each decision is measured from the **close before it**: the 1-day
+window includes decision day itself.
+
+- **PSU banks lag after cuts.** Decision day −0.55% vs NIFTY 50 (CI −1.06 to −0.04), and −1.7% over three
+  days (CI −2.4 to −1.1), beating NIFTY after only 4 of 22 cuts. This is the clearest result in the new rows.
+  A plausible reading: most loans now reprice with the repo rate straight away while deposits reprice slowly,
+  so cuts squeeze lending margins, and state-owned banks have the least room. Cuts also cluster in weak
+  economies (2019, 2020).
+- Midcaps lag slightly over three days after cuts and lead slightly after rises. These are borderline cells
+  (CIs just clear zero) and probably chance.
+- Rate-sensitive sectors move the way you'd guess, but **not decisively**: real estate −0.8% over three days
+  after cuts and −1.3% after rises, private banks and autos slightly negative either way. All their CIs cross
+  zero. With 12–22 decisions a sector needs a big, consistent reaction to stand out, and most decisions
+  are expected in advance.
+
+Across all 14 event types, 11.7% / 9.1% / 5.8% of cells are notable at 1 / 3 / 10 days (chance ≈ 5%),
+about as before.
+
 ## Caveats
 
 - **Baskets** (Oil & Gas, Aviation, Defence, Paints) use today's constituents, so they
@@ -63,8 +85,9 @@ The US-yield results rest on 12–14 episodes, so treat them as tentative.
   and a rupee fall), so rows aren't independent evidence.
 - **Futures rolls** in Brent can add a small jump on roll days.
 - **GDELT** counts coverage, not severity; a heavily covered minor incident can trigger.
-- RBI rate decisions, CPI surprises and tariff announcements aren't event types yet
-  (needs the rest of M1.6 and a headline archive).
+- RBI decisions are in (27 Nov), but a decision the market fully expected counts the same as a surprise;
+  separating them needs consensus forecasts we don't have. CPI surprises and tariff announcements aren't
+  event types yet (no consensus forecasts or headline archive).
 
 ## Next
 
