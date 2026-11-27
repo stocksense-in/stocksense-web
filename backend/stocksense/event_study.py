@@ -54,6 +54,18 @@ def spike_dates(series: pd.Series, *, z: float = 3.0, window: int = 90, min_peri
     return s.index[(score >= z).fillna(False).to_numpy()]
 
 
+def policy_dates(levels: pd.Series, direction: int) -> pd.DatetimeIndex:
+    """
+    Days a policy rate moved in `direction` (-1 cut, +1 rise), from a series of levels at each change.
+    Returned one day early: the RBI announces in the morning and markets react that day, so the window
+    must start at the close before the decision.
+    """
+    s = levels.dropna().sort_index()
+    moves = s.diff()
+    days = moves.index[(moves * direction) > 0]
+    return pd.DatetimeIndex(days) - pd.Timedelta(days=1)
+
+
 def to_base_dates(signals: pd.DatetimeIndex, calendar: pd.DatetimeIndex) -> pd.DatetimeIndex:
     """Each signal day → the last market day on or before it (signals before the calendar are dropped)."""
     pos = calendar.searchsorted(signals, side="right") - 1
@@ -154,6 +166,10 @@ EVENT_TYPES: list[EventType] = [
               lambda x: threshold_dates(_series(x, "US_VIX"), 0.30)),
     EventType("us_yield_jump", "US yield jump", "US 10-year yield up 0.15 points or more in a day",
               lambda x: threshold_dates(_series(x, "US10Y"), 0.15, change="diff")),
+    EventType("rbi_cut", "RBI rate cut", "The RBI lowers the repo rate. Dates shown are the trading day before each decision: moves are measured from that close, so decision day counts",
+              lambda x: policy_dates(_series(x, "repo_rate"), -1)),
+    EventType("rbi_hike", "RBI rate rise", "The RBI raises the repo rate. Dates shown are the trading day before each decision: moves are measured from that close, so decision day counts",
+              lambda x: policy_dates(_series(x, "repo_rate"), +1)),
     EventType("gold_spike", "Gold spike", "Gold up 3% or more in a day",
               lambda x: threshold_dates(_series(x, "GOLD"), 0.03)),
     EventType("global_conflict", "Global conflict flare-up",
