@@ -387,7 +387,7 @@ def create_app(
             raise HTTPException(404, f"No shareholding filings for {symbol.upper()} yet")
         return {"symbol": symbol.upper(), "source": request.app.state.holders()["source"], **entry,
                 "trend_note": own.trend_note(entry), "pledge_warning": own.pledge_warning(entry),
-                "institutions_note": own.institutions_note(entry)}
+                "institutions_note": own.institutions_note(entry), "pledge_note": own.pledge_note(entry)}
 
     def _events_of(request: Request, symbol: str) -> dict | None:
         return ((request.app.state.events() or {}).get("companies") or {}).get(symbol.upper())

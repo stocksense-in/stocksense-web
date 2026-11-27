@@ -102,3 +102,34 @@ def test_funds_buying_and_the_screener_filter(market):
     client = TestClient(create_app(market=market, headlines=lambda: [], history=lambda s, r: [], holders=lambda: doc))
     found = client.get("/stocks", params={"funds": "buying", "page_size": 200}).json()["results"]
     assert [r["symbol"] for r in found] == [symbol]
+
+
+def test_pledge_history_and_note(market):
+    symbol = ROWS[0]["symbol"]
+    sh = shareholding(symbol, [44.0] * 7)  # Mar 2025 → Sep 2026
+    sh["promoter_encumbered_pct"] = [85.0, 85.0, 8.9, 8.9, 8.9, 50.0, 82.8]
+    sh["promoter_pledged_pct"] = [None, None, 8.9, 8.9, 8.9, 50.0, 82.8]
+    doc = holders.build(sh)
+    entry = doc["companies"][symbol]
+    assert entry["quarters"][-1]["promoter_encumbered_pct"] == 82.8
+    assert "more of their stake over the past year: 9% → 83%" in holders.pledge_note(entry)
+    # no pledge position fetched: the warning falls back to the latest pattern's pledges
+    assert "83%" in holders.pledge_warning(entry)
+    client = TestClient(create_app(market=market, headlines=lambda: [], history=lambda s, r: [], holders=lambda: doc))
+    body = client.get(f"/stocks/{symbol}/holders").json()
+    assert body["quarters"][-1]["promoter_pledged_pct"] == 82.8 and "9% → 83%" in body["pledge_note"]
+
+
+def test_pledge_note_freed_steady_and_never():
+    def entry(values, promoter=44.0):
+        return {"quarters": [{"quarter_end": q.isoformat(), "promoter_pct": promoter, "promoter_encumbered_pct": v}
+                             for q, v in zip(QUARTERS, values)]}
+
+    assert "freed up shares" in holders.pledge_note(entry([40, 40, 40, 30, 20, 10, 0]))
+    assert "None are pledged now" in holders.pledge_note(entry([40, 40, 40, 30, 20, 10, 0]))
+    assert "stayed pledged" in holders.pledge_note(entry([100.0] * 7))
+    assert "much as a year ago" in holders.pledge_note(entry([2, 2, 2, 2, 2, 2, 0.5]))
+    assert "any quarter since Mar 2025" in holders.pledge_note(entry([0.0] * 7))
+    assert holders.pledge_note(entry([10, 20])) is None  # under a year, with pledges
+    assert holders.pledge_note(entry([0.0] * 7, promoter=0.0)) is None  # no promoter group
+    assert holders.pledge_note({"quarters": [{"quarter_end": "2026-09-30", "promoter_pct": 50}]}) is None
