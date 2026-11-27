@@ -7,7 +7,8 @@ know, computed from the lake:
   • results_filed    the company filed a quarterly result (with the profit change)
   • large_order      an order/contract-win announcement
   • promoter_stake   a new shareholding pattern with the promoters' stake up or down 1+ point
-  • pledge_change    promoters' pledged share of their stake moved 2+ points between snapshots
+  • pledge_change    promoters' pledged share of their stake moved 2+ points: in a pattern filed that day
+                     against the quarter before, or between pledge snapshots
   • big_deal         a bulk or block deal of ₹10 crore or more (the largest of the day, by who)
 
     python -m stocksense alerts --date 2023-01-27 --symbols ADANIENT ADANIPORTS
@@ -141,6 +142,30 @@ def pledge_change(pledges: pd.DataFrame, day: date) -> list[dict]:
     return out
 
 
+def pattern_pledge_change(shareholding: pd.DataFrame, day: date) -> list[dict]:
+    """A shareholding pattern filed today shows the promoters' pledged-or-encumbered share moving
+    PLEDGE_MOVE points from the quarter before (pledge snapshots catch changes between filings)."""
+    if (shareholding is None or not len(shareholding) or "submitted" not in shareholding
+            or "promoter_encumbered_pct" not in shareholding):
+        return []
+    sh = shareholding.dropna(subset=["promoter_encumbered_pct"]).copy()
+    sh = sh[sh["promoter_pct"].fillna(0) >= 1]
+    sh["submitted"] = pd.to_datetime(sh["submitted"]).dt.date
+    sh = sh.sort_values(["symbol", "quarter_end"])
+    sh["previous"] = sh.groupby("symbol")["promoter_encumbered_pct"].shift(1)
+    out = []
+    for r in sh[(sh["submitted"] == day) & sh["previous"].notna()].itertuples():
+        change = r.promoter_encumbered_pct - r.previous
+        if abs(change) >= PLEDGE_MOVE:
+            word = "more" if change > 0 else "less"
+            quarter = pd.Timestamp(r.quarter_end).strftime("%b %Y")
+            out.append(_alert(day, r.symbol, "pledge_change", change,
+                              f"Promoters of {r.symbol} had pledged or tied up {r.promoter_encumbered_pct:.1f}% of their "
+                              f"stake at the end of {quarter}, {abs(change):.1f} points {word} than a quarter earlier "
+                              f"(shareholding pattern filed today)."))
+    return out
+
+
 def shares(n: float) -> str:
     """Share counts as an Indian reader says them: 24 lakh, 1.2 crore, 15,000."""
     if n >= 1e7:
@@ -195,10 +220,15 @@ def for_day(lake: Lake, day: date, symbols: list[str] | None = None) -> list[dic
     if "announcements" in present:
         alerts += large_orders(lake.query(f"select date, symbol, category, summary from announcements "
                                           f"where date = ?{where}", [day], frames=frames), day)
+    pledge_alerts = []
     if "shareholding" in present:
-        alerts += promoter_stake(lake.query(f"select * from shareholding where 1=1{where}", frames=frames), day)
+        sh = lake.query(f"select * from shareholding where 1=1{where}", frames=frames)
+        alerts += promoter_stake(sh, day)
+        pledge_alerts += pattern_pledge_change(sh, day)
     if "pledges" in present:
-        alerts += pledge_change(lake.query(f"select * from pledges where 1=1{where}", frames=frames), day)
+        snapshot = pledge_change(lake.query(f"select * from pledges where 1=1{where}", frames=frames), day)
+        pledge_alerts += [a for a in snapshot if a["symbol"] not in {p["symbol"] for p in pledge_alerts}]
+    alerts += pledge_alerts
     if "deals" in present:
         alerts += big_deals(lake.query(f"select * from deals where date = ?{where}", [day], frames=frames), day)
     order = {"price_move": 0, "unusual_volume": 1, "results_filed": 2, "promoter_stake": 3, "pledge_change": 4,
