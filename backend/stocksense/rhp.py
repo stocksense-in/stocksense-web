@@ -13,11 +13,17 @@ reading the "Risk Factors" chapter.
 from __future__ import annotations
 
 import io
+import json
 import re
 from dataclasses import asdict, dataclass, field
+from functools import lru_cache
 from typing import Callable
 
+from .config import DATA_DIR
+
 HIGH, MEDIUM, LOW = "high", "medium", "low"
+# Each rule's record on past IPOs (ml/ipo_flags.py): how flagged issues did after listing.
+EVIDENCE_FILE = DATA_DIR / "rhp_evidence.json"
 _ORDER = {HIGH: 0, MEDIUM: 1, LOW: 2}
 MAX_EVIDENCE = 3
 
@@ -40,6 +46,7 @@ class Finding:
     summary: str
     why: str
     evidence: list[Evidence]
+    track_record: str | None = None  # how past IPOs with this flag did after listing
 
 
 @dataclass
@@ -242,13 +249,45 @@ RULES: list[Rule] = [
 ]
 
 
+@lru_cache(maxsize=1)
+def _evidence_doc() -> dict | None:
+    try:
+        return json.loads(EVIDENCE_FILE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def _pct(x: float) -> str:
+    return f"{100 * x:+.0f}%".replace("+0%", "0%").replace("-0%", "0%")
+
+
+def track_record(rule_id: str, doc: dict | None = None) -> str | None:
+    """One sentence on how past IPOs with this flag did in the six months after listing,
+    against NIFTY 50, from ml/ipo_flags.py's study; None when there's no study or too few cases."""
+    doc = doc if doc is not None else _evidence_doc()
+    entry = (doc or {}).get("rules", {}).get(rule_id)
+    if not entry or entry.get("verdict") == "too few to judge":
+        return None
+    span = f"{doc['listed_from'][:4]}–{doc['listed_to'][:4]}"
+    base = (f"In {entry['flagged'] + entry['clear']} IPOs listed {span}, the {entry['flagged']} with this flag returned a "
+            f"median {_pct(entry['median_flagged'])} against NIFTY 50 over the six months after listing, against "
+            f"{_pct(entry['median_clear'])} for the rest; {entry['weak_flagged']:.0%} trailed the market by more than "
+            f"10 points, against {entry['weak_clear']:.0%}.")
+    if entry["verdict"] == "worse":
+        return base + " Flagged issues did measurably worse."
+    if entry["verdict"] == "better":
+        return base + " On past IPOs this flag hasn't meant weaker shares; still worth reading."
+    return base + " The difference is within what chance would give, so on its own it hasn't predicted weaker shares."
+
+
 def scan_pages(pages: list[str]) -> ScanResult:
     result = ScanResult(pages=len(pages))
     for rule in RULES:
         outcome = rule.run(pages)
         if outcome:
             severity, summary, hits = outcome
-            result.findings.append(Finding(rule.id, rule.title, severity, summary, rule.why, _evidence(hits)))
+            result.findings.append(Finding(rule.id, rule.title, severity, summary, rule.why, _evidence(hits),
+                                           track_record(rule.id)))
         else:
             result.clear.append({"id": rule.id, "title": rule.title})
     result.findings.sort(key=lambda f: _ORDER[f.severity])

@@ -76,6 +76,11 @@ export function RHPPage() {
             <div key={r.id} style={{ padding: '8px 0', borderBottom: '1px solid rgba(201,168,76,0.04)' }} title={r.why}>
               <div style={{ fontSize: 11, color: 'var(--cream)' }}>{r.title}</div>
               <div style={{ fontSize: 9.5, color: 'var(--cream-mute)', marginTop: 3, lineHeight: 1.5 }}>{r.why}</div>
+              {r.track_record && (
+                <div style={{ fontSize: 9.5, color: 'var(--cream-dim)', marginTop: 3, lineHeight: 1.5 }}>
+                  <span style={{ color: 'var(--gold)' }}>Track record:</span> {r.track_record}
+                </div>
+              )}
             </div>
           ))}
           {!rules.length && <div style={{ fontSize: 11, color: 'var(--cream-mute)' }}>The scanner isn&apos;t reachable right now.</div>}
@@ -127,6 +132,11 @@ export function RHPPage() {
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--cream)', lineHeight: 1.65 }}>{f.summary}</div>
                       <div style={{ fontSize: 10.5, color: 'var(--cream-mute)', lineHeight: 1.6, marginTop: 4 }}>Why it matters: {f.why}</div>
+                      {f.track_record && (
+                        <div style={{ fontSize: 10.5, color: 'var(--cream-dim)', lineHeight: 1.6, marginTop: 4 }}>
+                          <span style={{ color: 'var(--gold)' }}>Track record:</span> {f.track_record}
+                        </div>
+                      )}
                       {f.evidence.slice(0, 3).map(ev => (
                         <blockquote key={ev.page + ev.quote.slice(0, 20)} style={{ margin: '8px 0 0', padding: '6px 10px', background: 'rgba(201,168,76,0.04)', borderRadius: 4, fontSize: 10.5, color: 'var(--cream-dim)', lineHeight: 1.6 }}>
                           <span style={{ fontFamily: 'var(--f-mono)', color: 'var(--gold)', marginRight: 8 }}>p.{ev.page}</span>

@@ -606,7 +606,7 @@ def create_app(
     @app.get("/prospectus/rules", tags=["prospectus"])
     def prospectus_rules():
         """What the scanner looks for."""
-        return [{"id": r.id, "title": r.title, "why": r.why} for r in rhp.RULES]
+        return [{"id": r.id, "title": r.title, "why": r.why, "track_record": rhp.track_record(r.id)} for r in rhp.RULES]
 
     @app.post("/prospectus/scan", response_model=schemas.ScanResult, tags=["prospectus"])
     def prospectus_scan(request: Request, file: UploadFile = File(..., description="DRHP or RHP as a text PDF")):

@@ -273,11 +273,13 @@ export interface IpoBoard { updated_at: string; open: Ipo[]; upcoming: Ipo[] }
 
 export interface Listing { symbol: string; name: string; board: string; listed: string; issue_price: number | null; price: number | null; return_pct: number | null }
 
-export interface ScanRule { id: string; title: string; why: string }
+/** `track_record`: how past IPOs with this flag did in the six months after listing (null until studied). */
+export interface ScanRule { id: string; title: string; why: string; track_record?: string | null }
 
 export interface ScanFinding {
   id: string; title: string; severity: 'high' | 'medium' | 'low' | string; summary: string; why: string;
   evidence: { page: number; quote: string }[];
+  track_record?: string | null;
 }
 
 export interface ScanResult { pages: number; findings: ScanFinding[]; clear: { id: string; title: string }[] }

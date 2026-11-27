@@ -399,6 +399,7 @@ class Finding(BaseModel):
     summary: str
     why: str
     evidence: list[Evidence]
+    track_record: str | None = Field(None, description="How past IPOs with this flag did in the six months after listing")
 
 
 class ScanResult(BaseModel):
