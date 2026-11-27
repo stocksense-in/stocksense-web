@@ -253,5 +253,24 @@
   "The EBIT margin for the quarter came in at 15%, tr": "ok",
   "As a part of this long-term financing strategy, we": "ok",
   "Overall, we are expecting one-time expenses to the": "ok"
+ },
+ "changes": {
+  "ACUTAAS revenue": "ok",
+  "ALIVUS margins": "ok",
+  "BANDHANBNK asset quality": "ok",
+  "BSE orders": "ok",
+  "ENDURANCE capex": "ok",
+  "INFY revenue": "ok",
+  "J&KBANK loans": "ok",
+  "KARURVYSYA loans": "ok",
+  "LUMAXTECH orders": "ok",
+  "NMDC capex": "ok",
+  "RVNL revenue": "ok",
+  "RVNL orders": "ok",
+  "SAGILITY margins": "ok",
+  "JKCEMENT costs": "two different cost items (diesel, coal), not one guidance moving",
+  "SHYAMMETL capex": "the capex still to spend falls as it's spent; the plan didn't change",
+  "_repeated_sample": "a random sample of 20 read: 19 right; the miss (FSL, a raised range) is now caught as changed",
+  "FSL revenue": "ok"
  }
 }
