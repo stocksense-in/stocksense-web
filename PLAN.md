@@ -196,6 +196,7 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 - [ ] **M4.1 Deploy the API** (Docker on Render/Railway) with the read-only key and CORS for the site. *Accept:* `/health` public; uptime monitor.
 - [ ] **M4.2 Deploy the site** (Vercel) pointed at the public API. *Accept:* every public page works with Supabase only (college PC off).
 - [ ] **M4.3 Publishable layer only.** EOD/delayed prices, own scores/signals, headlines with links. *Accept:* checklist against §4 signed off.
+  *Audit 27 Nov (`docs/publishable-layer-2026-11.md`): every endpoint mapped to its source. Filings, holdings, events, dividends, alerts, economy, geopolitics and news are publishable as served; four changes remain: EOD prices instead of Upstox quotes, fundamentals and promoter holding from filings (retiring Screener.in and Yahoo in scores), charts from our EOD history, and IPO data from filings. The first two write to Supabase, so they wait for the owner.*
 - [ ] **M4.4 Accounts** (Supabase Auth): saved watchlists, paper-trading portfolios. *Accept:* data private per user (RLS tested).
 
 ---
