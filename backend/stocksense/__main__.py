@@ -187,6 +187,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--weekly", action="store_true", help="also corporate actions and the event study")
     jobs.add_parser("check-lake", help="data checks on the index, macro and GDELT datasets")
 
+    p = jobs.add_parser("ingest-rhp", help="every mainboard IPO's prospectus from SEBI, scanned with the RHP rules (M3.7)")
+    p.add_argument("--since", default="2015-06-01", help="oldest filing to list (YYYY-MM-DD)")
+    p.add_argument("--no-download", action="store_true", help="rescan the prospectuses already on disk")
+    p.add_argument("--workers", type=int, default=6, help="parallel text extraction")
+
     p = jobs.add_parser("backup", help="copy what's new in the lake to a backup folder, then test a restore")
     p.add_argument("--dest", help="backup folder (default: STOCKSENSE_BACKUP_DIR)")
     p.add_argument("--no-check", action="store_true", help="skip the restore test after copying")
@@ -415,6 +420,12 @@ def main() -> None:
         from .jobs import engine_daily
 
         raise SystemExit(engine_daily.run(days=args.days, weekly=args.weekly))
+
+    if args.job == "ingest-rhp":
+        from .jobs import ingest_rhp
+
+        ingest_rhp.run(since=date.fromisoformat(args.since), download_new=not args.no_download, workers=args.workers)
+        return
 
     if args.job == "backup":
         from pathlib import Path

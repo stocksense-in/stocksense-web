@@ -46,6 +46,7 @@ ALERTS_PATH = DATA_DIR / "alerts.json"  # written daily by `python -m stocksense
 HOLDERS_PATH = DATA_DIR / "holders.json"  # written by `python -m stocksense holders-export`
 DIVIDENDS_PATH = DATA_DIR / "dividends.json"  # written by `python -m stocksense dividends-export`
 EVENTS_PATH = DATA_DIR / "events.json"  # written daily by `python -m stocksense events-export`
+IPO_PROSPECTUS_PATH = DATA_DIR / "ipo_prospectus.json"  # written by `python -m stocksense ingest-rhp`
 ECONOMY_PATH = DATA_DIR / "economy.json"  # written weekly by `python -m stocksense ingest-india-macro`
 BENCHMARKS_TTL_SECONDS = 5 * 60  # peer quartiles change only when fundamentals do
 
@@ -146,6 +147,11 @@ def load_events(path: Path = EVENTS_PATH) -> dict | None:
     return _load_json(path)
 
 
+def load_ipo_prospectus(path: Path = IPO_PROSPECTUS_PATH) -> dict | None:
+    """Each mainboard IPO's prospectus flags and SEBI link (backend/data/ipo_prospectus.json)."""
+    return _load_json(path)
+
+
 def _warm(app: FastAPI) -> None:
     try:
         app.state.market.stocks()
@@ -167,6 +173,7 @@ def create_app(
     alerts: Callable[[], dict | None] | None = None,
     events: Callable[[], dict | None] | None = None,
     economy: Callable[[], dict | None] | None = None,
+    ipo_prospectus: Callable[[], dict | None] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -203,6 +210,7 @@ def create_app(
     app.state.dividends = dividends or load_dividends
     app.state.events = events or load_events
     app.state.economy = economy or load_economy
+    app.state.ipo_prospectus = ipo_prospectus or load_ipo_prospectus
     app.state.scan_slots = threading.BoundedSemaphore(MAX_CONCURRENT_SCANS)
 
     def market_of(request: Request) -> MarketData:
@@ -599,6 +607,10 @@ def create_app(
         past = _nse(request, "ipo-past", LISTINGS_TTL_SECONDS, request.app.state.nse.past_issues)
         prices = {s.symbol: s.price for s in market_of(request).stocks() if s.price is not None}
         rows = ipo.recent_listings(past, prices, days)
+        scanned = (request.app.state.ipo_prospectus() or {}).get("ipos") or {}
+        for r in rows:
+            entry = scanned.get(r["symbol"])
+            r["prospectus"] = {"url": entry["url"], "flags": entry["flags"]} if entry else None
         return [r for r in rows if board is None or r["board"] == board]
 
     # ── prospectus scanner ──────────────────────────────────────────────────
@@ -606,7 +618,7 @@ def create_app(
     @app.get("/prospectus/rules", tags=["prospectus"])
     def prospectus_rules():
         """What the scanner looks for."""
-        return [{"id": r.id, "title": r.title, "why": r.why} for r in rhp.RULES]
+        return [{"id": r.id, "title": r.title, "why": r.why, "track_record": rhp.track_record(r.id)} for r in rhp.RULES]
 
     @app.post("/prospectus/scan", response_model=schemas.ScanResult, tags=["prospectus"])
     def prospectus_scan(request: Request, file: UploadFile = File(..., description="DRHP or RHP as a text PDF")):

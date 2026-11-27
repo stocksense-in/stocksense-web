@@ -189,7 +189,8 @@ Each milestone: one branch, one PR, acceptance criteria met, tests pass, docs up
 - [ ] **M3.4 Nightly signals.** Score new news, write `geo_signals` (sector, effect, strength, analogues, evidence links) to Supabase; `/geopolitics` serves models instead of rules. *Accept:* runs unattended for a week; model version recorded with every signal.
 - [ ] **M3.5 Filings Q&A.** Vector index over annual reports, DRHPs, concall transcripts; local LLM answers with citations. *Accept:* 50 test questions, answers cite the right document/page ≥80% of the time.
 - [ ] **M3.6 Concall summaries & guidance tracking.** *Accept:* summary + guidance changes for 50 companies' latest calls, spot-checked.
-- [ ] **M3.7 Prospectus model.** Train on historical DRHPs + listing outcomes: which red flags actually preceded weak listings. *Accept:* evaluated on later IPOs; rules in `rhp.py` reweighted by evidence.
+- [x] **M3.7 Prospectus model.** Train on historical DRHPs + listing outcomes: which red flags actually preceded weak listings. *Accept:* evaluated on later IPOs; rules in `rhp.py` reweighted by evidence.
+  *Done 28 Nov on 305 IPOs since July 2020 (the rest download when SEBI's site resolves again). Litigation, criminal-case, regulatory, auditor and related-party rules now read the prospectus's own numbers. No flag predicts weak six-month returns. Criminal cases and large litigation go with a listing day about 10 points weaker. The flags together score AUC 0.55 on IPOs from 2023 on. So the rules weren't reweighted: each finding shows its track record instead (`docs/prospectus-evidence-2026-11.md`).*
 
 ### Phase 4 — Public StockSense
 

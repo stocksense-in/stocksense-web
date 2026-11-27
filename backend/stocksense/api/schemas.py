@@ -399,6 +399,7 @@ class Finding(BaseModel):
     summary: str
     why: str
     evidence: list[Evidence]
+    track_record: str | None = Field(None, description="How past IPOs with this flag did in the six months after listing")
 
 
 class ScanResult(BaseModel):
@@ -453,6 +454,18 @@ class IpoBoard(BaseModel):
     upcoming: list[Ipo]
 
 
+class ProspectusFlag(BaseModel):
+    id: str
+    title: str
+    severity: str = Field(description="high | medium")
+    summary: str
+
+
+class ListingProspectus(BaseModel):
+    url: str = Field(description="The red herring prospectus on SEBI's site")
+    flags: list[ProspectusFlag] = Field(description="Medium and high findings of the prospectus checker")
+
+
 class Listing(BaseModel):
     symbol: str
     name: str
@@ -461,6 +474,7 @@ class Listing(BaseModel):
     issue_price: float | None
     price: float | None = Field(description="Latest price, when StockSense tracks the stock")
     return_pct: float | None = Field(description="Return from issue price to latest price, %")
+    prospectus: ListingProspectus | None = Field(None, description="Its prospectus, scanned (mainboard IPOs)")
 
 
 class Announcement(BaseModel):
