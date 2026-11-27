@@ -71,3 +71,28 @@ def test_old_patterns_in_percent_new_in_fractions():
     assert sh.as_percent({"fii_pct": 0.0901, "dii_pct": 0.1357}) == {"fii_pct": 9.01, "dii_pct": 13.57}
     assert sh.as_percent({"fii_pct": 0.0, "non_institutions_pct": 28.98}) == {"fii_pct": 0.0, "non_institutions_pct": 28.98}
     assert sh.as_percent({}) == {}
+
+
+def _pattern(values: dict[str, float]) -> str:
+    """A minimal shareholding-pattern XBRL: one context and one percentage per category member."""
+    contexts = "".join(
+        f'<xbrli:context id="c{i}"><xbrli:entity><xbrli:segment><xbrldi:explicitMember dimension="d">'
+        f'in-capmkt:{member}</xbrldi:explicitMember></xbrli:segment></xbrli:entity></xbrli:context>'
+        for i, member in enumerate(values))
+    facts = "".join(f'<in-capmkt:ShareholdingAsAPercentageOfTotalNumberOfShares contextRef="c{i}">{v}'
+                    f'</in-capmkt:ShareholdingAsAPercentageOfTotalNumberOfShares>' for i, v in enumerate(values.values()))
+    return ('<xbrli:xbrl xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" '
+            f'xmlns:in-capmkt="http://x">{contexts}{facts}</xbrli:xbrl>')
+
+
+def test_older_pattern_formats():
+    # 2023–24: same categories, older spellings (MutualFundsOrUti, the taxonomy's own "Goverments")
+    mid = sh.categories(_pattern({"InstitutionsForeignMember": 47.83, "InstitutionsDomesticMember": 33.6,
+                                                 "MutualFundsOrUtiMember": 25.1, "GovermentsMember": 0.2}))
+    assert (mid["fii_pct"], mid["dii_pct"], mid["mutual_funds_pct"], mid["government_pct"]) == (47.83, 33.6, 25.1, 0.2)
+    # pre-2023: foreign portfolio investors inside one Institutions total; domestic is the rest
+    old = sh.categories(_pattern({"InstitutionsMember": 59.42, "InstitutionsForeignPortfolioInvestorMember": 32.31,
+                                                 "MutualFundsOrUtiMember": 18.03,
+                                                 "IndividualShareholdersHoldingNominalShareCapitalUpToRsTwoLakhMember": 10.78}))
+    assert (old["fii_pct"], old["dii_pct"], old["mutual_funds_pct"], old["small_retail_pct"]) == (32.31, 27.11, 18.03, 10.78)
+    assert "_fpi" not in old and "_institutions" not in old

@@ -74,7 +74,7 @@ def _fetch_company(c, lake: Lake, symbol: str, today: date, pause: float, breake
 def _save_categories(c, lake: Lake, symbol: str, row: dict, pause: float, breaker: Breaker) -> bool:
     """One quarter's full pattern (FII/DII split), unless already saved. True if fetched."""
     path = lake.raw_dir(CATEGORIES, row["quarter_end"]) / f"{symbol}.json"
-    if path.exists():
+    if path.exists() and _complete(path):
         return False
     try:
         cats = nse_shareholding.categories(nse_shareholding.fetch_xbrl(c, row["xbrl"]))
@@ -85,8 +85,19 @@ def _save_categories(c, lake: Lake, symbol: str, row: dict, pause: float, breake
     finally:
         time.sleep(pause)
     path.write_text(json.dumps({"symbol": symbol, "quarter_end": row["quarter_end"].isoformat(),
-                                "xbrl": row["xbrl"], **cats}), encoding="utf-8")
+                                "xbrl": row["xbrl"], "parser": nse_shareholding.PARSER_VERSION, **cats}),
+                    encoding="utf-8")
     return True
+
+
+def _complete(path) -> bool:
+    """Read by the current parser, or already carrying the split: no need to fetch the pattern again."""
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    return doc.get("parser", 1) >= nse_shareholding.PARSER_VERSION or (
+        doc.get("fii_pct") is not None and doc.get("mutual_funds_pct") is not None)
 
 
 def _fetch_categories(c, lake: Lake, symbol: str, master: list[dict], pause: float, breaker: Breaker,
