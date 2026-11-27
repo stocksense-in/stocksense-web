@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 import pandas as pd
 
@@ -92,8 +92,22 @@ def test_results_checks(tmp_path):
     lake.write_table(rows, "financial_results")
     r = lake_checks.check_results(lake, date(2026, 11, 25))
     assert r["companies"] == 2 and r["duplicates"] == 0 and r["behind"] == ["OLDCO"]
+    assert r["negative_revenue"] == ["OLDCO Dec 2024"]
+    # in a two-company table one laggard is half the market and one negative quarter a third: our pipeline
     text = " | ".join(r["problems"])
     assert "negative revenue" in text and "OLDCO" in text and "TCS" not in text
+
+
+def test_a_few_late_or_negative_companies_are_notes_not_problems(tmp_path):
+    lake = Lake(tmp_path)
+    rows = [{"symbol": f"CO{i:03d}", "period_end": date(2026, 9, 30) - timedelta(days=91 * q), "consolidated": True,
+             "revenue": 100.0} for i in range(100) for q in range(6)]
+    rows.append({"symbol": "LATE", "period_end": date(2025, 12, 31), "consolidated": True, "revenue": 50.0})
+    rows.append({"symbol": "INVESTCO", "period_end": date(2026, 9, 30), "consolidated": True, "revenue": -7.2})
+    lake.write_table(pd.DataFrame(rows), "financial_results")
+    r = lake_checks.check_results(lake, date(2026, 11, 27))
+    assert r["problems"] == [] and r["behind"] == ["LATE"]
+    assert any("LATE" in n for n in r["notes"]) and any("INVESTCO Sep 2026" in n for n in r["notes"])
 
 
 def test_shareholding_checks(tmp_path):

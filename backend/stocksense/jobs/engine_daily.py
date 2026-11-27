@@ -47,6 +47,7 @@ class RunReport:
     started_at: str
     steps: list[dict] = field(default_factory=list)
     problems: dict[str, list[str]] = field(default_factory=dict)
+    notes: dict[str, list[str]] = field(default_factory=dict)  # worth knowing, not a fault (e.g. late filers)
     seconds: float = 0.0
 
     @property
@@ -54,7 +55,7 @@ class RunReport:
         return all(s["ok"] for s in self.steps) and not any(self.problems.values())
 
 
-RESULTS_TOP = 100  # companies whose quarterly results the weekly run keeps current (only new filings are fetched)
+RESULTS_RECENT = 2  # quarters of integrated filings the weekly run checks, for every company (~1 h)
 RESULTS_RESTS = 4  # NSE throttles long runs; rest 15 min and resume up to this many times
 SHAREHOLDING_RESTS = 6  # NSE throttles long runs; rest and resume up to this many times
 
@@ -78,8 +79,10 @@ def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
         Step("india_macro", lambda: ingest_india_macro.run(lake=lake, today=today), weekly=True),
         Step("event_study", lambda: event_study.run(lake=lake), weekly=True),
         Step("valuation_context", lambda: valuation.write(lake), weekly=True),
-        # Results arrive quarterly; weekly picks up each filing within days, fetching only new ones.
-        Step("results", lambda: ingest_results.run(top=RESULTS_TOP, lake=lake, rests=RESULTS_RESTS), weekly=True),
+        # Results arrive quarterly; weekly picks up each company's new filing within days. Every
+        # result since Mar 2025 is an integrated filing, so one list request per company finds it.
+        Step("results", lambda: ingest_results.run(everything=True, recent=RESULTS_RECENT, by_size=True, lake=lake,
+                                                   rests=RESULTS_RESTS), weekly=True),
         Step("financials_export", lambda: financials.write(lake), weekly=True),
         # Two requests per company, every NSE equity (~2 h); pledge history builds from these snapshots.
         Step("shareholding", lambda: ingest_shareholding.run(everything=True, lake=lake, rests=SHAREHOLDING_RESTS),
@@ -107,6 +110,7 @@ def run_steps(lake: Lake, steps: list[Step], weekly: bool, today: date | None = 
     try:
         checks = lake_checks.check_all(lake, today)
         report.problems = {name: r["problems"] for name, r in checks.items()}
+        report.notes = {name: r["notes"] for name, r in checks.items() if r.get("notes")}
         if "eod_prices" in lake.datasets():
             last = eod.check(lake).get("last_day")
             if last and (today - date.fromisoformat(last)).days > lake_checks.STALE_AFTER_DAYS:
@@ -116,7 +120,8 @@ def run_steps(lake: Lake, steps: list[Step], weekly: bool, today: date | None = 
     report.seconds = round(time.monotonic() - t0, 1)
     with (lake.root / RUNS_FILE).open("a", encoding="utf-8") as f:
         f.write(json.dumps({"started_at": report.started_at, "seconds": report.seconds, "weekly": weekly,
-                            "ok": report.ok, "steps": report.steps, "problems": report.problems}) + "\n")
+                            "ok": report.ok, "steps": report.steps, "problems": report.problems,
+                            "notes": report.notes}) + "\n")
     return report
 
 
@@ -129,4 +134,6 @@ def run(days: int = 10, weekly: bool = False, lake: Lake | None = None, today: d
     found = {k: v for k, v in report.problems.items() if v}
     log.info(f"engine: {'OK' if report.ok else 'NEEDS ATTENTION'} in {report.seconds:.0f}s"
              + (f"; failed: {', '.join(failed)}" if failed else "") + (f"; problems: {found}" if found else ""))
+    for name, notes in report.notes.items():
+        log.info(f"engine: note on {name}: {' | '.join(notes)}")
     return 0 if report.ok else 1
