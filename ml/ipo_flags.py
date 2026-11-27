@@ -14,7 +14,7 @@ Outcomes per IPO, from our own price history (followed by ISIN, so renames don't
   weak           excess_6m below -10%: the six months after listing went clearly worse than the market
 
 Judged three ways:
-  1. Each rule alone: flagged IPOs against clear ones, difference in mean six-month excess with a
+  1. Each rule alone: flagged IPOs against clear ones, difference in median six-month excess with a
      bootstrap 95% interval, and the share that turned out weak.
   2. All rules together, a logistic regression fitted on IPOs listed before 2023 and scored on
      2023 onwards by AUC (0.5 = no better than chance), against the checker's current score (the
@@ -104,9 +104,11 @@ def load(lake: Lake) -> pd.DataFrame:
 
 
 def bootstrap_diff(a: np.ndarray, b: np.ndarray, rng: np.random.Generator) -> tuple[float, float, float]:
-    """Mean(a) - mean(b) and its percentile bootstrap 95% interval."""
-    diffs = np.array([rng.choice(a, len(a)).mean() - rng.choice(b, len(b)).mean() for _ in range(BOOTSTRAP)])
-    return float(a.mean() - b.mean()), float(np.percentile(diffs, 2.5)), float(np.percentile(diffs, 97.5))
+    """Median(a) - median(b) and its percentile bootstrap 95% interval. Medians, because IPO returns are
+    heavily skewed: a few multibaggers swing a mean (customer concentration's mean said "better" while
+    its median said "worse")."""
+    diffs = np.array([np.median(rng.choice(a, len(a))) - np.median(rng.choice(b, len(b))) for _ in range(BOOTSTRAP)])
+    return float(np.median(a) - np.median(b)), float(np.percentile(diffs, 2.5)), float(np.percentile(diffs, 97.5))
 
 
 def per_rule(df: pd.DataFrame, outcome: str = "excess_6m") -> pd.DataFrame:
@@ -209,7 +211,7 @@ def report(df: pd.DataFrame, rules: pd.DataFrame, listing: pd.DataFrame, fit: di
              f"listing {pct(judged['excess_6m'].median())}; {judged['weak'].mean():.0%} were weak (six months more than "
              f"10 points behind NIFTY 50).", "",
              "## Each rule alone (six months after listing, against NIFTY 50)", "",
-             "| Rule | Flagged | Clear | Median flagged | Median clear | Weak if flagged | Weak if clear | Mean difference (95% CI) | Verdict |",
+             "| Rule | Flagged | Clear | Median flagged | Median clear | Weak if flagged | Weak if clear | Difference in medians (95% CI) | Verdict |",
              "|---|---:|---:|---:|---:|---:|---:|---|---|"]
     for r in rules.itertuples():
         if r.verdict == "too few to judge":
@@ -218,7 +220,7 @@ def report(df: pd.DataFrame, rules: pd.DataFrame, listing: pd.DataFrame, fit: di
         lines.append(f"| {r.title} | {r.flagged} | {r.clear} | {pct(r.median_flagged)} | {pct(r.median_clear)} | "
                      f"{r.weak_flagged:.0%} | {r.weak_clear:.0%} | {pct(r.diff)} ({pct(r.lo)} to {pct(r.hi)}) | {r.verdict} |")
     lines += ["", "## Each rule alone, listing day (close against the issue price)", "",
-              "| Rule | Flagged | Mean difference (95% CI) | Verdict |", "|---|---:|---|---|"]
+              "| Rule | Flagged | Difference in medians (95% CI) | Verdict |", "|---|---:|---|---|"]
     for r in listing.itertuples():
         if r.verdict == "too few to judge":
             continue
