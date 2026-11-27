@@ -42,6 +42,10 @@ ANALYST_LABEL = re.compile(r"(?:^|(?<=[.?!]\s))((?:Shri|Mr\.?|Ms\.?)?\s?[A-Z][\w
 # ...and the same style for the company's own people: "Mr. C.S. Setty – Chairman, State Bank of India:"
 COMPANY_ROLE = re.compile(r"\b(chairman|chairperson|managing director|\bmd\b|ceo|cfo|coo|chief|director|president|"
                           r"head|officer|founder|executive|whole[- ]time|general manager|treasurer|secretary)\b", re.I)
+# The market rather than the company: "global refinery runs…", "government capital expenditure…"
+INDUSTRY = re.compile(r"\b(industry|industries|global|china|chinese|government|economy|gdp|lme|commentators|"
+                      r"the market|world|country's|nation)\b", re.I)
+OWN = re.compile(r"\b(we|our|us|ours)\b", re.I)
 # Questions that don't end with a question mark
 ASKING = re.compile(r"^(sir|madam|ma'am)\b|\b(just trying to understand|wanted to understand|want to understand|"
                     r"can you (please )?(help|share|give|tell|throw)|could you|would you|if you could|any colou?r on)\b", re.I)
@@ -260,6 +264,8 @@ def _from_company(sents: list[Line]) -> list[tuple[int, Line]]:
     for i, s in enumerate(sents):
         if s.text.endswith("?") or SMALL_TALK.search(s.text) or ASKING.search(s.text):
             continue
+        if INDUSTRY.search(s.text) and not OWN.search(s.text):
+            continue  # about the market, not the company
         if team is not None and s.speaker not in team and not (s.speaker is None and i < start):
             continue
         out.append((i, s))
