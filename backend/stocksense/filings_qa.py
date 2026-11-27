@@ -100,6 +100,8 @@ class PageHit:
     page: int        # 1-based, as printed in a PDF viewer
     score: float
     snippet: str
+    document: str = ""  # which filing, when the search covers several (an earnings call's filing date)
+    link: str = ""      # the filing's PDF
 
 
 def issuer_words(company: str | None) -> frozenset[str]:
@@ -172,6 +174,30 @@ def company_name(lake, symbol: str) -> str | None:
 @lru_cache(maxsize=8)
 def _index(path: str, company: str | None = None) -> PageIndex:
     return PageIndex(json.loads(gzip.decompress(Path(path).read_bytes())), company)
+
+
+CALLS = 4  # earnings calls searched: about a year
+
+
+def ask_calls(lake, symbol: str, question: str, k: int = 5, calls: int = CALLS) -> list[PageHit]:
+    """The pages of the company's latest earnings-call transcripts most likely to answer the question,
+    each with its call's filing date and PDF. Uses what `ingest-transcripts` collected."""
+    from .jobs import ingest_transcripts
+
+    rows = (lake.query("select filed, file, attachment from transcripts where symbol = ? and is_call "
+                       "order by filed desc limit ?", [symbol.upper(), calls])
+            if "transcripts" in set(lake.datasets()) else None)
+    if rows is None or rows.empty:
+        raise LookupError(f"no call transcripts for {symbol}: run `python -m stocksense ingest-transcripts` first")
+    pages, where = [], []
+    for r in rows.itertuples():
+        doc = ingest_transcripts.load_pages(lake.raw / ingest_transcripts.SOURCE / r.file)
+        filed = str(r.filed)[:10]
+        pages += doc
+        where += [(filed, n, r.attachment) for n in range(1, len(doc) + 1)]
+    index = PageIndex(pages)
+    return [PageHit(where[h.page - 1][1], h.score, h.snippet, where[h.page - 1][0], where[h.page - 1][2])
+            for h in index.search(question, k)]
 
 
 def ask(lake, symbol: str, question: str, k: int = 5) -> list[PageHit]:
