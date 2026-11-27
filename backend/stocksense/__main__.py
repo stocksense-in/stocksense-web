@@ -34,6 +34,7 @@ Jobs
     alerts         what happened to companies on a day: big moves, volume, results, orders, stakes, pledges
     ingest-results quarterly P&L history since 2005 from NSE filings (default: 20 largest companies)
     ingest-shareholding  promoter holding by quarter + promoter pledges (default: 50 largest; --all)
+    ingest-transcripts   earnings-call transcripts filed with NSE: last 4 calls of the 500 largest → lake
     engine-daily   update every lake source for the last N days, check the data, log the run  (daily)
     check-lake     data checks on the index, macro and GDELT datasets
     ingest-fno     NSE futures & options end-of-day file, 2010 → today: OI, put/call ratios  (daily)
@@ -182,6 +183,14 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--history", type=int, default=0, metavar="N",
                    help="read the last N quarters' full patterns (FII/DII split history) from the saved lists")
 
+    p = jobs.add_parser("ingest-transcripts", help="earnings-call transcripts filed with NSE (M3.5, M3.6)")
+    p.add_argument("--symbols", nargs="+", metavar="SYM", help="these companies")
+    p.add_argument("--top", type=int, default=500, help="how many of the largest companies")
+    p.add_argument("--calls", type=int, default=4, help="how many of each company's latest calls")
+    p.add_argument("--rests", type=int, default=0,
+                   help="when NSE stops answering, rest 15 min and resume, up to this many times")
+    p.add_argument("--workers", type=int, default=4, help="processes extracting PDF text")
+
     p = jobs.add_parser("engine-daily", help="update the whole lake and check it")
     p.add_argument("--days", type=int, default=10, help="how many recent days to fetch (catch-up after downtime)")
     p.add_argument("--weekly", action="store_true", help="also corporate actions and the event study")
@@ -314,6 +323,12 @@ def main() -> None:
         from .jobs import ingest_shareholding
 
         ingest_shareholding.run(args.symbols, args.top, everything=args.all, rests=args.rests, history=args.history)
+        return
+
+    if args.job == "ingest-transcripts":
+        from .jobs import ingest_transcripts
+
+        ingest_transcripts.run(args.symbols, args.top, calls=args.calls, rests=args.rests, workers=args.workers)
         return
 
     if args.job == "ingest-results":
