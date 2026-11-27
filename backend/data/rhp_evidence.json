@@ -1,0 +1,209 @@
+{
+ "as_of": "2026-11-28",
+ "ipos": 277,
+ "listed_from": "2020-07",
+ "listed_to": "2026-05",
+ "outcome": "return over the six months after listing, minus NIFTY 50's",
+ "rules": {
+  "customer-concentration": {
+   "flagged": 76,
+   "clear": 201,
+   "verdict": "no clear difference",
+   "median_flagged": -0.1011,
+   "median_clear": -0.0343,
+   "weak_flagged": 0.5,
+   "weak_clear": 0.428,
+   "diff": -0.0668,
+   "lo": -0.1742,
+   "hi": 0.0513,
+   "listing": {
+    "flagged": 90,
+    "verdict": "no clear difference",
+    "diff": 0.0215,
+    "lo": -0.0444,
+    "hi": 0.1089
+   }
+  },
+  "supplier-concentration": {
+   "flagged": 32,
+   "clear": 245,
+   "verdict": "no clear difference",
+   "median_flagged": -0.1381,
+   "median_clear": -0.0345,
+   "weak_flagged": 0.562,
+   "weak_clear": 0.433,
+   "diff": -0.1036,
+   "lo": -0.2112,
+   "hi": 0.1031,
+   "listing": {
+    "flagged": 46,
+    "verdict": "no clear difference",
+    "diff": 0.008,
+    "lo": -0.0857,
+    "hi": 0.1099
+   }
+  },
+  "criminal-proceedings": {
+   "flagged": 83,
+   "clear": 194,
+   "verdict": "no clear difference",
+   "median_flagged": -0.0811,
+   "median_clear": -0.0338,
+   "weak_flagged": 0.47,
+   "weak_clear": 0.438,
+   "diff": -0.0474,
+   "lo": -0.1673,
+   "hi": 0.0564,
+   "listing": {
+    "flagged": 90,
+    "verdict": "worse",
+    "diff": -0.1068,
+    "lo": -0.1613,
+    "hi": -0.0398
+   }
+  },
+  "litigation": {
+   "flagged": 113,
+   "clear": 164,
+   "verdict": "no clear difference",
+   "median_flagged": -0.0597,
+   "median_clear": -0.0385,
+   "weak_flagged": 0.46,
+   "weak_clear": 0.439,
+   "diff": -0.0212,
+   "lo": -0.1186,
+   "hi": 0.0923,
+   "listing": {
+    "flagged": 123,
+    "verdict": "worse",
+    "diff": -0.0917,
+    "lo": -0.1512,
+    "hi": -0.0336
+   }
+  },
+  "offer-for-sale": {
+   "flagged": 38,
+   "clear": 239,
+   "verdict": "no clear difference",
+   "median_flagged": -0.0392,
+   "median_clear": -0.0508,
+   "weak_flagged": 0.421,
+   "weak_clear": 0.452,
+   "diff": 0.0116,
+   "lo": -0.1322,
+   "hi": 0.1609,
+   "listing": {
+    "flagged": 39,
+    "verdict": "no clear difference",
+    "diff": -0.0334,
+    "lo": -0.1002,
+    "hi": 0.1483
+   }
+  },
+  "general-corporate-purposes": {
+   "flagged": 0,
+   "clear": 277,
+   "verdict": "too few to judge"
+  },
+  "losses": {
+   "flagged": 119,
+   "clear": 158,
+   "verdict": "no clear difference",
+   "median_flagged": -0.0332,
+   "median_clear": -0.054,
+   "weak_flagged": 0.454,
+   "weak_clear": 0.443,
+   "diff": 0.0208,
+   "lo": -0.0851,
+   "hi": 0.1618,
+   "listing": {
+    "flagged": 132,
+    "verdict": "no clear difference",
+    "diff": -0.0303,
+    "lo": -0.1156,
+    "hi": 0.0321
+   }
+  },
+  "negative-cash-flow": {
+   "flagged": 162,
+   "clear": 115,
+   "verdict": "no clear difference",
+   "median_flagged": -0.0485,
+   "median_clear": -0.0421,
+   "weak_flagged": 0.463,
+   "weak_clear": 0.426,
+   "diff": -0.0064,
+   "lo": -0.1131,
+   "hi": 0.0976,
+   "listing": {
+    "flagged": 180,
+    "verdict": "no clear difference",
+    "diff": -0.0204,
+    "lo": -0.1253,
+    "hi": 0.0367
+   }
+  },
+  "promoter-pledge": {
+   "flagged": 5,
+   "clear": 272,
+   "verdict": "too few to judge"
+  },
+  "related-party": {
+   "flagged": 19,
+   "clear": 258,
+   "verdict": "no clear difference",
+   "median_flagged": -0.1653,
+   "median_clear": -0.0371,
+   "weak_flagged": 0.526,
+   "weak_clear": 0.442,
+   "diff": -0.1282,
+   "lo": -0.1887,
+   "hi": 0.144,
+   "listing": {
+    "flagged": 20,
+    "verdict": "no clear difference",
+    "diff": 0.0012,
+    "lo": -0.1181,
+    "hi": 0.1628
+   }
+  },
+  "auditor-remarks": {
+   "flagged": 21,
+   "clear": 256,
+   "verdict": "no clear difference",
+   "median_flagged": -0.1048,
+   "median_clear": -0.0439,
+   "weak_flagged": 0.524,
+   "weak_clear": 0.441,
+   "diff": -0.0609,
+   "lo": -0.1797,
+   "hi": 0.1177,
+   "listing": {
+    "flagged": 25,
+    "verdict": "no clear difference",
+    "diff": -0.005,
+    "lo": -0.0946,
+    "hi": 0.171
+   }
+  },
+  "regulatory-action": {
+   "flagged": 60,
+   "clear": 217,
+   "verdict": "no clear difference",
+   "median_flagged": -0.1034,
+   "median_clear": -0.0343,
+   "weak_flagged": 0.517,
+   "weak_clear": 0.429,
+   "diff": -0.0691,
+   "lo": -0.1826,
+   "hi": 0.0288,
+   "listing": {
+    "flagged": 65,
+    "verdict": "no clear difference",
+    "diff": -0.0668,
+    "lo": -0.1343,
+    "hi": 0.0094
+   }
+  }
+ }
+}
