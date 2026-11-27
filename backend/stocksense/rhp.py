@@ -329,7 +329,26 @@ def _promoter_pledge(pages: list[str]) -> RuleResult:
     return (HIGH, "Some promoter shareholding is pledged.", hits) if hits else None
 
 
+# The usual Risk Factors sentence: "the percentage of related party transactions to our revenue from
+# operations in Fiscal 2021, 2022 and 2023 was 13.34%, 11.07% and 12.14%, respectively".
+_RPT_SHARE = (r"related[\s-]+party\s+transactions?(?:\s*\([^)]{0,40}\))?\s+(?:to|as\s+(?:a\s+)?percentage\s+of)\s+"
+              r"(?:our\s+)?(?:total\s+)?(?:restated\s+)?(?:consolidated\s+)?"
+              r"(?:revenue\s+from\s+oper\s?ations|total\s+income|revenue|income)"
+              r"[^%]{0,260}?\b(?:was|were|amounted\s+to|stood\s+at|is|are)\s+"
+              r"((?:\d{1,3}(?:\.\d+)?\s?%(?:\s*,\s*|\s+and\s+|\s*)){1,6})")
+_PCT = re.compile(r"(\d{1,3}(?:\.\d+)?)\s?%")
+
+
 def _related_party(pages: list[str]) -> RuleResult:
+    hits = _find(pages, _RPT_SHARE)
+    if hits:
+        shares = [float(x) for x in _PCT.findall(hits[0].match.group(1))]
+        top = max(float(x) for h in hits for x in _PCT.findall(h.match.group(1)))
+        listed = ", ".join(f"{x:g}%" for x in shares)
+        level = HIGH if top >= 25 else MEDIUM if top >= 10 else LOW
+        what = ("Related-party transactions came to " + listed + " of revenue in the periods shown"
+                if len(shares) > 1 else f"Related-party transactions came to {listed} of revenue")
+        return level, f"{what} (page {hits[0].page}).", hits
     hits = _find(pages, r"related\s+party\s+transactions?[^.]{0,200}?(\d{1,3}(?:\.\d+)?)\s?%\s+of\s+(?:our\s+)?(?:total\s+)?(?:revenue|income|expenses)")
     if not hits:
         return None
@@ -418,10 +437,18 @@ def track_record(rule_id: str, doc: dict | None = None) -> str | None:
             f"{_pct(entry['median_clear'])} for the rest; {entry['weak_flagged']:.0%} trailed the market by more than "
             f"10 points, against {entry['weak_clear']:.0%}.")
     if entry["verdict"] == "worse":
-        return base + " Flagged issues did measurably worse."
-    if entry["verdict"] == "better":
-        return base + " On past IPOs this flag hasn't meant weaker shares; still worth reading."
-    return base + " The difference is within what chance would give, so on its own it hasn't predicted weaker shares."
+        base += " Flagged issues did measurably worse."
+    elif entry["verdict"] == "better":
+        base += " On past IPOs this flag hasn't meant weaker shares; still worth reading."
+    else:
+        base += " The difference is within what chance would give, so on its own it hasn't predicted weaker shares."
+    listing = entry.get("listing") or {}
+    if listing.get("verdict") in ("worse", "better"):
+        gap = abs(listing["diff"]) * 100
+        way = "lower" if listing["verdict"] == "worse" else "higher"
+        base += (f" On listing day, flagged issues closed a median {gap:.0f} points {way} against the issue price than the "
+                 f"rest, a gap too large to be chance.")
+    return base
 
 
 def scan_pages(pages: list[str]) -> ScanResult:

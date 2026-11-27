@@ -55,6 +55,15 @@ def test_track_record_reads_the_study():
     assert rhp.track_record("losses", {}) is None  # no study yet
 
 
+def test_track_record_adds_a_clear_listing_day_gap():
+    doc = {**EVIDENCE, "rules": {**EVIDENCE["rules"]}}
+    doc["rules"]["litigation"] = {**EVIDENCE["rules"]["litigation"],
+                                  "listing": {"flagged": 120, "verdict": "worse", "diff": -0.092, "lo": -0.15, "hi": -0.03}}
+    assert "On listing day, flagged issues closed a median 9 points lower" in rhp.track_record("litigation", doc)
+    doc["rules"]["litigation"]["listing"]["verdict"] = "no clear difference"
+    assert "listing day" not in rhp.track_record("litigation", doc)
+
+
 # A synthetic offer-document summary in the SEBI ICDR layout, as text extraction lays it out.
 LITIGATION_PAGE = """Summary of Outstanding Litigation (in Rs. million, unless otherwise specified)
 Name of the Entity Criminal Proceedings Tax Proceedings Statutory or Regulatory Proceedings Disciplinary
@@ -111,3 +120,19 @@ def test_stated_judges_each_match_in_its_own_sentence():
             "emphasis of matter paragraph for Fiscal 2023.")
     hits = rhp._stated([page], r"emphasis\s+of\s+matters?")
     assert len(hits) == 1 and "2023" in hits[0].quote  # the first (across a line break) is negated, the second stands
+
+
+def test_related_party_share_of_revenue_listed_by_period():
+    pages = ["Risk factors. The percentage of related party transactions to our revenue from oper ations in "
+             "Fiscal 2021, 2022 and 2023 was 20.77%, 25.39% and 16.18%, respectively. For further details see page 300."]
+    level, text, _ = rhp._related_party(pages)
+    assert level == rhp.HIGH
+    assert "20.77%, 25.39%, 16.18%" in text and "page 1" in text
+
+
+def test_related_party_small_share_is_low_and_threshold_boilerplate_ignored():
+    small = ["The percentage of related party transactions to our total income in Fiscals 2022 and 2023 was 1.31% and 0.95%, respectively."]
+    assert rhp._related_party(small)[0] == rhp.LOW
+    boiler = ["Related party transactions which, individually or in the aggregate, exceed 10% of the total restated "
+              "consolidated revenue of our Company are disclosed below."]
+    assert rhp._related_party(boiler) is None
