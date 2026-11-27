@@ -497,3 +497,22 @@ class Events(BaseModel):
     announcements: list[Announcement]
     insiders: Insiders | None
     insider_note: str | None
+
+
+class EconomySeries(BaseModel):
+    series: str = Field(description="repo_rate | cpi_inflation | iip_growth | fx_reserves | gsec_10y")
+    label: str
+    unit: str
+    value: float
+    period: str = Field(description="The month (or day, for the repo rate) the value is for")
+    year_ago: float | None
+    released: str = Field(description="When it became public (estimated from the usual release lag)")
+    source: str
+    note: str = Field(description="Where it stands now, for a beginner")
+    why: str = Field(description="Why it matters for shares")
+    history: list[tuple[str, float]] = Field(description="[period, value], oldest first")
+
+
+class Economy(BaseModel):
+    as_of: str | None
+    series: list[EconomySeries]
