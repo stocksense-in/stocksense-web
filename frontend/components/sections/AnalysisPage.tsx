@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import type { Alert, CompanyHeadline, Dividends, Financials, History, Holders, StockDetail, StockOut } from '@/lib/api';
+import type { Alert, CompanyEvents, CompanyHeadline, Dividends, Financials, History, Holders, StockDetail, StockOut } from '@/lib/api';
 import { API_URL, api, fmtCrore, fmtPct, fmtRupees, stockScoreColor, verdictPill } from '@/lib/api';
 import { PriceChart } from '@/components/company/PriceChart';
 import { ScoreBreakdown } from '@/components/company/ScoreBreakdown';
@@ -10,13 +10,14 @@ import { HoldersPanel } from '@/components/company/HoldersPanel';
 import { DividendsPanel } from '@/components/company/DividendsPanel';
 import { PeersTable } from '@/components/company/PeersTable';
 import { NewsPanel } from '@/components/company/NewsPanel';
+import { EventsPanel } from '@/components/company/EventsPanel';
 import { AlertsStrip } from '@/components/company/AlertsStrip';
 import { useWatchlist } from '@/lib/watchlist';
 
 type Status = 'loading' | 'ok' | 'notfound' | 'offline';
-export type CompanyTab = 'score' | 'financials' | 'holders' | 'dividends' | 'peers' | 'news';
+export type CompanyTab = 'score' | 'financials' | 'holders' | 'dividends' | 'events' | 'peers' | 'news';
 type Tab = CompanyTab;
-const TABS: Tab[] = ['score', 'financials', 'holders', 'dividends', 'peers', 'news'];
+const TABS: Tab[] = ['score', 'financials', 'holders', 'dividends', 'events', 'peers', 'news'];
 
 const QUICK: [string, string][] = [
   ['INFY', 'IT Services'], ['HDFCBANK', 'Banking'], ['MARUTI', 'Auto'], ['ITC', 'FMCG'], ['SUNPHARMA', 'Pharma'],
@@ -40,6 +41,7 @@ interface Company {
   fin: Financials | null;
   holders: Holders | null;
   divs: Dividends | null;
+  events: CompanyEvents | null;
 }
 
 export function AnalysisPage() {
@@ -78,17 +80,18 @@ export function AnalysisPage() {
       if (!d) {
         const probe = await api.search(symbol, signal);
         if (signal.aborted) return;
-        setCompany({ symbol, status: probe === null ? 'offline' : 'notfound', detail: null, fin: null, holders: null, divs: null });
+        setCompany({ symbol, status: probe === null ? 'offline' : 'notfound', detail: null, fin: null, holders: null, divs: null, events: null });
         return;
       }
-      setCompany({ symbol, status: 'ok', detail: d, fin: null, holders: null, divs: null });
-      const [fin, holders, divs] = await Promise.all([
+      setCompany({ symbol, status: 'ok', detail: d, fin: null, holders: null, divs: null, events: null });
+      const [fin, holders, divs, events] = await Promise.all([
         d.available.financials ? api.financials(symbol, signal) : Promise.resolve(null),
         d.available.holders ? api.holders(symbol, signal) : Promise.resolve(null),
         d.available.dividends ? api.dividends(symbol, signal) : Promise.resolve(null),
+        d.available.events ? api.events(symbol, signal) : Promise.resolve(null),
       ]);
       if (signal.aborted) return;
-      setCompany(c => (c && c.symbol === symbol ? { ...c, fin, holders, divs } : c));
+      setCompany(c => (c && c.symbol === symbol ? { ...c, fin, holders, divs, events } : c));
     })();
     return () => ctl.abort();
   }, [symbol]);
@@ -134,6 +137,7 @@ export function AnalysisPage() {
   const fin = company?.fin ?? null;
   const holders = company?.holders ?? null;
   const divs = company?.divs ?? null;
+  const events = company?.events ?? null;
   const shownHistory = history && detail && history.symbol === detail.stock.symbol ? history : null;
   const s = detail?.stock;
   const sc = detail?.score;
@@ -142,6 +146,7 @@ export function AnalysisPage() {
     ['financials', 'Financials', !!fin],
     ['holders', 'Holders', !!holders],
     ['dividends', 'Dividends', !!divs],
+    ['events', 'Filings', !!events],
     ['peers', 'Peers', !!detail?.peers.length],
     ['news', 'News', !!detail],
   ];
@@ -305,6 +310,7 @@ export function AnalysisPage() {
           {activeTab === 'financials' && fin && <FinancialsPanel fin={fin} />}
           {activeTab === 'holders' && holders && <HoldersPanel h={holders} />}
           {activeTab === 'dividends' && divs && <DividendsPanel d={divs} />}
+          {activeTab === 'events' && events && <EventsPanel e={events} name={s.name ?? s.symbol} />}
           {activeTab === 'peers' && <PeersTable stock={s} peers={detail.peers} onOpen={open} />}
           {activeTab === 'news' && <NewsPanel name={s.name ?? s.symbol} items={news?.symbol === s.symbol ? news.items : null} />}
 

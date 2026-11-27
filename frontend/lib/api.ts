@@ -77,7 +77,7 @@ export interface StockDetail {
   stock: StockOut;
   score: ScoreDetail;
   peers: StockOut[];
-  available: { financials: boolean; holders: boolean; dividends: boolean };
+  available: { financials: boolean; holders: boolean; dividends: boolean; events?: boolean };
 }
 
 export interface FinancialQuarter {
@@ -135,6 +135,34 @@ export interface HolderQuarter {
   insurance_pct: number | null;
   small_retail_pct: number | null;
   government_pct: number | null;
+}
+
+export interface Announcement {
+  at: string;
+  group: string;
+  category: string;
+  title: string;
+  link: string | null;
+}
+
+export interface InsiderTrade {
+  date: string;
+  person: string;
+  role: string;
+  side: 'buy' | 'sell';
+  value_cr: number | null;
+  pct_after: number | null;
+}
+
+export interface CompanyEvents {
+  symbol: string;
+  source: string;
+  since: string | null;
+  insiders_until: string | null;
+  counts: Record<string, number>;
+  announcements: Announcement[];
+  insiders: { bought_cr: number | null; sold_cr: number | null; buys: number; sells: number; trades: InsiderTrade[] } | null;
+  insider_note: string | null;
 }
 
 export interface Holders {
@@ -311,6 +339,7 @@ export const api = {
   financials: (s: string, signal?: AbortSignal) => get<Financials>(`/stocks/${sym(s)}/financials`, signal),
   holders: (s: string, signal?: AbortSignal) => get<Holders>(`/stocks/${sym(s)}/holders`, signal),
   dividends: (s: string, signal?: AbortSignal) => get<Dividends>(`/stocks/${sym(s)}/dividends`, signal),
+  events: (s: string, signal?: AbortSignal) => get<CompanyEvents>(`/stocks/${sym(s)}/events`, signal),
   alerts: (q: { symbols?: string; kind?: string; days?: number; limit?: number } = {}, signal?: AbortSignal) => get<Alerts>(`/alerts${qs(q)}`, signal),
   companyNews: (s: string, limit = 20, signal?: AbortSignal) => get<CompanyHeadline[]>(`/stocks/${sym(s)}/news?limit=${limit}`, signal),
   history: (s: string, range = '1y', signal?: AbortSignal) => get<History>(`/stocks/${sym(s)}/history?range=${range}`, signal),
@@ -338,6 +367,8 @@ export function fmtRupees(v: number | null | undefined, digits = 2): string {
 export function fmtCrore(v: number | null | undefined): string {
   if (v === null || v === undefined || Number.isNaN(v)) return '—';
   if (Math.abs(v) >= 100000) return `₹${(v / 100000).toFixed(2)} L Cr`;
+  if (v !== 0 && Math.abs(v) < 1) return `₹${(v * 100).toLocaleString('en-IN', { maximumFractionDigits: 1 })} lakh`;
+  if (Math.abs(v) < 10) return `₹${v.toLocaleString('en-IN', { maximumFractionDigits: 1 })} Cr`;
   return `₹${Math.round(v).toLocaleString('en-IN')} Cr`;
 }
 
