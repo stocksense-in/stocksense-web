@@ -134,3 +134,22 @@ def test_pledge_note_freed_steady_and_never():
     assert holders.pledge_note(entry([10, 20])) is None  # under a year, with pledges
     assert holders.pledge_note(entry([0.0] * 7, promoter=0.0)) is None  # no promoter group
     assert holders.pledge_note({"quarters": [{"quarter_end": "2026-09-30", "promoter_pct": 50}]}) is None
+
+
+def test_pledged_now_rising_and_the_screener_filters(market):
+    a, b, c, d = (r["symbol"] for r in ROWS[:4])
+    sh = pd.concat([shareholding(s, [44.0] * 7) for s in (a, b, c)] + [shareholding(d, [0.0] * 7)])
+    sh["promoter_encumbered_pct"] = [0.0] * 7 + [10.0, 10, 10, 10, 12, 15, 20] + [None] * 7 + [None] * 7
+    doc = holders.build(sh, pd.DataFrame([{"symbol": c, "fetched": date(2026, 11, 26), "pledged_pct_of_promoter": 0.0,
+                                           "pledged_pct_of_total": 0.0, "all_pledges_pct_of_total": 1.0}]))
+    entries = doc["companies"]
+    assert [holders.pledged_now(entries[s]) for s in (a, b, c, d)] == [0.0, 20.0, 0.0, 0.0]  # d: no promoter group
+    assert holders.pledged_now({"quarters": []}) is None
+    assert holders.pledges_rising(entries[b]) and not holders.pledges_rising(entries[a])
+    client = TestClient(create_app(market=market, headlines=lambda: [], history=lambda s, r: [], holders=lambda: doc))
+
+    def found(**params):
+        return {r["symbol"] for r in client.get("/stocks", params={**params, "page_size": 200}).json()["results"]}
+
+    assert found(pledges="none") == {a, c, d}
+    assert found(pledges="rising") == {b}

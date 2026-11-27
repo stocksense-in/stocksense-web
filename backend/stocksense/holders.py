@@ -111,11 +111,38 @@ def _quarter(quarter_end: str) -> str:
     return date.fromisoformat(quarter_end).strftime("%b %Y")
 
 
+def _pledge_quarters(entry: dict | None) -> list[dict]:
+    return [q for q in (entry or {}).get("quarters", [])
+            if q.get("promoter_encumbered_pct") is not None and (q.get("promoter_pct") or 0) >= 1]
+
+
+def pledged_now(entry: dict | None) -> float | None:
+    """The share of the promoters' stake pledged: the latest pledge position, else the latest pattern's
+    pledged-or-encumbered figure; 0 for a company with no promoter group; None when unknown."""
+    snapshot = ((entry or {}).get("pledge") or {}).get("pledged_pct_of_promoter")
+    if snapshot is not None:
+        return snapshot
+    quarters = (entry or {}).get("quarters") or []
+    if quarters and quarters[-1].get("promoter_pct") is not None and quarters[-1]["promoter_pct"] < 1:
+        return 0.0
+    pattern = _pledge_quarters(entry)
+    return pattern[-1]["promoter_encumbered_pct"] if pattern else None
+
+
+def pledges_rising(entry: dict | None) -> bool:
+    """Promoters pledged or tied up PLEDGE_MOVE points more of their stake over the past year."""
+    quarters = _pledge_quarters(entry)
+    if len(quarters) < 2:
+        return False
+    now = quarters[-1]
+    year_ago = [q for q in quarters if q["quarter_end"] <= _year_before(now["quarter_end"])]
+    return bool(year_ago) and now["promoter_encumbered_pct"] - year_ago[-1]["promoter_encumbered_pct"] >= PLEDGE_MOVE
+
+
 def pledge_note(entry: dict | None) -> str | None:
     """How much of the promoters' stake is pledged or otherwise tied up (the pattern's "pledged or
     otherwise encumbered"), and how that moved over the past year. None without the history."""
-    quarters = [q for q in (entry or {}).get("quarters", [])
-                if q.get("promoter_encumbered_pct") is not None and (q.get("promoter_pct") or 0) >= 1]
+    quarters = _pledge_quarters(entry)
     if len(quarters) < 2:
         return None
     now = quarters[-1]
