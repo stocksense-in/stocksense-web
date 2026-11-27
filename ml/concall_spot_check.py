@@ -12,7 +12,8 @@ Two checks:
     are keyed by the quote's first 50 characters: "ok" or a short reason it's wrong.
 
 Companies: the 50 largest by market value with a call transcript, so the set doesn't move with the
-results. Guidance changes are listed for the companies that have a previous call.
+results. Guidance changes are judged across every company in backend/data/concalls.json (concalls-export):
+each "changed" pair (verdicts under "changes" in the judgements file), and a sample of "repeated" ones.
 """
 
 from __future__ import annotations
@@ -121,12 +122,34 @@ def report(rows: list[dict], judgements: dict) -> str:
     return "\n".join(lines)
 
 
+def change_section(judgements: dict) -> list[str]:
+    """Every guidance change in the published export, with the reader's verdicts."""
+    path = REPO / "backend" / "data" / "concalls.json"
+    if not path.exists():
+        return []
+    companies = json.loads(path.read_text(encoding="utf-8"))["companies"]
+    pairs = [(s, c) for s, v in companies.items() for c in v["changes"]]
+    changed = [(s, c) for s, c in pairs if c["status"] == "changed"]
+    verdicts = judgements.get("changes", {})
+    judged = [verdicts.get(f"{s} {c['topic']}") for s, c in changed]
+    right = sum(v == "ok" for v in judged)
+    lines = ["", "## Guidance changes across all calls", "",
+             f"{len(companies)} companies in the export; {len({s for s, _ in pairs})} have guidance that could be matched to "
+             f"the previous call's: {sum(c['status'] == 'repeated' for _, c in pairs)} repeated, {len(changed)} changed. "
+             f"Read and judged: {right} of {sum(v is not None for v in judged)} changes right. "
+             f"Repeated: {verdicts.get('_repeated_sample', 'not judged')}.", "",
+             "| Company | Topic | Before | Now | Verdict |", "|---|---|---|---|---|"]
+    for (s, c), v in zip(changed, judged):
+        lines.append(f"| {s} | {c['topic']} | {c['before']['text'][:110]} | {c['now']['text'][:110]} | {v or 'not judged'} |")
+    return lines
+
+
 def main() -> None:
     lake = Lake.from_settings()
     rows = check(lake, companies(lake))
     judgements = json.loads(JUDGEMENTS.read_text(encoding="utf-8")) if JUDGEMENTS.exists() else {}
     out = REPO / "ml" / "reports" / f"concall-spot-check-{date.today():%Y-%m-%d}.md"
-    out.write_text(report(rows, judgements), encoding="utf-8")
+    out.write_text(report(rows, judgements) + "\n".join(change_section(judgements)) + "\n", encoding="utf-8")
     print(out.read_text(encoding="utf-8")[:3000])
 
 

@@ -46,7 +46,7 @@ export function ConcallPanel({ c, name }: { c: Concall; name: string }) {
         {c.previous_filed && (
           <div className="card">
             <div className="ct">Guidance against the call filed {day(c.previous_filed)}</div>
-            {c.changes.length === 0 && <p className="mc-plain">Neither call gave figures to compare.</p>}
+            {c.changes.length === 0 && <p className="mc-plain">No guidance line on this call could be matched to one on the previous call. Read both to compare.</p>}
             {[...changed, ...c.changes.filter(x => x.status === 'repeated')].map((x, i) => {
               const st = STATUS[x.status] ?? STATUS.changed;
               return (
@@ -68,7 +68,8 @@ export function ConcallPanel({ c, name }: { c: Concall; name: string }) {
           </div>
         )}
         <p style={{ fontSize: 9, color: 'var(--cream-mute)', marginTop: 10, lineHeight: 1.6 }}>
-          Every line is quoted from the transcript {name} filed with NSE (<a href={c.source} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--gold)' }}>PDF</a>), picked by rules
+          Changes are shown only where both calls state the same kind of guidance: the same figure again is
+          “Repeated”, different figures “Changed”. Every line is quoted from the transcript {name} filed with NSE (<a href={c.source} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--gold)' }}>PDF</a>), picked by rules
           rather than written by StockSense: sentences with figures from the company&apos;s own speakers. Read the call for context.
         </p>
       </div>

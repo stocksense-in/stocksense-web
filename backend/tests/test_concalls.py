@@ -92,19 +92,30 @@ def test_highlights_are_reported_results_from_the_prepared_remarks():
 
 def test_quantities():
     assert cc._numbers("revenue of Rs 4,200 crores, up 18%, margin 120 bps, ₹50 and 3.2x") == (
-        "rs4,200", "18%", "120bps", "₹50", "3.2x")
+        "₹4,200", "18%", "120bps", "₹50", "3.2x")
     assert cc._numbers("across the next 2 quarters, we will see volumes grow") == ()  # not "rs," of quarters
 
 
-def test_changes_compare_each_topic_with_the_previous_call():
-    def q(topic, numbers, score=3.0):
-        return cc.Quote(1, f"{topic} {numbers}", topic, numbers, score)
+def test_changes_compare_like_with_like():
+    def q(topic, text):
+        return cc.Quote(1, text, topic, cc._numbers(text), 3.0)
 
-    out = cc.changes([q("revenue", ("1%", "2%")), q("margins", ("20%", "22%")), q("tax", ("29%",))],
-                     [q("revenue", ("1.5%", "3%")), q("margins", ("20%", "22%")), q("capex", ("rs900",))])
-    assert [(c["topic"], c["status"]) for c in out] == [
-        ("revenue", "changed"), ("tax", "new"), ("margins", "repeated"), ("capex", "dropped")]
-    assert out[0]["before"]["numbers"] == ("1.5%", "3%")
+    now = [q("revenue", "Based on our Q2 performance our revenue growth guidance for the year is 1% to 2%."),
+           q("margins", "Our operating margin guidance remains at 20% to 22% for the year."),
+           q("capex", "Capex guidance of Rs. 37,000 crore for the year stays."),
+           q("tax", "We expect the tax rate to be 29% to 30%."),
+           q("debt", "Net debt should fall below 1x by March.")]
+    before = [q("revenue", "We are revising our revenue growth guidance for the year to 1.5% to 3%."),
+              q("margins", "Operating margin guidance remains the same at 20% to 22% for the year."),
+              q("capex", "The capex guidance for the year was ₹37,000 crore."),
+              q("tax", "We registered a tax rate of 27% this quarter, in line with guidance."),
+              q("orders", "We expect the order book to reach ₹50,000 crore.")]
+    out = {c["topic"]: c["status"] for c in cc.changes(now, before)}
+    # same figure in other words is repeated (the rupee written two ways); a result isn't guidance to compare;
+    # a topic on only one call isn't claimed as new or dropped
+    assert out == {"revenue": "changed", "margins": "repeated", "capex": "repeated"}
+    assert cc.changes(now, before)[0]["topic"] == "revenue"
+    assert cc.similarity("revenue guidance for the year", "the year revenue guidance") == 1.0
 
 
 def test_call_reads_the_two_latest_transcripts(tmp_path):
@@ -162,3 +173,28 @@ def test_dash_labels_bullets_and_unmarked_questions():
     assert texts and not any("20%" in t or "3.5%" in t for t in texts)  # the analyst's figures
     assert cc.BULLETS.sub("", "• Revenue grew 18%.") == "Revenue grew 18%."
     assert cc.ASKING.search("Sir, given the repo hike, what is the sensitivity of our cost of funds.")
+
+
+def test_changes_moved_ranges_revisions_and_reaffirmed_outlooks():
+    def q(topic, text):
+        return cc.Quote(1, text, topic, cc._numbers(text), 3.0)
+
+    pairs = {
+        # a range that moved at one end
+        "costs": ("Our cost-to-income ratio guidance will remain in the range of 47% to 48% for the year.",
+                  "We expect our cost-to-income guidance to be around 45% to 47% for the year."),
+        # a stated revision, though the old figure appears again
+        "revenue": ("Our revenue growth guidance for the year is 25%.",
+                    "I would like to revise our revenue growth guidance for the year from 25% to around 30%."),
+        # reaffirmed, quoted with an extra figure
+        "margins": ("We reiterate our FY28 outlook of $400 million revenue and EBITDA margins of 40%.",
+                    "We are reaffirming our FY28 outlook of $400 million revenue and $160 million EBITDA."),
+        # the same figures written differently
+        "capex": ("We expect to spend between INR200 crores to INR225 crores in capex for FY27.",
+                  "Our capex guidance for FY27 also remains the same between INR200 crores-225 crores."),
+    }
+    out = {c["topic"]: c["status"] for c in cc.changes([q(t, now) for t, (_, now) in pairs.items()],
+                                                       [q(t, before) for t, (before, _) in pairs.items()])}
+    assert out == {"costs": "changed", "revenue": "changed", "margins": "repeated", "capex": "repeated"}
+    assert cc._values(q("capex", "INR200 crores-225 crores")) == {200.0, 225.0}
+    assert cc.sentences(["The capex is 4. 9% of revenue this quarter, below guidance."])[0].text.startswith("The capex is 4.9%")

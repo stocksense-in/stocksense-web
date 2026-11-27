@@ -6,8 +6,8 @@ Reads the transcripts `ingest-transcripts` collected and picks out, without a la
   • highlights — sentences from management's prepared remarks that state a result with a number
   • guidance   — forward-looking sentences with a number (growth, margins, capex, loans, orders…),
                  from management, never the analysts' questions
-  • changes    — for each topic, this call's guidance beside the previous call's: new, dropped,
-                 repeated (same numbers) or changed
+  • changes    — this call's guidance beside the previous call's where both say the same kind of thing:
+                 repeated (same figures) or changed
 
 Everything is a quote from the company's own filing with its page, so a reader can check it. A local
 LLM (M3.6 proper, on the GPU) will write the summaries; this is what it gets measured against.
@@ -88,6 +88,7 @@ TOPIC_RES = {name: re.compile(rf"\b(?:{pattern})", re.I) for name, pattern in TO
 MAX_PER_TOPIC = 2
 MAX_GUIDANCE = 10
 MAX_HIGHLIGHTS = 6
+WIDE = 6  # guidance lines per topic considered when comparing two calls
 
 
 @dataclass
@@ -172,6 +173,7 @@ def sentences(pages: list[str]) -> list[Line]:
     out = []
     for c in chunks:
         text = re.sub(r"\s+", " ", re.sub(r"(\w)- (\w)", r"\1-\2", COPYRIGHT.sub(" ", c.text)))
+        text = re.sub(r"(\d)\. (\d+\s?%)", r"\1.\2", text)  # "4. 9%": a decimal the PDF split
         for s in SENTENCE_END.split(text):
             s = s.strip(" -•")
             if 25 <= len(s) <= 600:
@@ -226,7 +228,8 @@ def _same_person(a: str, b: str) -> bool:
 
 
 def _numbers(text: str) -> tuple[str, ...]:
-    return tuple(re.sub(r"\s+", "", m.group(0)).lower() for m in QUANT.finditer(text))
+    """Each figure, spacing removed and the rupee written one way ("Rs. 37,000" and "₹37,000" are the same)."""
+    return tuple(re.sub(r"^(?:rs\.?|inr)", "₹", re.sub(r"\s+", "", m.group(0)).lower()) for m in QUANT.finditer(text))
 
 
 def _topic(text: str) -> str | None:
@@ -263,7 +266,7 @@ def _from_company(sents: list[Line]) -> list[tuple[int, Line]]:
     return out
 
 
-def guidance(pages: list[str], call_day: date) -> list[Quote]:
+def guidance(pages: list[str], call_day: date, per_topic: int = MAX_PER_TOPIC, total: int = MAX_GUIDANCE) -> list[Quote]:
     """Management's forward-looking statements with a number, at most two per topic, best first."""
     sents = sentences(pages)
     picked: list[Quote] = []
@@ -275,13 +278,13 @@ def guidance(pages: list[str], call_day: date) -> list[Quote]:
         if score >= 1.5:
             picked.append(Quote(s.page, s.text, topic, numbers, score + 0.5 * min(len(numbers), 3)))
     picked.sort(key=lambda q: (-q.score, q.page))
-    out, per_topic, said = [], Counter(), set()
+    out, count, said = [], Counter(), set()
     for q in picked:  # the same figure repeated (press conference, then analysts' call) counts once
-        if per_topic[q.topic] < MAX_PER_TOPIC and (q.topic, frozenset(q.numbers)) not in said:
+        if count[q.topic] < per_topic and (q.topic, frozenset(q.numbers)) not in said:
             out.append(q)
-            per_topic[q.topic] += 1
+            count[q.topic] += 1
             said.add((q.topic, frozenset(q.numbers)))
-    return out[:MAX_GUIDANCE]
+    return out[:total]
 
 
 def highlights(pages: list[str], call_day: date) -> list[Quote]:
@@ -306,31 +309,79 @@ def highlights(pages: list[str], call_day: date) -> list[Quote]:
     return sorted(out[:MAX_HIGHLIGHTS], key=lambda q: q.page)
 
 
-def changes(latest: list[Quote], previous: list[Quote]) -> list[dict]:
-    """Per topic, this call's best guidance beside the previous call's."""
-    def best(quotes: list[Quote]) -> dict[str, Quote]:
-        out: dict[str, Quote] = {}
-        for q in quotes:
-            if q.topic not in out or q.score > out[q.topic].score:
-                out[q.topic] = q
-        return out
+SAME_THING = 0.15  # share of words two statements need in common to be about the same thing
+SAME_STATEMENT = 0.30  # ...to call different figures a change (0.15 when both say "guidance" outright)
+REVISED = re.compile(r"\brevis(?:e|ed|ing)\b|\braise[sd]?\b.{0,30}\bguidance|\bguidance\b.{0,40}\bfrom\b.{0,20}\bto\b|\bnow (?:expect|guid|see|project)\w*\b.{0,80}\bcompared (?:with|to)\b", re.I)
+REAFFIRMED = re.compile(r"\b(reiterat\w*|reaffirm\w*|remains?|retain\w*|maintain\w*|holds|continues? to (?:remain|hold)|"
+                        r"stays?|unchanged|in line (?:with|to) our)\b", re.I)
+LOOKING_BACK = re.compile(r"\b(had|has been|have been)\b", re.I)
+GUIDE_WORDS = re.compile(r"\b(guidance|guid(?:e|ed|ing)|target(?:s|ing)?|outlook|expect(?:s|ed|ing)?)\b", re.I)
+_STOP = frozenset("the and for that this with our are was were will have has from which what about into than then "
+                  "they their there been also would should could year quarter we you it is be of to in on at as by "
+                  "an or so if not but all any can may".split())
 
-    best_now, best_then = best(latest), best(previous)
+
+def _words(text: str) -> set[str]:
+    return {w.rstrip("s") for w in re.findall(r"[a-z]{3,}", text.lower())} - _STOP
+
+
+def similarity(a: str, b: str) -> float:
+    """Word overlap of two sentences (Jaccard), 0 to 1."""
+    wa, wb = _words(a), _words(b)
+    return len(wa & wb) / len(wa | wb) if wa and wb else 0.0
+
+
+def _values(q: Quote) -> set[float]:
+    """The figures as numbers ("₹200", "200crores" and "INR200 crores" are all 200)."""
+    out = set()
+    for n in q.numbers:
+        m = re.search(r"\d[\d,]*(?:\.\d+)?", n)
+        if m:
+            out.add(round(float(m.group(0).replace(",", "")), 4))
+    return out
+
+
+def _units(q: Quote) -> frozenset[str]:
+    """What the figures measure: percentages (and basis points), money, or other counts."""
+    return frozenset("%" if n.endswith("%") or "bps" in n or "basis" in n else
+                     "money" if n.startswith(("₹", "$", "usd")) or re.search(r"crore|cr$|billion|bn$|million|mn$|lakh", n)
+                     else "count" for n in q.numbers)
+
+
+def changes(latest: list[Quote], previous: list[Quote]) -> list[dict]:
+    """Per topic, this call's guidance beside the previous call's, when the two say the same kind of thing:
+      • repeated — the same figures, or one statement's figures contain the other's
+      • changed  — both are stated as guidance (guidance, target, expect…, not results or "we had"), in the
+                   same units and much the same words, with different figures; or the new one says
+                   it revises the guidance
+    Nothing else is claimed. Statements on the same topic that aren't about the same thing (little wording in
+    common), or differ without being framed as guidance, aren't compared, and a topic found on only one call
+    isn't called new or dropped: in the spot check those labels were wrong more often than right, mostly
+    because the same guidance landed under another topic or wasn't picked up on one of the calls."""
     out = []
-    for topic in dict.fromkeys(list(best_now) + list(best_then)):
-        now, then = best_now.get(topic), best_then.get(topic)
-        if now and not then:
-            status = "new"
-        elif then and not now:
-            status = "dropped"
-        elif set(now.numbers) == set(then.numbers):
-            status = "repeated"
+    for topic in dict.fromkeys([q.topic for q in latest] + [q.topic for q in previous]):
+        now = [q for q in latest if q.topic == topic]
+        then = [q for q in previous if q.topic == topic]
+        if not now or not then:
+            continue
+        sim, a, b = max(((similarity(x.text, y.text), x, y) for x in now for y in then), key=lambda t: t[0])
+        if sim < SAME_THING:
+            continue
+        na, nb = _values(a), _values(b)
+        guided = all(GUIDE_WORDS.search(t) and not PAST.search(t) and not LOOKING_BACK.search(t) for t in (a.text, b.text))
+        if na != nb and REVISED.search(a.text) and _units(a) & _units(b):
+            status = "changed"  # "we revise our guidance from 25% to around 30%"
+        elif na <= nb or nb <= na or (na & nb and REAFFIRMED.search(a.text)):
+            status = "repeated"  # the same figures, or the new call restating a shared one ("we reiterate…")
+        elif na & nb and guided:
+            status = "changed"  # a range that moved at one end: 47–48% → 45–47%
+        elif (not na & nb and guided and _units(a) == _units(b)
+              and (sim >= SAME_STATEMENT or all(re.search(r"\bguidance\b", t, re.I) for t in (a.text, b.text)))):
+            status = "changed"  # the same kind of guidance (same units, same wording), not a result
         else:
-            status = "changed"
-        out.append({"topic": topic, "status": status, "now": asdict(now) if now else None,
-                    "before": asdict(then) if then else None})
-    order = {"changed": 0, "new": 1, "repeated": 2, "dropped": 3}
-    return sorted(out, key=lambda c: order[c["status"]])
+            continue
+        out.append({"topic": topic, "status": status, "now": asdict(a), "before": asdict(b)})
+    return sorted(out, key=lambda c: c["status"] != "changed")
 
 
 def call(lake, symbol: str) -> dict:
@@ -349,12 +400,14 @@ def call(lake, symbol: str) -> dict:
         calls.append({"filed": day.isoformat(), "source": r.attachment, "pages": pages, "day": day})
     latest = calls[0]
     now = guidance(latest["pages"], latest["day"])
-    before = guidance(calls[1]["pages"], calls[1]["day"]) if len(calls) > 1 else []
+    # compare against more than the lines shown: the matching statement may not be among a topic's best two
+    wide_now = guidance(latest["pages"], latest["day"], per_topic=WIDE, total=10 * WIDE)
+    before = guidance(calls[1]["pages"], calls[1]["day"], per_topic=WIDE, total=10 * WIDE) if len(calls) > 1 else []
     return {"symbol": symbol.upper(), "filed": latest["filed"], "source": latest["source"],
             "previous_filed": calls[1]["filed"] if len(calls) > 1 else None,
             "highlights": [asdict(q) for q in highlights(latest["pages"], latest["day"])],
             "guidance": [asdict(q) for q in now],
-            "changes": changes(now, before) if len(calls) > 1 else []}
+            "changes": changes(wide_now, before) if len(calls) > 1 else []}
 
 
 OUTPUT = DATA_DIR / "concalls.json"

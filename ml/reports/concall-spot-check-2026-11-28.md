@@ -42,7 +42,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p7 [costs] Depreciation and finance costs were higher because of the increase in asset base and increases in debt, which is reflecting in the higher profit after tax decline of 24%. — *not judged*
 - highlight p19 [capex] MEG 12.8 million tonnes, again 30% of the global capacity and PTA 32 million tonnes, which is about 25% of the global capacity was impacted in this oil turmoil. — *not judged*
 - guidance p16 [margins] Refinery outages have been about 11.8, currently standing at about 4 million to 5 million barrels a day, which actually is likely to support the margin going into the future that is what all the commentators and analysts are saying and global refinery runs also a little lower at 79 because of the frequent disruptions and outages that we are seeing and product inventories again diesel and gasoline they are down as compared to the five year average. — *industry figures (refinery outages), not the company's guidance*
-  - change: margins changed
 
 ### BHARTIARTL (filed 2026-11-12)
 - highlight p3 [margins] Consolidated EBITDAaL came in at about Rs 31,500 crores, growing at about 5.5%. — *ok*
@@ -51,7 +50,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p4 [revenue] Airtel business revenues came in at about Rs.5,800 Crores, growing 3.8% sequentially and 11.4% over last year same quarter. — *not judged*
 - highlight p4 [deposits] Deposits remain strong at over Rs.4,400 Crores, growing at 10%. — *not judged*
 - highlight p5 [costs] Our AI-enabled RAM dynamically orchestrated over 14 million sleep hours each day across our network sites during Q2, reducing energy consumption and generating some cost savings. — *not judged*
-  - change: capex dropped
 
 ### HDFCBANK (filed 2026-10-23)
 - highlight p3 [deposits] And within this, retail CASA growth was about 11.2% year -on-year compared to 9% a year ago, reflecting improving momentum. — *ok*
@@ -68,7 +66,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p3 [deposits] CET-1 ratio was 16.01%, and total capital adequacy ratio was 16.68% at September 30, Moving on to deposit growth B. — *not judged*
 - highlight p3 [loans] The total loan portfolio grew by 30% year-on-year and 12.3% quarter on-quarter at September 30, 2026 2. — *not judged*
 - highlight p4 [asset quality] Net NPA ratio was 0.3% at September 30, 2026 compared to 0.35% at June 30, 2026 and 0.39% at September 30, 2025 2. — *not judged*
-  - change: costs dropped
 
 ### SBIN (filed 2026-11-07)
 - highlight p5 [margins] Operating Profit was ₹34,226 crore, registering a year -on-year change of 7.28%. — *ok*
@@ -81,10 +78,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p22 [interest margin] Agarwal, I am not going to give any guidance beyond 3% what you mentioned, but I would like to say that there are definitely tailwinds to make NIM better than 3% guidance. — *ok*
 - guidance p22 [loans] The tailwinds are mainly coming because as I mentioned 25 basis points EBLR which has already happened, and the full benefit will be available in the half year, and 15 basis points MC LR which we have increased, that also is going to contribute as the loans get repriced. — *explains rate changes; no guided figure*
 - guidance p13 [loans] And we are also sticking to our guidance on credit growth 14 to 15% and a quality credit growth. — *ok*
-  - change: loans changed
-  - change: orders new
-  - change: interest margin new
-  - change: margins dropped
 
 ### TCS (filed 2026-10-14)
 - highlight p3 [revenue] In constant currency, revenue grew 0.5% sequentially and 2.8% year-on-year . — *ok*
@@ -104,14 +97,9 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p4 [loans] We are well on track to deliver between 60 million to 62 million new loans in FY27. — *ok*
 - guidance p6 [asset quality] Overall, I would just say that the first half principally demonstrates the strength and scalability of our business model at this scale to grow 26% is I would say, good growth to be in while maintaining credit costs that, as I've said, that probably it's likely that in the 4 years, this is likely to be one of the lowest years on credit costs. — *a result (grew 26%), not guidance*
 - guidance p19 [margins] We've been pruning back, as I said earlier, that we've taken a proactive call that CPL will drop from where it is today at 7% in terms of origination to half business in some business, zero where I have no margin will be zero is the decision management has made and we are going about it. — *ok*
-  - change: loans new
-  - change: asset quality new
-  - change: margins new
-  - change: volumes dropped
 
 ### HINDUNILVR (filed 2026-11-04)
 - guidance p9 [margins] We expect medium -term EBITDA Margin to be within the current guided range of 22% to 24%. — *ok*
-  - change: margins new
 
 ### INFY (filed 2026-10-28)
 - highlight p4 [revenue] Our revenue growth for Q2 was 1.5% YoY and 1.2% sequentially in constant currency terms. — *ok*
@@ -123,7 +111,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p28 [tax] We expect effective tax rate for the year to be in the range of 29% to 30%. — *ok*
 - guidance p19 [costs] The other point that we are focusing on is what you described the mega deals, the large deals because there, where we are doing business transformation, AI-led work, other consolidation, other cost work, that is work that gives us more support for the future in terms of the growth, which is what we shared that this mega deal will give us -- it is estimated to give us about 1% of growth next year. — *no forward-looking figure*
   - change: revenue changed
-  - change: costs new
 
 ### SUNPHARMA (filed 2026-11-04)
 - highlight p3 [revenue] During the second quarter of FY27, sales were at INR1,61,000 million, registering a growth of 11.8% vis -a-vis Q2 FY26. — *ok*
@@ -138,7 +125,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p3 [margins] The other thing in jewellery, which we have spoken last time, that a large part of MTM gain of quarter one reversed this quarter, which would impact jewellery margin by about 60 basis points. — *ok*
 - highlight p3 [margins] And if you normalize for that, then TMZ, which is Titan Jeweller y business margin, would be 11.7%. — *not judged*
 - guidance p17 [margins] One thing I will add to Arun's point, and while some of you suggest us that should we relook at our margin guidance, and we keep saying that, no, we want to keep it anchored around 11%, two, three things. — *ok*
-  - change: margins changed
 
 ### HCLTECH (filed 2026-10-15)
 - highlight p4 [revenue] Advanced AI revenue reached $219 million this quarter, up 28.4% sequentially and 78% YoY. — *ok*
@@ -151,16 +137,9 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p15 [revenue] For FY27, constant currency revenue growth is expected to be between 3% to 4% for the Services business and at the Company level the revenue growth is expected to be between 2.5% to 4%. — *ok*
 - guidance p12 [revenue] Services revenue growth guidance is 3% to 4%. — *ok*
 - guidance p19 [margins] For the services component, I think the margins will be at least 7% to 10% higher than traditional services. — *ok*
-  - change: margins changed
-  - change: revenue new
-  - change: costs dropped
-  - change: capex dropped
 
 ### M&M (filed 2026-11-11)
 - guidance p4 [capex] Diversifying the supplier base, increasing capacity, we will be up 27% by the end of this year. — *ok*
-  - change: capex new
-  - change: margins dropped
-  - change: revenue dropped
 
 ### HAL (filed 2026-05-22)
 - highlight p4 [revenue] We have achieved revenue from operations of INR33,050 crores fo r financial year 2025-'26 in comparison to INR30,981 crores in financial year 2024-'25. — *ok*
@@ -170,9 +149,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p5 [capex] During the year, we have crossed INR2,386 cror es as capex and INR2,794 crores in R&D activities, which is around 8.4% of our revenue. — *not judged*
 - highlight p5 [orders] The order book of the company further im proved to INR2,54,538 crores against the previous year order b ook position of INR1,89,302 cr ores as on 1st April 2025, and after the liquidation of the current year turnover of INR31,792 crores. — *not judged*
 - guidance p6 [margins] And the EBITDA ma rgin, we have always maintained around 30%, 31%, and it will be maintained. — *ok*
-  - change: margins changed
-  - change: revenue dropped
-  - change: orders dropped
 
 ### ULTRACEMCO (filed 2026-10-27)
 - highlight p3 [costs] As for UltraTech, despite increase in cost, the company has achieved an improvement in operating performance, higher capacity utilization on a higher base, higher or stable realizations, improvement in efficiency and a 21% increase in net profit. — *ok*
@@ -184,10 +160,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p9 [debt] But by the end of March, I will be below 1x net debt to EBITDA. — *ok*
 - guidance p6 [capex] We are on track to reach 240 million ton s of capacity as planned without any surprises. — *ok*
 - guidance p14 [costs] India Cements, my colleague just pointed out, India Cement s, where we clocked INR 500 per ton in their books will get a lot of cost improvement advantage now to take us to a 4-digit mark because we will be taking major shutdowns for India Cement s kilns, for upgradation, for attaching WHRS coolers, increasing the preheater, height, etcetera, which will result into, as promised and committed into the fiscal '28 January-March '28 quarter to be a fabulous quarter for India Cements. — *ok*
-  - change: capex changed
-  - change: costs changed
-  - change: debt new
-  - change: volumes dropped
 
 ### NTPC (filed 2026-11-06)
 - highlight p6 [debt] The weighted average interest rate on borrowings during H1 FY27 stood at 5.72% compared to 5.98% in FY26, reflecting the benefits of proactive refinancing and restructuring of company's loan portfolio. — *ok*
@@ -196,7 +168,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p6 [payout] During Q2 FY27, we have accounted for dividend income of INR 658 crores from our subsidiaries and joint ventures, in addition to INR238 crores earned during Q1 FY27. — *not judged*
 - highlight p7 [revenue] Coming to the NTPC Green Energy Limited highlights, consolidated revenue from operation increased by 58% to INR 2,045 crores in H1 FY27, while Operating EBITDA grew by 60% to INR1,818 crores as compared to H1 FY26. — *not judged*
 - highlight p7 [margins] Operating EBITDA has also increased to INR829.69 crores in Q2 from INR 529.6 crores in the last year, which amounts to increase by 56.67%. — *not judged*
-  - change: capex dropped
 
 ### ETERNAL (filed 2026-10-27)
 
@@ -208,7 +179,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p9 [debt] Operating leverage with a INR20,000 crores quarter from higher revenue, alongside disciplined cost management and a very hard look that we did on discretionary spend helped offset the remaining cost pressures and sustained our margin delivery. — *not judged*
 - highlight p11 [revenue] That said, from a headline perspective, consolidated revenue for the quarter came in at INR25,126 crores, a growth of 60% year -on-year and consolidated profit after tax stood at INR3,400-plus crores, also growing by 60% plus over the previous year. — *not judged*
 - guidance p10 [revenue] So therefore, the rate for the second half is expected to remain at this maximum level. which is essentially the rate at which we have exited quarter 2, which is the 16% base rate and the 2% booster, so 18% on electric vehicle revenues for the second half. — *ok*
-  - change: revenue new
 
 ### BAJAJFINSV (filed 2026-11-10)
 - highlight p4 [margins] I'll start with Bajaj General: GWP for Bajaj General grew at 10% for the quarter to about INR 7,056 crores, which is marginally lower than the industry growth of about 12%. — *ok*
@@ -218,26 +188,19 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p6 [asset quality] Accordingly, the gross and the net NPAs stood at 1.06% and 0.42%, respectively, much lower than the same period last year. — *not judged*
 - highlight p7 [revenue] The operating revenue for the Company has increased to INR 120 crores in Q2 with a healthy growth of 45%. — *not judged*
 - guidance p17 [payout] This INR 4,700 crores plus the dividend should be sufficient to fund these investments going forward. — *ok*
-  - change: payout new
-  - change: loans dropped
 
 ### BEL (filed 2026-11-06)
 - highlight p3 [revenue] The revenue from operations increased to 12,824 up to Q2 as compared to 10, with a growth of 25.97%. — *ok*
 - highlight p3 [margins] The EBITDA up to Q2 is 27.43%. — *ok*
-  - change: costs dropped
-  - change: revenue dropped
-  - change: margins dropped
 
 ### NESTLEIND (filed 2026-08-07)
 - highlight p4 [volumes] So if you look at the last five years, we were getting a CAGR of close to 4.2% volume growth. — *ok*
 - highlight p10 [debt] We spent close to 1.6 billion Swiss francs behind research a nd the great thing is one of the most critical research centers is actually next to our office here in India, in Manesar and that gives us ability to borrow and leverage global research, and then marry it with what Indian consumers, South Asian consumers want. — *the parent's research spend, not a result*
 - highlight p11 [capex] In the last one calendar year, w e started a new MAGGI line with close to Rs.170 Crores plus investment, a new Munch line where again we invested close to Rs.225 Crores, so I think a virtuous cycle of growth is moving and capital expenditure is something we would continue to do to ensure we deliver quality products to our consumers. — *not judged*
-  - change: capex dropped
 
 ### COALINDIA (filed 2025-05-17)
 - guidance p8 [capex] But by 29-30, if you see in terms of the capacities, then around 900 million tonnes of our capacity will be enabled to be moved through the first mile connectivity projects. — *ok*
 - guidance p16 [capex] Around 20,000 crores capex will continue for the next three to four years. — *ok*
-  - change: capex new
 
 ### DIVISLAB (filed 2026-11-13)
 - highlight p6 [revenue] Our global nutraceutical business recorded revenue of ₹571 crores for the first half compared to ₹492 crores in the corresponding period of the previous financial year. — *ok*
@@ -247,7 +210,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p6 [revenue] Looking at revenue composition and business performance, exports continue to constitute approximately 90% of standalone sales revenue, reflecting the Company's strong international business presence. — *not judged*
 - highlight p6 [revenue] Europe and North America together accounted for approximately 75% of the standalone sales revenue. — *not judged*
 - guidance p11 [capex] Historically, if you see the last three years post-COVID, three to four years, our capex outlook has been about ₹2,000 crores, plus or minus 20% every year. — *ok*
-  - change: capex new
 
 ### POWERGRID (filed 2026-11-10)
 - highlight p4 [capex] As you are aware, we are about ₹3.29 lakh crore of the fixed assets, going much beyond the ₹3 lakh crore which was there some time back. 1.87 lakh circuit kilometres, almost 6.5 lakh MVA transformation capacity, and availability continues to be in the order of 99% plus. — *ok*
@@ -257,8 +219,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p7 [revenue] So, translating that, about 8% of the top line growth and roughly the 8% even on the PAT. — *not judged*
 - highlight p7 [debt] The debt-equity is 59.41, which is having enough room for us to actually work upon the massive projects pipeline which we are envisaging, 1:1.5%. — *not judged*
 - guidance p5 [capex] And project execution, CapEx and capitalization: The guidance, as what we have said last year, was ₹37,000 crore, and we are moving up, and then we should be able to catch up with about ₹40,000 crore. — *ok*
-  - change: capex changed
-  - change: orders dropped
 
 ### SHRIRAMFIN (filed 2026-10-27)
 - highlight p4 [revenue] The commercial vehicle sales has increased by 28.7% in Q2 FY27, and stands at 3.09 lakh units against 2.4 lakh units sold in the Q2 FY26. — *industry vehicle sales, not the company's*
@@ -270,11 +230,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p17 [costs] Having said that, the medium to long-term guidance will be the cost to income will be around 25%. — *ok*
 - guidance p6 [asset quality] And our guidance will remain at 2% credit cost. — *ok*
 - guidance p7 [costs] So, cost of liabilities on book is 8.4 %, and I don't expect the incremental cost to be more than 8% as of now. — *ok*
-  - change: costs new
-  - change: asset quality new
-  - change: margins dropped
-  - change: interest margin dropped
-  - change: debt dropped
 
 ### ASIANPAINT (filed 2026-11-03)
 - highlight p13 [capex] Today we have got the phase 1 of it, out of the total CapEx of about Rs. 3,250 crores which is there. — *a capex plan, not a result*
@@ -284,8 +239,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p22 [revenue] 21 | If you were to look at the overall standalone financials, the net sales growth is 14.8%. — *not judged*
 - highlight p24 [payout] We've broadly looked at the same payout ratio of about 21.4% in H1 FY27 as compared to what it was last year. — *not judged*
 - guidance p29 [volumes] We also have a wedding season which is coming, while rural will come into some question with the monsoon deficit of what is really, we are talking of, but we feel that it would be reasonable to expect to see a volume growth of about 8% to 9% going forward. — *ok*
-  - change: volumes new
-  - change: margins dropped
 
 ### DMART (filed 2026-08-04)
 - highlight p5 [costs] Employee cost expanded by 27 bps due to the investment in service levels of the business, and other expenses declined by 9 bps, leading to EBITDA which was almost flat at about 7.85%. — *ok*
@@ -297,8 +250,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p6 [margins] You should be able to make, some margin, which in our case we believe should be at least 20% more than the benchmark, and you should have a right to at least get 20% volume share, which basically means that we need to give true value, that's why customers would want to buy from us. — *a pricing principle, not guidance*
 - guidance p19 [margins] And so therefore, 15% kind of a gross margin and let's say around a 5% kind of a net margin should be the North Star for this business even in the future. — *ok*
 - guidance p21 [debt] So we might go to an INR2,000 crores borrowing by the end of the year, but that is all going towards managing capex. — *ok*
-  - change: margins new
-  - change: debt new
 
 ### TATASTEEL (filed 2026-11-12)
 - highlight p2 [costs] However, we were able to successfully navigate this higher -cost environment and generate close to 90 bps improvement in EBITDA margin, from 15% in 1Q to 16% in 2Q, on a consolidated basis. — *ok*
@@ -313,10 +264,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p10 [costs] As far as costs are concerned, the coking coal impact is expected to be about $15 a ton, both in the Netherlands and in India, in 3Q compared to 2Q, on a consumption basis. — *ok*
 - guidance p12 [capex] But if you are spending Rs. 20,000 crore s on capex, I don't think that is our target. — *says what isn't the target; no figure guided*
 - guidance p12 [debt] We have always said our debt should be less than 3x. — *ok*
-  - change: capex changed
-  - change: costs changed
-  - change: debt new
-  - change: volumes dropped
 
 ### HINDALCO (filed 2026-11-12)
 - highlight p5 [capex] Looking at the global alumin ium market in Q3 calendar year 2026, Chinese alumin ium production grew about 3% year -on-year to nearly 11 million tons, supported by capacity additions in Yunnan, partially offset by capacity rationalization in Shandong. — *global market data, not a result*
@@ -328,10 +275,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p11 [volumes] If the Middle East supplies get normalized and if the expected Indonesian volumes come, and there's a big if in that 1.5 million tons additional will come or not, then the LME Week, the consensus was, in some ways, the LME next year could be between $2,600 and $2,800. — *metal-market commentary, not the company's guidance*
 - guidance p7 [margins] Copper is expected to deliver an underlying quarterly EBITDA of around INR1,200 crores on a normalized basis, underscoring the strength and resilience of this business. — *ok*
 - guidance p7 [margins] Importantly, our long -term EBITDA per ton guidance of $600 remains unchanged. — *ok*
-  - change: margins changed
-  - change: volumes new
-  - change: costs dropped
-  - change: debt dropped
 
 ### GRASIM (filed 2026-11-17)
 - highlight p4 [revenue] On a consolidated basis, revenue for Q2FY27 stood at the highest ever of ₹50,105 crores, up 26% year -on-year, driven by strong all -round performance across our businesses. — *ok*
@@ -344,12 +287,8 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p15 [revenue] And we gave us the confidence of reminding you that our guidance on a year -on-year basis is we will grow revenue by 50% against last year revenues. — *ok*
 - guidance p10 [capex] As capacity ramped up across these projects, our chlorine integration is expected to improve to 67%. — *ok*
 - guidance p10 [capex] The business remains firmly on track to achieve 242.9 million metric tons of capacity by exit of March 2028. — *ok*
-  - change: revenue changed
-  - change: capex changed
-  - change: costs dropped
 
 ### EICHERMOT (filed 2026-11-17)
-  - change: capex dropped
 
 ### SBILIFE (filed 2026-11-03)
 - highlight p4 [margins] VoNB margin stands at 27.9%. — *ok*
@@ -367,7 +306,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p6 [revenue] Our IT services revenue grew 0.6% year-on-year in constant currency terms. — *not judged*
 - guidance p6 [revenue] In terms of the guidance, like Srini said, we expect our revenues to be in the range of $2.571 billion to $2.625 billion. — *ok*
 - guidance p5 [revenue] We are guiding for a sequential IT services revenue growth of minus 1.5% to plus 0.5% in constant currency. — *ok*
-  - change: revenue new
 
 ### PIDILITIND (filed 2026-11-05)
 - highlight p3 [revenue] In the current quarter, our stand-alone revenue was under INR4,000 crores with a growth of 21.7% in nominal terms and underpinned by underlying volume growth of 10.7%, which was broad-based. — *ok*
@@ -377,7 +315,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p4 [margins] EBITDA in the international subsidiaries also improved with a growth of 53% versus the top line growth of 21.8%. — *not judged*
 - highlight p4 [revenue] And therefore, in H1, if I were to look at our stand-alone revenues grew by 22%, UVG was 11%. — *not judged*
 - guidance p6 [margins] With that and so on and so forth, we remain very confident of Q3 and quite confident of the full second half that we should be able to deliver in our EBITDA margin corridor of 20% to 24%, ideally in the slightly higher end of the corridor. — *ok*
-  - change: margins new
 
 ### VBL (filed 2026-11-04)
 - highlight p2 [revenue] Consolidated sales volume revenue grew 28.7% with a volume growth of 22.5% in India and 39.9% in international markets. — *ok*
@@ -404,9 +341,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p11 [debt] From a borrowing mix perspective, approximately 25% of our borrowings are linked to the repo rate, while another 25% are linked to other market benchmarks . — *not judged*
 - guidance p9 [loans] Based on the trends we have seen so far, disbursements in October are expected to grow by approximately 18% year-on-year compared to October last year. — *ok*
 - guidance p13 [costs] As I mentioned earlier, we expect the cost of funds to increase by around 20 basis points . — *ok*
-  - change: loans changed
-  - change: costs new
-  - change: asset quality dropped
 
 ### TECHM (filed 2026-10-21)
 - highlight p3 [revenue] Revenues were US$1.693 billion, representing 6.8% year -on-year growth on a reported basis and 7.2% growth in constant currency. — *ok*
@@ -416,8 +350,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p11 [tax] Effective tax rate for the quarter came in at 29.9% due to a one -time tax adjustment related to prior periods tax matters. — *not judged*
 - highlight p11 [payout] The board has declared an interim dividend of INR15 per share, reaffirming our commitment to the laid -out capital allocation policy of returning 85% and above of free cash flow back to shareholders. — *not judged*
 - guidance p12 [margins] We reiterate that we remain on tr ack to achieve our full-year FY27 EBIT margin target of 15%. — *ok*
-  - change: margins new
-  - change: costs dropped
 
 ### POLYCAB (filed 2026-10-19)
 - highlight p4 [capex] In July, August, government capital expenditure remained significantly at higher levels, and bank credit growth continues to trend close to 15% to 20%. — *macro data, not a result*
@@ -427,15 +359,10 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p6 [margins] EBITDA increased by 36% year-on-year, with margins remaining healthy at 14.1%, while profit after tax grew by 38% year-on-year, translating into PAT margins of 9.9%. — *not judged*
 - highlight p6 [revenue] Despite challenging geopolitical environment, exports picked up strongly during the quarter as sales grew 17% year-on-year and grew 85% quarter-on-quarter. — *not judged*
 - guidance p11 [capex] And with that, the kind of capex that UltraTech has put into this industry, the kind of revenue guidance that they have given close to around potential of around 6x to 7x, it looks elusive at the moment. — *another company's guidance (UltraTech)*
-  - change: capex new
-  - change: margins dropped
-  - change: revenue dropped
 
 ### HDFCLIFE (filed 2026-10-23)
 - highlight p4 [margins] New busine ss margin was 24.7%, compared with 24.5% in H1 FY2026. — *ok*
 - guidance p4 [debt] The Board has ap proved raising up to ₹500 crore through subordinated debt , which we expect to complete during the current quarter, further strengthening our capital position as we invest for growth. — *ok*
-  - change: debt new
-  - change: margins dropped
 
 ### BRITANNIA (filed 2026-11-12)
 
@@ -448,14 +375,9 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p4 [debt] This will be with an investment of INR 11,871 crores and will be financed through 75% of debt and 25% equity. — *ok*
 - guidance p4 [capex] And we have already done INR10,000 crores of capex, and we are on track to complete nearly INR25,000 crores of capex for the year. — *ok*
 - guidance p6 [margins] INR4,500 crores EBITDA It should be a little more than double of H1 because many of the plants have come up in last three months or six months. — *ok*
-  - change: capex new
-  - change: debt new
-  - change: margins new
-  - change: orders dropped
 
 ### PAYTM (filed 2026-10-30)
 - guidance p9 [capex] On capex, yes, we have said it was about 400 crores on a kind of inward devices count basis, and we expect same. — *ok*
-  - change: capex new
 
 ### CIPLA (filed 2026-10-30)
 - highlight p4 [revenue] Coming to North America, we delivered a quarterly revenue of $172 million in Q2, which represents a $10 million improvement versus previous quarter. — *ok*
@@ -466,8 +388,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p6 [debt] As of 30th September, the debt on our balance sheet, including lease liabilities, stood at INR 699 crores with a net cash equivalent balance of INR9,823 crores. — *not judged*
 - guidance p9 [margins] And for the EBITDA guidance for the full year will be 18.5% to 20%. — *ok*
 - guidance p6 [revenue] We continue to maintain the guidance to exit this fiscal year with $1 billion annualized revenue run rate. — *ok*
-  - change: margins new
-  - change: revenue new
 
 ### TMPV (filed 2026-11-19)
 - highlight p2 [revenue] Consolidated revenue for TMPV Group was ~96,000Cr, close to Rs. 97,000 Cr, up 34% year-on-year. — *ok*
@@ -480,10 +400,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - guidance p11 [costs] So, the bottom right of the chart you're referring to shows the split of GBP 1.7 billion between what we're anticipating from ex -works, what we're anticipating from warranty, and what we're anticipating from cost efficiencies. — *ok*
 - guidance p10 [revenue] So we don't give a specific number, but just to give you guidance, it will be between 6% to 7% of the revenue. — *ok*
 - guidance p5 [margins] The total for the first half of the year was GBP 1.76 billion, and we're expecting H2 to be marginally below this, and then it will decline a little bit further into next year. — *ok*
-  - change: margins changed
-  - change: costs new
-  - change: revenue new
-  - change: capex dropped
 
 ### DRREDDY (filed 2026-07-28)
 - highlight p3 [revenue] The business reported a revenue decline of 5.6% and an EBITDA margin of 12.5% for the quarter, reflecting the impact of lower lenalidomide revenues, which contributed to the corresponding period last year, as well as a provision of ₹240 crores for inventor y and other costs associated with the recent semaglutide API related challenges. — *ok*
@@ -493,7 +409,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p5 [capex] Capex cash outflow for the quarter stood at ₹307 crores, which is US$32 million. — *not judged*
 - highlight p5 [payout] Cash flow during the quarter before acquisition related payout was negative ₹216 crores, which is negative US$23 million. — *not judged*
 - guidance p9 [revenue] So, the productivity measures will be primarily that the sales that's associated, obviously, with this S&M, will grow much faster than the expenses. 52% now of our business is branded markets. — *the figure is today's business mix, not guidance*
-  - change: revenue new
 
 ### HEROMOTOCO (filed 2026-11-03)
 - highlight p5 [capex] And we are investing over INR700 crores in setting up a complete new automated parts center and double our parts handling capacity from what it is right now. — *an investment plan, not a result*
@@ -521,7 +436,6 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p5 [revenue] Revenue declined 8% in the U.K., but U.S. business grew 4%, expanded margins with 6% constant currency growth in coffee. — *not judged*
 - guidance p15 [margins] So Percy, number one, as we've always maintained that a good food business in India, food and beverage business in India should be in the 17% to 20% ballpark of EBITDA. — *ok*
 - guidance p5 [margins] Dry fruits and cold -pressed oil now combined ARR of INR1,000 crores plus, and we will continue to expand the portfolio with margin expansion as we go forward. — *the figure is current revenue; the outlook has none*
-  - change: margins new
 
 ### PERSISTENT (filed 2026-10-23)
 - highlight p4 [revenue] We achieved a healthy revenue growth of 7.8% quarter-on-quarter and 20% year-on-year delivering USD 487.6 million in Q2 FY27. — *ok*
@@ -532,5 +446,26 @@ The latest call of the 50 largest companies with a transcript, quoted by `stocks
 - highlight p9 [tax] Effective tax rate for the quarter came in at 22.5%, same as last quarter. — *not judged*
 - guidance p7 [debt] As a part of this long-term financing strategy, we will be raising USD 1.25 billion in terms of both debt and equity. — *ok*
 - guidance p7 [costs] Overall, we are expecting one-time expenses to the tune of approximately $50 million spread over three to four quarters. — *ok*
-  - change: debt new
-  - change: costs new
+
+## Guidance changes across all calls
+
+410 companies in the export; 70 have guidance that could be matched to the previous call's: 77 repeated, 16 changed. Read and judged: 14 of 16 changes right. Repeated: a random sample of 20 read: 19 right; the miss (FSL, a raised range) is now caught as changed.
+
+| Company | Topic | Before | Now | Verdict |
+|---|---|---|---|---|
+| ACUTAAS | revenue | The 25% figure is coming from our guidance related to revenue growth. | Before I conclude, I would also like to revise our revenue growth guidance for current year from 25% to around | ok |
+| ALIVUS | margins | And that's the reason why we are giving 32% margin guidance and Doctor mentioned, that it can go to 34%. | And that's why we are confident of the guidance that Dr. mentioned in his commentary of about 35% to 36% EBITD | ok |
+| BANDHANBNK | asset quality | And therefore, our credit cost guidance of 1.6% to 1.8%, that continues to remain. | We expect some improvement in credit cost, potentially from 1.8% to 1.7%. | ok |
+| BSE | orders | The mainboard IPO pipeline remains strong, with over 250 companies seeking to access the capital markets and t | The main board IPO pipeline remains strong, with over 150 companies seeking to access the capital markets and  | ok |
+| ENDURANCE | capex | We expect capital expenditure in FY 27 to remain similar to the FY 26 capex of ₹ 800 crores. 15. | We expect capital expenditure in FY 27 to be around ₹ 1,100 crores. | ok |
+| FSL | revenue | On revenue, we continue to expect constant currency growth of 10% to 13% for FY27. | We now expect constant currency revenue growth of 10.5% to 13%, compared with 10% to 13% earlier. | ok |
+| INFY | revenue | Considering lower-than-expected Q1 revenues and revi sed view of the rest of the year, we are revising our rev | Based on our Q2 performance and revised outlook for rest of the year, our revenue growth guidance is 1% to 2%  | ok |
+| J&KBANK | loans | I expect the credit growth to be somewhere around 18% to 20%. | The revised guidance for FY 2026-27 would be credit growth of 14% plus, deposit growth of 12% plus, CASA to be | ok |
+| JKCEMENT | costs | So o verall, you know, with diesel and everything we expect that the cost should go up by INR150 a ton. | So, we expect, you know, the coal cost to be within INR1, INR1.25. | two different cost items (diesel, coal), not one guidance moving |
+| KARURVYSYA | loans | To sum up, our guidance for credit growth of 1% or 2% over the industry growth will continue for the rest of t | To sum up, our guidance for credit growth would be between 18% to 20% for the financial year '26-'27. | ok |
+| LUMAXTECH | orders | Of this order book, approximately 24% is expected to be executed in this FY 27 itself, 56% in FY 28, and the r | Of this order book, approximately 14% is expected to be executed in FY 27 itself, 59% in FY 28 and the remaini | ok |
+| NMDC | capex | So actual capex would be -- we expect around INR4,000 crores this year. | This year we expect to capex of around INR6,000 crore s. | ok |
+| RVNL | revenue | Further, the company expects its top line to grow by around 15%, while the bottom line is projected to increas | Further, the company expects its top-line revenue to grow by around 10%, while the bottom line is projected to | ok |
+| RVNL | orders | The company is targeting work orders of around INR 20,000 crore during this year , in addition to the existing | is targeting work orders of around INR 25,000 crore during the year, in addition to the existing order book, o | ok |
+| SAGILITY | margins | On margins, we are maintaining our 24% to 25% guidance despite absorbing 120 basis points incremental impact f | Page | 10 Karnataka and Telangana, we are raising our FY '27 adjusted EBITDA margin guidance from our earlier  | ok |
+| SHYAMMETL | capex | Going forward, the balance approximately INR9,580 crores of our announced capex is expected to be deployed ove | The balance planned capex of approximately INR8,864 crores is expected to be deployed over the next 2 to 3 yea | the capex still to spend falls as it's spent; the plan didn't change |
