@@ -24,6 +24,11 @@ CAN_BE_NEGATIVE = ("US10Y", "WTI")
 LIQUID_CALL_OI = 1_000_000  # put/call ratios are judged only above this call OI
 SHAREHOLDING_DUE_DAYS = 120  # patterns are due 21 days after quarter end; 120 means one was missed
 RESULTS_DUE_DAYS = 150  # results are due 45–60 days after quarter end; 150 means one was missed
+# A few companies are always late (insolvency, suspension) and some really do report negative
+# revenue (investment firms' fair-value losses, year-end corrections): listed as notes. Only a
+# share this large points at our pipeline rather than at the companies.
+BEHIND_SHARE = 0.05     # of companies
+NEGATIVE_SHARE = 0.002  # of quarters
 
 
 def _gaps(days: pd.Series, max_days: int) -> list[str]:
@@ -188,13 +193,19 @@ def check_results(lake: Lake, today: date | None = None) -> dict:
     problems = []
     if dupes:
         problems.append(f"{dupes} duplicate (symbol, quarter, basis) rows")
-    if int(totals["negative"]):
-        problems.append(f"{int(totals['negative'])} quarters with negative revenue")
+    negative = q("select symbol, period_end from financial_results where revenue < 0 order by symbol, period_end")
+    negative_list = [f"{r.symbol} {pd.Timestamp(r.period_end):%b %Y}" for r in negative.itertuples()]
+    notes = []
+    if len(negative):
+        line = f"{len(negative)} quarters with negative revenue: {', '.join(negative_list[:10])}"
+        (problems if len(negative) > NEGATIVE_SHARE * int(totals["n"]) else notes).append(line)
     if behind:
-        problems.append(f"{len(behind)} companies with no results for over {RESULTS_DUE_DAYS} days: {' '.join(behind[:10])}")
+        line = f"{len(behind)} companies with no results for over {RESULTS_DUE_DAYS} days: {' '.join(behind[:10])}"
+        (problems if len(behind) > BEHIND_SHARE * len(latest) else notes).append(line)
     return {"rows": int(totals["n"]), "companies": int(totals["companies"]),
             "first": str(pd.Timestamp(totals["first"]).date()), "last": str(pd.Timestamp(totals["last"]).date()),
-            "without_revenue": int(totals["no_revenue"]), "duplicates": dupes, "behind": behind, "problems": problems}
+            "without_revenue": int(totals["no_revenue"]), "duplicates": dupes, "behind": behind,
+            "negative_revenue": negative_list, "notes": notes, "problems": problems}
 
 
 def check_shareholding(lake: Lake, today: date | None = None) -> dict:
@@ -244,11 +255,13 @@ def check_shareholding(lake: Lake, today: date | None = None) -> dict:
         problems.append(f"{out_of_range} promoter holdings outside 0–100%")
     if split_off:
         problems.append(f"{split_off} quarters where the FII/DII/retail split doesn't add to 100%")
+    notes = []
     if behind:
-        problems.append(f"{len(behind)} companies with no shareholding pattern for over {SHAREHOLDING_DUE_DAYS} days: "
-                        f"{' '.join(behind[:10])}")
+        line = f"{len(behind)} companies with no shareholding pattern for over {SHAREHOLDING_DUE_DAYS} days: {' '.join(behind[:10])}"
+        (problems if len(behind) > BEHIND_SHARE * len(latest) else notes).append(line)
     out = {"rows": int(len(q("select 1 from shareholding"))), "companies": int(len(latest)), "duplicates": dupes,
-           "not_100": off, "split_not_100": split_off, "behind": behind, "non_compliant_bz": non_compliant}
+           "not_100": off, "split_not_100": split_off, "behind": behind, "non_compliant_bz": non_compliant,
+           "notes": notes}
     if "pledges" in set(lake.datasets()):
         out["pledge_snapshots"] = int(q("select count(*) from pledges").iloc[0, 0])
     out["problems"] = problems

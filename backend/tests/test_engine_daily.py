@@ -38,6 +38,17 @@ def test_weekly_runs_everything_and_a_clean_run_is_ok(tmp_path):
     assert len((tmp_path / "runs.jsonl").read_text().splitlines()) == 2  # appends, never overwrites
 
 
+def test_notes_are_recorded_but_dont_fail_the_run(tmp_path, monkeypatch):
+    lake = Lake(tmp_path).ensure()
+    monkeypatch.setattr(engine_daily.lake_checks, "check_all", lambda lake, today: {
+        "shareholding": {"problems": [], "notes": ["5 companies with no shareholding pattern for over 120 days: LATE"]},
+        "index_prices": {"problems": []}})
+    report = engine_daily.run_steps(lake, [Step("a", lambda: None)], weekly=False, today=TODAY)
+    assert report.ok and report.notes == {"shareholding": ["5 companies with no shareholding pattern for over 120 days: LATE"]}
+    line = json.loads((tmp_path / "runs.jsonl").read_text().splitlines()[-1])
+    assert line["ok"] is True and "LATE" in line["notes"]["shareholding"][0]
+
+
 def test_exit_code_follows_the_report(tmp_path, monkeypatch):
     lake = Lake(tmp_path).ensure()
     monkeypatch.setattr(engine_daily, "default_steps", lambda lake, days, today: [Step("ok", lambda: None)])
