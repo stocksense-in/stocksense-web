@@ -47,6 +47,24 @@ def test_results_orders_stakes_pledges():
     assert alerts.pledge_change(pl, date(2026, 12, 3))[0]["value"] == 3.5
 
 
+def test_pledge_change_from_a_pattern_filed_today():
+    sh = pd.DataFrame([
+        {"symbol": "PAKKA", "quarter_end": date(2026, 6, 30), "submitted": date(2026, 7, 15), "promoter_pct": 43.8,
+         "promoter_encumbered_pct": 8.9},
+        {"symbol": "PAKKA", "quarter_end": date(2026, 9, 30), "submitted": date(2026, 10, 17), "promoter_pct": 43.8,
+         "promoter_encumbered_pct": 82.8},
+        {"symbol": "STEADY", "quarter_end": date(2026, 6, 30), "submitted": date(2026, 7, 10), "promoter_pct": 50.0,
+         "promoter_encumbered_pct": 10.0},
+        {"symbol": "STEADY", "quarter_end": date(2026, 9, 30), "submitted": date(2026, 10, 17), "promoter_pct": 50.0,
+         "promoter_encumbered_pct": 11.0},
+    ])
+    out = alerts.pattern_pledge_change(sh, date(2026, 10, 17))
+    assert [a["symbol"] for a in out] == ["PAKKA"] and round(out[0]["value"], 1) == 73.9
+    assert "82.8% of their stake at the end of Sep 2026" in out[0]["text"]
+    assert alerts.pattern_pledge_change(sh, date(2026, 10, 18)) == []
+    assert alerts.pattern_pledge_change(sh.drop(columns="promoter_encumbered_pct"), date(2026, 10, 17)) == []
+
+
 def test_export_covers_recent_sessions_newest_first(tmp_path, monkeypatch):
     import json
     days = [date(2026, 11, 24), date(2026, 11, 25), date(2026, 11, 26)]
