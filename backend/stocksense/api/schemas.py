@@ -236,6 +236,31 @@ class Available(BaseModel):
     holders: bool = Field(description="GET /stocks/{symbol}/holders has shareholding filings for this company")
     dividends: bool = Field(False, description="GET /stocks/{symbol}/dividends has corporate actions for this company")
     events: bool = Field(False, description="GET /stocks/{symbol}/events has announcements or insider trades")
+    concall: bool = Field(False, description="GET /stocks/{symbol}/concall has an earnings-call transcript")
+
+
+class CallQuote(BaseModel):
+    page: int = Field(description="Page of the transcript PDF")
+    text: str = Field(description="The sentence, as said on the call")
+    topic: str | None = Field(None, description="revenue, margins, loans, capex, orders…")
+
+
+class GuidanceChange(BaseModel):
+    topic: str
+    status: str = Field(description="changed, new, repeated (same figures) or dropped, against the previous call")
+    now: CallQuote | None
+    before: CallQuote | None
+
+
+class Concall(BaseModel):
+    symbol: str
+    source_note: str
+    filed: str = Field(description="When the transcript was filed with NSE")
+    source: str = Field(description="The transcript PDF on NSE")
+    previous_filed: str | None
+    highlights: list[CallQuote] = Field(description="Results management reported in its prepared remarks")
+    guidance: list[CallQuote] = Field(description="Forward-looking figures management gave")
+    changes: list[GuidanceChange]
 
 
 class DividendYear(BaseModel):

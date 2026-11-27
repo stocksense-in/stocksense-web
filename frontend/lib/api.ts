@@ -77,7 +77,7 @@ export interface StockDetail {
   stock: StockOut;
   score: ScoreDetail;
   peers: StockOut[];
-  available: { financials: boolean; holders: boolean; dividends: boolean; events?: boolean };
+  available: { financials: boolean; holders: boolean; dividends: boolean; events?: boolean; concall?: boolean };
 }
 
 export interface FinancialQuarter {
@@ -208,6 +208,23 @@ export interface Holders {
   pledge_warning: string | null;
   institutions_note?: string | null;
   pledge_note?: string | null;
+}
+
+export interface CallQuote {
+  page: number;
+  text: string;
+  topic?: string | null;
+}
+
+export interface Concall {
+  symbol: string;
+  source_note: string;
+  filed: string;
+  source: string;
+  previous_filed: string | null;
+  highlights: CallQuote[];
+  guidance: CallQuote[];
+  changes: { topic: string; status: 'changed' | 'new' | 'repeated' | 'dropped'; now: CallQuote | null; before: CallQuote | null }[];
 }
 
 export interface Dividends {
@@ -385,6 +402,7 @@ export const api = {
   holders: (s: string, signal?: AbortSignal) => get<Holders>(`/stocks/${sym(s)}/holders`, signal),
   dividends: (s: string, signal?: AbortSignal) => get<Dividends>(`/stocks/${sym(s)}/dividends`, signal),
   events: (s: string, signal?: AbortSignal) => get<CompanyEvents>(`/stocks/${sym(s)}/events`, signal),
+  concall: (s: string, signal?: AbortSignal) => get<Concall>(`/stocks/${sym(s)}/concall`, signal),
   alerts: (q: { symbols?: string; kind?: string; days?: number; limit?: number } = {}, signal?: AbortSignal) => get<Alerts>(`/alerts${qs(q)}`, signal),
   companyNews: (s: string, limit = 20, signal?: AbortSignal) => get<CompanyHeadline[]>(`/stocks/${sym(s)}/news?limit=${limit}`, signal),
   history: (s: string, range = '1y', signal?: AbortSignal) => get<History>(`/stocks/${sym(s)}/history?range=${range}`, signal),

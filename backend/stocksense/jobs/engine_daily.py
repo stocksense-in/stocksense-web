@@ -26,7 +26,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 
-from .. import alerts, dividends, eod, events, financials, holders, lake_checks, valuation
+from .. import alerts, concalls, dividends, eod, events, financials, holders, lake_checks, valuation
 from ..lake import Lake
 from ..log import get_logger
 
@@ -62,7 +62,7 @@ SHAREHOLDING_RESTS = 6  # NSE throttles long runs; rest and resume up to this ma
 
 def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
     from . import (event_study, ingest_bhavcopy, ingest_corporate_actions, ingest_filings, ingest_fno, ingest_india_macro,
-                   ingest_gdelt, ingest_market, ingest_results, ingest_shareholding)
+                   ingest_gdelt, ingest_market, ingest_results, ingest_shareholding, ingest_transcripts)
 
     start = today - timedelta(days=days)
     return [
@@ -88,6 +88,9 @@ def default_steps(lake: Lake, days: int, today: date) -> list[Step]:
         Step("shareholding", lambda: ingest_shareholding.run(everything=True, lake=lake, rests=SHAREHOLDING_RESTS),
              weekly=True),
         Step("holders_export", lambda: holders.write(lake), weekly=True),
+        # Calls follow results by a week or two; only filings not yet saved are downloaded
+        Step("transcripts", lambda: ingest_transcripts.run(lake=lake, rests=RESULTS_RESTS), weekly=True),
+        Step("concalls_export", lambda: concalls.write(lake), weekly=True),
     ]
 
 

@@ -66,5 +66,5 @@ def test_default_steps_cover_every_source(tmp_path):
     assert names == [("bhavcopy", False), ("indices", False), ("macro", False), ("gdelt", False), ("fno", False), ("filings", False), ("alerts_export", False), ("events_export", False),
                      ("corporate_actions", True), ("dividends_export", True), ("india_macro", True), ("event_study", True), ("valuation_context", True),
                      ("results", True), ("financials_export", True),
-                     ("shareholding", True), ("holders_export", True)]
+                     ("shareholding", True), ("holders_export", True), ("transcripts", True), ("concalls_export", True)]
 

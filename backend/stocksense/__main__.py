@@ -36,6 +36,7 @@ Jobs
     ingest-shareholding  promoter holding by quarter + promoter pledges (default: 50 largest; --all)
     ingest-transcripts   earnings-call transcripts filed with NSE: last 4 calls of the 500 largest → lake
     concall        a company's latest earnings call: results, guidance and what changed, quoted with pages
+    concalls-export      every company's latest call, quoted → data/concalls.json  (weekly)
     engine-daily   update every lake source for the last N days, check the data, log the run  (daily)
     check-lake     data checks on the index, macro and GDELT datasets
     ingest-fno     NSE futures & options end-of-day file, 2010 → today: OI, put/call ratios  (daily)
@@ -202,6 +203,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-download", action="store_true", help="rescan the prospectuses already on disk")
     p.add_argument("--workers", type=int, default=6, help="parallel text extraction")
 
+    jobs.add_parser("concalls-export", help="every company's latest earnings call, quoted, for the API")
     p = jobs.add_parser("concall", help="a company's latest earnings call: highlights, guidance, changes (M3.6)")
     p.add_argument("symbol", help="NSE symbol of a company whose transcripts `ingest-transcripts` has read")
 
@@ -449,6 +451,14 @@ def main() -> None:
         from .jobs import ingest_rhp
 
         ingest_rhp.run(since=date.fromisoformat(args.since), download_new=not args.no_download, workers=args.workers)
+        return
+
+    if args.job == "concalls-export":
+        from . import concalls
+        from .lake import Lake
+
+        doc = concalls.write(Lake.from_settings())
+        print(f"Wrote calls for {len(doc['companies'])} companies to {concalls.OUTPUT}")
         return
 
     if args.job == "concall":
