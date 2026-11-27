@@ -20,7 +20,8 @@ Then two clean tables are rebuilt from every raw file:
 
   • shareholding — one row per company and quarter: promoter %, public %, employee trusts %,
                    and for quarters whose full pattern was read, FII %, DII %, mutual funds %,
-                   insurers %, small retail %, government %
+                   insurers %, small retail %, government %, and the promoters' pledged and
+                   encumbered shares (% of their holding)
   • pledges      — one row per company and fetch day: promoter shares pledged, as % of
                    the promoters' holding and of all shares
 """
@@ -91,13 +92,12 @@ def _save_categories(c, lake: Lake, symbol: str, row: dict, pause: float, breake
 
 
 def _complete(path) -> bool:
-    """Read by the current parser, or already carrying the split: no need to fetch the pattern again."""
+    """Read by the current parser: no need to fetch the pattern again."""
     try:
         doc = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return False
-    return doc.get("parser", 1) >= nse_shareholding.PARSER_VERSION or (
-        doc.get("fii_pct") is not None and doc.get("mutual_funds_pct") is not None)
+    return doc.get("parser", 1) >= nse_shareholding.PARSER_VERSION
 
 
 def _fetch_categories(c, lake: Lake, symbol: str, master: list[dict], pause: float, breaker: Breaker,

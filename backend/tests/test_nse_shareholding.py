@@ -85,6 +85,49 @@ def _pattern(values: dict[str, float]) -> str:
             f'xmlns:in-capmkt="http://x">{contexts}{facts}</xbrli:xbrl>')
 
 
+def _with_pledges(facts: str, answers: dict[str, str] | None = None) -> str:
+    """A pattern with a promoter context ("P"), a public one ("Q") and the given pledge facts."""
+    contexts = "".join(
+        f'<xbrli:context id="{cid}"><xbrli:entity><xbrli:segment><xbrldi:explicitMember dimension="d">'
+        f'in-bse-shp:{member}</xbrldi:explicitMember></xbrli:segment></xbrli:entity></xbrli:context>'
+        for cid, member in (("P", "ShareholdingOfPromoterAndPromoterGroupMember"), ("Q", "PublicShareholdingMember")))
+    yes_no = "".join(f'<in-bse-shp:{q} contextRef="MainI">{a}</in-bse-shp:{q}>' for q, a in (answers or {}).items())
+    return ('<xbrli:xbrl xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" '
+            f'xmlns:in-bse-shp="http://x">{contexts}{yes_no}{facts}'
+            '<in-bse-shp:ShareholdingAsAPercentageOfTotalNumberOfShares contextRef="P">0.3053'
+            '</in-bse-shp:ShareholdingAsAPercentageOfTotalNumberOfShares></xbrli:xbrl>')
+
+
+def test_promoter_pledges_since_2024_split_pledges_from_other_encumbrances():
+    facts = ('<in-bse-shp:EncumberedShareUnderPledgedAsPercentageOfTotalNumberOfShares contextRef="Q">0.9'
+             '</in-bse-shp:EncumberedShareUnderPledgedAsPercentageOfTotalNumberOfShares>'
+             '<in-bse-shp:EncumberedShareUnderPledgedAsPercentageOfTotalNumberOfShares contextRef="P">0.8283'
+             '</in-bse-shp:EncumberedShareUnderPledgedAsPercentageOfTotalNumberOfShares>'
+             '<in-bse-shp:EncumberedSharesHeldAsPercentageOfTotalNumberOfShares contextRef="P">0.9'
+             '</in-bse-shp:EncumberedSharesHeldAsPercentageOfTotalNumberOfShares>')
+    out = sh.categories(_with_pledges(facts))  # Pakka, Oct 2026 (the public row's pledges are ignored)
+    assert out["promoter_pledged_pct"] == 82.83 and out["promoter_encumbered_pct"] == 90.0
+    assert out["promoter_pct_pattern"] == 30.53
+
+
+def test_promoter_pledges_before_2024_one_column():
+    facts = ('<in-bse-shp:PledgedOrEncumberedSharesHeldAsPercentageOfTotalNumberOfShares contextRef="P">0.8499'
+             '</in-bse-shp:PledgedOrEncumberedSharesHeldAsPercentageOfTotalNumberOfShares>')
+    out = sh.categories(_with_pledges(facts))
+    assert out["promoter_encumbered_pct"] == 84.99 and "promoter_pledged_pct" not in out
+
+
+def test_no_pledges_declared_means_zero():
+    new = {q: "false" for q in sh.NONE_ENCUMBERED}
+    assert {k: v for k, v in sh.categories(_with_pledges("", new)).items() if "pledged" in k or "encumbered" in k} == {
+        "promoter_pledged_pct": 0.0, "promoter_encumbered_pct": 0.0}
+    old = sh.categories(_with_pledges("", {sh.NONE_ENCUMBERED_OLD: "false"}))
+    assert old["promoter_encumbered_pct"] == 0.0 and "promoter_pledged_pct" not in old
+    # pledged nothing but tied shares up another way: the encumbered figure is unknown, not zero
+    partial = sh.categories(_with_pledges("", {**new, sh.NONE_ENCUMBERED[1]: "true"}))
+    assert partial["promoter_pledged_pct"] == 0.0 and "promoter_encumbered_pct" not in partial
+
+
 def test_older_pattern_formats():
     # 2023–24: same categories, older spellings (MutualFundsOrUti, the taxonomy's own "Goverments")
     mid = sh.categories(_pattern({"InstitutionsForeignMember": 47.83, "InstitutionsDomesticMember": 33.6,

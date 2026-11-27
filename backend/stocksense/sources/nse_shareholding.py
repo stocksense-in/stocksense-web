@@ -9,7 +9,8 @@ NSE shareholding — promoter holding by quarter and promoter pledges (M1.3).
     percPromoterShares — % of the promoters' holding), and separately every pledge
     recorded at the depository by any shareholder (numSharesPledged — mostly margin
     pledges, not a promoter signal: ITC, with no promoter, shows 2% of its shares). Only
-    the current figure is served, so history builds up from regular snapshots.
+    the current figure is served; each quarter's pattern (XBRL) carries that quarter's
+    promoter pledges, so history comes from the patterns.
 
 Promoter holding here is what Indian filings mean by it — the founders/parent and their
 group — unlike Yahoo's "insiders", which the score has been using as a stand-in.
@@ -61,8 +62,24 @@ CATEGORIES = {
     "InstitutionsForeignPortfolioInvestorMember": "_fpi",
     "InstitutionsMember": "_institutions",
 }
-PARSER_VERSION = 2  # saved with each parsed pattern; files from older parsers missing the split are read again
+PARSER_VERSION = 3  # saved with each parsed pattern; files from older parsers are read again
 PERCENT_TAG = "ShareholdingAsAPercentageOfTotalNumberOfShares"
+
+# Promoters' shares pledged or otherwise encumbered, as a share of the promoters' own holding (the
+# pattern's "as a % of total shares held" column on the promoter row). Since 2024 the pattern splits
+# pledges from non-disposal undertakings and other encumbrances; before, one column held them all.
+PROMOTER_MEMBER = "ShareholdingOfPromoterAndPromoterGroupMember"
+PLEDGE_TAGS = {
+    "EncumberedShareUnderPledgedAsPercentageOfTotalNumberOfShares": "promoter_pledged_pct",
+    "EncumberedSharesHeldAsPercentageOfTotalNumberOfShares": "promoter_encumbered_pct",
+    "PledgedOrEncumberedSharesHeldAsPercentageOfTotalNumberOfShares": "promoter_encumbered_pct",  # before 2024
+}
+# Yes/no answers on the declaration: "no" means zero, where the pattern then leaves the number out.
+NONE_PLEDGED = "WhetherAnySharesHeldByPromotersAreEncumberedUnderPledgedForPromoterAndPromoterGroup"
+NONE_ENCUMBERED = ("WhetherAnySharesHeldByPromotersAreEncumberedUnderPledgedForPromoterAndPromoterGroup",
+                   "WhetherAnySharesHeldByPromotersAreEncumberedUnderNonDisposalUndertakingForPromoterAndPromoterGroup",
+                   "WhetherAnySharesHeldByPromotersAreEncumberedOtherThanByWayOfPledgeOrNDUForPromoterAndPromoterGroup")
+NONE_ENCUMBERED_OLD = "WhetherAnySharesHeldByPromotersArePledgeOrOtherwiseEncumberedForPromoterAndPromoterGroup"
 
 
 def fetch_xbrl(c: httpx.Client, url: str) -> bytes:
@@ -73,7 +90,8 @@ def fetch_xbrl(c: httpx.Client, url: str) -> bytes:
 
 def categories(xml: bytes | str) -> dict:
     """Who holds the rest: foreign and domestic institutions, mutual funds, insurers, small
-    retail, government — percent of all shares, from the pattern's XBRL (2023+ format)."""
+    retail, government — percent of all shares, from the pattern's XBRL (2023+ format). Plus
+    the promoters' pledged and encumbered shares, as percent of the promoters' holding."""
     root = ET.fromstring(xml)
     member_of = {}
     for ctx in root.iter():
@@ -81,9 +99,20 @@ def categories(xml: bytes | str) -> dict:
             members = [m.text.split(":")[-1] for m in ctx.iter() if m.tag.endswith("explicitMember")]
             if len(members) == 1:
                 member_of[ctx.get("id")] = members[0]
-    raw = {}
+    raw, answers = {}, {}
     for el in root:
-        if el.tag.split("}")[-1] != PERCENT_TAG:
+        tag = el.tag.split("}")[-1]
+        if tag.startswith("Whether"):
+            answers[tag] = (el.text or "").strip().lower()
+            continue
+        if tag in PLEDGE_TAGS and member_of.get(el.get("contextRef")) == PROMOTER_MEMBER:
+            if PLEDGE_TAGS[tag] not in raw:
+                try:
+                    raw[PLEDGE_TAGS[tag]] = float(el.text)
+                except (TypeError, ValueError):
+                    pass
+            continue
+        if tag != PERCENT_TAG:
             continue
         column = CATEGORIES.get(member_of.get(el.get("contextRef")))
         if column and column not in raw:
@@ -92,12 +121,21 @@ def categories(xml: bytes | str) -> dict:
             except (TypeError, ValueError):
                 continue
     out = as_percent(raw)
+    _no_pledges(out, answers)
     fpi, institutions = out.pop("_fpi", None), out.pop("_institutions", None)
     if "fii_pct" not in out and fpi is not None:
         out["fii_pct"] = fpi
     if "dii_pct" not in out and institutions is not None and out.get("fii_pct") is not None:
         out["dii_pct"] = round(institutions - out["fii_pct"], 2)  # the rest of the institutions are domestic
     return out
+
+
+def _no_pledges(out: dict, answers: dict) -> None:
+    """Fill in zero where the declaration says the promoters pledged nothing and leaves the number out."""
+    if answers.get(NONE_PLEDGED) == "false":
+        out.setdefault("promoter_pledged_pct", 0.0)
+    if all(answers.get(q) == "false" for q in NONE_ENCUMBERED) or answers.get(NONE_ENCUMBERED_OLD) == "false":
+        out.setdefault("promoter_encumbered_pct", 0.0)
 
 
 def as_percent(values: dict) -> dict:
