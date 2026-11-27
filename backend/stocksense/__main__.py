@@ -35,6 +35,7 @@ Jobs
     ingest-results quarterly P&L history since 2005 from NSE filings (default: 20 largest companies)
     ingest-shareholding  promoter holding by quarter + promoter pledges (default: 50 largest; --all)
     ingest-transcripts   earnings-call transcripts filed with NSE: last 4 calls of the 500 largest → lake
+    concall        a company's latest earnings call: results, guidance and what changed, quoted with pages
     engine-daily   update every lake source for the last N days, check the data, log the run  (daily)
     check-lake     data checks on the index, macro and GDELT datasets
     ingest-fno     NSE futures & options end-of-day file, 2010 → today: OI, put/call ratios  (daily)
@@ -200,6 +201,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--since", default="2015-06-01", help="oldest filing to list (YYYY-MM-DD)")
     p.add_argument("--no-download", action="store_true", help="rescan the prospectuses already on disk")
     p.add_argument("--workers", type=int, default=6, help="parallel text extraction")
+
+    p = jobs.add_parser("concall", help="a company's latest earnings call: highlights, guidance, changes (M3.6)")
+    p.add_argument("symbol", help="NSE symbol of a company whose transcripts `ingest-transcripts` has read")
 
     p = jobs.add_parser("ask", help="the prospectus pages that answer a question about a company (M3.5)")
     p.add_argument("symbol", help="NSE symbol of a company whose prospectus `ingest-rhp` has read")
@@ -445,6 +449,31 @@ def main() -> None:
         from .jobs import ingest_rhp
 
         ingest_rhp.run(since=date.fromisoformat(args.since), download_new=not args.no_download, workers=args.workers)
+        return
+
+    if args.job == "concall":
+        from . import concalls
+        from .lake import Lake
+
+        try:
+            doc = concalls.call(Lake.from_settings(), args.symbol)
+        except LookupError as exc:
+            raise SystemExit(str(exc)) from None
+        print(f"{doc['symbol']} — call transcript filed {doc['filed']}\n{doc['source']}\n\nWhat they reported:")
+        for q in doc["highlights"]:
+            print(f"  p{q['page']:<3} {q['text']}")
+        print("\nWhat they expect:" if doc["guidance"] else "\nNo forward-looking figures found.")
+        for q in doc["guidance"]:
+            print(f"  p{q['page']:<3} [{q['topic']}] {q['text']}")
+        if doc["changes"]:
+            print(f"\nAgainst the call filed {doc['previous_filed']}:")
+            for c in doc["changes"]:
+                now, before = c["now"], c["before"]
+                print(f"  {c['topic']}: {c['status']}")
+                if before:
+                    print(f"    before p{before['page']}: {before['text']}")
+                if now:
+                    print(f"    now    p{now['page']}: {now['text']}")
         return
 
     if args.job == "ask":
