@@ -12,6 +12,7 @@ What the model may know before the Indian open on t+1:
   • macro closes of day t (US markets close ~02:00 IST, before the Indian open)
   • GDELT up to day t-1 only: the day-t file is published ~15:30 IST on t+1, after the session
   • Indian market data up to close t
+  • India's macro series (repo rate, CPI, IIP, 10y yield, forex reserves) from their release dates
 
 Walk-forward: for each test year Y, train on every earlier year, test on Y. Baselines:
 zero (no excess move), each sector's trailing mean, and yesterday's excess move
@@ -82,6 +83,30 @@ def load_panel(lake: Lake) -> tuple[pd.DataFrame, list[str]]:
             s = inputs[col]
             past = s.shift(1).rolling(90, min_periods=60)
             macro[f"{col}_z"] = asof((s - past.mean()) / past.std(), lag_days=1)  # day t-1's file
+    # India's own macro series (M1.6), each entering only from the day it was published.
+    if "india_macro" in lake.datasets():
+        im = lake.query("select series, period, value, available_from from india_macro")
+        im["available_from"] = pd.to_datetime(im["available_from"])
+
+        def released(series: str) -> pd.Series:
+            s = im[im["series"] == series].sort_values(["available_from", "period"])
+            return s.groupby("available_from")["value"].last()
+
+        repo = released("repo_rate")
+        if len(repo):
+            level = asof(repo)
+            macro["in_repo"] = level
+            macro["in_repo_change_90d"] = level - level.shift(63)  # ~three months of sessions
+            last_change = pd.Series(repo.index, index=repo.index).reindex(cal, method="ffill")
+            macro["in_days_since_repo_change"] = (cal - pd.DatetimeIndex(last_change)).days
+        for name in ("cpi_inflation", "iip_growth", "gsec_10y"):
+            s = released(name)
+            if len(s):
+                macro[f"in_{name}"] = asof(s)
+                macro[f"in_{name}_3m"] = asof(s.diff(3))  # change over three monthly releases
+        fx = released("fx_reserves")
+        if len(fx):
+            macro["in_fx_reserves_3m"] = asof(fx.pct_change(3) * 100)
     macro["india_vix"] = close["INDIA_VIX"]
     macro["india_vix_1d"] = close["INDIA_VIX"].pct_change(fill_method=None)
     macro["nifty_1d"] = bench_c.pct_change(fill_method=None)
@@ -161,7 +186,8 @@ def report(results: dict, out: Path, data_range: tuple[str, str], importance: pd
         "Can daily macro and news features predict next-day sector moves versus NIFTY 50?",
         "Gradient-boosted trees (LightGBM), walk-forward by year (train on all earlier years,",
         f"test on the next). Data {data_range[0]} → {data_range[1]}; {len(job.INDEX_SECTORS)} NSE sector indices.",
-        "Code: `ml/sector_gbm.py`. Timing rules are in its docstring (GDELT lagged one extra day).",
+        "Code: `ml/sector_gbm.py`. Timing rules are in its docstring (GDELT lagged one extra day;",
+        "India's repo rate, CPI, IIP, bond yield and reserves enter from their release dates).",
         "",
         "Metrics: **IC** = average daily rank correlation between forecast and outcome across",
         "sectors (t-stat over days); **hit** = sign accuracy; **R²** vs forecasting zero;",
@@ -197,6 +223,9 @@ def main() -> None:
     panel, features = load_panel(lake)
     data_range = (str(panel["date"].min().date()), str(panel["date"].max().date()))
     print(f"panel: {len(panel)} rows, {len(features)} features, {data_range}")
+    # India's monthly macro series lowered the IC when tried (27 Nov 2026 report), so the main
+    # model leaves them out; the ablation below keeps measuring them.
+    candidates, features = features, [f for f in features if not f.startswith("in_")]
     results = {}
     for target in ("next_day", "open_to_close"):
         preds, by_year = walk_forward(panel, features, target)
@@ -210,9 +239,13 @@ def main() -> None:
     # Ablation: where does the signal come from? Same model, nested feature sets.
     gdelt = [f for f in features if f.endswith("_share_z")]
     market = ["sector", "excess_1d", "excess_5d", "excess_20d", "nifty_1d", "nifty_5d", "india_vix", "india_vix_1d"]
-    macro = [f for f in features if f not in market and f not in gdelt]
+    india = [f for f in candidates if f.startswith("in_")]
+    macro = [f for f in features if f not in market and f not in gdelt and f not in india]
+    sets = [("market only", market), ("+ macro", market + macro), ("+ macro + GDELT", market + macro + gdelt)]
+    if india:
+        sets.append(("+ macro + GDELT + India macro", features + india))
     ablation = {}
-    for name, cols in (("market only", market), ("+ macro", market + macro), ("+ macro + GDELT", features)):
+    for name, cols in sets:
         for target in ("next_day", "open_to_close"):
             preds, _ = walk_forward(panel, cols, target)
             ablation[(name, target)] = evaluate(preds, "model", target)
