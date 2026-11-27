@@ -137,6 +137,25 @@ export interface HolderQuarter {
   government_pct: number | null;
 }
 
+export interface EconomySeries {
+  series: string;
+  label: string;
+  unit: string;
+  value: number;
+  period: string;
+  year_ago: number | null;
+  released: string;
+  source: string;
+  note: string;
+  why: string;
+  history: [string, number][];
+}
+
+export interface Economy {
+  as_of: string | null;
+  series: EconomySeries[];
+}
+
 export interface Announcement {
   at: string;
   group: string;
@@ -324,6 +343,7 @@ const sym = (s: string) => encodeURIComponent(s.trim().toUpperCase());
 export const api = {
   indices: (signal?: AbortSignal) => get<IndexQuote[]>('/market/indices', signal),
   overview: (signal?: AbortSignal) => get<Overview>('/market/overview', signal),
+  economy: (signal?: AbortSignal) => get<Economy>('/economy', signal),
   news: (q: { topic?: string; sector?: string; limit?: number } = {}, signal?: AbortSignal) => get<NewsEvent[]>(`/news${qs(q)}`, signal),
   learn: (sector = 'general', signal?: AbortSignal) => get<LearnMetrics>(`/learn/metrics?sector=${encodeURIComponent(sector)}`, signal),
   prospectusRules: (signal?: AbortSignal) => get<ScanRule[]>('/prospectus/rules', signal),

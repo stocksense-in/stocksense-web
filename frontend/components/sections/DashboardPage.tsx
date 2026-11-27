@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import type { Geopolitics, IndexQuote, NewsEvent, Overview, StockOut } from '@/lib/api';
 import { api, effectPill, fmtNum, fmtPct, fmtRupees, stockScoreColor, timeAgo } from '@/lib/api';
 import { WatchlistCard } from '@/components/cards/WatchlistCard';
+import { EconomyCard } from '@/components/cards/EconomyCard';
 
 const INDEX_ORDER = ['NIFTY50', 'SENSEX', 'BANKNIFTY', 'INDIAVIX'];
 const INDEX_LABEL: Record<string, string> = { NIFTY50: 'NIFTY 50', SENSEX: 'SENSEX', BANKNIFTY: 'BANK NIFTY', INDIAVIX: 'INDIA VIX' };
@@ -177,6 +178,8 @@ export function DashboardPage({ onNav }: { onNav: (p: Page) => void }) {
               Breadth shows whether a move is broad or carried by a few large companies: an index can rise while most stocks fall.
             </p>
           </div>
+
+          <EconomyCard />
 
           <div className="card" style={{ flex: 1 }}>
             <div className="ct">Intelligence feed</div>
