@@ -123,3 +123,27 @@ def test_call_reads_the_two_latest_transcripts(tmp_path):
     assert revenue["status"] == "changed" and "12% to 14%" in revenue["before"]["text"]
     with pytest.raises(LookupError, match="ingest-transcripts"):
         cc.call(lake, "NOPE")
+
+
+def test_export_and_api(tmp_path, market):
+    from fastapi.testclient import TestClient
+
+    from conftest import ROWS
+    from stocksense.api import create_app
+
+    lake = Lake(tmp_path).ensure()
+    symbol = ROWS[0]["symbol"]
+    folder = lake.raw_dir("nse_transcripts", DAY)
+    (folder / f"{symbol}_1.pages.json.gz").write_bytes(gzip.compress(json.dumps(CALL).encode()))
+    lake.write_table(pd.DataFrame([{"symbol": symbol, "filed": DAY, "file": f"{DAY.isoformat()}/{symbol}_1.pages.json.gz",
+                                    "is_call": True, "attachment": "https://x/call.pdf"}]), "transcripts")
+    doc = cc.write(lake, output=tmp_path / "concalls.json")
+    entry = doc["companies"][symbol]
+    assert entry["previous_filed"] is None and entry["changes"] == []
+    assert set(entry["guidance"][0]) == {"page", "text", "topic"}
+
+    client = TestClient(create_app(market=market, headlines=lambda: [], history=lambda s, r: [], concalls=lambda: doc))
+    body = client.get(f"/stocks/{symbol.lower()}/concall").json()
+    assert body["source"] == "https://x/call.pdf" and any("15% to 17%" in q["text"] for q in body["guidance"])
+    assert client.get(f"/stocks/{symbol}").json()["available"]["concall"] is True
+    assert client.get("/stocks/NOPE/concall").status_code == 404

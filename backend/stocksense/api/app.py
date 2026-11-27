@@ -45,6 +45,7 @@ FINANCIALS_PATH = DATA_DIR / "financials.json"  # written by `python -m stocksen
 ALERTS_PATH = DATA_DIR / "alerts.json"  # written daily by `python -m stocksense alerts-export`
 HOLDERS_PATH = DATA_DIR / "holders.json"  # written by `python -m stocksense holders-export`
 DIVIDENDS_PATH = DATA_DIR / "dividends.json"  # written by `python -m stocksense dividends-export`
+CONCALLS_PATH = DATA_DIR / "concalls.json"  # written weekly by `python -m stocksense concalls-export`
 EVENTS_PATH = DATA_DIR / "events.json"  # written daily by `python -m stocksense events-export`
 IPO_PROSPECTUS_PATH = DATA_DIR / "ipo_prospectus.json"  # written by `python -m stocksense ingest-rhp`
 ECONOMY_PATH = DATA_DIR / "economy.json"  # written weekly by `python -m stocksense ingest-india-macro`
@@ -147,6 +148,11 @@ def load_events(path: Path = EVENTS_PATH) -> dict | None:
     return _load_json(path)
 
 
+def load_concalls(path: Path = CONCALLS_PATH) -> dict | None:
+    """Each company's latest earnings call, quoted: results, guidance, changes (backend/data/concalls.json)."""
+    return _load_json(path)
+
+
 def load_ipo_prospectus(path: Path = IPO_PROSPECTUS_PATH) -> dict | None:
     """Each mainboard IPO's prospectus flags and SEBI link (backend/data/ipo_prospectus.json)."""
     return _load_json(path)
@@ -174,6 +180,7 @@ def create_app(
     events: Callable[[], dict | None] | None = None,
     economy: Callable[[], dict | None] | None = None,
     ipo_prospectus: Callable[[], dict | None] | None = None,
+    concalls: Callable[[], dict | None] | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -211,6 +218,7 @@ def create_app(
     app.state.events = events or load_events
     app.state.economy = economy or load_economy
     app.state.ipo_prospectus = ipo_prospectus or load_ipo_prospectus
+    app.state.concalls = concalls or load_concalls
     app.state.scan_slots = threading.BoundedSemaphore(MAX_CONCURRENT_SCANS)
 
     def market_of(request: Request) -> MarketData:
@@ -392,6 +400,18 @@ def create_app(
     def _events_of(request: Request, symbol: str) -> dict | None:
         return ((request.app.state.events() or {}).get("companies") or {}).get(symbol.upper())
 
+    def _concall_of(request: Request, symbol: str) -> dict | None:
+        return ((request.app.state.concalls() or {}).get("companies") or {}).get(symbol.upper())
+
+    @app.get("/stocks/{symbol}/concall", response_model=schemas.Concall, tags=["stocks"])
+    def stock_concall(request: Request, symbol: str):
+        """The company's latest earnings call in its own words: results it reported, figures it expects, and
+        how that guidance moved since the call before. Every line is a quote with the transcript's page."""
+        entry = _concall_of(request, symbol)
+        if entry is None:
+            raise HTTPException(404, f"No earnings-call transcript for {symbol.upper()} yet")
+        return {"symbol": symbol.upper(), "source_note": request.app.state.concalls().get("source", ""), **entry}
+
     @app.get("/stocks/{symbol}/events", response_model=schemas.Events, tags=["stocks"])
     def stock_events(request: Request, symbol: str):
         """What the company told the exchange over the past year (results, orders, deals, ratings, management
@@ -492,7 +512,8 @@ def create_app(
             peers=[_stock_out(s) for s in analytics.peers(m.fresh_stocks(), stock, peers)] if peers else [],
             available=schemas.Available(financials=financials is not None, holders=holders is not None,
                                         dividends=_dividends_of(request, stock.symbol) is not None,
-                                        events=_events_of(request, stock.symbol) is not None),
+                                        events=_events_of(request, stock.symbol) is not None,
+                                        concall=_concall_of(request, stock.symbol) is not None),
         )
 
     @app.get("/stocks/{symbol}/history", response_model=schemas.History, tags=["stocks"])

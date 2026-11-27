@@ -67,9 +67,10 @@ def test_stock_detail_says_which_panels_exist(market):
     symbol = ROWS[0]["symbol"]
     doc = holders.build(shareholding(symbol, [60] * 7))
     client = TestClient(create_app(market=market, headlines=lambda: [], history=lambda s, r: [],
-                                   holders=lambda: doc, financials=lambda: None, dividends=lambda: None, events=lambda: None))
+                                   holders=lambda: doc, financials=lambda: None, dividends=lambda: None, events=lambda: None,
+                                   concalls=lambda: None))
     assert client.get(f"/stocks/{symbol}").json()["available"] == {"financials": False, "holders": True, "dividends": False,
-                                                                  "events": False}
+                                                                  "events": False, "concall": False}
 
 
 def test_institutions_note_compares_a_year_of_the_split():

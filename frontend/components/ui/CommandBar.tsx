@@ -25,6 +25,7 @@ const FUNCTIONS: { codes: string[]; tab: CompanyTab; label: string }[] = [
   { codes: ['HDS'], tab: 'holders', label: 'Holders' },
   { codes: ['DVD'], tab: 'dividends', label: 'Dividends' },
   { codes: ['EV', 'EVTS'], tab: 'events', label: 'Filings & insider trades' },
+  { codes: ['CALL', 'CC'], tab: 'calls', label: 'Earnings call' },
   { codes: ['RV', 'PEERS'], tab: 'peers', label: 'Peers' },
   { codes: ['N', 'NEWS'], tab: 'news', label: 'News' },
 ];
@@ -136,7 +137,7 @@ export function CommandBar({ onPage, onCompany }: { onPage: (p: Page) => void; o
             <div style={{ padding: '8px 10px', fontSize: 11, color: 'var(--cream-mute)' }}>No company or command matches “{text.trim()}”.</div>
           )}
           <div style={{ padding: '7px 10px', borderTop: '1px solid var(--border)', fontSize: 9, color: 'var(--cream-mute)', lineHeight: 1.7, fontFamily: 'var(--f-mono)' }}>
-            SYMBOL then: FA financials · HDS holders · DVD dividends · EV filings · RV peers · N news &nbsp;|&nbsp; ↑↓ choose · Enter open · Esc close
+            SYMBOL then: FA financials · HDS holders · DVD dividends · EV filings · CALL earnings call · RV peers · N news &nbsp;|&nbsp; ↑↓ choose · Enter open · Esc close
           </div>
         </div>
       )}

@@ -20,6 +20,8 @@ from collections import Counter
 from dataclasses import asdict, dataclass
 from datetime import date
 
+from .config import DATA_DIR
+
 PAGE_LINE = re.compile(r"^\s*(page\s*\d+\s*(of\s*\d+)?|\d+)\s*$", re.I)
 SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z\"'(₹$])")
 # A speaker's turn starts with their name: "Samir Seksaria: Thank you" (TCS, HDFC Bank), the name alone on
@@ -313,3 +315,39 @@ def call(lake, symbol: str) -> dict:
             "highlights": [asdict(q) for q in highlights(latest["pages"], latest["day"])],
             "guidance": [asdict(q) for q in now],
             "changes": changes(now, before) if len(calls) > 1 else []}
+
+
+OUTPUT = DATA_DIR / "concalls.json"
+
+
+def _short(q: dict | None) -> dict | None:
+    return None if q is None else {k: q[k] for k in ("page", "text", "topic") if k in q}
+
+
+def build(lake, symbols: list[str] | None = None, today: date | None = None) -> dict:
+    """Every company with a call transcript: the latest call's quotes and the guidance changes."""
+    if "transcripts" not in set(lake.datasets()):
+        return {"generated": (today or date.today()).isoformat(), "companies": {}}
+    found = lake.query("select distinct symbol from transcripts where is_call order by 1")["symbol"].tolist()
+    companies = {}
+    for symbol in symbols or found:
+        try:
+            doc = call(lake, symbol)
+        except (LookupError, OSError, ValueError):
+            continue
+        companies[symbol] = {
+            "filed": doc["filed"], "source": doc["source"], "previous_filed": doc["previous_filed"],
+            "highlights": [_short(q) for q in doc["highlights"]], "guidance": [_short(q) for q in doc["guidance"]],
+            "changes": [{"topic": c["topic"], "status": c["status"], "now": _short(c["now"]),
+                         "before": _short(c["before"])} for c in doc["changes"]]}
+    return {"generated": (today or date.today()).isoformat(),
+            "source": "Earnings-call transcripts the companies filed with NSE", "companies": companies}
+
+
+def write(lake, output=OUTPUT) -> dict:
+    import json
+
+    doc = build(lake)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    return doc
