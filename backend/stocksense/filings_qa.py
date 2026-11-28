@@ -176,7 +176,8 @@ def _index(path: str, company: str | None = None) -> PageIndex:
     return PageIndex(json.loads(gzip.decompress(Path(path).read_bytes())), company)
 
 
-CALLS = 4  # earnings calls searched: about a year
+CALLS = 1  # earnings calls searched: the latest (people asking about guidance mean the latest call;
+           # searching four put an older call's page first for most questions, ml/calls_qa_eval.py)
 
 
 def ask_calls(lake, symbol: str, question: str, k: int = 5, calls: int = CALLS) -> list[PageHit]:

@@ -211,7 +211,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("symbol", help="NSE symbol of a company whose prospectus `ingest-rhp` has read")
     p.add_argument("question", help="the question, in quotes")
     p.add_argument("-k", type=int, default=5, help="how many pages to show")
-    p.add_argument("--calls", action="store_true", help="search the latest earnings-call transcripts instead")
+    p.add_argument("--calls", action="store_true", help="search the latest earnings-call transcript instead")
+    p.add_argument("--last", type=int, default=1, metavar="N", help="with --calls: search the last N calls")
 
     p = jobs.add_parser("backup", help="copy what's new in the lake to a backup folder, then test a restore")
     p.add_argument("--dest", help="backup folder (default: STOCKSENSE_BACKUP_DIR)")
@@ -492,8 +493,9 @@ def main() -> None:
         from .lake import Lake
 
         try:
-            search = filings_qa.ask_calls if args.calls else filings_qa.ask
-            hits = search(Lake.from_settings(), args.symbol, args.question, k=args.k)
+            lake = Lake.from_settings()
+            hits = (filings_qa.ask_calls(lake, args.symbol, args.question, k=args.k, calls=args.last) if args.calls
+                    else filings_qa.ask(lake, args.symbol, args.question, k=args.k))
         except LookupError as exc:
             raise SystemExit(str(exc)) from None
         for h in hits:
