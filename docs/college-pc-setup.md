@@ -199,6 +199,37 @@ replaced, not appended). The lake is 320 KB so far.
    off this machine (see "Backups" below). A lab machine can be reimaged without notice;
    until then, treat `E:\stocksense\lake` as rebuildable, not precious.
 
+## After a reboot or power cut
+
+Checked 28 Nov. Most of it carries on by itself; long jobs started by hand need their
+command run again.
+
+- **Scheduled runs.** Both Task Scheduler tasks (`StockSense engine daily`, Mon–Sat 19:30,
+  and `StockSense engine weekly`, Sunday) have "run as soon as possible after a missed
+  start" switched on, so a run missed while the PC was off starts once it's back.
+  `engine-daily` fetches the last 10 days of every daily source, so a few days off catch up
+  on their own; after longer, run `engine-daily --days 30` once.
+- **Files are never left half-written.** Clean tables, raw filings (results, shareholding,
+  announcements), downloaded PDFs and archives, and the extracted page text are all written
+  to a temporary file and renamed, so a cut leaves the old file or the new one. This matters
+  because jobs skip raw files that already exist: a half-written one would never be fetched
+  again. A scan on 28 Nov found none among 74,274 raw JSON files and 2,089 page-text files.
+- **Long jobs started by hand don't restart.** Run the same command again; each one skips
+  what it already has:
+  - `ingest-results --all --largest-first --rests 40 --checkpoint <file>`: companies listed in
+    the checkpoint file are skipped (a company is added once both feeds came back with
+    nothing refused). Without `--checkpoint`, `--from SYM` starts at a company instead, but
+    every company before it would otherwise be listed again.
+  - `ingest-shareholding`: a company's list is fetched once a day, and patterns already read
+    by the current parser aren't fetched again.
+  - `ingest-transcripts` and `ingest-rhp`: PDFs already downloaded (or known to be missing),
+    and text already extracted, are skipped.
+  - `backup`: copies only what's new or changed.
+- **The local servers don't restart.** Start them again if needed: `python -m stocksense api
+  --port 8000` (127.0.0.1 only) and, in `frontend/`, `npx next dev --hostname 127.0.0.1`.
+- **Not known yet:** the lab's maintenance windows (Windows Update restarts, power-downs).
+  Worth asking the lab staff, so long backfills don't start the night before one.
+
 ## Backups
 
 `python -m stocksense backup` copies the lake (`raw/`, `clean/`, `features/`, `models/`) to

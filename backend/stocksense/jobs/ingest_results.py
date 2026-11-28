@@ -4,6 +4,7 @@ Results ingest job — companies' quarterly P&L history from NSE filings (M1.2).
     python -m stocksense ingest-results                    # the 20 largest companies
     python -m stocksense ingest-results --top 100
     python -m stocksense ingest-results --symbols TCS INFY
+    python -m stocksense ingest-results --all --largest-first --rests 40 --checkpoint results.done
 
 For each company: list its quarterly filings, keep one per quarter and basis (standalone
 and consolidated — many companies filed consolidated figures only some quarters, so a
@@ -15,6 +16,10 @@ all raw files: one row per company, quarter and basis, amounts in ₹ crore.
 Results from Mar 2025 on come from SEBI's integrated filing (sources/nse_integrated.py:
 an XBRL file per filing, saved raw under raw/nse_integrated/), so one run covers 2005 to
 the latest quarter.
+
+A whole-market backfill takes days. With --checkpoint, each company whose two feeds came back
+without NSE refusing a request is added to a file, and a rerun with the same file skips them:
+after a reboot the backfill carries on where it was, without listing 400 companies' filings again.
 """
 
 from __future__ import annotations
@@ -22,11 +27,12 @@ from __future__ import annotations
 import json
 import time
 from collections.abc import Iterable
+from pathlib import Path
 
 import httpx
 import pandas as pd
 
-from ..lake import Lake
+from ..lake import Lake, write_atomic
 from ..log import get_logger
 from ..sources import nse_integrated, nse_results
 
@@ -49,6 +55,7 @@ class Breaker:
 
     def __init__(self, limit: int = MAX_FAILURES_IN_A_ROW):
         self.limit, self.in_a_row = limit, 0
+        self.refused = 0  # requests NSE timed out or refused, this run (a rerun would retry them)
 
     def ok(self) -> None:
         self.in_a_row = 0
@@ -59,6 +66,7 @@ class Breaker:
             self.in_a_row = 0
             return
         self.in_a_row += 1
+        self.refused += 1
         if self.in_a_row >= self.limit:
             raise NseUnavailable(f"{self.in_a_row} requests in a row failed")
 
@@ -115,26 +123,44 @@ def recent_filings(filings: list[dict], quarters: int) -> list[dict]:
     return [best[e] for e in sorted(best, reverse=True)[:quarters]]
 
 
+def done_companies(checkpoint: Path | None) -> set[str]:
+    if checkpoint is None or not checkpoint.exists():
+        return set()
+    return {line.strip() for line in checkpoint.read_text(encoding="utf-8").splitlines() if line.strip()}
+
+
 def fetch(lake: Lake, symbols: Iterable[str], pause: float = PAUSE_SECONDS, rests: int = 0,
-          rest_seconds: float = REST_SECONDS, recent: int | None = None) -> int:
+          rest_seconds: float = REST_SECONDS, recent: int | None = None, checkpoint: Path | None = None) -> int:
     """Download filings not already in raw/. Returns how many were fetched.
 
     If NSE fails MAX_FAILURES_IN_A_ROW requests in a row, wait `rest_seconds` and carry on
     from the same company, up to `rests` times; then stop, keeping what it has.
 
     `recent`: only the last N quarters from integrated filings, one basis per quarter — enough
-    for trailing margin, ROE and debt to equity across the whole market in one night."""
+    for trailing margin, ROE and debt to equity across the whole market in one night.
+
+    `checkpoint`: skip the companies listed in this file, and add each company fetched in full
+    (nothing timed out or refused), so a rerun after a reboot picks up where this one stopped."""
     symbols = list(symbols)
+    done = done_companies(checkpoint)
+    if done:
+        before = len(symbols)
+        symbols = [s for s in symbols if s not in done]
+        log.info(f"{SOURCE}: skipping {before - len(symbols)} companies already fetched ({checkpoint})")
     fetched, position = 0, 0
     while True:
         breaker = Breaker()
         try:
             with nse_results.client() as c:
                 while position < len(symbols):
+                    refused = breaker.refused
                     if recent:
                         fetched += fetch_integrated(c, lake, symbols[position], pause, breaker, recent)
                     else:
                         fetched += _fetch_company(c, lake, symbols[position], pause, breaker)
+                    if checkpoint is not None and breaker.refused == refused:
+                        with checkpoint.open("a", encoding="utf-8") as f:
+                            f.write(symbols[position] + "\n")
                     position += 1
             return fetched
         except NseUnavailable as exc:
@@ -169,7 +195,7 @@ def _fetch_company(c, lake: Lake, symbol: str, pause: float, breaker: Breaker) -
         except Exception as exc:
             breaker.fail(f"{SOURCE}: {symbol} {end}", exc)
             continue
-        path.write_text(json.dumps({"filing": f, "detail": detail}), encoding="utf-8")
+        write_atomic(path, json.dumps({"filing": f, "detail": detail}))
         new += 1
         time.sleep(pause)
     log.info(f"{SOURCE}: {symbol} — {len(filings)} filings, {new} new")
@@ -203,7 +229,7 @@ def fetch_integrated(c, lake: Lake, symbol: str, pause: float = PAUSE_SECONDS, b
         except Exception as exc:
             breaker.fail(f"{INTEGRATED}: {symbol} {end}", exc)
             continue
-        path.write_text(json.dumps({"filing": f, "xml": xml}), encoding="utf-8")
+        write_atomic(path, json.dumps({"filing": f, "xml": xml}))
         new += 1
         time.sleep(pause)
     log.info(f"{INTEGRATED}: {symbol} — {len(filings)} filings, {new} new")
@@ -295,7 +321,7 @@ def market_caps() -> dict[str, float]:
 
 def run(symbols: list[str] | None = None, top: int = 20, lake: Lake | None = None, rests: int = 0,
         everything: bool = False, recent: int | None = None, start: str | None = None,
-        by_size: bool = False) -> pd.DataFrame:
+        by_size: bool = False, checkpoint: Path | None = None) -> pd.DataFrame:
     lake = lake or Lake.from_settings()
     if symbols:
         targets = [s.upper() for s in symbols]
@@ -309,5 +335,5 @@ def run(symbols: list[str] | None = None, top: int = 20, lake: Lake | None = Non
         targets = largest_first(targets, market_caps())
     targets = resume_from(targets, start)
     log.info(f"{SOURCE}: {len(targets)} companies" + (f", last {recent} quarters" if recent else ""))
-    fetch(lake, targets, rests=rests, recent=recent)
+    fetch(lake, targets, rests=rests, recent=recent, checkpoint=checkpoint)
     return build(lake)

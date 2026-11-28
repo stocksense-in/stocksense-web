@@ -34,7 +34,7 @@ import pandas as pd
 
 from .. import rhp
 from ..config import DATA_DIR
-from ..lake import Lake
+from ..lake import Lake, write_atomic
 from ..log import get_logger
 from ..sources import nse_ipo, sebi_offers
 
@@ -177,8 +177,7 @@ def _extract(pdf: str) -> tuple[str, int, str | None]:
     except Exception as exc:  # scanned, damaged, encrypted: recorded, not retried every run
         path.with_suffix(".error").write_text(str(exc), encoding="utf-8")
         return pdf, 0, str(exc)
-    with gzip.open(_pages_file(path), "wt", encoding="utf-8") as f:
-        json.dump(pages, f)
+    write_atomic(_pages_file(path), gzip.compress(json.dumps(pages).encode("utf-8")))
     return pdf, len(pages), None
 
 

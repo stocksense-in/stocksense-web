@@ -188,3 +188,27 @@ def test_largest_first_then_resume_by_position():
     assert order == ["TCS", "INFY", "ABB", "TINYCO", "ZZZ"]  # no market cap: last, in list order
     # resuming a size-ordered run picks up at that company's place, not alphabetically
     assert resume_from(order, "infy") == ["INFY", "ABB", "TINYCO", "ZZZ"]
+
+
+def test_checkpoint_skips_finished_companies_and_leaves_out_refused_ones(tmp_path, monkeypatch):
+    lake = Lake(tmp_path / "lake")
+    checkpoint = tmp_path / "results.done"
+    checkpoint.write_text("A\n", encoding="utf-8")
+    monkeypatch.setattr(nse_results, "client", lambda: FakeClient())
+    monkeypatch.setattr(nse_integrated, "fetch_filings", lambda c, s: [])
+    listed = []
+
+    def filings(c, symbol):
+        listed.append(symbol)
+        if symbol == "C":
+            raise TimeoutError("timed out")  # one hiccup: C is skipped this run and retried by the next
+        return [filing("31-Dec-2024", seq=symbol)]
+
+    monkeypatch.setattr(nse_results, "fetch_filings", filings)
+    monkeypatch.setattr(nse_results, "fetch_detail", lambda c, f: {"resultsData2": {"re_net_sale": "100"}})
+    assert ingest_results.fetch(lake, ["A", "B", "C", "D"], pause=0, checkpoint=checkpoint) == 2
+    assert listed == ["B", "C", "D"]
+    assert checkpoint.read_text(encoding="utf-8").split() == ["A", "B", "D"]
+    listed.clear()
+    ingest_results.fetch(lake, ["A", "B", "C", "D"], pause=0, checkpoint=checkpoint)
+    assert listed == ["C"]

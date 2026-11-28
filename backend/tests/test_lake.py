@@ -154,3 +154,15 @@ def test_connect_does_not_retry_other_io_errors(tmp_path, monkeypatch):
     monkeypatch.setattr(lake_module.duckdb, "connect", broken)
     with pytest.raises(duckdb.IOException):
         lake_module.Lake(tmp_path).connect()
+
+
+def test_write_atomic_replaces_the_file_and_leaves_no_temp(tmp_path):
+    from stocksense.lake import write_atomic
+
+    path = tmp_path / "TCS_1.json"
+    write_atomic(path, '{"a": 1}')
+    write_atomic(path, '{"a": 2}')
+    assert path.read_text(encoding="utf-8") == '{"a": 2}'
+    assert [p.name for p in tmp_path.iterdir()] == ["TCS_1.json"]
+    write_atomic(tmp_path / "TCS_1.pages.json.gz", b"\x1f\x8b")
+    assert (tmp_path / "TCS_1.pages.json.gz").read_bytes() == b"\x1f\x8b"
