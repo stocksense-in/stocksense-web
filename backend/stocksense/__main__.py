@@ -171,6 +171,8 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="when NSE stops answering, rest 15 min and resume, up to this many times")
     p.add_argument("--all", action="store_true", help="every NSE equity (use with --recent)")
     p.add_argument("--from", dest="start", metavar="SYM", help="start at this symbol (resume a run NSE cut short)")
+    p.add_argument("--checkpoint", type=Path, metavar="FILE",
+                   help="skip companies listed here, add each one fetched in full (a backfill survives reboots)")
     p.add_argument("--largest-first", action="store_true",
                    help="largest companies first (a multi-night --all backfill covers what matters most early)")
     p.add_argument("--recent", type=int, metavar="N",
@@ -343,7 +345,7 @@ def main() -> None:
         from .jobs import ingest_results
 
         ingest_results.run(args.symbols, args.top, rests=args.rests, everything=args.all, recent=args.recent,
-                           start=args.start, by_size=args.largest_first)
+                           start=args.start, by_size=args.largest_first, checkpoint=args.checkpoint)
         return
 
     if args.job == "alerts":
