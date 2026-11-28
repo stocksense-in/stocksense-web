@@ -79,7 +79,9 @@ def test_ask_calls_searches_the_latest_transcripts_and_says_which_call(tmp_path)
         rows.append({"symbol": "ACME", "filed": filed, "file": f"{filed.isoformat()}/ACME_{filed:%m}.pages.json.gz",
                      "is_call": True, "attachment": f"https://x/{filed:%m}.pdf"})
     lake.write_table(pd.DataFrame(rows), "transcripts")
-    hit = fq.ask_calls(lake, "acme", "What is the outlook for loan growth?", k=1)[0]
+    # by default only the latest call; calls=2 reaches back a quarter
+    assert {h.document for h in fq.ask_calls(lake, "acme", "loan growth outlook", k=5)} <= {"2026-10-20"}
+    hit = fq.ask_calls(lake, "acme", "What is the outlook for loan growth?", k=1, calls=2)[0]
     assert (hit.document, hit.page, hit.link) == ("2026-07-20", 2, "https://x/07.pdf")
     assert fq.ask_calls(lake, "ACME", "credit costs", k=1)[0].document == "2026-10-20"
     with pytest.raises(LookupError, match="ingest-transcripts"):
