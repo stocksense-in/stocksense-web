@@ -35,7 +35,7 @@ from datetime import date
 
 import pandas as pd
 
-from ..lake import Lake
+from ..lake import Lake, write_atomic
 from ..log import get_logger
 from ..sources import nse_shareholding
 from .ingest_results import Breaker, NseUnavailable
@@ -67,7 +67,7 @@ def _fetch_company(c, lake: Lake, symbol: str, today: date, pause: float, breake
         time.sleep(pause)
     if "master" not in doc and "pledges" not in doc:
         return False
-    path.write_text(json.dumps(doc), encoding="utf-8")
+    write_atomic(path, json.dumps(doc))
     _fetch_categories(c, lake, symbol, doc.get("master") or [], pause, breaker)
     return True
 
@@ -85,9 +85,8 @@ def _save_categories(c, lake: Lake, symbol: str, row: dict, pause: float, breake
         return False
     finally:
         time.sleep(pause)
-    path.write_text(json.dumps({"symbol": symbol, "quarter_end": row["quarter_end"].isoformat(),
-                                "xbrl": row["xbrl"], "parser": nse_shareholding.PARSER_VERSION, **cats}),
-                    encoding="utf-8")
+    write_atomic(path, json.dumps({"symbol": symbol, "quarter_end": row["quarter_end"].isoformat(),
+                                   "xbrl": row["xbrl"], "parser": nse_shareholding.PARSER_VERSION, **cats}))
     return True
 
 

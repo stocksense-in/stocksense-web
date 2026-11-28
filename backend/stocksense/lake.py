@@ -81,6 +81,17 @@ def _atomic_parquet(df: pd.DataFrame, target: Path) -> None:
     tmp.replace(target)
 
 
+def write_atomic(path: Path, data: str | bytes) -> None:
+    """Save a raw file via a temp file and rename. Jobs skip raw files that exist, so one cut
+    off by a reboot or power cut must never be left half-written under its real name."""
+    tmp = path.parent / f".tmp-{uuid.uuid4().hex}"
+    if isinstance(data, bytes):
+        tmp.write_bytes(data)
+    else:
+        tmp.write_text(data, encoding="utf-8")
+    tmp.replace(path)
+
+
 class Lake:
     def __init__(self, root: Path | str):
         self.root = Path(root).expanduser().resolve()

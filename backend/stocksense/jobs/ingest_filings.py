@@ -22,7 +22,7 @@ from datetime import date, timedelta
 
 import pandas as pd
 
-from ..lake import Lake
+from ..lake import Lake, write_atomic
 from ..log import get_logger
 from ..sources import nse_filings
 
@@ -57,7 +57,7 @@ def _sync(lake: Lake, source: str, name: str, fetch, frame, dataset: str, date_c
                 except Exception as exc:  # NSE hiccup: keep going, the next run retries
                     log.warning(f"{source}: {first:%Y-%m} failed: {exc}")
                     continue
-                path.write_text(json.dumps(rows), encoding="utf-8")
+                write_atomic(path, json.dumps(rows))
                 time.sleep(pause)
             else:
                 continue  # already have this (older) month

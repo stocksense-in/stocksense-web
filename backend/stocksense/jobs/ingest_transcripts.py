@@ -30,7 +30,7 @@ import httpx
 import pandas as pd
 
 from .. import rhp
-from ..lake import Lake
+from ..lake import Lake, write_atomic
 from ..log import get_logger
 from .ingest_results import Breaker, NseUnavailable
 
@@ -130,8 +130,7 @@ def _extract(pdf: str) -> tuple[str, int, str | None]:
     except Exception as exc:  # scanned or damaged: recorded, not retried every run
         path.with_suffix(".error").write_text(str(exc), encoding="utf-8")
         return pdf, 0, str(exc)
-    with gzip.open(pages_file(path), "wt", encoding="utf-8") as f:
-        json.dump(pages, f)
+    write_atomic(pages_file(path), gzip.compress(json.dumps(pages).encode("utf-8")))
     return pdf, len(pages), None
 
 
